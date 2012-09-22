@@ -9,7 +9,11 @@ class Photo_frame_lib {
 		$this->EE =& get_instance();
 		
 		$this->EE->load->config('photo_frame_config');
-		$this->EE->load->model('photo_frame_model');
+		
+		if(!class_exists('photo_frame_model'))
+		{
+			$this->EE->load->model('photo_frame_model');
+		}
 		
 		$this->id   = $this->EE->input->get_post('id', TRUE);
 		$this->name = $this->EE->input->get_post('name', TRUE);
