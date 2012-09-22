@@ -5,8 +5,20 @@ class Photo_frame_model extends CI_Model {
 	public function __construct()
 	{
 		parent::__construct();
-		
-		$this->load->config('photo_frame_config');
+	}
+	
+	public function delete_entries($ids = array(), $field_id = FALSE)
+	{
+		foreach($ids as $id)
+		{
+			if($field_id)
+			{
+				$this->db->where('field_id', $field_id);	
+			}
+			
+			$this->db->where('entry_id', $id);
+			$this->db->delete('photo_frame');
+		}
 	}
 	
 	public function get_settings($field_id)
