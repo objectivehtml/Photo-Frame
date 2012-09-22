@@ -80,7 +80,7 @@
 	background: -ms-linear-gradient(left,  #ffffff 0%,#e0e0e0 100%); /* IE10+ */
 	background: linear-gradient(to right,  #ffffff 0%,#e0e0e0 100%); /* W3C */
 	filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#ffffff', endColorstr='#e0e0e0',GradientType=1 ); /* IE6-9 */
-	padding: 1em 2em 1em 1em;
+	padding: 1em 1em .5em;
 	border: 1px solid white;
 	border-bottom-color: rgb(189, 189, 189);
 	-moz-box-shadow: 0 0 20px rgb(0, 0, 0);
@@ -105,11 +105,6 @@
 	text-decoration: none;
 }
 
-.photo-frame-info-panel .aspect {
-	font-size: .7em;
-	margin-left: .5em;
-}
-
 .photo-frame-info-panel .size {
 	font-size: 1.5em;
 }
@@ -117,6 +112,12 @@
 .photo-frame-info-panel .coords {
 	font-size: 1.1em;
 	margin-top: .5em;
+}
+
+.photo-frame-info-panel .coords b {
+	display: inline-block;
+	width: 20px;
+	margin-bottom: 5px;
 }
 
 .photo-frame-info-panel .coords span {
@@ -128,7 +129,14 @@
 }
 
 .photo-frame-info-panel .aspect {
-	margin-top: .5em;
+	position: absolute;
+	bottom: 1em;
+	right: 1em;
+}
+
+.photo-frame-info-panel .coords label {
+	width: 80px;
+	display: inline-block;
 }
 
 .photo-frame-button, .photo-frame-button:hover {
@@ -307,6 +315,10 @@
 	float: left;
 	margin: 0 1em 1em 0;
 	display: inline-block;
+}
+
+.photo-frame-photo img {
+	max-width: 100%;
 }
 
 .photo-frame-upload {
