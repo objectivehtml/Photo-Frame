@@ -7,8 +7,8 @@
  * @author		Justin Kimbrell
  * @copyright	Copyright (c) 2012, Justin Kimbrell
  * @link 		http://www.objectivehtml.com/photo-frame
- * @version		0.1.0
- * @build		20120914
+ * @version		0.2.0
+ * @build		20120921
  */
  
 class Photo_frame_mcp {

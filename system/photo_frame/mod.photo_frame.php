@@ -1,14 +1,14 @@
 <?php if ( ! defined('BASEPATH')) exit('No direct script access allowed');
 
 /**
- * Authenticate
+ * Photo Frame
  * 
- * @package		Authenticate
+ * @package		Photo Frame
  * @author		Justin Kimbrell
  * @copyright	Copyright (c) 2012, Justin Kimbrell
- * @link 		http://www.objectivehtml.com/authenticate
- * @version		1.2.1
- * @build		20120627
+ * @link 		http://www.objectivehtml.com/photo-frame
+ * @version		0.2.0
+ * @build		20120921
  */
  
 class Photo_frame {
