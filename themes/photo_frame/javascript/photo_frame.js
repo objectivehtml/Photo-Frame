@@ -116,8 +116,8 @@ var PhotoFrame = function(options) {
 	        	t.ui.image.remove();
 	        	
 	        	t.ui.image = $('<div class="photo-frame-image"></div>');
-		        t.ui.crop.prepend(t.ui.image);
-	        		        	
+	        	
+		        t.ui.crop.prepend(t.ui.image);   	
 	            t.ui.image.html(img).show();	        	
 	            t.ui.crop.center();
 	            
@@ -189,8 +189,18 @@ var PhotoFrame = function(options) {
 	
 	t.cropDimensions = function(cropSize) {
 	
-		if(!cropSize) {
-			var cropSize    = t.jcrop.tellSelect();
+		if(!cropSize && t.jcrop.tellSelect) {
+			var cropSize = t.jcrop.tellSelect();
+		}
+		else {
+			var cropSize = {
+				w: 0,
+				h: 0,
+				x: 0,
+				x2: 0,
+				y: 0,
+				y2: 0
+			}
 		}
 		
 		cropSize.w = cropSize.w == 0 ? t.ui.image.outerWidth()  : cropSize.w;
@@ -255,7 +265,7 @@ var PhotoFrame = function(options) {
 			errors.push('The image must have a maximum height of '+maxHeight+'px');
 		}
 		
-		if(!isCropped) {
+		if(!isCropped && ratio) {
 			if(ratio != cropWidth / cropHeight) {
 				errors.push('The image must have an apect ratio of '+t.settings.aspectRatioString);
 			}
@@ -366,16 +376,18 @@ var PhotoFrame = function(options) {
 			'<div class="photo-frame-dimmer" id="photo-frame-dimmer-"'+options.index+'">',
 				'<div class="photo-frame-info-panel">',
 					'<a href="#" class="photo-frame-close"><span class="icon-remove"></span></a>',
-					'<p class="size">W: <span class="width"></span> H: <span class="height"></span> <span class="aspect"></span></p>',
-					'<p class="coords">',
-						'X: <span class="x"></span>',
-						'Y: <span class="y"></span>',
-						'X2: <span class="x2"></span>',
-						'Y2: <span class="y2"></span>',
-					'</p>',
-					'<!-- <p class="aspect">',
-						'Aspect Ratio: <span></span>',
-					'</p> -->',
+					'<p class="size">W: <span class="width"></span> H: <span class="height"></span></p>',
+					'<div class="coords">',
+						'<p>',
+							'<label><b>X</b>: <span class="x"></span></label>',
+							'<label><b>Y</b>: <span class="y"></span></label>',
+						'</p>',
+						'<p>',
+							'<label><b>X2</b>: <span class="x2"></span></label>',
+							'<label><b>Y2</b>: <span class="y2"></span></label>',
+						'</p>',
+					'</div>',
+					'<p class="aspect"></p>',
 				'</div>',
 				'<div class="photo-frame-activity">',
 					'<span class="photo-frame-indicator"></span> <p>Uploading...</p>',
@@ -531,10 +543,10 @@ var PhotoFrame = function(options) {
 		t.ui.info.find('.size .width').html(Math.ceil(crop.w)+'px');
 		t.ui.info.find('.size .height').html(Math.ceil(crop.h)+'px');
 		t.ui.info.find('.aspect').html('('+aspect[0]+':'+aspect[1]+')');
-		t.ui.info.find('.x').html(Math.ceil(crop.x));
-		t.ui.info.find('.x2').html(Math.ceil(crop.x2));
-		t.ui.info.find('.y').html(Math.ceil(crop.y));
-		t.ui.info.find('.y2').html(Math.ceil(crop.y2));
+		t.ui.info.find('.x').html(Math.ceil(crop.x)+'px');
+		t.ui.info.find('.x2').html(Math.ceil(crop.x2)+'px');
+		t.ui.info.find('.y').html(Math.ceil(crop.y)+'px');
+		t.ui.info.find('.y2').html(Math.ceil(crop.y2)+'px');
 	}
 	
 	t.init(t.settings, t.photos);
