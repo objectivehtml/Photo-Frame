@@ -7,8 +7,8 @@
  * @author		Justin Kimbrell
  * @copyright	Copyright (c) 2012, Objective HTML
  * @link 		http://www.objectivehtml.com/photo-frame
- * @version		0.2.0
- * @build		20120921
+ * @version		0.3.0
+ * @build		20120922
  */
 
 require 'config/photo_frame_config.php';
@@ -164,6 +164,7 @@ class Photo_frame_ft extends EE_Fieldtype {
 					$file_url  = $this->EE->photo_frame_model->parse_filename($row['file'], 'url');
 					
 					$new_row                       = $row;
+					$new_row['saved_data']         = $row;
 					$new_row['directory']          = $directory;
 					$new_row['file_url']		   = $file_url;	
 					$new_row['file_path']          = $file_path;
@@ -230,12 +231,6 @@ class Photo_frame_ft extends EE_Fieldtype {
 		
 		$settings_js 	= '
 		<script type="text/javascript">
-			if(typeof PhotoFrameGlobal == "undefined") {
-				var PhotoFrameGlobal = {
-					instance: []
-				}
-			}
-
 			$(document).ready(function() {
 				var obj = new PhotoFrame({
 					fieldName: \''.$this->field_name.'\',
@@ -246,9 +241,7 @@ class Photo_frame_ft extends EE_Fieldtype {
 					cropUrl: \''.$crop_url.'\',
 					settings: '.json_encode($jcrop_settings).',
 					directory: '.json_encode($directory).'
-				});
-				
-				PhotoFrameGlobal.instance.push(obj);				
+				});			
 			});
 		</script>';
 				
@@ -458,6 +451,23 @@ class Photo_frame_ft extends EE_Fieldtype {
 				$new_photos[$index]['site_id']  = config_item('site_id');
 				$new_photos[$index]['field_id'] = $this->field_id;
 				$new_photos[$index]['entry_id'] = $this->settings['entry_id'];
+				
+				$unset = array(
+					'directory' => FALSE,
+				);
+				
+				foreach($unset as $var => $rename)
+				{
+					if(isset($new_photos[$index][$var]))
+					{
+						if($rename)
+						{
+							$new_photos[$index][$rename] = $new_photos[$index][$var];
+						}
+						
+						unset($new_photos[$index][$var]);
+					}
+				}
 			}
 			
 			$this->EE->photo_frame_model->save($new_photos);

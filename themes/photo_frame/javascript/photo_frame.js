@@ -18,7 +18,7 @@ var PhotoFrame = function(options) {
 	t.edit         = false;
 	t.isNewPhoto   = false;
 	t.directory    = options.directory;
-	t.index        = PhotoFrameGlobal.instance.length;
+	t.index        = PhotoFrame.instances.length;
 	t.messageWidth = 500; 
 	
 	t.ui   = {
@@ -116,7 +116,6 @@ var PhotoFrame = function(options) {
 	        	t.ui.image.remove();
 	        	
 	        	t.ui.image = $('<div class="photo-frame-image"></div>');
-	        	
 		        t.ui.crop.prepend(t.ui.image);   	
 	            t.ui.image.html(img).show();	        	
 	            t.ui.crop.center();
@@ -553,3 +552,5 @@ var PhotoFrame = function(options) {
 	
 	return t;
 }
+
+PhotoFrame.instances = [];

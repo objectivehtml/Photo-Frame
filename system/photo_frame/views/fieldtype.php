@@ -10,12 +10,15 @@
 				<a href="#<?php echo isset($photo->id) ? '' : $index?>" class="photo-frame-delete"><span class="icon-trash"></span></a>
 			</div>
 		</div>
+	
+		<?php if(isset($photo)): ?>
+			<?php if(!isset($photo->id)):?>
+				<textarea name="photo_frame_new_photos[<?php echo $id?>][<?php echo $index?>]" id="photo_frame_new_photos-<?php echo $id?>-<?php echo $index?>" style="display:none"><?php echo json_encode($photo->saved_data);?></textarea>
+			<?php endif; ?>
+		<?php endif; ?>
+		
 	<?php endforeach; ?>
 	</div>
 	
 	<a href="#" class="photo-frame-button photo-frame-upload photo-frame-margin-top"><span class="icon-upload-alt"></span> Upload</a>
-	
-	<?php if(!isset($photo->id)): ?>
-		<textarea name="photo_frame_new_photos[<?php echo $id?>][<?php echo $index?>]" style="display:none"><?php echo json_encode($photo)?></textarea>
-	<?php endif; ?>
 </div>
