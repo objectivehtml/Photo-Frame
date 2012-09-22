@@ -1,14 +1,14 @@
 <?php if ( ! defined('BASEPATH')) exit('No direct script access allowed');
 
 /**
- * Google Maps for ExpressionEngine v3
+ * Photo Frame
  * 
- * @package		Google Maps for ExpressionEngine
+ * @package		Photo Frame
  * @author		Justin Kimbrell
  * @copyright	Copyright (c) 2012, Objective HTML
- * @link 		http://www.objectivehtml.com/google-maps
- * @version		3.0.188
- * @build		20120812
+ * @link 		http://www.objectivehtml.com/photo-frame
+ * @version		0.2.0
+ * @build		20120921
  */
 
 require 'config/photo_frame_config.php';
@@ -35,9 +35,22 @@ class Photo_frame_ft extends EE_Fieldtype {
 		{
 			$this->safecracker = TRUE;
 		}
+		
+		/* Fixes bugs imposed by EE 2.5.2 and earlier */
+		if(version_compare(APP_VER, '2.5.3', '<'))
+		{
+			require_once PATH_THIRD . 'photo_frame/config/photo_frame_config.php';
+			require_once PATH_THIRD . 'photo_frame/helpers/addon_helper.php';
+			require_once PATH_THIRD . 'photo_frame/models/photo_frame_model.php';
 			
-		$this->EE->load->helper('addon_helper');
-		$this->EE->load->model('photo_frame_model');
+			$this->EE->photo_frame_model = new Photo_frame_model();		
+		}
+		else
+		{
+			$this->EE->load->helper('addon_helper');
+			$this->EE->load->model('photo_frame_model');
+			$this->EE->load->config('photo_frame_config');
+		}
 		
 		if(count($_FILES) > 0 && count($_POST) == 0)
 		{
@@ -109,14 +122,36 @@ class Photo_frame_ft extends EE_Fieldtype {
 		*/
 		
 		$saved_data = array();
+		$new_photos = array();
 		
-		if(!empty($data))
+		$new_photos_set = isset($_POST['photo_frame_new_photos'][$this->field_id]) ? TRUE : FALSE;
+		
+		if(!empty($data) || $new_photos_set)
 		{
 			$saved_data = $this->EE->photo_frame_model->get_photos($this->field_id, $data);
 			
 			if($saved_data->num_rows() > 0)
 			{
 				$saved_data = $saved_data->result_array();
+			}
+			else
+			{
+				$saved_data = array();
+			}
+			
+			if($new_photos_set)
+			{
+				$new_photos = $_POST['photo_frame_new_photos'][$this->field_id];
+				
+				foreach($new_photos as $index => $new_photo)
+				{
+					$new_photos[$index] = (array) json_decode($new_photo);
+					$saved_data[] 	    = $new_photos[$index];
+				}
+			}
+			
+			if(count($saved_data) > 0)
+			{
 				$directory  = $this->EE->photo_frame_model->get_upload_group($this->settings['photo_frame_upload_group']);
 				// $saved_data = $this->EE->photo_frame_model->parse_filenames($saved_data->result_array());
 			
@@ -137,10 +172,6 @@ class Photo_frame_ft extends EE_Fieldtype {
 					
 					$saved_data[$index]            = (object) $new_row;
 				}
-			}
-			else
-			{
-				$saved_data = array();
 			}
 		}
 		
@@ -228,6 +259,7 @@ class Photo_frame_ft extends EE_Fieldtype {
 			'field_label'    => $settings['field_label'],
 			'field_name'     => $this->field_name,
 			'data'   	     => $saved_data,
+			'new_photos'     => $new_photos,
 			'preview_styles' => trim($preview_styles)
 		);
 		
@@ -255,9 +287,6 @@ class Photo_frame_ft extends EE_Fieldtype {
 		{
 			$params = array();	
 		}
-		
-		$this->EE->load->config('photo_frame_config');
-		$this->EE->load->model('photo_frame_model');
 		
 		$default_params = array(
 			'id'              => '',
@@ -500,16 +529,16 @@ class Photo_frame_ft extends EE_Fieldtype {
 				'label' => 'Photo Min Width',
 				'description' => 'Values should be numerical and in pixels.'
 			),
-			'photo_frame_max_width' => array(
-				'label' => 'Photo Max Width',
-				'description' => 'Values should be numerical and in pixels.'
-			),
 			'photo_frame_min_height' => array(
 				'label' => 'Photo Min Height',
 				'description' => 'Values should be numerical and in pixels.'
 			),
 			'photo_frame_max_height' => array(
 				'label' => 'Photo Max Height',
+				'description' => 'Values should be numerical and in pixels.'
+			),
+			'photo_frame_max_width' => array(
+				'label' => 'Photo Max Width',
 				'description' => 'Values should be numerical and in pixels.'
 			),
 			'photo_frame_aspect_ratio' => array(
@@ -532,6 +561,11 @@ class Photo_frame_ft extends EE_Fieldtype {
 		);
 		
 		return $this->EE->load->view('settings', $vars, TRUE);
+	}
+	
+	public function delete($ids)
+	{
+		$this->EE->photo_frame_model->delete_entries($ids);
 	}
 	
 	/**

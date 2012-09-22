@@ -7,11 +7,15 @@
 			
 			<div class="photo-frame-action-bar">
 				<a href="#<?php echo $index?>" class="photo-frame-edit"><span class="icon-edit"></span></a>
-				<a href="#<?php echo $photo->id?>" class="photo-frame-delete"><span class="icon-trash"></span></a>
+				<a href="#<?php echo isset($photo->id) ? '' : $index?>" class="photo-frame-delete"><span class="icon-trash"></span></a>
 			</div>
 		</div>
 	<?php endforeach; ?>
 	</div>
 	
 	<a href="#" class="photo-frame-button photo-frame-upload photo-frame-margin-top"><span class="icon-upload-alt"></span> Upload</a>
+	
+	<?php if(!isset($photo->id)): ?>
+		<textarea name="photo_frame_new_photos[<?php echo $id?>][<?php echo $index?>]" style="display:none"><?php echo json_encode($photo)?></textarea>
+	<?php endif; ?>
 </div>
