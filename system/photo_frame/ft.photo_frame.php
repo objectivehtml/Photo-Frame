@@ -99,6 +99,8 @@ class Photo_frame_ft extends EE_Fieldtype {
 		$this->EE->theme_loader->javascript('jquery.load-image');
 		$this->EE->theme_loader->javascript('jquery.jcrop');
 		$this->EE->theme_loader->javascript('jquery.color');
+		
+		$entry_id  = /*!empty($data) && $data !== FALSE ? $data : */($this->EE->input->get_post('entry_id') ? $this->EE->input->get_post('entry_id') : (isset($this->EE->safecracker) ? $this->EE->safecracker->entry('entry_id') : 0));
 	
 		$default_settings = array(
 			'photo_frame_display_info' => 'true'
@@ -128,12 +130,12 @@ class Photo_frame_ft extends EE_Fieldtype {
 		$saved_data = array();
 		$new_photos = array();
 		
-		$new_photos_set = isset($_POST['photo_frame_new_photos'][$this->field_id]) ? TRUE : FALSE;
+		$new_photos_set = isset($_POST[$this->field_name]['new']) ? TRUE : FALSE;
 		
-		if(!empty($data) || $new_photos_set)
-		{
-			$saved_data = $this->EE->photo_frame_model->get_photos($this->field_id, $data);
+		$saved_data = $this->EE->photo_frame_model->get_photos($this->field_id, $entry_id);
 			
+		if($saved_data->num_rows() > 0 || $new_photos_set)
+		{
 			if($saved_data->num_rows() > 0)
 			{
 				$saved_data = $saved_data->result_array();
@@ -145,12 +147,19 @@ class Photo_frame_ft extends EE_Fieldtype {
 			
 			if($new_photos_set)
 			{
-				$new_photos = $_POST['photo_frame_new_photos'][$this->field_id];
+				$new_photos = $_POST[$this->field_name]['new'];
 				
 				foreach($new_photos as $index => $new_photo)
-				{
-					$new_photos[$index] = (array) json_decode($new_photo);
-					$saved_data[] 	    = $new_photos[$index];
+				{				
+					$photo = json_decode(html_entity_decode($new_photo));
+					
+					if(!is_null($photo))
+					{
+						$photo = (array) $photo;
+						$photo['new'] 		= TRUE;
+						$new_photos[$index] = $photo;
+						$saved_data[] 	    = $photo;
+					}
 				}
 			}
 			
@@ -178,6 +187,10 @@ class Photo_frame_ft extends EE_Fieldtype {
 					$saved_data[$index]            = (object) $new_row;
 				}
 			}
+		}
+		else
+		{
+			$saved_data = array();
 		}
 		
 		$url      = page_url() . '&dir_id='.$settings['photo_frame_upload_group'].'&field_id='.$this->field_id;
@@ -438,17 +451,22 @@ class Photo_frame_ft extends EE_Fieldtype {
 		return $default;
 	}
 	
+	public function save($data)
+	{
+		return NULL;
+	}
+	
 	public function post_save($data)
 	{
 		$this->EE->load->library('photo_frame_lib');
 		
 		// Create new photos
 		
-		$new_photos = $this->EE->input->post('photo_frame_new_photos', TRUE);
-		
-		if(isset($new_photos[$this->field_id]))
-		{	
-			$new_photos = $new_photos[$this->field_id];			
+		$new_photos = $this->EE->input->post($this->field_name, TRUE);
+		$new_photos = isset($new_photos['new']) ? $new_photos['new'] : array();
+			
+		if(count($new_photos) > 0)
+		{			
 			$new_photos = $this->EE->photo_frame_lib->decode_array($new_photos);
 			
 			foreach($new_photos as $index => $photo)
@@ -479,13 +497,12 @@ class Photo_frame_ft extends EE_Fieldtype {
 		}
 		
 		// Update existing photos
+					
+		$update_photos = $this->EE->input->post($this->field_name, TRUE);
+		$update_photos = isset($update_photos['edit']) ? $update_photos['edit'] : array();
 		
-		$update_photos = $this->EE->input->post('photo_frame_update_photo', TRUE);
-		
-		if(isset($update_photos[$this->field_id]))
+		if($update_photos)
 		{
-			$update_photos = $update_photos[$this->field_id];
-			
 			$this->EE->photo_frame_model->update($update_photos);
 		}
 	
@@ -500,10 +517,12 @@ class Photo_frame_ft extends EE_Fieldtype {
 		}
 		
 		// Update data with the entry_id
-				
+		
+		/*	
 		$this->EE->photo_frame_model->update_entry($this->settings['entry_id'], array(
 			'field_id_'.$this->field_id => $this->settings['entry_id']
 		));
+		*/
 		
 		return $this->settings['entry_id'];
 	}	

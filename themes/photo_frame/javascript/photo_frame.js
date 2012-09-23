@@ -47,7 +47,7 @@ var PhotoFrame = function(options) {
 				'</div>'
 			].join('');
 			
-			t.$wrapper.append('<textarea type="hidden" name="photo_frame_new_photos['+options.fieldId+']['+index+']" id="photo-frame-new-photo-'+options.fieldId+'-'+index+'" style="display:none">'+data.save_data+'</textarea>');
+			t.$wrapper.append('<textarea name="'+options.fieldName+'[new]['+index+']" id="photo-frame-new-photo-'+options.fieldId+'-'+index+'" style="display:none">'+data.save_data+'</textarea>');
 			t.ui.preview.append(html);
 			t.photos.push(data);
 		}
@@ -59,9 +59,9 @@ var PhotoFrame = function(options) {
 				t.$wrapper.find('#photo-frame-new-photo-'+options.fieldId+'-'+t.edit+'').html(data.save_data);
 			}
 			
-			t.$wrapper.find('#photo-frame-update-photo-'+options.fieldId+'-'+index).remove();
+			t.$wrapper.find('#photo-frame-edit-photo-'+options.fieldId+'-'+index).remove();
 			
-			t.$wrapper.append('<textarea type="hidden" name="photo_frame_update_photo['+options.fieldId+']['+t.edit_id+']" id="photo-frame-update-photo-'+index+'" style="display:none">'+data.save_data+'</textarea>');
+			t.$wrapper.append('<textarea name="'+options.fieldName+'[edit]['+t.edit_id+']" id="photo-frame-edit-photo-'+index+'" style="display:none">'+data.save_data+'</textarea>');
 			
 			window.loadImage(
 		        data.file,
@@ -179,8 +179,8 @@ var PhotoFrame = function(options) {
 	
 	t.isCropped = function(cropSize) {
 	
-		if(!cropSize) {
-			var cropSize    = t.jcrop.tellSelect();
+		if(!cropSize && t.jcrop.tellSelect) {
+			var cropSize = t.jcrop.tellSelect();
 		}
 		
 		if(t.ui.dimmer.find('.jcrop-tracker').width() == 0) {
@@ -240,6 +240,8 @@ var PhotoFrame = function(options) {
 			cropSize   = defaultCropSize;
 			cropSize.w = image.w;
 			cropSize.h = image.h;
+			
+			aspect = t.reduce(image.w, image.h);
 		};
 		
 		cropSize.a = aspect;		
@@ -313,6 +315,9 @@ var PhotoFrame = function(options) {
 				response.validRatio = false;
 				errors.push('The image must have an apect ratio of '+t.settings.aspectRatioString);
 			}
+		}
+		else {
+			
 		}
 		
 		response.errors = errors;
@@ -551,6 +556,7 @@ var PhotoFrame = function(options) {
 			var id = $t.attr('href').replace('#', '');
 				
 			if($t.attr('data-new-entry') != 'true') {
+				t.$wrapper.find('#photo-frame-edit-photo-'+options.fieldId+'-'+id).remove();
 				t.$wrapper.append('<input type="hidden" name="photo_frame_delete_photos['+options.fieldId+'][]" value="'+id+'" />');
 			}
 			else {
@@ -583,34 +589,36 @@ var PhotoFrame = function(options) {
 	};
 		
 	t.updateInfo = function() {
-		var crop = t.cropDimensions();		
-		var aspect = crop.a;
-				
-		t.ui.info.fadeIn();
-		t.ui.info.find('.size .width').html(Math.ceil(crop.w)+'px');
-		t.ui.info.find('.size .height').html(Math.ceil(crop.h)+'px');
-		t.ui.info.find('.aspect').html('('+aspect[0]+':'+aspect[1]+')');
-		t.ui.info.find('.x').html(Math.ceil(crop.x)+'px');
-		t.ui.info.find('.x2').html(Math.ceil(crop.x2)+'px');
-		t.ui.info.find('.y').html(Math.ceil(crop.y)+'px');
-		t.ui.info.find('.y2').html(Math.ceil(crop.y2)+'px');
-		
-		var errors = t.validate(true);
-		
-		t.ui.info.find('.width').removeClass('photo-frame-invalid');
-		t.ui.info.find('.height').removeClass('photo-frame-invalid');
-		t.ui.info.find('.aspect').removeClass('photo-frame-invalid');
-		
-		if(!errors.validWidth) {
-			t.ui.info.find('.width').addClass('photo-frame-invalid');
-		}
-		
-		if(!errors.validHeight) {
-			t.ui.info.find('.height').addClass('photo-frame-invalid');
-		}
-		
-		if(!errors.validRatio) {
-			t.ui.info.find('.aspect').addClass('photo-frame-invalid');
+		if(t.ui.info) {		
+			var crop = t.cropDimensions();		
+			var aspect = crop.a;
+			
+			t.ui.info.fadeIn();
+			t.ui.info.find('.size .width').html(Math.ceil(crop.w)+'px');
+			t.ui.info.find('.size .height').html(Math.ceil(crop.h)+'px');
+			t.ui.info.find('.aspect').html('('+aspect[0]+':'+aspect[1]+')');
+			t.ui.info.find('.x').html(Math.ceil(crop.x)+'px');
+			t.ui.info.find('.x2').html(Math.ceil(crop.x2)+'px');
+			t.ui.info.find('.y').html(Math.ceil(crop.y)+'px');
+			t.ui.info.find('.y2').html(Math.ceil(crop.y2)+'px');
+			
+			var errors = t.validate(true);
+			
+			t.ui.info.find('.width').removeClass('photo-frame-invalid');
+			t.ui.info.find('.height').removeClass('photo-frame-invalid');
+			t.ui.info.find('.aspect').removeClass('photo-frame-invalid');
+			
+			if(!errors.validWidth) {
+				t.ui.info.find('.width').addClass('photo-frame-invalid');
+			}
+			
+			if(!errors.validHeight) {
+				t.ui.info.find('.height').addClass('photo-frame-invalid');
+			}
+			
+			if(!errors.validRatio) {
+				t.ui.info.find('.aspect').addClass('photo-frame-invalid');
+			}
 		}
 	}
 	

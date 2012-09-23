@@ -89,13 +89,19 @@ class Photo_frame_model extends CI_Model {
 			{
 				$data = array($data);	
 			}
-			
 			foreach($data as $id => $row)
 			{
-				$row = json_decode($row);
+				$row = (array)json_decode($row);
 				
-				$this->db->where('id', $id);
-				$this->db->update('photo_frame', $row);
+				if(!isset($row['id']))
+				{
+					$this->save(array($row));
+				}
+				else
+				{
+					$this->db->where('id', $row['id']);
+					$this->db->update('photo_frame', $row);
+				}
 			}
 		}
 	}			
@@ -104,6 +110,13 @@ class Photo_frame_model extends CI_Model {
 	{
 		if(count($data) > 0)
 		{
+			foreach($data as $index => $value)
+			{
+				$new_row = $data[$index];
+				unset($new_row['new']);
+				$data[$index] = $new_row;
+			}
+			
 			$this->db->insert_batch('photo_frame', $data);
 		}
 	}		
