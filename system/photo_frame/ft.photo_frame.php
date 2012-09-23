@@ -100,7 +100,11 @@ class Photo_frame_ft extends EE_Fieldtype {
 		$this->EE->theme_loader->javascript('jquery.jcrop');
 		$this->EE->theme_loader->javascript('jquery.color');
 	
-		$settings = $this->settings;
+		$default_settings = array(
+			'photo_frame_display_info' => 'true'
+		);
+	
+		$settings = array_merge($default_settings, $this->settings);
 	
 		$preview_styles = NULL;
 		
@@ -240,8 +244,9 @@ class Photo_frame_ft extends EE_Fieldtype {
 					url: \''.$url.'\',
 					cropUrl: \''.$crop_url.'\',
 					settings: '.json_encode($jcrop_settings).',
-					directory: '.json_encode($directory).'
-				});			
+					directory: '.json_encode($directory).',
+					infoPanel: '.$settings['photo_frame_display_info'].'
+				});
 			});
 		</script>';
 				
@@ -523,6 +528,17 @@ class Photo_frame_ft extends EE_Fieldtype {
 				'type'        => 'select',
 				'settings' => array(
 					'options' => $this->EE->photo_frame_model->upload_options()
+				)
+			),
+			'photo_frame_display_info' => array(
+				'label'       => 'Display Info Panel',
+				'description' => 'Select the file upload group you in which you want to store your photos.',
+				'type'        => 'select',
+				'settings' => array(
+					'options' => array(
+						'true'  => 'True',
+						'false' => 'False'
+					)
 				)
 			),
 			/*

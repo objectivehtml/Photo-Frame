@@ -1,6 +1,7 @@
 @import 'font-awesome.css';
 
 .photo-frame-dimmer img { max-width: none; }
+.photo-frame-invalid { color: rgb(238, 57, 45); font-weight: bold; }
 
 .photo-frame-form {
 	display: none;

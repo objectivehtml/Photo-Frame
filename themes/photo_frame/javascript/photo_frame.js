@@ -183,27 +183,37 @@ var PhotoFrame = function(options) {
 			var cropSize    = t.jcrop.tellSelect();
 		}
 		
+		if(t.ui.dimmer.find('.jcrop-tracker').width() == 0) {
+			return false;
+		}
+		
 		return cropSize.x || cropSize.y || cropSize.x2 || cropSize.y2 ? true : false;	
 	}
 	
 	t.cropDimensions = function(cropSize) {
-	
+		var defaultCropSize = {
+			w: 0,
+			h: 0,
+			x: 0,
+			x2: 0,
+			y: 0,
+			y2: 0
+		}
+			
 		if(!cropSize && t.jcrop.tellSelect) {
 			var cropSize = t.jcrop.tellSelect();
 		}
 		else {
-			var cropSize = {
-				w: 0,
-				h: 0,
-				x: 0,
-				x2: 0,
-				y: 0,
-				y2: 0
-			}
+			var cropSize = defaultCropSize;
 		}
 		
-		cropSize.w = cropSize.w == 0 ? t.ui.image.outerWidth()  : cropSize.w;
-		cropSize.h = cropSize.h == 0 ? t.ui.image.outerHeight() : cropSize.h;
+		var image = {
+			w: t.ui.image.outerWidth(),
+			h: t.ui.image.outerHeight()
+		};
+		
+		cropSize.w = cropSize.w == 0 ? image.w : cropSize.w;
+		cropSize.h = cropSize.h == 0 ? image.h : cropSize.h;
 		
 		if(!t.settings.aspectRatio) {
 			var aspect = t.reduce(Math.ceil(cropSize.w), Math.ceil(cropSize.h));
@@ -226,14 +236,26 @@ var PhotoFrame = function(options) {
 			aspect = t.reduce(aspect[0], aspect[1]);
 		}
 		
-		cropSize.a = aspect;
+		if(!t.isCropped()) {
+			cropSize   = defaultCropSize;
+			cropSize.w = image.w;
+			cropSize.h = image.h;
+		};
+		
+		cropSize.a = aspect;		
 		
 		return cropSize;
 	}
 	
-	t.validate = function() {
+	t.validate = function(json) {
+		
+		if(!json) {
+			var json = false;	
+		}
+		
 		var ratio       = t.settings.aspectRatio ? t.settings.aspectRatio : false;
 		var cropSize    = t.cropDimensions();
+		
 		var cropWidth   = cropSize.w;
 		var cropHeight  = cropSize.h;
 		var minWidth    = t.settings.minSize ? t.settings.minSize[0] : 0;
@@ -241,33 +263,62 @@ var PhotoFrame = function(options) {
 		var maxWidth    = t.settings.maxSize ? t.settings.maxSize[0] : 0;
 		var maxHeight   = t.settings.maxSize ? t.settings.maxSize[1] : 0;
 		var isCropped   = t.isCropped(cropSize);
+		
 		var height      = cropSize.h;
 		var width       = cropSize.w;
 		var errors      = [];
-		
 		var imgWidth    = Math.ceil(t.ui.image.outerWidth());
-		var imgHeight   = Math.ceil(t.ui.image.outerHeight());
-			
+		var imgHeight   = Math.ceil(t.cropSize);
+		
+		var response    = {
+			validWidth: true,
+			validHeight: true,
+			validRatio: true,
+			minWidth: minWidth,
+			minHeight: minHeight,
+			maxWidth: maxWidth,
+			maxHeight: maxHeight,
+			width: cropSize.w,
+			height: cropSize.h,
+			x: cropSize.x,
+			x2: cropSize.x2,
+			y: cropSize.y,
+			y2: cropSize.y2,
+			ratio: ratio,
+			ratioString: t.settings.aspectRatioString
+		};
+		
 		if(minWidth > 0 && minWidth > width) {
+			response.validWidth = false;
 			errors.push('The image must have a minimum width of '+minWidth+'px');
 		}
 		
 		if(minHeight > 0 && minHeight > height) {
+			response.validHeight = false;
 			errors.push('The image must have a minimum height of '+minHeight+'px');
 		}
 		
 		if(maxWidth > 0 && maxWidth < width) {
+			response.validWidth = false;
 			errors.push('The image must have a maximum width of '+maxWidth+'px');
 		}
 		
 		if(maxHeight > 0 && maxHeight < height) {
+			response.validHeight = false;
 			errors.push('The image must have a maximum height of '+maxHeight+'px');
 		}
 		
 		if(!isCropped && ratio) {
 			if(ratio != cropWidth / cropHeight) {
+				response.validRatio = false;
 				errors.push('The image must have an apect ratio of '+t.settings.aspectRatioString);
 			}
+		}
+		
+		response.errors = errors;
+			
+		if(json) {
+			return response;
 		}
 		
 		return errors;
@@ -410,6 +461,15 @@ var PhotoFrame = function(options) {
 		t.ui.dimmer = $(html);
 		t.ui.body.append(t.ui.dimmer);
 	
+		if(options.infoPanel) {
+			t.ui.info = t.ui.dimmer.find('.photo-frame-info-panel');
+			t.ui.info.draggable();
+			t.ui.info.find('.photo-frame-close').click(function(e) {			
+				t.ui.info.fadeOut();
+				e.preventDefault();
+			});
+		}
+				
 		t.ui.activity = t.ui.dimmer.find('.photo-frame-activity');
 		t.ui.activity.find('.photo-frame-indicator').activity({color: '#fff'});
 		
@@ -418,9 +478,6 @@ var PhotoFrame = function(options) {
 		t.ui.errors   = t.ui.dimmer.find('.photo-frame-errors');
 		t.ui.crop     = t.ui.dimmer.find('.photo-frame-crop');
 		t.ui.image    = t.ui.dimmer.find('.photo-frame-image');
-		t.ui.info     = t.ui.dimmer.find('.photo-frame-info-panel');
-		
-		t.ui.info.draggable();
 		
 		t.ui.form.fileupload({
 			//url: '/live/home/index',
@@ -454,11 +511,6 @@ var PhotoFrame = function(options) {
 		t.ui.cancel.click(function(e) {			
 			t.closeMessages();			
 			t.ui.dimmer.fadeOut('fast');			
-			e.preventDefault();
-		});
-		
-		t.ui.info.find('.photo-frame-close').click(function(e) {			
-			t.ui.info.fadeOut();
 			e.preventDefault();
 		});
 		
@@ -531,14 +583,10 @@ var PhotoFrame = function(options) {
 	};
 		
 	t.updateInfo = function() {
-	
 		var crop = t.cropDimensions();		
 		var aspect = crop.a;
-		
-		if(t.ui.info.css('display') == 'none') {
-			t.ui.info.fadeIn();	
-		}
-		
+				
+		t.ui.info.fadeIn();
 		t.ui.info.find('.size .width').html(Math.ceil(crop.w)+'px');
 		t.ui.info.find('.size .height').html(Math.ceil(crop.h)+'px');
 		t.ui.info.find('.aspect').html('('+aspect[0]+':'+aspect[1]+')');
@@ -546,6 +594,24 @@ var PhotoFrame = function(options) {
 		t.ui.info.find('.x2').html(Math.ceil(crop.x2)+'px');
 		t.ui.info.find('.y').html(Math.ceil(crop.y)+'px');
 		t.ui.info.find('.y2').html(Math.ceil(crop.y2)+'px');
+		
+		var errors = t.validate(true);
+		
+		t.ui.info.find('.width').removeClass('photo-frame-invalid');
+		t.ui.info.find('.height').removeClass('photo-frame-invalid');
+		t.ui.info.find('.aspect').removeClass('photo-frame-invalid');
+		
+		if(!errors.validWidth) {
+			t.ui.info.find('.width').addClass('photo-frame-invalid');
+		}
+		
+		if(!errors.validHeight) {
+			t.ui.info.find('.height').addClass('photo-frame-invalid');
+		}
+		
+		if(!errors.validRatio) {
+			t.ui.info.find('.aspect').addClass('photo-frame-invalid');
+		}
 	}
 	
 	t.init(t.settings, t.photos);
