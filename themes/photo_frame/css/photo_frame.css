@@ -91,7 +91,11 @@
 	-webkit-border-radius: 2px;
 	border-radius: 2px;
 	z-index: 1100;
-	min-width: 230px;
+	min-width: 240px;
+}
+
+.photo-frame-info-panel label {
+	margin: 0;	
 }
 
 .photo-frame-info-panel.ui-draggable {
@@ -106,8 +110,13 @@
 	text-decoration: none;
 }
 
+.photo-frame-info-panel p {
+	line-height: 1em;
+	margin: 0;	
+}
+
 .photo-frame-info-panel .size {
-	font-size: 1.5em;
+	font-size: 16px;
 }
 
 .photo-frame-info-panel .coords {
@@ -115,10 +124,13 @@
 	margin-top: .5em;
 }
 
+.photo-frame-info-panel .coords p {
+	margin-bottom: 5px;
+}
+
 .photo-frame-info-panel .coords b {
 	display: inline-block;
 	width: 20px;
-	margin-bottom: 5px;
 }
 
 .photo-frame-info-panel .coords span {
@@ -133,6 +145,7 @@
 	position: absolute;
 	bottom: 1em;
 	right: 1em;
+	font-size: 12px;
 }
 
 .photo-frame-info-panel .coords label {
@@ -316,6 +329,7 @@
 	float: left;
 	margin: 0 1em 1em 0;
 	display: inline-block;
+	line-height: 1em;
 }
 
 .photo-frame-photo img {

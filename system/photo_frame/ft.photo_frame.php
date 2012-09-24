@@ -49,14 +49,15 @@ class Photo_frame_ft extends EE_Fieldtype {
 		{
 			$this->EE->load->helper('addon_helper');
 			$this->EE->load->model('photo_frame_model');
-			$this->EE->load->config('photo_frame_config');
 		}
 		
+		$this->EE->load->config('photo_frame_config');
+			
 		if(count($_FILES) > 0 && count($_POST) == 0)
 		{
 			$this->EE->load->library('photo_frame_lib');
 			$this->EE->photo_frame_lib->upload_action();
-		}
+		}		
 	}
 	
 	// --------------------------------------------------------------------
@@ -84,10 +85,13 @@ class Photo_frame_ft extends EE_Fieldtype {
 	function display_field($data)
 	{	
 		$this->EE->load->library('photo_frame_lib');
-		$this->EE->load->library('theme_loader');
+		
+		if(!isset($this->EE->theme_loader))
+		{
+			$this->EE->load->library('theme_loader');
+		}
 		
 		$this->EE->theme_loader->module_name = 'photo_frame';
-		
 		$this->EE->theme_loader->css('photo_frame');
 		$this->EE->theme_loader->css('jquery.jcrop');
 		$this->EE->theme_loader->javascript('photo_frame');
@@ -100,8 +104,8 @@ class Photo_frame_ft extends EE_Fieldtype {
 		$this->EE->theme_loader->javascript('jquery.jcrop');
 		$this->EE->theme_loader->javascript('jquery.color');
 		
-		$entry_id  = /*!empty($data) && $data !== FALSE ? $data : */($this->EE->input->get_post('entry_id') ? $this->EE->input->get_post('entry_id') : (isset($this->EE->safecracker) ? $this->EE->safecracker->entry('entry_id') : 0));
-	
+		$entry_id  = empty($data) && $data !== FALSE ? $data : ($this->EE->input->get_post('entry_id') ? $this->EE->input->get_post('entry_id') : (isset($this->EE->safecracker) ? $this->EE->safecracker->entry('entry_id') : 0));
+		
 		$default_settings = array(
 			'photo_frame_display_info' => 'true'
 		);
@@ -133,7 +137,7 @@ class Photo_frame_ft extends EE_Fieldtype {
 		$new_photos_set = isset($_POST[$this->field_name]['new']) ? TRUE : FALSE;
 		
 		$saved_data = $this->EE->photo_frame_model->get_photos($this->field_id, $entry_id);
-			
+		
 		if($saved_data->num_rows() > 0 || $new_photos_set)
 		{
 			if($saved_data->num_rows() > 0)
@@ -264,7 +268,7 @@ class Photo_frame_ft extends EE_Fieldtype {
 		</script>';
 				
 		$this->EE->cp->add_to_head($settings_js);		
-		
+				
 		$vars = array(
 			'id'             => $this->field_id,
 			'field_label'    => $settings['field_label'],
@@ -517,12 +521,10 @@ class Photo_frame_ft extends EE_Fieldtype {
 		}
 		
 		// Update data with the entry_id
-		
-		/*	
+			
 		$this->EE->photo_frame_model->update_entry($this->settings['entry_id'], array(
 			'field_id_'.$this->field_id => $this->settings['entry_id']
 		));
-		*/
 		
 		return $this->settings['entry_id'];
 	}	
