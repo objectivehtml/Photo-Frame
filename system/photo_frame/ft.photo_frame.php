@@ -428,6 +428,7 @@ class Photo_frame_ft extends EE_Fieldtype {
 		
 		if($this->bool_param($params['parse_filenames']))
 		{
+			/*
 			$parse_filenames = TRUE;
 				
 			if( $params['directory_name'] == config_item('photo_frame_directory_name') &&
@@ -438,6 +439,10 @@ class Photo_frame_ft extends EE_Fieldtype {
 			}
 			
 			$return = $this->EE->photo_frame_model->parse_filename($return, 'url', $parse_filenames, $params['directory_name']);			
+			$return = $this->EE->photo_frame_model->parse_filename($return, 'url');
+			*/
+			
+			$return = $this->EE->photo_frame_model->parse_filename($return, 'url');		
 		}
 		
 		return $return;
