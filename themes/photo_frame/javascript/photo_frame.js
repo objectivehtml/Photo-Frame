@@ -10,6 +10,7 @@ jQuery.fn.center = function () {
 var PhotoFrame = function(options) {
 	
 	var t          = this;
+	
 	t.settings     = options.settings;
 	t.$wrapper     = $(options.wrapper);
 	t.response     = {};
@@ -20,6 +21,10 @@ var PhotoFrame = function(options) {
 	t.directory    = options.directory;
 	t.index        = PhotoFrame.instances.length;
 	t.messageWidth = 500; 
+	t.instructions = options.instructions;
+	t.disable      = false;
+	t.size 		   = options.size;
+	t.released	   = false;
 	
 	t.ui   = {
 		body: $('body'),
@@ -115,6 +120,11 @@ var PhotoFrame = function(options) {
 	        function (img) {
 	        	t.ui.image.remove();
 	        	
+	        	if(t.instructions) {
+	        		t.ui.instructions = $('<div class="photo-frame-instructions" />').html(t.instructions);
+	        		t.ui.dimmer.append(t.ui.instructions);
+	        	}
+	        	
 	        	t.ui.image = $('<div class="photo-frame-image"></div>');
 		        t.ui.crop.prepend(t.ui.image);   	
 	            t.ui.image.html(img).show();	        	
@@ -123,6 +133,34 @@ var PhotoFrame = function(options) {
 	            t.settings.onChange = function() {
 		          	t.updateInfo();
 	            };
+	            
+	            if(t.instructions && t.ui.instructions.css('display') != 'none') {
+		            t.settings.onChange = function() {
+			            t.ui.instructions.fadeOut();
+		            }
+	            }
+	            
+	            if(t.size != 'false') {
+	            	var size = t.size.split('x');
+	            	
+	            	size[0] = parseInt(size[0]);
+	            	size[1] = parseInt(size[1]);
+	            	
+	           		var x  = (t.ui.image.width()  / 2) - (size[0] / 2);
+	           		var x2 = x + size[0];
+	           		var y  = (t.ui.image.height() / 2) - (size[1] / 2);
+	           		var y2 = y + size[1];
+	           		
+	           		t.settings.setSelect = [x, y, x2, y2];
+	            }
+	            
+	            t.settings.onRelease = function() {
+		            t.released = true;
+	            };
+	            
+	            t.settings.onSelect = function() {
+		            t.released = false;
+	            }
 	            
 	            t.ui.image.Jcrop(t.settings, function() {
 	            	t.jcrop = this;
@@ -505,7 +543,18 @@ var PhotoFrame = function(options) {
     	});
     	
     	t.ui.save.click(function() {
-	    	t.cropImage(t.response.file_path, t.jcrop.tellScaled());
+    		var _default = {
+    			x: 0,
+    			y: 0,
+    			x2: 0,
+    			y2: 0,
+    			w: 0,
+    			h: 0
+    		};
+    		
+    		var size = t.released ? _default : t.jcrop.tellScaled();
+    		
+	    	t.cropImage(t.response.file_path, size);
     	});
 		
 		t.ui.upload.click(function(e) {

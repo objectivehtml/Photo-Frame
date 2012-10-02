@@ -16,5 +16,5 @@
 	<?php endforeach; ?>
 	</div>
 	
-	<a href="#" class="photo-frame-button photo-frame-upload photo-frame-margin-top"><span class="icon-upload-alt"></span> Upload</a>
+	<a href="#" class="photo-frame-button photo-frame-upload photo-frame-margin-top"><span class="icon-upload-alt"></span> <?php echo $button_text?></a>
 </div>

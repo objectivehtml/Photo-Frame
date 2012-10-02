@@ -250,6 +250,14 @@ class Photo_frame_ft extends EE_Fieldtype {
 		
 		$jcrop_settings = (object) $jcrop_settings;
 		
+		$this->EE->lang->loadfile('photo_frame');
+		
+		$button_text = empty($settings['photo_frame_button_text']) ? lang('photo_frame_button_text') : $settings['photo_frame_button_text'];
+		
+		$instructions = empty($settings['photo_frame_instructions']) ? lang('photo_frame_instructions') : $settings['photo_frame_instructions'];
+		
+		$size = isset($settings['photo_frame_default_size']) && !empty($settings['photo_frame_default_size']) ? $settings['photo_frame_default_size'] : 'false';
+		
 		$settings_js 	= '
 		<script type="text/javascript">
 			$(document).ready(function() {
@@ -262,7 +270,9 @@ class Photo_frame_ft extends EE_Fieldtype {
 					cropUrl: \''.$crop_url.'\',
 					settings: '.json_encode($jcrop_settings).',
 					directory: '.json_encode($directory).',
-					infoPanel: '.$settings['photo_frame_display_info'].'
+					infoPanel: '.$settings['photo_frame_display_info'].',
+					instructions: '.json_encode($instructions).',
+					size: \''.$size.'\'
 				});
 			});
 		</script>';
@@ -275,7 +285,8 @@ class Photo_frame_ft extends EE_Fieldtype {
 			'field_name'     => $this->field_name,
 			'data'   	     => $saved_data,
 			'new_photos'     => $new_photos,
-			'preview_styles' => trim($preview_styles)
+			'preview_styles' => trim($preview_styles),
+			'button_text'	 => $button_text
 		);
 		
 		return $this->EE->load->view('fieldtype', $vars, TRUE);
@@ -602,11 +613,33 @@ class Photo_frame_ft extends EE_Fieldtype {
 			'photo_frame_default_location' => array(
 				'label' 	  => 'Default Crop Location',
 				'description' => 'There should be four coordinates, each represented in pixels which place each corner of the crop utility. If left blank, the crop utility will not display by default. <i>Format: x1, y1, x2, y2</i>'
+			),
+			'photo_frame_default_size' => array(
+				'label' 	  => 'Default Crop Size',
+				'description' => 'Define a default height and width that will be used to center the crop utility within the photo. Ex: <i>400x300</i>',
+			)
+		);
+		
+		$info_fields = array(
+			'photo_frame_button_text' => array(
+				'label' 	  => 'Button Text',
+				'description' => 'Override the default button text. If no value is present the default text will be used.'
+			),
+			'photo_frame_instructions' => array(
+				'label' 	  => 'Instructions',
+				'description' => 'Override the default instruction text. If no value is present the default instructions will be used.',
+				'type'		  => 'textarea',
 			)
 		);
 		
 		$vars = array(
 			'table' => $IB->table($fields, $data, array(
+				'class'       => 'mainTable padTable',
+				'border'      => 0,
+				'cellpadding' => 0,
+				'cellspacing' => 0
+			)),
+			'info_table' => $IB->table($info_fields, $data, array(
 				'class'       => 'mainTable padTable',
 				'border'      => 0,
 				'cellpadding' => 0,

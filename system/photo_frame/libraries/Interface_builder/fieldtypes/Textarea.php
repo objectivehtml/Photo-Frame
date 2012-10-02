@@ -4,9 +4,7 @@ class Textarea_IBField extends IBFieldtype {
 
 	public function display_field($data = '')
 	{
-		return '
-		<label for="'.$this->id.'">'.$this->label.'</label>
-		<textarea name="'.$this->name.'" id="'.$this->id.'">'.$data.'</textarea>';
+		return '<textarea name="'.$this->name.'" id="'.$this->id.'">'.$data.'</textarea>';
 	}
 
 }
