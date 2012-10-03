@@ -10,8 +10,8 @@
 				<a href="#<?php echo !isset($photo->id) ? $id : $photo->id?>" class="photo-frame-delete"><span class="icon-trash"></span></a>
 			</div>
 		</div>
-	
-		<textarea name="<?php echo $field_name?>[<?php echo isset($photo->new) ? 'new' : 'edit'?>][<?php echo $index?>]" id="photo-frame-<?php echo isset($photo->new) ? 'new' : 'edit'?>-photo-<?php echo !isset($photo->id) ? $id : $photo->id?>-<?php echo $index?>" style="display:none"><?php echo json_encode($photo->saved_data);?></textarea>
+		
+		<textarea name="<?php echo $field_name?>[<?php echo isset($photo->new) ? 'new' : 'edit'?>][<?php echo isset($photo->new) ? $index : $photo->id?>]" id="photo-frame-<?php echo isset($photo->new) ? 'new' : 'edit'?>-photo-<?php echo !isset($photo->id) ? $id : $photo->id?>-<?php echo $index?>" style="display:none"><?php echo json_encode($photo->saved_data);?></textarea>
 		
 	<?php endforeach; ?>
 	</div>

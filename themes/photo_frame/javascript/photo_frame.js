@@ -25,6 +25,7 @@ var PhotoFrame = function(options) {
 	t.disable      = false;
 	t.size 		   = options.size;
 	t.released	   = false;
+	t.initialized  = false;
 	
 	t.ui   = {
 		body: $('body'),
@@ -41,7 +42,7 @@ var PhotoFrame = function(options) {
 		
 		var index = t.edit === false ? t.photos.length : t.edit;
 		
-		if(!t.edit) {
+		if(t.edit === false) {
 			var html = [
 				'<div class="photo-frame-photo" id="photo-frame-photo-'+options.fieldId+'-'+index+'">',
 					'<img src="'+data.file+'" alt="'+data.file_name+'" />',				
@@ -60,13 +61,14 @@ var PhotoFrame = function(options) {
 			
 			var obj = $('#photo-frame-photo-'+options.fieldId+'-'+t.edit);
 			
-			if(obj.attr('data-new-entry')) {
+			if(obj.find('a').attr('data-new-entry')) {
 				t.$wrapper.find('#photo-frame-new-photo-'+options.fieldId+'-'+t.edit+'').html(data.save_data);
 			}
-			
-			t.$wrapper.find('#photo-frame-edit-photo-'+options.fieldId+'-'+index).remove();
-			
-			t.$wrapper.append('<textarea name="'+options.fieldName+'[edit]['+t.edit_id+']" id="photo-frame-edit-photo-'+index+'" style="display:none">'+data.save_data+'</textarea>');
+			else {	
+				console.log(data.save_data);
+							
+				t.$wrapper.find('#photo-frame-edit-photo-'+t.edit_id+'-'+index).html(data.save_data);
+			}
 			
 			window.loadImage(
 		        data.file,
@@ -79,6 +81,7 @@ var PhotoFrame = function(options) {
 			t.photos[t.edit] = data;
 		}
 		
+		t.ui.saving.remove();
 		t.ui.dimmer.hide();
 	};
 	
@@ -119,10 +122,18 @@ var PhotoFrame = function(options) {
 	        image,
 	        function (img) {
 	        	t.ui.image.remove();
-	        	
-	        	if(t.instructions) {
+	        		        	
+	        	if(t.instructions && t.edit === false) {
 	        		t.ui.instructions = $('<div class="photo-frame-instructions" />').html(t.instructions);
+	        		
 	        		t.ui.dimmer.append(t.ui.instructions);
+	        		if(typeof options.size == "string") {
+		        		//t.ui.instructions.hide();
+	        		}
+	        		
+	        	}
+	        	else {
+		        	t.ui.instructions = false;
 	        	}
 	        	
 	        	t.ui.image = $('<div class="photo-frame-image"></div>');
@@ -134,13 +145,16 @@ var PhotoFrame = function(options) {
 		          	t.updateInfo();
 	            };
 	            
-	            if(t.instructions && t.ui.instructions.css('display') != 'none') {
+	            if(t.ui.instructions && t.ui.instructions.css('display') != 'none') {
 		            t.settings.onChange = function() {
-			            t.ui.instructions.fadeOut();
+		            	console.log(t.initialized);
+			            if(t.initialized) {
+			            	t.ui.instructions.fadeOut();
+			            }
 		            }
 	            }
 	            
-	            if(t.size != 'false') {
+	            if(t.edit === false && t.size != 'false') {
 	            	var size = t.size.split('x');
 	            	
 	            	size[0] = parseInt(size[0]);
@@ -169,6 +183,9 @@ var PhotoFrame = function(options) {
 			            callback();
 		            }
 	            });
+	            
+				t.initialized = true;
+				
 	        }
 	    );
 	};
@@ -194,6 +211,14 @@ var PhotoFrame = function(options) {
 		}
 		else {
 			t.closeMessages();
+			
+			t.ui.saving = $('<div class="photo-frame-saving"><span></span> Saving...</div>');
+			t.ui.dimmer.append(t.ui.saving);			
+			t.ui.dimmer.find('.photo-frame-saving span').activity();			
+			t.ui.crop.fadeOut();
+			t.ui.info.fadeOut();
+			
+			t.ui.saving.center();
 			
 			$.get(options.cropUrl, {
 				id: t.directory.id,
@@ -225,7 +250,7 @@ var PhotoFrame = function(options) {
 			return false;
 		}
 		
-		return cropSize.x || cropSize.y || cropSize.x2 || cropSize.y2 ? true : false;	
+		return typeof cropSize == "undefined" || cropSize.x || cropSize.y || cropSize.x2 || cropSize.y2 ? true : false;	
 	}
 	
 	t.cropDimensions = function(cropSize) {
@@ -455,7 +480,6 @@ var PhotoFrame = function(options) {
 	};
 
 	t.init = function(settings, photos) {
-		
 		var html = [
 			'<form id="photo-frame-upload" class="photo-frame-form" action="'+options.url+'" method="POST" enctype="multipart/form-data" id="photo-frame-upload-"'+options.index+'">',
 				'<input type="file" name="files">',
@@ -526,6 +550,7 @@ var PhotoFrame = function(options) {
 			//url: '/live/home/index',
 			url: options.url,
 			add: function (e, data) {
+				t.initialized = false;
 				t.startUpload(function() {			
 					data.submit();
 				});
@@ -533,6 +558,8 @@ var PhotoFrame = function(options) {
 			done: function (e, data) {
 				t.response   = data.result;
 			
+				console.log(t.response);
+				
 				if(t.response.success) {
 					t.stopUpload(t.response);
 				}
@@ -571,6 +598,10 @@ var PhotoFrame = function(options) {
 		$(window).resize(function() {
 			t.ui.crop.center();
 			
+			if(t.ui.saving) {
+				t.ui.saving.center();
+			}
+			
 			if(t.ui.errors.css('display') != 'none') {
 				t.ui.errors.center();
 			}
@@ -580,10 +611,11 @@ var PhotoFrame = function(options) {
 			var $t = $(this)
 			var id = $t.attr('href').replace('#', '');
 			var photo = t.photos[id];
-		
+			
 			t.response    = photo;
 			t.edit        = id;
 			t.edit_id	  = photo.id;
+			t.edit_index  = id;
 			t.isNewPhoto  = false;
 		
 			if($t.attr('data-new-entry') == 'true') {
@@ -591,6 +623,8 @@ var PhotoFrame = function(options) {
 			}
 			
 			t.stopUpload(photo, photo.original_url, function() {
+				console.log(photo);
+				
 				if(photo.x != '0' || photo.y != '0' || photo.x2 != '0' || photo.y2 != '0') {
 					t.jcrop.setSelect([photo.x, photo.y, photo.x2, photo.y2]);
 				}

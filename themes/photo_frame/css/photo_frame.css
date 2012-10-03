@@ -209,6 +209,7 @@
 	font-size: 24px;
 	color: rgb(215, 215, 215);
 	text-shadow: 0 1px 0 black;
+	display: none;
 }
 
 .photo-frame-activity .photo-frame-indicator {
@@ -385,6 +386,22 @@
 	font-size: 24px;
 	color: white;
 	text-shadow: 0 1px 0 black, 0 0 10px black;
+}
+
+.photo-frame-saving {
+	position: absolute;
+	top: 45%;
+	width: 100px;
+	font-size: 25px;
+	color: white;
+	text-shadow: 0 1px 0 black, 0 0 10px black;
+	text-align: center;
+}
+
+.photo-frame-saving span {
+	position: relative;
+	top: 13px;
+	right: 20px;
 }
 
 .photo-frame-float-right { float: right; }

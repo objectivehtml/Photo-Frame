@@ -92,16 +92,11 @@ class Photo_frame_model extends CI_Model {
 			foreach($data as $id => $row)
 			{
 				$row = (array)json_decode($row);
+		
+				$row['id'] = $id;
 				
-				if(!isset($row['id']))
-				{
-					$this->save(array($row));
-				}
-				else
-				{
-					$this->db->where('id', $row['id']);
-					$this->db->update('photo_frame', $row);
-				}
+				$this->db->where('id', $row['id']);
+				$this->db->update('photo_frame', $row);
 			}
 		}
 	}			
