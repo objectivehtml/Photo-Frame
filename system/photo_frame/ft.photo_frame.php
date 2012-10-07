@@ -538,17 +538,7 @@ class Photo_frame_ft extends EE_Fieldtype {
 		{
 			$this->EE->photo_frame_model->update($update_photos);
 		}
-	
-		// Delete photos
-		
-		$delete_photos = $this->EE->input->post('photo_frame_delete_photos', TRUE);
-		
-		if(isset($delete_photos[$this->field_id]))
-		{
-			$delete_photos = $delete_photos[$this->field_id];
-			$this->EE->photo_frame_model->delete($delete_photos);
-		}
-		
+			
 		// Update data with the entry_id
 			
 		$this->EE->photo_frame_model->update_entry($this->settings['entry_id'], array(
@@ -560,10 +550,17 @@ class Photo_frame_ft extends EE_Fieldtype {
 
 	public function validate($data)
 	{
-		$min_photos = (int) $this->settings['photo_frame_min_photos'];
-		$max_photos = (int) $this->settings['photo_frame_max_photos'];
+		$min_photos    = (int) $this->settings['photo_frame_min_photos'];
+		$max_photos    = (int) $this->settings['photo_frame_max_photos'];
+		$total_photos  = isset($_POST[$this->field_name]) ? count($_POST[$this->field_name]) : 0;		
+		$delete_photos = $this->EE->input->post('photo_frame_delete_photos', TRUE);
 		
-		$total_photos = isset($_POST[$this->field_name]) ? count($_POST[$this->field_name]) : 0;
+		if(isset($delete_photos[$this->field_id]))
+		{
+			$total_photos  = $total_photos - count($delete_photos);
+			$delete_photos = $delete_photos[$this->field_id];
+			$this->EE->photo_frame_model->delete($delete_photos);
+		}
 		
 		$vars = array(
 			'min_photos' => $min_photos,

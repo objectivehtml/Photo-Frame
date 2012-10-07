@@ -192,19 +192,22 @@ var PhotoFrame = function(options) {
 		            t.released = false;
 	            }
 	            
-	            if(!t.isNewPhoto) {
-	            
-	            	var photo = t.photos[t.edit];
-	            	
-		        	t.ui.meta.find('input[name="title"]').val(photo.title);
-		        	t.ui.meta.find('input[name="keywords"]').val(photo.keywords);
-		        	t.ui.meta.find('textarea').val(photo.description);  
-	            }
-	            
-	            // var scale = t.autoScale();
-	            
-	            console.log();
-	            
+            	var photo = t.photos[t.edit];
+            	
+            	if(photo) {
+	            	if(photo.title) {
+		        		t.ui.meta.find('input[name="title"]').val(photo.title);
+		        	}
+		        	
+		        	if(photo.keywords) {
+		        		t.ui.meta.find('input[name="keywords"]').val(photo.keywords);
+		        	}
+		        	
+		        	if(photo.description) {
+		        		t.ui.meta.find('textarea').val(photo.description);
+		        	}
+	        	}
+            	
 	            t.initJcrop(callback);				
 	        }
 	    );
@@ -741,6 +744,7 @@ var PhotoFrame = function(options) {
     	});
     	
 		t.ui.upload.click(function(e) {
+			t.isNewPhoto = true;
 			t.ui.form.find('input').click();
 			t.resetMeta();			
 			e.preventDefault();
@@ -813,8 +817,6 @@ var PhotoFrame = function(options) {
 			$(this).parents('.photo-frame-photo').fadeOut(function() {
 				$(this).remove();
 				
-				console.log(options.maxPhotos);
-				console.log(t.getTotalPhotos());
 				if(options.maxPhotos > 0 && options.maxPhotos > t.getTotalPhotos()) {
 					t.ui.upload.show();
 				}
