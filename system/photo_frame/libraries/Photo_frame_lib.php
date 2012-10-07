@@ -186,7 +186,10 @@ class Photo_frame_lib {
 			'save_data' 	=> json_encode(array_merge(array(
 				'original_file' => $original_file,
 				'file'          => $new_file,
-				'file_name'		=> $this->name
+				'file_name'		=> $this->name,
+				'title' 		=> $this->EE->input->get_post('title', TRUE) ? $this->EE->input->get_post('title', TRUE) : '',
+				'description'   => $this->EE->input->get_post('description', TRUE) ? $this->EE->input->get_post('description', TRUE) : '',
+				'keywords' 		=> $this->EE->input->get_post('keywords', TRUE) ? $this->EE->input->get_post('keywords', TRUE) : '',
 			), $save_data))
 		), $save_data));
 	}

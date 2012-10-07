@@ -1,0 +1,17 @@
+[class^="icon-"],
+[class*=" icon-"] {
+  font-family: 'photo-frame';
+  font-style: normal;
+  font-weight: normal;
+/* fix buttons height */
+  line-height: 1em;
+/* you can be more comfortable with increased icons size */
+/* font-zize: 120%; */
+}
+
+.icon-info { *zoom: expression( this.runtimeStyle['zoom'] = '1', this.innerHTML = '&#x2139;&nbsp;'); }
+.icon-save { *zoom: expression( this.runtimeStyle['zoom'] = '1', this.innerHTML = '&#x2611;&nbsp;'); }
+.icon-cancel { *zoom: expression( this.runtimeStyle['zoom'] = '1', this.innerHTML = '&#x2715;&nbsp;'); }
+.icon-rotate { *zoom: expression( this.runtimeStyle['zoom'] = '1', this.innerHTML = '&#x27f2;&nbsp;'); }
+.icon-resize { *zoom: expression( this.runtimeStyle['zoom'] = '1', this.innerHTML = '&#xe744;&nbsp;'); }
+.icon-upload { *zoom: expression( this.runtimeStyle['zoom'] = '1', this.innerHTML = '&#xe800;&nbsp;'); }

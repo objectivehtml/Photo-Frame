@@ -1,9 +1,9 @@
-<h3>Photo Frame Settings</h3>
+<h3><?php echo lang('photo_frame_settings')?></h3>
 
-<p><i>Any setting with an empty value will be ignored.</i></p>
+<p><i><?php echo lang('photo_frame_ignore_settings')?></i></p>
 
 <?php echo $table?>
 
-<h3>Additional Settings</h3>
+<h3><?php echo lang('photo_frame_interface_settings')?></h3>
 
 <?php echo $info_table?>

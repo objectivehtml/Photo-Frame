@@ -89,6 +89,7 @@ class Photo_frame_model extends CI_Model {
 			{
 				$data = array($data);	
 			}
+			
 			foreach($data as $id => $row)
 			{
 				$row = (array)json_decode($row);

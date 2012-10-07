@@ -17,7 +17,7 @@ var PhotoFrame = function(options) {
 	t.jcrop        = {};
 	t.photos       = options.photos;
 	t.edit         = false;
-	t.isNewPhoto   = false;
+	t.isNewPhoto   = true;
 	t.directory    = options.directory;
 	t.index        = PhotoFrame.instances.length;
 	t.messageWidth = 500; 
@@ -26,6 +26,11 @@ var PhotoFrame = function(options) {
 	t.size 		   = options.size;
 	t.released	   = false;
 	t.initialized  = false;
+	t.scale        = 1;
+	t.rotate	   = 0;
+	t.title		   = options.title ? options.title : '';
+	t.description  = options.description ? options.description : '';
+	t.keywords     = options.keywords ? options.keywords : '';
 	
 	t.ui   = {
 		body: $('body'),
@@ -41,7 +46,11 @@ var PhotoFrame = function(options) {
 	t.save = function(data) {
 		
 		var index = t.edit === false ? t.photos.length : t.edit;
-		
+	
+	    data.title = t.title;
+	    data.description = t.description;
+	    data.keywords = t.keywords;
+	    
 		if(t.edit === false) {
 			var html = [
 				'<div class="photo-frame-photo" id="photo-frame-photo-'+options.fieldId+'-'+index+'">',
@@ -65,8 +74,6 @@ var PhotoFrame = function(options) {
 				t.$wrapper.find('#photo-frame-new-photo-'+options.fieldId+'-'+t.edit+'').html(data.save_data);
 			}
 			else {	
-				console.log(data.save_data);
-							
 				t.$wrapper.find('#photo-frame-edit-photo-'+t.edit_id+'-'+index).html(data.save_data);
 			}
 			
@@ -79,6 +86,10 @@ var PhotoFrame = function(options) {
 		    );
 		    
 			t.photos[t.edit] = data;
+		}
+		
+		if(options.maxPhotos > 0 && options.maxPhotos <= t.getTotalPhotos()) {
+			t.ui.upload.hide();
 		}
 		
 		t.ui.saving.remove();
@@ -114,10 +125,14 @@ var PhotoFrame = function(options) {
 		t.ui.image.hide();
 		t.ui.crop.show();
 		
+		t.resetMeta();
+		
 		if(t.jcrop.destroy) {
 			t.jcrop.destroy();	
 		}
 		
+		t.ui.window = $(window);
+					
 		window.loadImage(
 	        image,
 	        function (img) {
@@ -140,6 +155,7 @@ var PhotoFrame = function(options) {
 		        t.ui.crop.prepend(t.ui.image);   	
 	            t.ui.image.html(img).show();	        	
 	            t.ui.crop.center();
+	            t.hideMeta();
 	            
 	            t.settings.onChange = function() {
 		          	t.updateInfo();
@@ -147,7 +163,7 @@ var PhotoFrame = function(options) {
 	            
 	            if(t.ui.instructions && t.ui.instructions.css('display') != 'none') {
 		            t.settings.onChange = function() {
-		            	console.log(t.initialized);
+		          		t.updateInfo();
 			            if(t.initialized) {
 			            	t.ui.instructions.fadeOut();
 			            }
@@ -176,19 +192,37 @@ var PhotoFrame = function(options) {
 		            t.released = false;
 	            }
 	            
-	            t.ui.image.Jcrop(t.settings, function() {
-	            	t.jcrop = this;
-	            	t.updateInfo();
-		            if(typeof callback == "function") {
-			            callback();
-		            }
-	            });
+	            if(!t.isNewPhoto) {
 	            
-				t.initialized = true;
-				
+	            	var photo = t.photos[t.edit];
+	            	
+		        	t.ui.meta.find('input[name="title"]').val(photo.title);
+		        	t.ui.meta.find('input[name="keywords"]').val(photo.keywords);
+		        	t.ui.meta.find('textarea').val(photo.description);  
+	            }
+	            
+	            // var scale = t.autoScale();
+	            
+	            console.log();
+	            
+	            t.initJcrop(callback);				
 	        }
 	    );
 	};
+	
+	t.initJcrop = function(callback) {
+		t.setScale();
+        
+        t.ui.image.Jcrop(t.settings, function() {
+        	t.jcrop = this;
+        	t.updateInfo();
+            if(typeof callback == "function") {
+	            callback();
+            }
+        });
+        
+		t.initialized = true;
+	}
 	
 	t.closeMessages = function(animation) {
 	
@@ -199,6 +233,10 @@ var PhotoFrame = function(options) {
 		$('.photo-frame-message').each(function() {
 			$(this).animate({right: -t.messageWidth}, animation);
 		});
+	}
+	
+	t.getTotalPhotos = function() {
+		return t.$wrapper.find('.photo-frame-photo').length;
 	}
 	
 	t.cropImage = function(image, size) {
@@ -216,9 +254,17 @@ var PhotoFrame = function(options) {
 			t.ui.dimmer.append(t.ui.saving);			
 			t.ui.dimmer.find('.photo-frame-saving span').activity();			
 			t.ui.crop.fadeOut();
-			t.ui.info.fadeOut();
 			
+			if(t.ui.info) {
+				t.ui.info.fadeOut();
+			}
+			
+			t.hideMeta();
 			t.ui.saving.center();
+			
+			t.title       = t.ui.meta.find('input[name="title"]').val();
+			t.description = t.ui.meta.find('textarea').val();
+			t.keywords    = t.ui.meta.find('input[name="keywords"]').val();
 			
 			$.get(options.cropUrl, {
 				id: t.directory.id,
@@ -230,10 +276,15 @@ var PhotoFrame = function(options) {
 				edit: t.edit !== false ? true : false,
 				height: size.h,
 				width: size.w,
+				scale: t.scale,
+				rotate: t.rotate,
 				x: size.x,
 				x2: size.x2,
 				y: size.y,
-				y2: size.y2
+				y2: size.y2,
+				title: t.title,
+				description: t.description,
+				keywords: t.keywords
 			}, function(data) {
 				t.save(data);
 			});
@@ -392,6 +443,74 @@ var PhotoFrame = function(options) {
 		return errors;
 	}
 	
+	t.autoScale = function() {
+		var window = t.ui.window;
+		var img    = t.ui.image.find('img');
+		var scale  = 1;
+			
+		window = {
+			w: window.width(),
+			h: window.height()
+		};
+		
+		img = {
+			w: img.width(),
+			h: img.height()
+		};
+		
+		if(img.w < img.h) {
+			if(img.w > window.w) {
+				scale = window.w / img.w;		
+			}
+		}
+		else {
+			if(img.h > window.h) {
+				scale = window.h / img.h;
+			}
+		}
+		
+		if(scale != 1) {
+			t.ui.image.find('img').css({
+				width: img.w * scale,
+				height: img.h * scale,
+			});
+			
+			if(t.jcrop.destroy) {
+				t.jcrop.destroy();
+			}
+		}
+		
+		t.scale = scale;
+		
+		return scale;
+	}
+	
+	t.setScale = function(scale) {
+		if(scale) {
+			t.scale = scale;
+		}	
+			
+		if(t.scale != 1) {
+	        var img = t.ui.image.find('img');
+	        var w = parseInt(img.css('width').replace('px', ''));
+	        var h = parseInt(img.css('height').replace('px', ''));
+	        
+	        w = w * t.scale;
+	        h = h * t.scale;
+	        	            
+	        img.css({
+	           width: w,
+	           height: h 
+	        });
+	        
+	        $(window).resize();
+        }
+	}
+	
+	t.getScale = function() {
+		return t.scale;
+	}
+	
 	t.notify = function(notifications, delay, animation) {
 		
 		var $panel   = $('.photo-frame-panel');
@@ -412,7 +531,7 @@ var PhotoFrame = function(options) {
 				message = $([
 					'<div class="photo-frame-message">',
 						'<p><span class="icon-warning-sign"></span>'+message+'</p>',
-						'<a href="#" class="photo-frame-close"><span class="icon-remove"></span></a>',
+						'<a href="#" class="photo-frame-close"><span class="icon-cancel"></span></a>',
 					'</div>'
 				].join(''));
 				
@@ -488,11 +607,13 @@ var PhotoFrame = function(options) {
 		
 		t.ui.form = $(html);
 		t.ui.body.append(t.ui.form);
-	
+		t.ui.window = $(window);
+		
 		var html = [
 			'<div class="photo-frame-dimmer" id="photo-frame-dimmer-"'+options.index+'">',
+				'<a href="#" class="photo-frame-meta-toggle"><span class="icon-info"></span></a>',
 				'<div class="photo-frame-info-panel">',
-					'<a href="#" class="photo-frame-close"><span class="icon-remove"></span></a>',
+					'<a href="#" class="photo-frame-close"><span class="icon-cancel"></span></a>',
 					'<p class="size">W: <span class="width"></span> H: <span class="height"></span></p>',
 					'<div class="coords">',
 						'<p>',
@@ -508,18 +629,36 @@ var PhotoFrame = function(options) {
 				'</div>',
 				'<div class="photo-frame-activity">',
 					'<span class="photo-frame-indicator"></span> <p>Uploading...</p>',
-					'<a class="photo-frame-button photo-frame-cancel"><span class="icon-remove"></span> Cancel</a>',
+					'<a class="photo-frame-button photo-frame-cancel"><span class="icon-cancel"></span> Cancel</a>',
 				'</div>',
 				'<div class="photo-frame-errors">',
 					'<h3>Errors</h3>',
 					'<ul></ul>',
-					'<a class="photo-frame-button photo-frame-cancel"><span class="icon-remove"></span> Close</a>',
+					'<a class="photo-frame-button photo-frame-cancel"><span class="icon-cancel"></span> Close</a>',
 				'</div>',
 				'<div class="photo-frame-crop">',
 					'<div class="photo-frame-image"></div>',
+					'<div class="photo-frame-meta">',
+						'<a href="#" class="photo-frame-close-meta photo-frame-float-right"><span class="icon-cancel"></span></a>',
+						'<h3>Photo Details</h3>',
+						'<ul>',
+							'<li>',
+								'<label for="title">Title</label>',
+								'<input type="text" name="title" value="'+t.description+'" id="title" />',
+							'</li>',
+							'<!-- <li>',
+								'<label for="keywords">Keywords</label>',
+								'<input type="text" name="keywords" value="'+t.keywords+'" id="keywords" />',
+							'</li> -->',
+							'<li>',
+								'<label for="title">Description</label>',
+								'<textarea name="description" id="description">'+t.description+'</textarea>',
+							'</li>',
+						'</ul>',
+					'</div>',
 					'<div class="photo-frame-toolbar">',
-						'<a class="photo-frame-bar-button photo-frame-cancel photo-frame-float-left"><span class="icon-remove"></span> Cancel</a>',
-						'<a class="photo-frame-bar-button photo-frame-save photo-frame-float-right"><span class="icon-check"></span> Save</a>',
+						'<a class="photo-frame-bar-button photo-frame-cancel photo-frame-float-left"><span class="icon-cancel"></span> Cancel</a>',
+						'<a class="photo-frame-bar-button photo-frame-save photo-frame-float-right"><span class="icon-save"></span> Save</a>',
 					'</div>',
 				'</div>',
 			'</div>'
@@ -540,11 +679,14 @@ var PhotoFrame = function(options) {
 		t.ui.activity = t.ui.dimmer.find('.photo-frame-activity');
 		t.ui.activity.find('.photo-frame-indicator').activity({color: '#fff'});
 		
-		t.ui.save     = t.ui.dimmer.find('.photo-frame-save');
-		t.ui.cancel   = t.ui.dimmer.find('.photo-frame-cancel');
-		t.ui.errors   = t.ui.dimmer.find('.photo-frame-errors');
-		t.ui.crop     = t.ui.dimmer.find('.photo-frame-crop');
-		t.ui.image    = t.ui.dimmer.find('.photo-frame-image');
+		t.ui.save       = t.ui.dimmer.find('.photo-frame-save');
+		t.ui.cancel     = t.ui.dimmer.find('.photo-frame-cancel');
+		t.ui.errors     = t.ui.dimmer.find('.photo-frame-errors');
+		t.ui.crop       = t.ui.dimmer.find('.photo-frame-crop');
+		t.ui.image      = t.ui.dimmer.find('.photo-frame-image');
+		t.ui.meta       = t.ui.dimmer.find('.photo-frame-meta');
+		t.ui.metaToggle = t.ui.dimmer.find('.photo-frame-meta-toggle');
+		t.ui.metaClose  = t.ui.dimmer.find('.photo-frame-close-meta');
 		
 		t.ui.form.fileupload({
 			//url: '/live/home/index',
@@ -558,8 +700,6 @@ var PhotoFrame = function(options) {
 			done: function (e, data) {
 				t.response   = data.result;
 			
-				console.log(t.response);
-				
 				if(t.response.success) {
 					t.stopUpload(t.response);
 				}
@@ -568,35 +708,61 @@ var PhotoFrame = function(options) {
 				}
 			}
     	});
-    	
-    	t.ui.save.click(function() {
-    		var _default = {
-    			x: 0,
-    			y: 0,
-    			x2: 0,
-    			y2: 0,
-    			w: 0,
-    			h: 0
-    		};
-    		
-    		var size = t.released ? _default : t.jcrop.tellScaled();
-    		
-	    	t.cropImage(t.response.file_path, size);
+    	    	
+    	t.ui.metaToggle.click(function(e) {
+	    	t.toggleMeta();	    		    	
+	    	e.preventDefault();
     	});
-		
+    	
+    	t.ui.metaClose.click(function(e) {
+    		t.hideMeta();
+	    	e.preventDefault();
+    	});
+    	    	
+    	t.ui.save.click(function() {
+    		if(options.showMeta && t.ui.meta.css('display') == 'none') {
+		    	t.showMeta();
+	    	}
+	    	else {
+	    		var _default = {
+	    			x: 0,
+	    			y: 0,
+	    			x2: 0,
+	    			y2: 0,
+	    			w: 0,
+	    			h: 0
+	    		};
+	    		
+	    		var size = t.released ? _default : t.jcrop.tellScaled();
+	    		
+	    		t.hideMeta();
+		    	t.cropImage(t.response.file_path, size);
+	    	}
+    	});
+    	
 		t.ui.upload.click(function(e) {
-			t.ui.form.find('input').click();			
+			t.ui.form.find('input').click();
+			t.resetMeta();			
 			e.preventDefault();
 		});
 		
 		t.ui.cancel.click(function(e) {			
 			t.closeMessages();			
-			t.ui.dimmer.fadeOut('fast');			
+			t.ui.dimmer.fadeOut('fast');	
+			t.hideMeta();	
 			e.preventDefault();
 		});
 		
 		$(window).resize(function() {
-			t.ui.crop.center();
+			//t.autoScale();
+			
+			if(t.ui.crop.css('display') != 'none') {
+				t.ui.crop.center();
+			}
+			
+			if(t.ui.meta.css('display') != 'none') {
+				t.ui.meta.center();
+			}
 			
 			if(t.ui.saving) {
 				t.ui.saving.center();
@@ -623,8 +789,6 @@ var PhotoFrame = function(options) {
 			}
 			
 			t.stopUpload(photo, photo.original_url, function() {
-				console.log(photo);
-				
 				if(photo.x != '0' || photo.y != '0' || photo.x2 != '0' || photo.y2 != '0') {
 					t.jcrop.setSelect([photo.x, photo.y, photo.x2, photo.y2]);
 				}
@@ -648,6 +812,15 @@ var PhotoFrame = function(options) {
 			
 			$(this).parents('.photo-frame-photo').fadeOut(function() {
 				$(this).remove();
+				
+				console.log(options.maxPhotos);
+				console.log(t.getTotalPhotos());
+				if(options.maxPhotos > 0 && options.maxPhotos > t.getTotalPhotos()) {
+					t.ui.upload.show();
+				}
+				else {
+					t.ui.upload.hide();
+				}									
 			});
 			
 			e.preventDefault();
@@ -660,6 +833,56 @@ var PhotoFrame = function(options) {
 		});
 		
 	};
+	
+	t.showCrop = function() {
+		t.ui.crop.fadeIn('fast');	
+	}
+	
+	t.hideCrop = function() {
+		t.ui.crop.fadeOut('fast');	
+	}
+	
+	t.showImage = function() {
+		t.ui.image.parent().fadeIn('fast');	
+	}
+	
+	t.hideImage = function() {
+		t.ui.image.parent().fadeOut('fast');	
+	}
+	
+	t.resetMeta = function() {
+		t.ui.meta.find('input[name="title"]').val('');
+    	t.ui.meta.find('input[name="keywords"]').val('');
+    	t.ui.meta.find('textarea').val('');  
+	}
+	
+	t.showMeta = function() {
+		t.ui.metaToggle.addClass('active');	
+		t.ui.meta.fadeIn('fast');
+		t.ui.meta.center();
+	}
+	
+	t.hideMeta = function() {	
+		t.ui.metaToggle.removeClass('active');	
+		t.ui.meta.fadeOut('fast');
+	}
+	
+	t.toggleMeta = function(image) {
+		if(t.ui.meta.css('display') == 'none') {
+			t.showMeta();
+			
+			if(image) {
+				t.hideImage();
+			}
+		}
+		else {
+			t.hideMeta();
+			
+			if(image) {
+				t.showImage();
+			}
+		}
+	}
 	
 	t.reduce = function(numerator,denominator){
 		var gcd = function gcd(a,b){

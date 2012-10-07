@@ -7,8 +7,8 @@
  * @author		Justin Kimbrell
  * @copyright	Copyright (c) 2012, Justin Kimbrell
  * @link 		http://www.objectivehtml.com/photo-frame
- * @version		0.5.0
- * @build		20121002
+ * @version		0.6.0
+ * @build		20121007
  */
  
 class Photo_frame_mcp {
@@ -126,12 +126,15 @@ class Photo_frame_mcp {
 		$name = $this->EE->input->get('name', TRUE);
 		
 		return $this->json(array(
-			'id'		=> $id,
-			'success' 	=> TRUE,
-			'file_path' => $dir,
-			'file_name' => $name,
-			'file_url'  => $url,
-			'save_data' => '{filedir_'.$id.'}'.$name
+			'id'          => $id,
+			'success'     => TRUE,
+			'file_path'   => $dir,
+			'file_name'   => $name,
+			'file_url'    => $url,
+			'title'       => $this->EE->input->get('title') ? $this->EE->input->get('title') : NULL,
+			'description' => $this->EE->input->get('description') ? $this->EE->input->get('description') : NULL,
+			'keywords'    => $this->EE->input->get('keywords') ? $this->EE->input->get('keywords') : NULL, 
+			'save_data'   => '{filedir_'.$id.'}'.$name
 		));
 		
 	}

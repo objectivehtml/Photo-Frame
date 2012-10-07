@@ -7,8 +7,8 @@
  * @author		Justin Kimbrell
  * @copyright	Copyright (c) 2012, Objective HTML
  * @link 		http://www.objectivehtml.com/photo-frame
- * @version		0.5.0
- * @build		20121002
+ * @version		0.6.0
+ * @build		20121007
  */
 
 require 'config/photo_frame_config.php';
@@ -52,7 +52,8 @@ class Photo_frame_ft extends EE_Fieldtype {
 		}
 		
 		$this->EE->load->config('photo_frame_config');
-			
+		$this->EE->lang->loadfile('photo_frame');
+					
 		if(count($_FILES) > 0 && count($_POST) == 0)
 		{
 			$this->EE->load->library('photo_frame_lib');
@@ -107,7 +108,10 @@ class Photo_frame_ft extends EE_Fieldtype {
 		$entry_id  = empty($data) && $data !== FALSE ? $data : ($this->EE->input->get_post('entry_id') ? $this->EE->input->get_post('entry_id') : (isset($this->EE->safecracker) ? $this->EE->safecracker->entry('entry_id') : 0));
 		
 		$default_settings = array(
-			'photo_frame_display_info' => 'true'
+			'photo_frame_display_info' => 'true',
+			'photo_frame_display_meta' => 'false',
+			'photo_frame_min_photos'   => 0,
+			'photo_frame_max_photos'   => 0
 		);
 	
 		$settings = array_merge($default_settings, $this->settings);
@@ -250,8 +254,6 @@ class Photo_frame_ft extends EE_Fieldtype {
 		
 		$jcrop_settings = (object) $jcrop_settings;
 		
-		$this->EE->lang->loadfile('photo_frame');
-		
 		$button_text = empty($settings['photo_frame_button_text']) ? lang('photo_frame_button_text') : $settings['photo_frame_button_text'];
 		
 		$instructions = empty($settings['photo_frame_instructions']) ? lang('photo_frame_instructions') : $settings['photo_frame_instructions'];
@@ -272,13 +274,21 @@ class Photo_frame_ft extends EE_Fieldtype {
 					directory: '.json_encode($directory).',
 					infoPanel: '.$settings['photo_frame_display_info'].',
 					instructions: '.json_encode($instructions).',
-					size: \''.$size.'\'
+					size: \''.$size.'\',
+					minPhotos: '.(!empty($settings['photo_frame_min_photos']) ? $settings['photo_frame_min_photos'] : 0).',
+					maxPhotos: '.(!empty($settings['photo_frame_max_photos']) ? $settings['photo_frame_max_photos'] : 0).',
+					showMeta: '.($settings['photo_frame_display_meta'] == 'true' ? 'true' : 'false').'
 				});
 			});
 		</script>';
 				
 		$this->EE->cp->add_to_head($settings_js);		
-				
+		
+		$total_photos = count($saved_data);
+		
+		$max_photos   = !empty($settings['photo_frame_max_photos']) ? $settings['photo_frame_max_photos'] : 0;
+		$overlimit   = $max_photos > 0 && $max_photos <= $total_photos ? TRUE : FALSE; 
+		
 		$vars = array(
 			'id'             => $this->field_id,
 			'field_label'    => $settings['field_label'],
@@ -286,7 +296,8 @@ class Photo_frame_ft extends EE_Fieldtype {
 			'data'   	     => $saved_data,
 			'new_photos'     => $new_photos,
 			'preview_styles' => trim($preview_styles),
-			'button_text'	 => $button_text
+			'button_text'	 => $button_text,
+			'overlimit'	 	 => $overlimit
 		);
 		
 		return $this->EE->load->view('fieldtype', $vars, TRUE);
@@ -549,6 +560,37 @@ class Photo_frame_ft extends EE_Fieldtype {
 
 	public function validate($data)
 	{
+		$min_photos = (int) $this->settings['photo_frame_min_photos'];
+		$max_photos = (int) $this->settings['photo_frame_max_photos'];
+		
+		$total_photos = isset($_POST[$this->field_name]) ? count($_POST[$this->field_name]) : 0;
+		
+		$vars = array(
+			'min_photos' => $min_photos,
+			'max_photos' => $max_photos
+		);
+		
+		if(($min_photos > 0 || $max_photos > 0) && !isset($this->EE->TMPL))
+		{		
+			require APPPATH . 'libraries/Template.php';	
+			$this->EE->TMPL = new EE_Template();		
+		}
+		
+		if($min_photos > 0 && $min_photos > $total_photos)
+		{
+			$error = $this->EE->TMPL->parse_variables_row(lang('photo_frame_min_photos_error'), $vars);
+		}
+		
+		if($max_photos > 0 && $max_photos < $total_photos)
+		{
+			$error = $this->EE->TMPL->parse_variables_row(lang('photo_frame_max_photos_error'), $vars);
+		}
+		
+		if(isset($error))
+		{
+			return $this->EE->TMPL->advanced_conditionals($error);
+		}
+		
 		return TRUE;
 	}
 	
@@ -569,16 +611,15 @@ class Photo_frame_ft extends EE_Fieldtype {
 					'options' => $this->EE->photo_frame_model->upload_options()
 				)
 			),
-			'photo_frame_display_info' => array(
-				'label'       => 'Display Info Panel',
-				'description' => 'Select the file upload group you in which you want to store your photos.',
-				'type'        => 'select',
-				'settings' => array(
-					'options' => array(
-						'true'  => 'True',
-						'false' => 'False'
-					)
-				)
+			'photo_frame_min_photos' => array(
+				'label'       => 'Minimum Number of Photos',
+				'description' => 'If defined, you can mandate a minimum number of photos that a user must upload. If no minimum is desired, use the default value of <i>0</i>.',
+				'type'        => 'input'
+			),
+			'photo_frame_max_photos' => array(
+				'label'       => 'Maximum Number of Photos',
+				'description' => 'If defined, you can mandate a maxmimum number of photos that a user can upload. If no maximum is desired, use the default value of <i>0</i>.',
+				'type'        => 'input'
 			),
 			/*
 			'photo_frame_preview_width' => array(
@@ -621,6 +662,28 @@ class Photo_frame_ft extends EE_Fieldtype {
 		);
 		
 		$info_fields = array(
+			'photo_frame_display_meta' => array(
+				'label'       => 'Display Meta on Save',
+				'description' => 'If you want the meta dialog will always prompt the user before the photo is saved, then choose <i>true</i>.',
+				'type'        => 'select',
+				'settings' => array(
+					'options' => array(
+						'true'  => 'True',
+						'false' => 'False'
+					)
+				)
+			),
+			'photo_frame_display_info' => array(
+				'label'       => 'Display Info Panel',
+				'description' => 'If you want to display coordinates, image size, and aspect ratio, then choose <i>true</i>.',
+				'type'        => 'select',
+				'settings' => array(
+					'options' => array(
+						'true'  => 'True',
+						'false' => 'False'
+					)
+				)
+			),
 			'photo_frame_button_text' => array(
 				'label' 	  => 'Button Text',
 				'description' => 'Override the default button text. If no value is present the default text will be used.'
