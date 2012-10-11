@@ -14,10 +14,6 @@
   speak: none;
   display: inline-block;
   text-decoration: inherit;
-  width: 1em;
-  margin-right: 0.2em;
-  text-align: center;
-  line-height: 1em;
 }
 
 .icon-info:before { content: '\2139'; } /* 'ℹ' */
@@ -130,13 +126,12 @@
 	top: 3px;	
 	color: rgb(247, 160, 45);
 }
-
-.photo-frame-message .photo-frame-close, 
+ 
 .photo-frame-message .photo-frame-close {
 	position: absolute;
 	line-height: 14px;
-	top: 1.1em;
-	right: 1em;
+	top: 5px;
+	right: 5px;
 	text-decoration: none;
 }
 
@@ -179,8 +174,8 @@
 .photo-frame-info-panel .photo-frame-close:hover,
 .photo-frame-close-meta {
 	position: absolute;
-	right: .7em;
-	top: .5em;
+	top: 5px;
+	right: 5px;
 	text-decoration: none;
 }
 
@@ -452,6 +447,11 @@
 .photo-frame-action-bar .photo-frame-edit { 
 	float: left;
 	border-right: 1px solid rgb(39, 39, 39);
+}
+
+.photo-frame-helper {
+	margin-top: 10px;
+	font-size:  12px;
 }
 
 .photo-frame-instructions {

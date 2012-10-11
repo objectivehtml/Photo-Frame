@@ -297,7 +297,8 @@ class Photo_frame_ft extends EE_Fieldtype {
 			'new_photos'     => $new_photos,
 			'preview_styles' => trim($preview_styles),
 			'button_text'	 => $button_text,
-			'overlimit'	 	 => $overlimit
+			'overlimit'	 	 => $overlimit,
+			'upload_helper'	 => isset($settings['photo_frame_upload_helper']) ? $settings['photo_frame_upload_helper'] : ''
 		);
 		
 		return $this->EE->load->view('fieldtype', $vars, TRUE);
@@ -494,7 +495,6 @@ class Photo_frame_ft extends EE_Fieldtype {
 		$this->EE->load->library('photo_frame_lib');
 		
 		// Create new photos
-		
 		$new_photos = $this->EE->input->post($this->field_name, TRUE);
 		$new_photos = isset($new_photos['new']) ? $new_photos['new'] : array();
 			
@@ -534,7 +534,7 @@ class Photo_frame_ft extends EE_Fieldtype {
 		$update_photos = $this->EE->input->post($this->field_name, TRUE);
 		$update_photos = isset($update_photos['edit']) ? $update_photos['edit'] : array();
 		
-		if($update_photos)
+		if(is_array($update_photos) && count($update_photos) > 0)
 		{
 			$this->EE->photo_frame_model->update($update_photos);
 		}
@@ -550,8 +550,8 @@ class Photo_frame_ft extends EE_Fieldtype {
 
 	public function validate($data)
 	{
-		$min_photos    = (int) $this->settings['photo_frame_min_photos'];
-		$max_photos    = (int) $this->settings['photo_frame_max_photos'];
+		$min_photos    = isset($this->settings['photo_frame_min_photos']) ? (int) $this->settings['photo_frame_min_photos'] : 0;
+		$max_photos    = isset($this->settings['photo_frame_max_photos']) ? (int) $this->settings['photo_frame_max_photos'] : 0;
 		$total_photos  = isset($_POST[$this->field_name]) ? count($_POST[$this->field_name]) : 0;		
 		$delete_photos = $this->EE->input->post('photo_frame_delete_photos', TRUE);
 		
@@ -567,7 +567,7 @@ class Photo_frame_ft extends EE_Fieldtype {
 			'max_photos' => $max_photos
 		);
 		
-		if(($min_photos > 0 || $max_photos > 0) && !isset($this->EE->TMPL))
+		if(($min_photos > 0 || $max_photos > 0) && !isset($this->EE->TMPL) && !$this->safecracker)
 		{		
 			require APPPATH . 'libraries/Template.php';	
 			$this->EE->TMPL = new EE_Template();		
@@ -688,6 +688,11 @@ class Photo_frame_ft extends EE_Fieldtype {
 			'photo_frame_instructions' => array(
 				'label' 	  => 'Instructions',
 				'description' => 'Override the default instruction text. If no value is present the default instructions will be used.',
+				'type'		  => 'textarea',
+			),
+			'photo_frame_upload_helper' => array(
+				'label' 	  => 'Upload Helper',
+				'description' => 'You have add additional instructions below the upload button to instruct users about file types and/or sizes (for example). Otherwise, use this field as you wish.',
 				'type'		  => 'textarea',
 			)
 		);

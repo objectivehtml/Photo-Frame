@@ -40,7 +40,8 @@ var PhotoFrame = function(options) {
 		activity: $('.photo-frame-activity'),
 		preview: t.$wrapper.find('.photo-frame-preview'),
 		delete: t.$wrapper.find('.photo-frame-delete'),
-		edit: t.$wrapper.find('.photo-frame-edit')
+		edit: t.$wrapper.find('.photo-frame-edit'),
+		helper: t.$wrapper.find('.photo-frame-helper')
 	};
 	
 	t.save = function(data) {
@@ -89,7 +90,7 @@ var PhotoFrame = function(options) {
 		}
 		
 		if(options.maxPhotos > 0 && options.maxPhotos <= t.getTotalPhotos()) {
-			t.ui.upload.hide();
+			t.hideUpload();
 		}
 		
 		t.ui.saving.remove();
@@ -724,7 +725,14 @@ var PhotoFrame = function(options) {
     	    	
     	t.ui.save.click(function() {
     		if(options.showMeta && t.ui.meta.css('display') == 'none') {
-		    	t.showMeta();
+    			var errors = t.validate();
+    		
+    			if(errors.length == 0) {
+		    		t.showMeta();
+		    	}
+		    	else {
+			    	t.notify(errors);
+		    	}
 	    	}
 	    	else {
 	    		var _default = {
@@ -818,10 +826,10 @@ var PhotoFrame = function(options) {
 				$(this).remove();
 				
 				if(options.maxPhotos > 0 && options.maxPhotos > t.getTotalPhotos()) {
-					t.ui.upload.show();
+					t.showUpload();
 				}
 				else {
-					t.ui.upload.hide();
+					t.hideUpload();
 				}									
 			});
 			
@@ -835,6 +843,16 @@ var PhotoFrame = function(options) {
 		});
 		
 	};
+	
+	t.showUpload = function() {
+		t.ui.upload.show();
+		t.ui.helper.show();	
+	}
+	
+	t.hideUpload = function() {
+		t.ui.upload.hide();
+		t.ui.helper.hide();	
+	}
 	
 	t.showCrop = function() {
 		t.ui.crop.fadeIn('fast');	
