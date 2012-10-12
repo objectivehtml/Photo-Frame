@@ -193,11 +193,30 @@ class Photo_frame_model extends CI_Model {
 			$settings = $this->photo_frame_model->get_settings($field_id);		
 		}
 		
-		$image      = $_FILES['files'];
-		$image_size = getimagesize($image['tmp_name']);
-		$width      = $image_size[0];
-		$height     = $image_size[1];
+		$image      = new ImageEditor($_FILES['files']['tmp_name']);
+		$width      = $image->getWidth();
+		$height     = $image->getHeight();
+		$gcd	    = $width > $height ? 'width' : 'height';
 		$errors     = array();
+		$resize     = FALSE;
+		
+		$resizeMaxWidth  = isset($settings['photo_frame_resize_max_width']) &&
+						   !empty($settings['photo_frame_resize_max_width']) ? 
+						   (int) $settings['photo_frame_resize_max_width'] : false;
+						   		
+		$resizeMaxHeight  = isset($settings['photo_frame_resize_max_height']) &&
+						   !empty($settings['photo_frame_resize_max_height']) ? 
+						   (int) $settings['photo_frame_resize_max_height'] : false;
+		
+		if($resizeMaxWidth && $width > $resizeMaxWidth && $gcd == 'width')
+		{	
+			$image->resizeToWidth($resizeMaxWidth);
+		}		
+			   
+		if($resizeMaxHeight && $height > $resizeMaxHeight && $gcd == 'height')
+		{
+			$image->resizeToHeight($resizeMaxHeight);
+		}
 		
 		if(!empty($settings['photo_frame_min_width']))
 		{

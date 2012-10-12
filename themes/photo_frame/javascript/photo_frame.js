@@ -31,6 +31,7 @@ var PhotoFrame = function(options) {
 	t.title		   = options.title ? options.title : '';
 	t.description  = options.description ? options.description : '';
 	t.keywords     = options.keywords ? options.keywords : '';
+	t.compression  = options.compression;
 	
 	t.ui   = {
 		body: $('body'),
@@ -288,8 +289,11 @@ var PhotoFrame = function(options) {
 				y2: size.y2,
 				title: t.title,
 				description: t.description,
-				keywords: t.keywords
+				keywords: t.keywords,
+				compression: t.compression
 			}, function(data) {
+				console.log(data);
+				
 				t.save(data);
 			});
 		}
@@ -387,8 +391,8 @@ var PhotoFrame = function(options) {
 		var height      = cropSize.h;
 		var width       = cropSize.w;
 		var errors      = [];
-		var imgWidth    = Math.ceil(t.ui.image.outerWidth());
-		var imgHeight   = Math.ceil(t.cropSize);
+		var imgWidth    = Math.ceil(t.ui.image.width());
+		var imgHeight   = Math.ceil(t.ui.image.height());
 		
 		var response    = {
 			validWidth: true,
@@ -704,6 +708,8 @@ var PhotoFrame = function(options) {
 			done: function (e, data) {
 				t.response   = data.result;
 			
+				console.log(data.result);
+				
 				if(t.response.success) {
 					t.stopUpload(t.response);
 				}
@@ -825,7 +831,7 @@ var PhotoFrame = function(options) {
 			$(this).parents('.photo-frame-photo').fadeOut(function() {
 				$(this).remove();
 				
-				if(options.maxPhotos > 0 && options.maxPhotos > t.getTotalPhotos()) {
+				if((options.maxPhotos > 0 && options.maxPhotos > t.getTotalPhotos()) || (options.minPhotos == 0 && options.maxPhotos == 0)) {
 					t.showUpload();
 				}
 				else {

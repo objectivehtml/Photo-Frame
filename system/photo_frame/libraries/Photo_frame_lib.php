@@ -1,5 +1,7 @@
 <?php if ( ! defined('BASEPATH')) exit('No direct script access allowed');
 
+require_once PATH_THIRD.'photo_frame/libraries/ImageEditor.php';
+		
 class Photo_frame_lib {
 	
 	protected $id, $name, $dir, $url;
@@ -32,6 +34,8 @@ class Photo_frame_lib {
 		$framed_dir_name = config_item('photo_frame_directory_name');
 		
 		$dir_id     = $this->EE->input->get_post('dir_id');
+		$field_id   = $this->EE->input->get_post('field_id');
+		$settings   = $this->EE->photo_frame_model->get_settings($field_id);
 		$errors     = $this->EE->photo_frame_model->validate_image_size();
 		$directory  = $this->EE->filemanager->directory($dir_id, FALSE, TRUE);
 		
@@ -85,86 +89,35 @@ class Photo_frame_lib {
 		$y      = $this->EE->input->get_post('y', TRUE);
 		$y2     = $this->EE->input->get_post('y2', TRUE);
 		
-		$file_type = '';
-		
-		if(preg_match('/(jpeg)|(jpg)$/', $this->img))
-		{
-			$file_type = 'jpeg';
-		}
-		else if(preg_match('/(gif)$/', $this->img))
-		{
-			$file_type = 'gif';
-		}
-		else if(preg_match('/(png)$/', $this->img))
-		{
-			$file_type = 'png';
-		}
-		
-		if(empty($this->dir))
-		{
-			return $this->crop_json(FALSE);
-		}
+		$compression = $this->EE->input->get_post('compression', TRUE);
+		$compression = $compression ? $compression : 100;
 		
 		if($this->edit)
 		{
 			copy($this->orig, $this->img);
 		}
 		
-		// Get new dimensions
-		list($source_width, $source_height) = getimagesize($this->img);
+		$image = new ImageEditor($this->img, array(
+			'compression' => $compression
+		));
 		
-		//var_dump($this->edit);exit();
-		//var_dump($source_width.'x'.$source_height);exit();
-		
-		if(!$width)
+		if(empty($this->dir))
 		{
-			$width = $source_width;
+			return $this->crop_json(FALSE);
 		}
 		
-		if(!$height)
-		{
-			$height = $source_height;
-		}
+		$width  = $width  ? $width  : $image->get_width();
+		$height = $height ? $height : $image->get_height();
 		
-		$image_p = imagecreatetruecolor($width, $height);
-		
-		if($file_type == 'png')
-		{
-			$image = imagecreatefrompng($this->img);
-		}
-		elseif($file_type == 'jpeg')
-		{
-			$image = imagecreatefromjpeg($this->img);  
-		}
-		elseif($file_type == 'gif')
-		{
-			$image = imagecreatefromgif($this->img);
-		}
-		
-		imagecopyresampled($image_p, $image, 0, 0, ($x ? $x : 0), ($y ? $y : 0), $source_width, $source_height, $source_width, $source_height);
-		
-		header('Content-Type: image/'.$file_type);
-		
-		if($file_type == 'png')
-		{
-			$image = imagepng($image_p, $this->img);
-		}
-		elseif($file_type == 'jpeg')
-		{
-			$image = imagejpeg($image_p, $this->img); 
-		}
-		elseif($file_type == 'gif')
-		{
-			$image = imagegif($image_p, $this->img);
-		}		
+		$image->crop($width, $height, $x, $y);
 		
 		return $this->crop_json(TRUE, array(
-			'height' => $height,
-			'width'  => $width,
-			'x'      => $x,
-			'x2'     => $x2,
-			'y'      => $y,
-			'y2'     => $y2
+			'height'      => $height,
+			'width'       => $width,
+			'x'           => $x,
+			'x2'          => $x2,
+			'y'           => $y,
+			'y2'          => $y2
 		));
 	}
 	

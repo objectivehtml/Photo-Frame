@@ -108,10 +108,13 @@ class Photo_frame_ft extends EE_Fieldtype {
 		$entry_id  = empty($data) && $data !== FALSE ? $data : ($this->EE->input->get_post('entry_id') ? $this->EE->input->get_post('entry_id') : (isset($this->EE->safecracker) ? $this->EE->safecracker->entry('entry_id') : 0));
 		
 		$default_settings = array(
-			'photo_frame_display_info' => 'true',
-			'photo_frame_display_meta' => 'false',
-			'photo_frame_min_photos'   => 0,
-			'photo_frame_max_photos'   => 0
+			'photo_frame_display_info'      => 'true',
+			'photo_frame_display_meta'      => 'false',
+			'photo_frame_min_photos'        => 0,
+			'photo_frame_max_photos'        => 0,
+			'photo_frame_jpeg_compression'  => 100,
+			'photo_frame_resize_max_width'  => FALSE,
+			'photo_frame_resize_min_height' => FALSE
 		);
 	
 		$settings = array_merge($default_settings, $this->settings);
@@ -277,10 +280,19 @@ class Photo_frame_ft extends EE_Fieldtype {
 					size: \''.$size.'\',
 					minPhotos: '.(!empty($settings['photo_frame_min_photos']) ? $settings['photo_frame_min_photos'] : 0).',
 					maxPhotos: '.(!empty($settings['photo_frame_max_photos']) ? $settings['photo_frame_max_photos'] : 0).',
-					showMeta: '.($settings['photo_frame_display_meta'] == 'true' ? 'true' : 'false').'
+					showMeta: '.($settings['photo_frame_display_meta'] == 'true' ? 'true' : 'false').',
+					compression: '.(!empty($settings['photo_frame_jpeg_compression']) ? $settings['photo_frame_jpeg_compression'] : 100).'
 				});
 			});
 		</script>';
+		
+		/*
+		
+		,
+					resizeMaxWidth: '.(!empty($settings['photo_frame_resize_max_width']) ? $settings['photo_frame_resize_max_width'] : 'false').',
+					resizeMinHeight: '.(!empty($settings['photo_frame_resize_max_height']) ? $settings['photo_frame_resize_max_height'] : 'false').'
+					
+					*/
 				
 		$this->EE->cp->add_to_head($settings_js);		
 		
@@ -607,6 +619,21 @@ class Photo_frame_ft extends EE_Fieldtype {
 				'settings' => array(
 					'options' => $this->EE->photo_frame_model->upload_options()
 				)
+			),
+			'photo_frame_resize_max_width' => array(
+				'label'       => 'Resize Photo (Max Width)',
+				'description' => 'The photo\'s width is greater than its height and is greater than the defined value, it will be scaled down to the defined width',
+				'type'        => 'input'
+			),
+			'photo_frame_resize_max_height' => array(
+				'label'       => 'Resize Photo (Max Height)',
+				'description' => 'The photo\'s height is greater than its width and is greater than the defined value, it will be scaled down to the defined height',
+				'type'        => 'input'
+			),
+			'photo_frame_jpeg_compression' => array(
+				'label'       => 'Image Compression (JPEG Only)',
+				'description' => 'Enter an integer 1-100 with 100 being the best quality.',
+				'type'        => 'input'
 			),
 			'photo_frame_min_photos' => array(
 				'label'       => 'Minimum Number of Photos',
