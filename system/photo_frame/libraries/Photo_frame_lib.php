@@ -38,6 +38,7 @@ class Photo_frame_lib {
 		$settings   = $this->EE->photo_frame_model->get_settings($field_id);
 		$errors     = $this->EE->photo_frame_model->validate_image_size();
 		$directory  = $this->EE->filemanager->directory($dir_id, FALSE, TRUE);
+		$ie			= $this->EE->input->get_post('ie') == 'true' ? TRUE : FALSE;
 		
 		if(count($errors) == 0)
 		{
@@ -75,7 +76,7 @@ class Photo_frame_lib {
 			'original_url'  => isset($orig_url) ? $orig_url : NULL,
 			'original_path' => isset($orig_path) ? $orig_path : NULL,
 			'errors'        => $errors
-		));
+		), $ie);
 	}
 	
 	public function crop_action()
@@ -164,10 +165,18 @@ class Photo_frame_lib {
 		return $data;
 	}
 	
-	private function json($data)
+	private function json($data, $ie = FALSE)
 	{
-		header('Content-type: application/json');
-		exit(json_encode($data));
+		if(!$ie)
+		{
+			header('Content-type: application/json');
+			exit(json_encode($data));
+		}
+		else
+		{
+			echo '<script type="text/javascript">window.top.PhotoFrame.instances[0].callback('.json_encode($data).');</script>';
+			exit();
+		}
 	}
 	
 	public function reindex($data, $index)

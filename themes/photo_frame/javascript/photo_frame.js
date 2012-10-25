@@ -40,10 +40,14 @@ var PhotoFrame = function(options) {
 		dimmer: $('.photo-frame-dimmer'),
 		activity: $('.photo-frame-activity'),
 		preview: t.$wrapper.find('.photo-frame-preview'),
-		delete: t.$wrapper.find('.photo-frame-delete'),
+		del: t.$wrapper.find('.photo-frame-delete'),
 		edit: t.$wrapper.find('.photo-frame-edit'),
 		helper: t.$wrapper.find('.photo-frame-helper')
 	};
+	
+	t.IE = function() {
+		return t.$wrapper.children().hasClass('photo-frame-ie');
+	}
 	
 	t.save = function(data) {
 		
@@ -99,6 +103,10 @@ var PhotoFrame = function(options) {
 	};
 	
 	t.startUpload = function(callback) {
+		if(t.IE()) {
+			t.ui.form.hide();
+		}
+		
 		t.ui.activity.show();
 		t.ui.errors.hide();
 		t.ui.crop.hide();
@@ -134,7 +142,7 @@ var PhotoFrame = function(options) {
 		}
 		
 		t.ui.window = $(window);
-					
+				
 		window.loadImage(
 	        image,
 	        function (img) {
@@ -292,8 +300,6 @@ var PhotoFrame = function(options) {
 				keywords: t.keywords,
 				compression: t.compression
 			}, function(data) {
-				console.log(data);
-				
 				t.save(data);
 			});
 		}
@@ -606,14 +612,35 @@ var PhotoFrame = function(options) {
 		});
 	};
 
+	t.callback = function(data) {
+		t.response   = data;
+	
+		if(t.response.success) {
+			t.stopUpload(t.response);
+		}
+		else {
+			t.showErrors(t.response.errors);	
+		}	
+	}
+	
 	t.init = function(settings, photos) {
+				
 		var html = [
-			'<form id="photo-frame-upload" class="photo-frame-form" action="'+options.url+'" method="POST" enctype="multipart/form-data" id="photo-frame-upload-"'+options.index+'">',
+			'<form id="photo-frame-upload" class="photo-frame-form" action="'+options.url+(t.IE() ? '&ie=true' : '')+'" method="POST" enctype="multipart/form-data" id="photo-frame-upload-'+t.index+'" '+(t.IE() ? 'target="photo-frame-iframe-'+t.index+'"' : '')+'>',
+				'<h3>Select a file to upload...</h3>',
 				'<input type="file" name="files">',
+				'<button type="submit" class="photo-frame-button"><span class="icon-upload"></span>'+options.buttonText+'</button>',
 			'</form>'
 		].join('');
 		
 		t.ui.form = $(html);
+		
+		t.ui.form.submit(function() {
+			if(t.IE()) {
+				t.startUpload();
+			}
+		});
+		
 		t.ui.body.append(t.ui.form);
 		t.ui.window = $(window);
 		
@@ -696,29 +723,26 @@ var PhotoFrame = function(options) {
 		t.ui.metaToggle = t.ui.dimmer.find('.photo-frame-meta-toggle');
 		t.ui.metaClose  = t.ui.dimmer.find('.photo-frame-close-meta');
 		
-		t.ui.form.fileupload({
-			//url: '/live/home/index',
-			url: options.url,
-			add: function (e, data) {
-				t.initialized = false;
-				t.startUpload(function() {			
-					data.submit();
-				});
-			},
-			done: function (e, data) {
-				t.response   = data.result;
-			
-				console.log(data.result);
-				
-				if(t.response.success) {
-					t.stopUpload(t.response);
+		if(!t.IE()) {
+			t.ui.form.fileupload({
+				//url: '/live/home/index',
+				url: options.url,
+				add: function (e, data) {
+					t.initialized = false;
+					t.startUpload(function() {			
+						data.submit();
+					});
+				},
+				done: function (e, data) {
+					t.callback(data.result);
 				}
-				else {
-					t.showErrors(t.response.errors);	
-				}
-			}
-    	});
-    	    	
+	    	});
+    	}
+    	else {
+	    	t.ui.iframe = $('<iframe name="photo-frame-iframe-'+t.index+'" id="photo-frame-iframe-'+t.index+'" src="#" style="display:none;width:0;height:0"></iframe>');
+	    	t.ui.body.append(t.ui.iframe);
+    	}
+    	 	
     	t.ui.metaToggle.click(function(e) {
 	    	t.toggleMeta();	    		    	
 	    	e.preventDefault();
@@ -759,7 +783,22 @@ var PhotoFrame = function(options) {
     	
 		t.ui.upload.click(function(e) {
 			t.isNewPhoto = true;
-			t.ui.form.find('input').click();
+			
+			if(!t.IE()) {
+				t.ui.form.find('input').click();
+			}
+			else {
+				t.ui.dimmer.show();
+				t.ui.crop.hide();
+				
+				if(t.ui.instructions) {
+					t.ui.instructions.hide();
+				}
+				
+				t.ui.image.hide();
+				t.ui.form.show().center();
+			}
+			
 			t.resetMeta();			
 			e.preventDefault();
 		});
@@ -815,7 +854,7 @@ var PhotoFrame = function(options) {
 			e.preventDefault();
 		});
 			
-		t.ui.delete.live('click', function(e) {
+		t.ui.del.live('click', function(e) {
 			
 			var $t = $(this);
 			var id = $t.attr('href').replace('#', '');
@@ -955,6 +994,8 @@ var PhotoFrame = function(options) {
 	}
 	
 	t.init(t.settings, t.photos);
+	
+	PhotoFrame.instances.push(t);
 	
 	return t;
 }
