@@ -109,7 +109,7 @@ class ImageEditor extends Base_class {
 	
 	function get_width()
 	{
-		return getWidth();
+		return $this->getWidth();
 	}
 	
 	function getHeight()
@@ -119,7 +119,7 @@ class ImageEditor extends Base_class {
 	
 	function get_height()
 	{
-		return getHeight();
+		return $this->getHeight();
 	}
 	
 	function resizeToHeight($height)
@@ -132,7 +132,7 @@ class ImageEditor extends Base_class {
 	
 	function resize_to_height($height)
 	{
-		return resizeToHeight($height);
+		return $this->resizeToHeight($height);
 	}
 	
 	function resizeToWidth($width, $scale = FALSE)
@@ -145,7 +145,7 @@ class ImageEditor extends Base_class {
 	
 	function resize_to_width($width)
 	{
-		return resizeToWidth($width);
+		return $this->resizeToWidth($width);
 	}
 	
 	function scale($scale)
