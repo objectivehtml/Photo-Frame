@@ -486,6 +486,13 @@ class Photo_frame_ft extends EE_Fieldtype {
 		return $return;
 	}
 	
+	public function replace_total_photos($data, $params = array(), $tagdata)
+	{		
+		$photos = $this->EE->photo_frame_model->get_photos($this->field_id, $data);
+		
+		return $photos->num_rows();
+	}
+	
 	public function setting($index, $default = FALSE)
 	{
 		$index = 'photo_frame_'.$index;
