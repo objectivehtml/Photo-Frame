@@ -7,8 +7,8 @@
  * @author		Justin Kimbrell
  * @copyright	Copyright (c) 2012, Objective HTML
  * @link 		http://www.objectivehtml.com/photo-frame
- * @version		0.6.0
- * @build		20121007
+ * @version		0.7.0
+ * @build		20121031
  */
 
 require 'config/photo_frame_config.php';
