@@ -108,13 +108,17 @@ class Photo_frame_ft extends EE_Fieldtype {
 		$entry_id  = empty($data) && $data !== FALSE ? $data : ($this->EE->input->get_post('entry_id') ? $this->EE->input->get_post('entry_id') : (isset($this->EE->safecracker) ? $this->EE->safecracker->entry('entry_id') : 0));
 		
 		$default_settings = array(
-			'photo_frame_display_info'      => 'true',
-			'photo_frame_display_meta'      => 'false',
-			'photo_frame_min_photos'        => 0,
-			'photo_frame_max_photos'        => 0,
-			'photo_frame_jpeg_compression'  => 100,
-			'photo_frame_resize_max_width'  => FALSE,
-			'photo_frame_resize_min_height' => FALSE
+			'photo_frame_display_info'       => 'true',
+			'photo_frame_display_meta'       => 'false',
+			'photo_frame_min_photos'         => 0,
+			'photo_frame_max_photos'         => 0,
+			'photo_frame_jpeg_compression'   => 100,
+			'photo_frame_resize_max_width'   => FALSE,
+			'photo_frame_resize_min_height'  => FALSE,
+			'photo_frame_cropped_max_width'  => FALSE,
+			'photo_frame_cropped_max_height' => FALSE,
+			'photo_frame_cropped_width'      => FALSE,
+			'photo_frame_cropped_height'     => FALSE,
 		);
 	
 		$settings = array_merge($default_settings, $this->settings);
@@ -263,6 +267,9 @@ class Photo_frame_ft extends EE_Fieldtype {
 		
 		$size = isset($settings['photo_frame_default_size']) && !empty($settings['photo_frame_default_size']) ? $settings['photo_frame_default_size'] : 'false';
 		
+		$resize 	= $this->EE->photo_frame_lib->build_size($settings, 'cropped');
+		$resize_max = $this->EE->photo_frame_lib->build_size($settings, 'cropped_max');
+		
 		$settings_js 	= '
 		<script type="text/javascript">
 			$(document).ready(function() {
@@ -282,7 +289,9 @@ class Photo_frame_ft extends EE_Fieldtype {
 					maxPhotos: '.(!empty($settings['photo_frame_max_photos']) ? $settings['photo_frame_max_photos'] : 0).',
 					showMeta: '.($settings['photo_frame_display_meta'] == 'true' ? 'true' : 'false').',
 					compression: '.(!empty($settings['photo_frame_jpeg_compression']) ? $settings['photo_frame_jpeg_compression'] : 100).',
-					buttonText: '.json_encode($button_text).'
+					buttonText: '.json_encode($button_text).',
+					resize: '.json_encode($resize).',
+					resizeMax: '.json_encode($resize_max).',
 				});
 			});
 		</script>';
@@ -619,7 +628,7 @@ class Photo_frame_ft extends EE_Fieldtype {
 		
 		$settings = array();
 		
-		$fields = array(
+		$resize_fields = array(
 			'photo_frame_upload_group' => array(
 				'label'       => 'File Upload Group',
 				'description' => 'Select the file upload group you in which you want to store your photos.',
@@ -628,21 +637,44 @@ class Photo_frame_ft extends EE_Fieldtype {
 					'options' => $this->EE->photo_frame_model->upload_options()
 				)
 			),
-			'photo_frame_resize_max_width' => array(
-				'label'       => 'Resize Photo (Max Width)',
-				'description' => 'The photo\'s width is greater than its height and is greater than the defined value, it will be scaled down to the defined width',
-				'type'        => 'input'
-			),
-			'photo_frame_resize_max_height' => array(
-				'label'       => 'Resize Photo (Max Height)',
-				'description' => 'The photo\'s height is greater than its width and is greater than the defined value, it will be scaled down to the defined height',
-				'type'        => 'input'
-			),
 			'photo_frame_jpeg_compression' => array(
 				'label'       => 'Image Compression (JPEG Only)',
 				'description' => 'Enter an integer 1-100 with 100 being the best quality.',
 				'type'        => 'input'
 			),
+			'photo_frame_resize_max_width' => array(
+				'label'       => 'Resize Uploaded Photo (Max Width)',
+				'description' => 'If the uploaded photo\'s width is greater than its height and is greater than the defined value, it will be scaled down to the defined width <i>before</i> it is uploaded.',
+				'type'        => 'input'
+			),
+			'photo_frame_resize_max_height' => array(
+				'label'       => 'Resize Uploaded Photo (Max Height)',
+				'description' => 'If the uploaded photo\'s height is greater than its width and is greater than the defined value, it will be scaled down to the defined height <i>before</i> it is uploaded.',
+				'type'        => 'input'
+			),
+			'photo_frame_cropped_width' => array(
+				'label'       => 'Resize Cropped Photo Width',
+				'description' => 'Resize the cropped photo to the defined width <i>after</i> it is cropped.',
+				'type'        => 'input'
+			),
+			'photo_frame_cropped_height' => array(
+				'label'       => 'Resize Cropped Photo Height',
+				'description' => 'Resize the cropped photo to the defined height <i>after</i> it is cropped.',
+				'type'        => 'input'
+			),
+			'photo_frame_cropped_max_width' => array(
+				'label'       => 'Resize Cropped Photo (Max Width)',
+				'description' => 'If the photo\'s width is greater than its height and is greater than the defined value, it will be scaled down to the defined width <i>after</i> it is cropped.',
+				'type'        => 'input'
+			),
+			'photo_frame_cropped_max_height' => array(
+				'label'       => 'Resize Cropped Photo (Max Height)',
+				'description' => 'If the photo\'s height is greater than its width and is greater than the defined value, it will be scaled down to the defined height <i>before</i> it is cropped.',
+				'type'        => 'input'
+			),
+		);
+		
+		$crop_fields = array(			
 			'photo_frame_min_photos' => array(
 				'label'       => 'Minimum Number of Photos',
 				'description' => 'If defined, you can mandate a minimum number of photos that a user must upload. If no minimum is desired, use the default value of <i>0</i>.',
@@ -671,12 +703,12 @@ class Photo_frame_ft extends EE_Fieldtype {
 				'label' => 'Photo Min Height',
 				'description' => 'Values should be numerical and in pixels.'
 			),
-			'photo_frame_max_height' => array(
-				'label' => 'Photo Max Height',
-				'description' => 'Values should be numerical and in pixels.'
-			),
 			'photo_frame_max_width' => array(
 				'label' => 'Photo Max Width',
+				'description' => 'Values should be numerical and in pixels.'
+			),
+			'photo_frame_max_height' => array(
+				'label' => 'Photo Max Height',
 				'description' => 'Values should be numerical and in pixels.'
 			),
 			'photo_frame_aspect_ratio' => array(
@@ -733,7 +765,13 @@ class Photo_frame_ft extends EE_Fieldtype {
 		);
 		
 		$vars = array(
-			'table' => $IB->table($fields, $data, array(
+			'resize_table' => $IB->table($resize_fields, $data, array(
+				'class'       => 'mainTable padTable',
+				'border'      => 0,
+				'cellpadding' => 0,
+				'cellspacing' => 0
+			)),
+			'crop_table' => $IB->table($crop_fields, $data, array(
 				'class'       => 'mainTable padTable',
 				'border'      => 0,
 				'cellpadding' => 0,

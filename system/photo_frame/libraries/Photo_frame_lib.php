@@ -26,6 +26,21 @@ class Photo_frame_lib {
 		$this->url  = $this->EE->input->get_post('url', TRUE);
 	}
 		
+	public function build_size($settings, $index)
+	{
+		$size  = isset($settings['photo_frame_'.$index.'_width'])  ? (!empty($settings['photo_frame_'.$index.'_width']) ? $settings['photo_frame_'.$index.'_width'] : 0) : 0;
+		$size .= 'x';
+		$size .= isset($settings['photo_frame_'.$index.'_height']) ? (!empty($settings['photo_frame_'.$index.'_height']) ? $settings['photo_frame_'.$index.'_height'] : 0) : 0;
+		$size  = rtrim($size, 'x');
+		
+		if(empty($size))
+		{
+			$size = FALSE;
+		}
+		
+		return $size;
+	}
+	
 	public function upload_action()
 	{
 		$this->EE->load->library('filemanager');
@@ -83,12 +98,14 @@ class Photo_frame_lib {
 	{
 		// var_dump(array_merge($_GET, $_POST));exit();
 		
-		$height = $this->EE->input->get_post('height', TRUE);
-		$width  = $this->EE->input->get_post('width', TRUE);
-		$x      = $this->EE->input->get_post('x', TRUE);
-		$x2     = $this->EE->input->get_post('x2', TRUE);
-		$y      = $this->EE->input->get_post('y', TRUE);
-		$y2     = $this->EE->input->get_post('y2', TRUE);
+		$height     = $this->EE->input->get_post('height', TRUE);
+		$width      = $this->EE->input->get_post('width', TRUE);
+		$x          = $this->EE->input->get_post('x', TRUE);
+		$x2         = $this->EE->input->get_post('x2', TRUE);
+		$y          = $this->EE->input->get_post('y', TRUE);
+		$y2         = $this->EE->input->get_post('y2', TRUE);
+		$resize     = $this->EE->input->get_post('resize', TRUE);
+		$resize_max = $this->EE->input->get_post('resizeMax', TRUE);
 		
 		$compression = $this->EE->input->get_post('compression', TRUE);
 		$compression = $compression ? $compression : 100;
@@ -107,10 +124,54 @@ class Photo_frame_lib {
 			return $this->crop_json(FALSE);
 		}
 		
-		$width  = $width  ? $width  : $image->get_width();
-		$height = $height ? $height : $image->get_height();
+		$width  = (int) ($width  ? $width  : $image->get_width());
+		$height = (int) ($height ? $height : $image->get_height());
 		
 		$image->crop($width, $height, $x, $y);
+		
+		$resize = ($resize != 'false') ? $resize : FALSE;
+		
+		if($resize)
+		{
+			$resize = explode('x', $resize);
+			$resize_width  = (int) $resize[0];
+			$resize_height = (int) $resize[1];
+			
+			if($resize_width > 0 || $resize_height > 0)
+			{
+				if($resize_width == 0)
+				{
+					$resize_width = $width;
+				}
+				
+				if($resize_height == 0)
+				{
+					$resize_height = $height;
+				}
+				
+				$image->resize($resize_width, $resize_height);	
+			}
+		}
+		
+		$resize_max = ($resize_max != 'false') ? $resize_max : FALSE;
+		
+		if($resize_max)
+		{
+			$gcd           = $width > $height ? 'width' : 'height';
+			$resize_max    = explode('x', $resize_max);
+			$resize_max[0] = (int) $resize_max[0];
+			$resize_max[1] = (int) $resize_max[1];
+			
+			if($resize_max[0] && $width > $resize_max[0] && ($gcd == 'width' || $resize_max[1] == 0))
+			{	
+				$image->resizeToWidth($resize_max[0]);
+			}		
+			
+			if($resize_max[1] && $height > $resize_max[1] && ($gcd == 'height' || $resize_max[0] == 0))
+			{
+				$image->resizeToHeight($resize_max[1]);
+			}	
+		}
 		
 		return $this->crop_json(TRUE, array(
 			'height'      => $height,

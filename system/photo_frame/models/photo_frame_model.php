@@ -208,12 +208,12 @@ class Photo_frame_model extends CI_Model {
 						   !empty($settings['photo_frame_resize_max_height']) ? 
 						   (int) $settings['photo_frame_resize_max_height'] : false;
 		
-		if($resizeMaxWidth && $width > $resizeMaxWidth && $gcd == 'width')
+		if($resizeMaxWidth && $width > $resizeMaxWidth && ($gcd == 'width' || $resizeMaxHeight == 0))
 		{	
 			$image->resizeToWidth($resizeMaxWidth);
 		}		
 			   
-		if($resizeMaxHeight && $height > $resizeMaxHeight && $gcd == 'height')
+		if($resizeMaxHeight && $height > $resizeMaxHeight && ($gcd == 'height' || $resizeMaxWidth == 0))
 		{
 			$image->resizeToHeight($resizeMaxHeight);
 		}

@@ -3,6 +3,7 @@
 $lang	= array(
 	
 	'photo_frame_module_name'			=> 'Photo Frame',
+	'photo_frame_settings'				=> 'Photo Frame Settings',
 	'photo_frame_module_description'	=> '',
 		
 	'photo_frame_button_text'			=> 'Upload',
@@ -12,8 +13,9 @@ $lang	= array(
 	'photo_frame_max_photos_error'		=> 'You must upload at least {max_photos} photo{if max_photos > 1}s{/if}.',
 			
 	'photo_frame_interface_settings'	=> 'Interface Settings',
+	'photo_frame_resize_settings'		=> 'Resize Settings',
 	'photo_frame_ignore_settings'		=> 'Any setting with an empty value will be ignored.',
-	'photo_frame_settings'				=> 'Photo Frame Settings',
+	'photo_frame_crop_settings'			=> 'Crop Settings',
 	
 	//--------------------------------------------
 	'', ''

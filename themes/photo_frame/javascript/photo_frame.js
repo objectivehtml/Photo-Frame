@@ -28,6 +28,8 @@ var PhotoFrame = function(options) {
 	t.initialized  = false;
 	t.scale        = 1;
 	t.rotate	   = 0;
+	t.resize 	   = options.resize ? options.resize: false;
+	t.resizeMax    = options.resizeMax ? options.resizeMax: false;
 	t.title		   = options.title ? options.title : '';
 	t.description  = options.description ? options.description : '';
 	t.keywords     = options.keywords ? options.keywords : '';
@@ -291,6 +293,8 @@ var PhotoFrame = function(options) {
 				width: size.w,
 				scale: t.scale,
 				rotate: t.rotate,
+				resize: t.resize,
+				resizeMax: t.resizeMax,
 				x: size.x,
 				x2: size.x2,
 				y: size.y,
@@ -298,7 +302,7 @@ var PhotoFrame = function(options) {
 				title: t.title,
 				description: t.description,
 				keywords: t.keywords,
-				compression: t.compression
+				compression: t.compression,
 			}, function(data) {
 				t.save(data);
 			});
