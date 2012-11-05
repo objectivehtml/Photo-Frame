@@ -340,8 +340,8 @@ var PhotoFrame = function(options) {
 		}
 		
 		var image = {
-			w: t.ui.image.outerWidth(),
-			h: t.ui.image.outerHeight()
+			w: t.ui.image.find('img').width(),
+			h: t.ui.image.find('img').height()
 		};
 		
 		cropSize.w = cropSize.w == 0 ? image.w : cropSize.w;
@@ -381,6 +381,32 @@ var PhotoFrame = function(options) {
 		return cropSize;
 	}
 	
+	t.aspectRatio = function(d) {
+	    var df = 1, top = 1, bot = 1;
+	    var limit = 1e5; //Increase the limit to get more precision.
+	 
+	    while (df != d && limit-- > 0) {
+	        if (df < d) {
+	            top += 1;
+	        }
+	        else {
+	            bot += 1;
+	            top = parseInt(d * bot, 10);
+	        }
+	        df = top / bot;
+	    }
+	  
+	    return top + '/' + bot;
+	}
+	
+	t.round = function(number, place) {
+		if(!place) {
+			var place = 100;
+		}
+		
+		return Math.round(number * place) / place;
+	}
+	
 	t.validate = function(json) {
 		
 		if(!json) {
@@ -401,8 +427,8 @@ var PhotoFrame = function(options) {
 		var height      = cropSize.h;
 		var width       = cropSize.w;
 		var errors      = [];
-		var imgWidth    = Math.ceil(t.ui.image.width());
-		var imgHeight   = Math.ceil(t.ui.image.height());
+		var imgWidth    = Math.ceil(t.ui.image.find('img').width());
+		var imgHeight   = Math.ceil(t.ui.image.find('img').height());
 		
 		var response    = {
 			validWidth: true,
@@ -443,13 +469,10 @@ var PhotoFrame = function(options) {
 		}
 		
 		if(!isCropped && ratio) {
-			if(ratio != cropWidth / cropHeight) {
+			if(t.round(ratio, 100) != t.round(cropWidth / cropHeight, 100)) {
 				response.validRatio = false;
 				errors.push('The image must have an apect ratio of '+t.settings.aspectRatioString);
 			}
-		}
-		else {
-			
 		}
 		
 		response.errors = errors;
@@ -954,9 +977,9 @@ var PhotoFrame = function(options) {
 	}
 	
 	t.reduce = function(numerator,denominator){
-		var gcd = function gcd(a,b){
-			return b ? gcd(b, a%b) : a;
-		};
+		var gcd = function gcd (a, b) {
+            return (b == 0) ? a : gcd (b, a%b);
+        }
 		
 		gcd = gcd(numerator,denominator);
 		
