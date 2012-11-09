@@ -99,7 +99,6 @@ class Photo_frame_ft extends EE_Fieldtype {
 		$this->EE->theme_loader->javascript('jquery.ui.widget');
 		$this->EE->theme_loader->javascript('jquery.iframe-transport');
 		$this->EE->theme_loader->javascript('jquery.fileupload');
-		$this->EE->theme_loader->javascript('jquery.fileupload-fp');
 		$this->EE->theme_loader->javascript('jquery.activity-indicator');
 		$this->EE->theme_loader->javascript('jquery.load-image');
 		$this->EE->theme_loader->javascript('jquery.jcrop');
@@ -271,7 +270,7 @@ class Photo_frame_ft extends EE_Fieldtype {
 		$resize_max = $this->EE->photo_frame_lib->build_size($settings, 'cropped_max');
 		
 		$settings_js 	= '
-		<script type="text/javascript">
+		
 			$(document).ready(function() {
 				var obj = new PhotoFrame({
 					fieldName: \''.$this->field_name.'\',
@@ -294,7 +293,7 @@ class Photo_frame_ft extends EE_Fieldtype {
 					resizeMax: '.json_encode($resize_max).',
 				});
 			});
-		</script>';
+		';
 		
 		/*
 		
@@ -304,7 +303,7 @@ class Photo_frame_ft extends EE_Fieldtype {
 					
 					*/
 				
-		$this->EE->cp->add_to_head($settings_js);		
+		$this->EE->theme_loader->output($settings_js);		
 		
 		$total_photos = count($saved_data);
 		
