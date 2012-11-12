@@ -58,7 +58,14 @@ class Photo_frame_ft extends EE_Fieldtype {
 		{
 			$this->EE->load->library('photo_frame_lib');
 			$this->EE->photo_frame_lib->upload_action();
-		}		
+		}	
+			
+		if(!isset($this->EE->theme_loader))
+		{
+			$this->EE->load->library('theme_loader');
+		}
+		
+		$this->EE->theme_loader->module_name = 'photo_frame';
 	}
 	
 	// --------------------------------------------------------------------
@@ -87,12 +94,6 @@ class Photo_frame_ft extends EE_Fieldtype {
 	{	
 		$this->EE->load->library('photo_frame_lib');
 		
-		if(!isset($this->EE->theme_loader))
-		{
-			$this->EE->load->library('theme_loader');
-		}
-		
-		$this->EE->theme_loader->module_name = 'photo_frame';
 		$this->EE->theme_loader->css('photo_frame');
 		$this->EE->theme_loader->css('jquery.jcrop');
 		$this->EE->theme_loader->javascript('photo_frame');
@@ -472,23 +473,21 @@ class Photo_frame_ft extends EE_Fieldtype {
 		
 		if($this->bool_param($params['parse_filenames']))
 		{
-			if(!$tagdata)
+			$parse_filenames = TRUE;
+				
+			if( $params['directory_name'] == config_item('photo_frame_directory_name') &&
+			  	$params['source'] == 'original'
+			  )
 			{
-				$parse_filenames = TRUE;
-					
-				if( $params['directory_name'] == config_item('photo_frame_directory_name') &&
-				  	$params['source'] == 'original'
-				  )
-				{
-					$parse_filenames = FALSE;
-				}
-				
-				$return = $this->EE->photo_frame_model->parse_filename($return, 'url', $parse_filenames, $params['directory_name']);			
-			//$return = $this->EE->photo_frame_model->parse_filename($return, 'url');
-					
-			//$return = $this->EE->photo_frame_model->parse_filename($return, 'url');	
+				$parse_filenames = FALSE;
 			}
-				
+			
+			if($tagdata)
+			{
+				$parse_filenames = FALSE;
+			}
+			
+			$return = $this->EE->photo_frame_model->parse_filename($return, 'url', $parse_filenames, $params['directory_name']);
 		}
 		
 		return $return;
@@ -623,6 +622,11 @@ class Photo_frame_ft extends EE_Fieldtype {
 	{
 		require PATH_THIRD . 'photo_frame/libraries/Interface_builder/Interface_builder.php';
 		
+		$this->EE->theme_loader->javascript('InterfaceBuilder');
+		$this->EE->theme_loader->output('
+			var IB = new InterfaceBuilder();
+		');
+		
 		$IB = new Interface_builder();
 		
 		$settings = array();
@@ -651,26 +655,92 @@ class Photo_frame_ft extends EE_Fieldtype {
 				'description' => 'If the uploaded photo\'s height is greater than its width and is greater than the defined value, it will be scaled down to the defined height <i>before</i> it is uploaded.',
 				'type'        => 'input'
 			),
-			'photo_frame_cropped_width' => array(
-				'label'       => 'Resize Cropped Photo Width',
-				'description' => 'Resize the cropped photo to the defined width <i>after</i> it is cropped.',
-				'type'        => 'input'
+			'photo_frame_cropped_sizes' => array(
+				'label'       => 'Resize Cropped Photo Sizes',
+				'description' => 'Resize the cropped photos to the defined sizes by defining a name, height, and width. Note, if multiple sizes are defined, then multiple images will be created.',
+				'type'        => 'matrix',
+				'settings' => array(
+					'columns' => array(
+						0 => array(
+							'name'  => 'name',
+							'title' => 'Name'
+						),
+						1 => array(
+							'name'  => 'width',
+							'title' => 'Width'
+						),
+						2 => array(
+							'name'  => 'height',
+							'title' => 'Height'
+						),
+					),
+					'attributes' => array(
+						'class'       => 'mainTable padTable',
+						'border'      => 0,
+						'cellpadding' => 0,
+						'cellspacing' => 0
+					)
+				)			
 			),
-			'photo_frame_cropped_height' => array(
-				'label'       => 'Resize Cropped Photo Height',
-				'description' => 'Resize the cropped photo to the defined height <i>after</i> it is cropped.',
-				'type'        => 'input'
-			),
-			'photo_frame_cropped_max_width' => array(
+			'photo_frame_cropped_max_sizes' => array(
 				'label'       => 'Resize Cropped Photo (Max Width)',
-				'description' => 'If the photo\'s width is greater than its height and is greater than the defined value, it will be scaled down to the defined width <i>after</i> it is cropped.',
-				'type'        => 'input'
+				'description' => 'If the photo\'s largest dimension is larger than any of the defined dimensions, then the photo will be scaled down to the appropriate size. Note, if multiple sizes are defined, then multiple images will be created.',
+				'type'        => 'matrix',
+				'settings' => array(
+					'columns' => array(
+						0 => array(
+							'name'  => 'name',
+							'title' => 'Name'
+						),
+						1 => array(
+							'name'  => 'width',
+							'title' => 'Width'
+						),
+						2 => array(
+							'name'  => 'height',
+							'title' => 'Height'
+						),
+					),
+					'attributes' => array(
+						'class'       => 'mainTable padTable',
+						'border'      => 0,
+						'cellpadding' => 0,
+						'cellspacing' => 0
+					)
+				)
 			),
-			'photo_frame_cropped_max_height' => array(
-				'label'       => 'Resize Cropped Photo (Max Height)',
-				'description' => 'If the photo\'s height is greater than its width and is greater than the defined value, it will be scaled down to the defined height <i>before</i> it is cropped.',
-				'type'        => 'input'
+			'photo_frame_cropped_max_sizes' => array(
+				'label'       => 'Resize Cropped Photo (Max Width)',
+				'description' => 'If the photo\'s largest dimension is larger than any of the defined dimensions, then the photo will be scaled down to the appropriate size. Note, if multiple sizes are defined, then multiple images will be created.',
+				'type'        => 'matrix',
+				'settings' => array(
+					'columns' => array(
+						0 => array(
+							'name'  => 'name',
+							'title' => 'Name'
+						),
+						1 => array(
+							'name'  => 'width',
+							'title' => 'Width'
+						),
+						2 => array(
+							'name'  => 'height',
+							'title' => 'Height'
+						),
+					),
+					'attributes' => array(
+						'class'       => 'mainTable padTable',
+						'border'      => 0,
+						'cellpadding' => 0,
+						'cellspacing' => 0
+					)
+				)
 			),
+			'photo_frame_name_format' => array(
+				'label'       => 'Filename Format',
+				'description' => 'If a format is defined, the variables will be parsed to create a dynamic filename which will override the default.<br><br>Available Variables: <i>{channel_id}, {entry_id}, {title}, {url_title}, {filename}, {extension}, {name}, {width}, {height}</i>',
+				'type'        => 'input'
+			)
 		);
 		
 		$crop_fields = array(			
