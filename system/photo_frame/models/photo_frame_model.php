@@ -7,6 +7,34 @@ class Photo_frame_model extends CI_Model {
 		parent::__construct();
 	}
 	
+	public function get_file_upload_groups()
+	{
+		if(!isset($this->session->cache['photo_frame']['upload_prefs']))
+		{			
+			$groups = $this->db->get('upload_prefs')->result_array();
+			
+			$this->session->set_cache('photo_frame', 'upload_prefs', $groups);
+		}
+		else
+		{
+			$groups = $this->session->cache['photo_frame']['upload_prefs'];
+		}
+		
+		return $this->channel_data->utility->reindex('id', $groups);
+	}
+	
+	public function parse_file($string, $type = 'url')
+	{
+		$file_uploads = $this->get_file_upload_groups();
+		
+		preg_match("/".LD."filedir_(\d*)".RD."/", $string, $matches);
+		
+		$tag = $matches[0];
+		$id  = $matches[1];
+		
+		return str_replace($tag, $file_uploads[$id][$type], $string);		
+	}
+	
 	public function delete_entries($ids = array(), $field_id = FALSE)
 	{
 		foreach($ids as $id)
@@ -35,6 +63,16 @@ class Photo_frame_model extends CI_Model {
 		$this->db->where('id', $id);
 		
 		return $this->db->get('photo_frame');
+	}
+	
+	public function get_entry($entry_id)
+	{
+		if(!isset($this->channel_data))
+		{
+			$this->load->driver('channel_data');	
+		}
+		
+		return $this->channel_data->get_channel_entry($entry_id);
 	}
 	
 	public function get_entry_photos($entry_id, $site_id = FALSE)
@@ -79,6 +117,23 @@ class Photo_frame_model extends CI_Model {
 	{
 		$this->db->where('entry_id', $entry_id);
 		$this->db->update('channel_data', $data);
+	}
+	
+	public function update_photo($field_id, $entry_id, $data = array())
+	{
+		if(count($data) == 0)
+		{
+			return;
+		}
+		
+		if(isset($data['sizes']))
+		{
+			$data['sizes'] = json_encode($data['sizes']);
+		}
+		
+		$this->db->where('field_id', $field_id);
+		$this->db->where('entry_id', $entry_id);
+		$this->db->update('photo_frame', $data);	
 	}
 	
 	public function update($data)

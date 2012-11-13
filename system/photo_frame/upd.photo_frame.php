@@ -79,6 +79,9 @@ class Photo_frame_upd {
 			),
 			'keywords'		=> array(
 				'type' 				=> 'text'
+			),
+			'sizes'			=> array(
+				'type' 				=> 'text'
 			)
 		)
 	);

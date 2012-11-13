@@ -183,6 +183,95 @@ class Photo_frame_lib {
 		));
 	}
 	
+	public function resize_photos($field_id, $entry_id, $settings = array())
+	{
+		if(isset($settings['photo_frame_cropped_sizes']))
+		{
+			$entry  = $this->EE->photo_frame_model->get_entry($entry_id);
+			$photos = $this->EE->photo_frame_model->get_photos($field_id, $entry_id);
+			$sizes  = $settings['photo_frame_cropped_sizes'];
+			$parse  = array(
+				'entry_id'   => $entry_id,
+				'channel_id' => $entry->row('channel_id'),
+				'url_title'  => $entry->row('url_title'),
+				'title'      => $entry->row('title')
+			);
+			
+			$resized_photos = array();
+			
+			foreach($photos->result() as $photo)
+			{
+				$update = array();
+			
+				$parse['name']		= config_item('photo_frame_original_size');
+				$parse['file_name'] = $photo->file_name;
+				
+				preg_match("/.(\w)*$/", $photo->file_name, $ext_matches);
+				
+				$parse['extension'] = ltrim($ext_matches[0], '.');
+				
+				preg_match("/".LD."filedir_(\d*)".RD."/", $photo->file, $matches);
+					
+				$file_name = $photo->file_name;
+					
+				if(isset($settings['photo_frame_name_format']) && !empty($settings['photo_frame_name_format']))
+				{
+					$file_name = $this->parse($parse, $settings['photo_frame_name_format']);	
+					
+					$orig  = $matches[0].$file_name;
+					$orig  = $this->EE->photo_frame_model->parse_file($orig, 'server_path');
+					
+					$parse['name']		= config_item('photo_frame_default_size');
+					
+					$new  = $matches[0].config_item('photo_frame_directory_name').'/'.$file_name;
+					$new  = $this->EE->photo_frame_model->parse_file($new, 'server_path');
+					
+					$update['file_name']     = $file_name;
+					
+					foreach(array('file' => $new, 'original_file' => $orig) as $type => $renamed_file)
+					{
+						$rename_photo = $this->EE->photo_frame_model->parse_file($photo->$type, 'server_path');
+						$rename_photo = new ImageEditor($rename_photo);
+						$rename_photo->rename($renamed_file);
+						
+						$update[$type] = str_replace($photo->file_name, $file_name, $photo->$type);
+					}
+				}
+				
+				foreach($sizes as $size)
+				{
+					$parse['file_name'] = $photo->file_name;
+					$parse = array_merge($parse, $size);
+					
+					if(isset($settings['photo_frame_name_format']) && !empty($settings['photo_frame_name_format']))
+					{
+						$file_name = $this->parse($parse, $settings['photo_frame_name_format']);
+					}
+					
+					$width  = (int) $size['width'];
+					$height = (int) $size['height'];					
+					$file   = $this->EE->photo_frame_model->parse_file(isset($update['file']) ? $update['file'] : $photo->file, 'server_path');					
+					$new_format = $matches[0].config_item('photo_frame_directory_name').'/'.$file_name;
+					$new    	= $this->EE->photo_frame_model->parse_file($new_format, 'server_path');
+					
+					$resized_photos[$size['name']] = array(
+						'width'  => $width,
+						'height' => $height,
+						'file'   => $new_format
+					);
+					
+					$image = new ImageEditor($file);
+					
+					$image->duplicate($new, $width, $height);
+				}
+			}
+						
+			$update['sizes'] = $resized_photos;
+						
+			$this->EE->photo_frame_model->update_photo($field_id, $entry_id, $update);
+		}	
+	}
+	
 	public function crop_json($success = TRUE, $save_data = array())
 	{
 		$original_file = '{filedir_'.$this->id.'}'.$this->name;
@@ -267,4 +356,13 @@ class Photo_frame_lib {
 		return $array;
 	}
 
+	public function parse($vars, $tagdata = NULL)
+	{
+		foreach($vars as $var => $value)
+		{
+			$tagdata = str_replace(LD.$var.RD, $value, $tagdata);	
+		}
+		
+		return $tagdata;
+	}
 }

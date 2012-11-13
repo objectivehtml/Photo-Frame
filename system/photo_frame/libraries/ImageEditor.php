@@ -22,6 +22,11 @@ class ImageEditor extends Base_class {
 		
 		$this->filename = $filename;
 		
+		if(!file_exists($filename))
+		{
+			return FALSE;
+		}
+		
 		$meta = getimagesize($filename);
 		
 		$this->meta = $meta;
@@ -135,7 +140,7 @@ class ImageEditor extends Base_class {
 		return $this->resizeToHeight($height);
 	}
 	
-	function resizeToWidth($width, $scale = FALSE)
+	function resizeToWidth($width)
 	{
 		$ratio  = $width / $this->getWidth();
 		$height = $this->getHeight() * $ratio;
@@ -159,7 +164,38 @@ class ImageEditor extends Base_class {
 	{
 		imagerotate($this->image, $angle , $this->bgd_color, $ignore_transparent);
 	}
- 
+	
+	public function rename($filename)
+	{
+		if(file_exists($this->filename))
+		{
+			rename($this->filename, $filename);	
+		}
+	}
+	
+	public function duplicate($filename, $width = FALSE, $height = FALSE, $x = 0, $y = 0, $x2 = 0, $y2 = 0)
+	{
+		if($width || $height)
+		{			
+			copy($this->filename, $filename);
+			
+			$image = new ImageEditor($filename);	
+		}
+		
+		if(!$width && $height)
+		{
+			$image->resizeToHeight($height);
+		}
+		else if($width && !$height)
+		{
+			$image->resizeToWidth($width);	
+		}
+		else if($width && $height)
+		{
+			$image->resize($width, $height, $x = 0, $y = 0, $x2 = 0, $y2 = 0);			
+		}			
+	}
+	
 	function resize($width, $height, $x = 0, $y = 0, $x2 = 0, $y2 = 0)
 	{
 		$resized_image = imagecreatetruecolor($width, $height);

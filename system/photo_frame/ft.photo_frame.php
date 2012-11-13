@@ -51,7 +51,6 @@ class Photo_frame_ft extends EE_Fieldtype {
 			$this->EE->load->model('photo_frame_model');
 		}
 		
-		$this->EE->load->config('photo_frame_config');
 		$this->EE->lang->loadfile('photo_frame');
 					
 		if(count($_FILES) > 0 && count($_POST) == 0)
@@ -92,6 +91,9 @@ class Photo_frame_ft extends EE_Fieldtype {
 	
 	function display_field($data)
 	{	
+		$this->EE->theme_loader->module_name = 'photo_frame';
+		
+		$this->EE->load->config('photo_frame_config');
 		$this->EE->load->library('photo_frame_lib');
 		
 		$this->EE->theme_loader->css('photo_frame');
@@ -343,6 +345,8 @@ class Photo_frame_ft extends EE_Fieldtype {
 	
 	public function replace_tag($data, $params = array(), $tagdata)
 	{
+		$this->EE->load->config('photo_frame_config');
+		
 		if(!$params)
 		{
 			$params = array();	
@@ -378,11 +382,13 @@ class Photo_frame_ft extends EE_Fieldtype {
 		
 		$photos = $this->EE->photo_frame_model->get_photos($this->field_id, $data);
 		
+		/*
 		if(!is_null($params['size']))
 		{
 			$params['directory_name'] = '_'.ltrim($params['size']);
 			$params['source']         = 'original';
 		}
+		*/
 		
 		if(is_null($params['limit']))
 		{
@@ -434,6 +440,16 @@ class Photo_frame_ft extends EE_Fieldtype {
 								$img_params .= $param.'="'.$value.'" ';
 							}
 						}	
+					}
+					
+					if(isset($params['size']))
+					{
+						$sizes = json_decode($row['sizes']);
+						
+						if(isset($sizes->{$params['size']}))
+						{
+							$row[$field] = str_replace(config_item('photo_frame_directory_name'), '', $sizes->$params['size']->file);
+						}
 					}
 					
 					$return  .= '<img src="'.$row[$field].'" '.trim($img_params).' />';
@@ -518,7 +534,9 @@ class Photo_frame_ft extends EE_Fieldtype {
 	}
 	
 	public function post_save($data)
-	{
+	{	
+		$settings = unserialize(base64_decode($this->settings['field_settings']));
+		
 		$this->EE->load->library('photo_frame_lib');
 		
 		// Create new photos
@@ -566,11 +584,31 @@ class Photo_frame_ft extends EE_Fieldtype {
 			$this->EE->photo_frame_model->update($update_photos);
 		}
 			
+		$this->EE->photo_frame_lib->resize_photos($this->field_id, $this->settings['entry_id'], $settings);
+		
 		// Update data with the entry_id
 			
 		$this->EE->photo_frame_model->update_entry($this->settings['entry_id'], array(
 			'field_id_'.$this->field_id => $this->settings['entry_id']
 		));
+		
+		/*
+		$channel_id = $this->EE->input->get_post('channel_id');
+		
+		if($this->safecracker)
+		{
+			$channel_id = $this->EE->safecracker->channel['channel_id'];
+		}
+			
+		$entry = $this->
+		
+		$parse_vars = array(
+			'channel_id' => $channel_id,
+			'entry_id'   => $this->settings['entry_id'],
+			'title' 	 => 
+		);
+		
+		*/
 		
 		return $this->settings['entry_id'];
 	}	
@@ -620,6 +658,8 @@ class Photo_frame_ft extends EE_Fieldtype {
 	
 	public function display_settings($data)
 	{
+		$this->EE->load->config('photo_frame_config');
+		
 		require PATH_THIRD . 'photo_frame/libraries/Interface_builder/Interface_builder.php';
 		
 		$this->EE->theme_loader->javascript('InterfaceBuilder');
@@ -657,7 +697,7 @@ class Photo_frame_ft extends EE_Fieldtype {
 			),
 			'photo_frame_cropped_sizes' => array(
 				'label'       => 'Resize Cropped Photo Sizes',
-				'description' => 'Resize the cropped photos to the defined sizes by defining a name, height, and width. Note, if multiple sizes are defined, then multiple images will be created.',
+				'description' => 'Resize the cropped photos to the defined sizes by defining a name, height, and width. Note, if multiple sizes are defined, then multiple images will be created. If a width or height isn\' set, then the image will be scaled to the defined dimension.',
 				'type'        => 'matrix',
 				'settings' => array(
 					'columns' => array(
@@ -667,7 +707,7 @@ class Photo_frame_ft extends EE_Fieldtype {
 						),
 						1 => array(
 							'name'  => 'width',
-							'title' => 'Width'
+							'title' => 'Width'	
 						),
 						2 => array(
 							'name'  => 'height',
@@ -681,60 +721,6 @@ class Photo_frame_ft extends EE_Fieldtype {
 						'cellspacing' => 0
 					)
 				)			
-			),
-			'photo_frame_cropped_max_sizes' => array(
-				'label'       => 'Resize Cropped Photo (Max Width)',
-				'description' => 'If the photo\'s largest dimension is larger than any of the defined dimensions, then the photo will be scaled down to the appropriate size. Note, if multiple sizes are defined, then multiple images will be created.',
-				'type'        => 'matrix',
-				'settings' => array(
-					'columns' => array(
-						0 => array(
-							'name'  => 'name',
-							'title' => 'Name'
-						),
-						1 => array(
-							'name'  => 'width',
-							'title' => 'Width'
-						),
-						2 => array(
-							'name'  => 'height',
-							'title' => 'Height'
-						),
-					),
-					'attributes' => array(
-						'class'       => 'mainTable padTable',
-						'border'      => 0,
-						'cellpadding' => 0,
-						'cellspacing' => 0
-					)
-				)
-			),
-			'photo_frame_cropped_max_sizes' => array(
-				'label'       => 'Resize Cropped Photo (Max Width)',
-				'description' => 'If the photo\'s largest dimension is larger than any of the defined dimensions, then the photo will be scaled down to the appropriate size. Note, if multiple sizes are defined, then multiple images will be created.',
-				'type'        => 'matrix',
-				'settings' => array(
-					'columns' => array(
-						0 => array(
-							'name'  => 'name',
-							'title' => 'Name'
-						),
-						1 => array(
-							'name'  => 'width',
-							'title' => 'Width'
-						),
-						2 => array(
-							'name'  => 'height',
-							'title' => 'Height'
-						),
-					),
-					'attributes' => array(
-						'class'       => 'mainTable padTable',
-						'border'      => 0,
-						'cellpadding' => 0,
-						'cellspacing' => 0
-					)
-				)
 			),
 			'photo_frame_name_format' => array(
 				'label'       => 'Filename Format',
