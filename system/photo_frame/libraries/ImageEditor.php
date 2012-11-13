@@ -4,7 +4,7 @@ require_once PATH_THIRD . 'photo_frame/libraries/Base_class.php';
 
 class ImageEditor extends Base_class {
  
-	protected $image;
+	protected $image = FALSE;
 	
 	protected $meta;
 	
@@ -42,6 +42,11 @@ class ImageEditor extends Base_class {
 			case IMAGETYPE_PNG:
 				$this->image = imagecreatefrompng($filename);
 				break;
+		}
+		
+		if(!$this->image)
+		{
+			return FALSE;
 		}
 	}
 	

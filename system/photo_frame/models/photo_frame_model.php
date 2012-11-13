@@ -248,6 +248,15 @@ class Photo_frame_model extends CI_Model {
 		}
 		
 		$image      = new ImageEditor($_FILES['files']['tmp_name']);
+		
+		if(!$image->getImage())
+		{
+			$errors[] = lang('photo_frame_invalid_format');
+			
+			return $errors;
+		}
+		
+		
 		$width      = $image->getWidth();
 		$height     = $image->getHeight();
 		$gcd	    = $width > $height ? 'width' : 'height';
@@ -278,7 +287,9 @@ class Photo_frame_model extends CI_Model {
 			
 			if($min_width > $width)
 			{
-				$errors[] = 'The image must have a minimum width of '.$min_width.'px';
+				$errors[] = $this->photo_frame_lib->parse(array(
+					'min_width' => $min_width
+				), lang('photo_frame_min_width'));
 			}
 		}
 		
@@ -288,34 +299,12 @@ class Photo_frame_model extends CI_Model {
 			
 			if($min_height > $height)
 			{
-				$errors[] = 'The image must have a minimum height of '.$min_height.'px';
+				$errors[] = $this->photo_frame_lib->parse(array(
+					'min_height' => $min_height
+				), lang('photo_frame_min_height'));
 			}
 		}
-		
-		/*
-		
-		if(!empty($settings['photo_frame_max_width']))
-		{
-			$max_width = (int) $settings['photo_frame_max_width'];
-			
-			if($max_width < $width)
-			{
-				$errors[] = 'The image must have a maximum width of '.$min_width.'px';
-			}
-		}
-		
-		if(!empty($settings['photo_frame_max_height']))
-		{
-			$max_height = (int) $settings['photo_frame_max_height'];
-			
-			if($max_height < $height)
-			{
-				$errors[] = 'The image must have a maximum height of '.$max_height.'px';
-			}
-		}
-		
-		*/
-		
+				
 		return $errors;
 	}
 	

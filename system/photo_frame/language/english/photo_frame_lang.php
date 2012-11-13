@@ -17,6 +17,11 @@ $lang	= array(
 	'photo_frame_ignore_settings'		=> 'Any setting with an empty value will be ignored.',
 	'photo_frame_crop_settings'			=> 'Crop Settings',
 	
+	'photo_frame_invalid_format'        => 'The image is an invalid format. The image must be <i>gif</i>, <i>jpeg</i>, or a <i>png</i>.',
+	
+	'photo_frame_min_width'			    => 'The image must have a minimum width of {min_width}px',
+	'photo_frame_min_height'			=> 'The image must have a minimum height of {min_height}px',
+	
 	//--------------------------------------------
 	'', ''
 );
