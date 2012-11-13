@@ -7,6 +7,7 @@ if(!defined('PHOTO_FRAME_VERSION'))
 	define('PHOTO_FRAME_VERSION', $config['photo_frame_version']);
 }
 
-$config['photo_frame_directory_name'] = 'framed';
-$config['photo_frame_default_size']   = 'framed';
-$config['photo_frame_original_size']  = 'original';
+$config['photo_frame_directory_name']    = 'framed';
+$config['photo_frame_default_size']      = 'framed';
+$config['photo_frame_original_size']     = 'original';
+$config['photo_frame_random_string_len'] = 8;

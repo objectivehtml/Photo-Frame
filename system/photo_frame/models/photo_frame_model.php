@@ -119,7 +119,7 @@ class Photo_frame_model extends CI_Model {
 		$this->db->update('channel_data', $data);
 	}
 	
-	public function update_photo($field_id, $entry_id, $data = array())
+	public function update_photo($photo_id, $data = array())
 	{
 		if(count($data) == 0)
 		{
@@ -131,8 +131,7 @@ class Photo_frame_model extends CI_Model {
 			$data['sizes'] = json_encode($data['sizes']);
 		}
 		
-		$this->db->where('field_id', $field_id);
-		$this->db->where('entry_id', $entry_id);
+		$this->db->where('id', $photo_id);
 		$this->db->update('photo_frame', $data);	
 	}
 	

@@ -187,6 +187,8 @@ class Photo_frame_lib {
 	{
 		if(isset($settings['photo_frame_cropped_sizes']))
 		{
+			$this->EE->load->helper('string');
+			
 			$entry  = $this->EE->photo_frame_model->get_entry($entry_id);
 			$photos = $this->EE->photo_frame_model->get_photos($field_id, $entry_id);
 			$sizes  = $settings['photo_frame_cropped_sizes'];
@@ -202,9 +204,19 @@ class Photo_frame_lib {
 			foreach($photos->result() as $photo)
 			{
 				$update = array();
-			
-				$parse['name']		= config_item('photo_frame_original_size');
-				$parse['file_name'] = $photo->file_name;
+				
+				$photo_id = $photo->id;
+				
+				$parse['photo_id']       = $photo_id;
+				$parse['name']           = config_item('photo_frame_original_size');
+				$parse['file_name']      = $photo->file_name;
+				$parse['random_alpha']   = random_string('alpha', config_item('photo_frame_random_string_len'));
+				$parse['random_alnum']   = random_string('alnum', config_item('photo_frame_random_string_len'));
+				$parse['random_numeric'] = random_string('numeric', config_item('photo_frame_random_string_len'));
+				$parse['random_string']  = random_string('alnum', config_item('photo_frame_random_string_len'));
+				$parse['random_nozero']  = random_string('nozero', config_item('photo_frame_random_string_len'));
+				$parse['random_unique']  = random_string('unique', config_item('photo_frame_random_string_len'));
+				$parse['random_sha1']    = random_string('sha1', config_item('photo_frame_random_string_len'));
 				
 				preg_match("/.(\w)*$/", $photo->file_name, $ext_matches);
 				
@@ -240,14 +252,13 @@ class Photo_frame_lib {
 				
 				foreach($sizes as $size)
 				{
-					$parse['file_name'] = $photo->file_name;
+					$parse['file_name'] = $photo->file;
 					$parse = array_merge($parse, $size);
 					
 					if(isset($settings['photo_frame_name_format']) && !empty($settings['photo_frame_name_format']))
 					{
 						$file_name = $this->parse($parse, $settings['photo_frame_name_format']);
 					}
-					
 					$width  = (int) $size['width'];
 					$height = (int) $size['height'];					
 					$file   = $this->EE->photo_frame_model->parse_file(isset($update['file']) ? $update['file'] : $photo->file, 'server_path');					
@@ -268,7 +279,10 @@ class Photo_frame_lib {
 						
 			$update['sizes'] = $resized_photos;
 						
-			$this->EE->photo_frame_model->update_photo($field_id, $entry_id, $update);
+			if(isset($photo_id))
+			{
+				$this->EE->photo_frame_model->update_photo($photo_id, $update);
+			}
 		}	
 	}
 	
