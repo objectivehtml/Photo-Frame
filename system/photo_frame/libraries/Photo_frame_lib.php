@@ -11,7 +11,6 @@ class Photo_frame_lib {
 		$this->EE =& get_instance();
 		
 		$this->EE->load->config('photo_frame_config');
-		$this->EE->lang->loadfile('photo_frame');
 		
 		if(!class_exists('photo_frame_model'))
 		{
