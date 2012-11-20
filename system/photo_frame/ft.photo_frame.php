@@ -58,7 +58,7 @@ class Photo_frame_ft extends EE_Fieldtype {
 			{					
 				if(!isset($this->EE->theme_loader))
 				{
-					$this->EE->load->library('theme_loader');
+					$this->EE->load->library('Theme_loader');
 				}	
 			}
 		}
@@ -69,7 +69,7 @@ class Photo_frame_ft extends EE_Fieldtype {
 							
 			if(!isset($this->EE->theme_loader))
 			{
-				$this->EE->load->library('theme_loader');
+				$this->EE->load->library('Theme_loader');
 			}
 		}
 		
@@ -469,7 +469,14 @@ class Photo_frame_ft extends EE_Fieldtype {
 						}
 					}
 					
-					$return  .= '<img src="'.$row[$field].'" '.trim($img_params).' />';
+					if(isset($params['return_html']) && $this->bool_param($params['return_html']) || !isset($params['return_html']))
+					{
+						$return  .= '<img src="'.$row[$field].'" '.trim($img_params).' />';
+					}
+					else
+					{
+						$return .= $row[$field];
+					}
 				}
 			}
 	
