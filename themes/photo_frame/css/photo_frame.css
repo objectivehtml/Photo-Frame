@@ -6,8 +6,10 @@
   font-style: normal;
 }
 
-[class^="icon-"]:before,
-[class*=" icon-"]:before {
+.photo-frame-wrapper [class^="icon-"]:before,
+.photo-frame-wrapper [class*=" icon-"]:before,
+.photo-frame-form [class^="icon-"]:before,
+.photo-frame-form [class*=" icon-"]:before  {
   font-family: 'photo-frame';
   font-style: normal;
   font-weight: normal;
