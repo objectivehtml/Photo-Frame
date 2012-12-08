@@ -109,6 +109,7 @@ class Photo_frame_model extends CI_Model {
 		$this->db->where('site_id', $site_id);
 		$this->db->where('field_id', $field_id);
 		$this->db->where('entry_id', $entry_id);
+		$this->db->order_by('order', 'asc');
 		
 		return $this->db->get('photo_frame');
 	}
@@ -144,14 +145,18 @@ class Photo_frame_model extends CI_Model {
 				$data = array($data);	
 			}
 			
+			$count = 0;
+			
 			foreach($data as $id => $row)
 			{
 				$row = (array)json_decode($row);
-		
-				$row['id'] = $id;
+				$row['order'] = $count;
+				$row['id']    = $id;
 				
 				$this->db->where('id', $row['id']);
 				$this->db->update('photo_frame', $row);
+				
+				$count++;
 			}
 		}
 	}			
@@ -189,7 +194,7 @@ class Photo_frame_model extends CI_Model {
 	{
 		$parse = $this->parse_filenames(array(array('file' => $name)), $field, $framed_dir, $framed_dir_name);
 		
-		return $parse[0]->file;
+		return $this->functions->remove_double_slashes($parse[0]->file);
 	}
 	
 	public function parse_filenames($data, $field = 'url', $framed_dir = FALSE, $framed_dir_name = FALSE)

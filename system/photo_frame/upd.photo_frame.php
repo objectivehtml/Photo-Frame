@@ -40,6 +40,10 @@ class Photo_frame_upd {
 				'type'				=> 'int',
 				'constraint'		=> 50
 			),
+			'order'	=> array(
+				'type'				=> 'int',
+				'constraint'		=> 50
+			),
 			'height' 	=> array(
 				'type'				=> 'float'
 			),

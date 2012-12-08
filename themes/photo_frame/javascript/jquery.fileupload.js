@@ -24,7 +24,6 @@
         factory(window.jQuery);
     }
 }(function ($) {
-	
     'use strict';
 
     // The FileReader API is not actually used, but works as feature detection,
@@ -1105,5 +1104,5 @@
         }
 
     });
-    
-}($)));
+
+}));

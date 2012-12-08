@@ -311,6 +311,7 @@ class Photo_frame_ft extends EE_Fieldtype {
 					buttonText: '.json_encode($button_text).',
 					resize: '.json_encode($resize).',
 					resizeMax: '.json_encode($resize_max).',
+					sortable: '.(isset($settings['photo_frame_sortable']) ? $settings['photo_frame_sortable'] : 'false').'
 				});
 			});
 		';
@@ -328,18 +329,32 @@ class Photo_frame_ft extends EE_Fieldtype {
 		$total_photos = count($saved_data);
 		
 		$max_photos   = !empty($settings['photo_frame_max_photos']) ? $settings['photo_frame_max_photos'] : 0;
-		$overlimit   = $max_photos > 0 && $max_photos <= $total_photos ? TRUE : FALSE; 
+		$overlimit    = $max_photos > 0 && $max_photos <= $total_photos ? TRUE : FALSE; 
+		
+		$theme = FALSE;
+		
+		if(isset($settings['photo_frame_cp_theme']))
+		{
+		    $theme = $this->EE->photo_frame_lib->get_theme($settings['photo_frame_cp_theme']);
+		    
+		    foreach($theme->getCss() as $file)
+		    {
+    		     $this->EE->theme_loader->css($file);   
+		    }
+		}
 		
 		$vars = array(
 			'id'             => $this->field_id,
 			'field_label'    => $settings['field_label'],
 			'field_name'     => $this->field_name,
+			'theme'          => $theme ? $theme->getWrapperClass() : '',
 			'data'   	     => $saved_data,
 			'new_photos'     => $new_photos,
 			'preview_styles' => trim($preview_styles),
 			'button_text'	 => $button_text,
 			'overlimit'	 	 => $overlimit,
-			'upload_helper'	 => isset($settings['photo_frame_upload_helper']) ? $settings['photo_frame_upload_helper'] : ''
+			'upload_helper'	 => isset($settings['photo_frame_upload_helper']) ? $settings['photo_frame_upload_helper'] : '',
+			'sortable'       => (isset($settings['photo_frame_sortable'])  && $settings['photo_frame_sortable'] == 'true'? TRUE : FALSE)
 		);
 		
 		return $this->EE->load->view('fieldtype', $vars, TRUE);
@@ -465,7 +480,9 @@ class Photo_frame_ft extends EE_Fieldtype {
 						
 						if(isset($sizes->{$params['size']}))
 						{
-							$row[$field] = str_replace(config_item('photo_frame_directory_name'), '', $sizes->$params['size']->file);
+							
+							$row[$field] = str_replace(config_item('photo_frame_directory_name'), '', ltrim($sizes->$params['size']->file, '/'));
+							
 						}
 					}
 					
@@ -508,7 +525,9 @@ class Photo_frame_ft extends EE_Fieldtype {
 				);	
 			}
 			
-			$return = $this->parse($return, $tagdata);
+			$vars = $this->EE->channel_data->utility->add_prefix(isset($params['prefix']) ? $params['prefix'] : 'photo', $return);
+			
+			$return = $this->parse($vars, $tagdata);
 		}
 		
 		if($this->bool_param($params['parse_filenames']))
@@ -526,10 +545,10 @@ class Photo_frame_ft extends EE_Fieldtype {
 			{
 				$parse_filenames = FALSE;
 			}
-			
+						
 			$return = $this->EE->photo_frame_model->parse_filename($return, 'url', $parse_filenames, $params['directory_name']);
 		}
-		
+				
 		return $return;
 	}
 	
@@ -575,6 +594,7 @@ class Photo_frame_ft extends EE_Fieldtype {
 			{
 				$new_photos[$index]['site_id']  = config_item('site_id');
 				$new_photos[$index]['field_id'] = $this->field_id;
+			    $new_photos[$index]['order']    = $index;
 				$new_photos[$index]['entry_id'] = $this->settings['entry_id'];
 				
 				$unset = array(
@@ -683,7 +703,15 @@ class Photo_frame_ft extends EE_Fieldtype {
 	public function display_settings($data)
 	{
 		$this->EE->load->config('photo_frame_config');
+		$this->EE->load->library('photo_frame_lib');
 		
+		$themes = array('' => 'Default');
+		
+		foreach($this->EE->photo_frame_lib->get_themes() as $theme)
+		{
+		    $themes[$theme->getName()] = $theme->getTitle();
+		}
+			
 		require PATH_THIRD . 'photo_frame/libraries/Interface_builder/Interface_builder.php';
 		
 		$this->EE->theme_loader->javascript('InterfaceBuilder');
@@ -805,6 +833,25 @@ class Photo_frame_ft extends EE_Fieldtype {
 		);
 		
 		$info_fields = array(
+			'photo_frame_cp_theme' => array(
+				'label'       => 'Control Panel Theme',
+				'description' => 'If you want change the default theme, select one from the list.',
+				'type'        => 'select',
+				'settings' => array(
+					'options' => $themes
+				)
+			),
+			'photo_frame_sortable' => array(
+				'label'       => 'Enable Photo Sorting',
+				'description' => 'If you want to disallow the user to reorder the photos with drag and drop select FALSE.',
+				'type'        => 'select',
+				'settings' => array(
+					'options' => array(
+						'true'  => 'True',
+						'false' => 'False'
+					)
+				)
+			),
 			'photo_frame_display_meta' => array(
 				'label'       => 'Display Meta on Save',
 				'description' => 'If you want the meta dialog will always prompt the user before the photo is saved, then choose <i>true</i>.',

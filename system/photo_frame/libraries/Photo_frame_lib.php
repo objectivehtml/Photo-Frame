@@ -11,6 +11,7 @@ class Photo_frame_lib {
 		$this->EE =& get_instance();
 		
 		$this->EE->load->config('photo_frame_config');
+		$this->EE->lang->loadfile('photo_frame');
 		
 		if(!class_exists('photo_frame_model'))
 		{
@@ -39,6 +40,43 @@ class Photo_frame_lib {
 		}
 		
 		return $size;
+	}
+	
+	public function get_themes()
+	{    
+	    require_once PATH_THIRD . 'photo_frame/libraries/BaseClass.php';
+	    require_once PATH_THIRD . 'photo_frame/libraries/PhotoFrameTheme.php';	
+	    
+		$this->EE->load->helper('directory');
+		
+		$directory = config_item('photo_frame_extra_dir_name');
+		
+		$basepath = $this->EE->theme_loader->theme_path() . $directory . '/';
+		$baseurl  = $this->EE->theme_loader->theme_url() . $directory . '/';
+		
+		$return = array();
+		
+		if(is_dir($basepath))
+		{
+			foreach(directory_map($basepath) as $index => $file)
+			{
+			    $return[$index] = PhotoFrameTheme::load($index, $basepath, $baseurl);
+			}	
+		}
+		
+		return $return;	
+	}
+	
+	public function get_theme($index)
+	{    
+	    $themes = $this->get_themes();
+	    
+	    if(isset($themes[$index]))
+	    {
+    	    return $themes[$index];
+	    }
+	    
+	    return FALSE;
 	}
 	
 	public function upload_action()

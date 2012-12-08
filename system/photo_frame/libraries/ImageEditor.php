@@ -1,8 +1,8 @@
 <?php if ( ! defined('BASEPATH')) exit('No direct script access allowed');
 
-require_once PATH_THIRD . 'photo_frame/libraries/Base_class.php';
+require_once PATH_THIRD . 'photo_frame/libraries/BaseClass.php';
 
-class ImageEditor extends Base_class {
+class ImageEditor extends BaseClass {
  
 	protected $image = FALSE;
 	
