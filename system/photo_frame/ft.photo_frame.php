@@ -333,7 +333,7 @@ class Photo_frame_ft extends EE_Fieldtype {
 		
 		$theme = FALSE;
 		
-		if(isset($settings['photo_frame_cp_theme']))
+		if(isset($settings['photo_frame_cp_theme']) && !empty($settings['photo_frame_cp_theme']))
 		{
 		    $theme = $this->EE->photo_frame_lib->get_theme($settings['photo_frame_cp_theme']);
 		    
@@ -582,6 +582,69 @@ class Photo_frame_ft extends EE_Fieldtype {
 		
 		$this->EE->load->library('photo_frame_lib');
 		
+		$new_photos  = array();
+		$edit_photos = array();
+		
+		$post = $this->EE->input->post($this->field_name, TRUE);
+		
+		if(is_array($post))
+		{
+    		foreach($post as $index => $photo)
+    		{
+    		    if(isset($photo['new']))
+    		    {
+        		    $photo = $this->EE->photo_frame_lib->decode_array($photo);
+        		    $photo = $photo['new'];
+        		   
+        		    $photo['site_id']  = config_item('site_id');
+    				$photo['field_id'] = $this->field_id;
+    			    $photo['order']    = $index;
+    				$photo['entry_id'] = $this->settings['entry_id'];
+    				
+    				$unset = array(
+    					'directory' => FALSE
+    				);
+    				
+    				foreach($unset as $var => $rename)
+    				{
+    					if(isset($photo[$var]))
+    					{
+    						if($rename)
+    						{
+    							$photo[$rename] = $photo[$var];
+    						}
+    						
+    						unset($photo[$var]);
+    					}
+    				}
+    				
+    				$new_photos[] = $photo;
+    		    }
+    		    
+    		    if(isset($photo['edit']))
+    		    {
+        		    $photo = $this->EE->photo_frame_lib->decode_array($photo);
+        		    
+        		    $photo = $photo['edit'];
+        		    $photo['order'] = $index;
+        		    
+        		    $edit_photos[] = $photo;
+    		    }
+    		}
+		}
+		
+		if(count($new_photos) > 0)
+		{    		
+			$this->EE->photo_frame_model->save($new_photos);
+		}
+		
+		if(count($edit_photos) > 0)
+		{    		
+			$this->EE->photo_frame_model->update($edit_photos);
+		}
+		
+		
+		/*
 		// Create new photos
 		$new_photos = $this->EE->input->post($this->field_name, TRUE);
 		$new_photos = isset($new_photos['new']) ? $new_photos['new'] : array();
@@ -627,6 +690,8 @@ class Photo_frame_ft extends EE_Fieldtype {
 		{
 			$this->EE->photo_frame_model->update($update_photos);
 		}
+		
+		*/
 			
 		$this->EE->photo_frame_lib->resize_photos($this->field_id, $this->settings['entry_id'], $settings);
 		

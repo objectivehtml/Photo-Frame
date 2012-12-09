@@ -15,7 +15,7 @@
         				</div>
         			</div>
         			
-        			<textarea name="<?php echo $field_name?>[<?php echo isset($photo->new) ? 'new' : 'edit'?>][<?php echo isset($photo->new) ? $index : $photo->id?>]" id="photo-frame-<?php echo isset($photo->new) ? 'new' : 'edit'?>-photo-<?php echo !isset($photo->id) ? $id : $photo->id?>-<?php echo $index?>" style="display:none"><?php echo json_encode($photo->saved_data);?></textarea>
+        			<textarea name="<?php echo $field_name?>[][<?php echo isset($photo->new) ? 'new' : 'edit'?>]" id="photo-frame-<?php echo isset($photo->new) ? 'new' : 'edit'?>-photo-<?php echo !isset($photo->id) ? $id : $photo->id?>-<?php echo $index?>" style="display:none"><?php echo json_encode($photo->saved_data);?></textarea>
         		</li>
         		<?php endforeach; ?>
     		</ul>
