@@ -343,6 +343,11 @@ class Photo_frame_ft extends EE_Fieldtype {
 		    }
 		}
 		
+		foreach($saved_data as $index => $data)
+		{
+			$data->saved_data['sizes'] = json_decode($data->saved_data['sizes']);
+		}
+		
 		$vars = array(
 			'id'             => $this->field_id,
 			'field_label'    => $settings['field_label'],
@@ -621,13 +626,10 @@ class Photo_frame_ft extends EE_Fieldtype {
     				$new_photos[] = $photo;
     		    }
     		    
-    		    if(isset($photo['edit']))
+    		    if(isset($photo['edit']) && count($photo['edit']))
     		    {
-        		    $photo = $this->EE->photo_frame_lib->decode_array($photo);
-        		    
-        		    $photo = $photo['edit'];
-        		    $photo['order'] = $index;
-        		    
+        		    $photo = json_decode($photo['edit']);
+        		    $photo->order  = $index;        		    
         		    $edit_photos[] = $photo;
     		    }
     		}

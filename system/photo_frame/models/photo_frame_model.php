@@ -149,8 +149,11 @@ class Photo_frame_model extends CI_Model {
 			{
 			    if(is_string($row))
 			    {
-				    $row = (array)json_decode($row);
+				    $row = json_decode($row);
 				}
+				
+				$row = (array) $row;
+				$row['sizes'] = json_encode($row['sizes']);
 				
 				$this->db->where('id', $row['id']);
 				$this->db->update('photo_frame', $row);

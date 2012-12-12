@@ -179,7 +179,12 @@ class ImageEditor extends BaseClass {
 	}
 	
 	public function duplicate($filename, $width = FALSE, $height = FALSE, $x = 0, $y = 0, $x2 = 0, $y2 = 0)
-	{
+	{	
+		if(!file_exists($this->filename))
+		{
+			return;	
+		}
+		
 		if($width || $height)
 		{			
 			copy($this->filename, $filename);

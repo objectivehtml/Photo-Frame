@@ -1,0 +1,13 @@
+.photo-frame-small-grid .photo-frame-photo {
+    width: 200px;
+    height: 200px;
+    float: left;
+}
+
+.photo-frame-small-grid .photo-frame-sortable-placeholder {
+    border: 3px dashed rgb(90, 92, 93);
+    width: 200px;
+    height: 200px;
+    display: block;
+    margin: 0 1em 1em 0;
+}
