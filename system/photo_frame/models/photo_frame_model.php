@@ -11,7 +11,9 @@ class Photo_frame_model extends CI_Model {
 	{
 		if(!isset($this->session->cache['photo_frame']['upload_prefs']))
 		{			
-			$groups = $this->db->get('upload_prefs')->result_array();
+			$this->load->model('file_upload_preferences_model');
+				
+			$groups = $this->file_upload_preferences_model->get_file_upload_preferences(NULL, NULL, TRUE);
 			
 			$this->session->set_cache('photo_frame', 'upload_prefs', $groups);
 		}
@@ -20,12 +22,31 @@ class Photo_frame_model extends CI_Model {
 			$groups = $this->session->cache['photo_frame']['upload_prefs'];
 		}
 		
-		return $this->channel_data->utility->reindex('id', $groups);
+		return $groups;
 	}
 	
-	public function parse_file($string, $type = 'url')
+	public function parse($string, $type = 'url', $file_uploads = FALSE)
 	{
-		$file_uploads = $this->get_file_upload_groups();
+		$types = array(
+			'url'         => 'url',
+			'file'        => 'server_path',
+			'server_path' => 'server_path',
+			'path'        => 'server_path'
+		);
+		
+		if(isset($types[$type]))
+		{
+			$type = $types[$type];
+		}
+		else
+		{
+			$type = 'url';
+		}
+		
+		if(!$file_uploads)
+		{
+			$file_uploads = $this->get_file_upload_groups();
+		}
 		
 		preg_match("/".LD."filedir_(\d*)".RD."/", $string, $matches);
 		
@@ -183,6 +204,7 @@ class Photo_frame_model extends CI_Model {
 		}
 	}	
 	
+	/*
 	public function parse_filename($name, $field = 'url', $framed_dir = FALSE, $framed_dir_name = FALSE)
 	{
 		$parse = $this->parse_filenames(array(array('file' => $name)), $field, $framed_dir, $framed_dir_name);
@@ -224,6 +246,7 @@ class Photo_frame_model extends CI_Model {
 		
 		return $data;
 	}
+	*/
 	
 	public function upload_options($index_field = 'id', $name_field = 'name')
 	{

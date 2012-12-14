@@ -368,6 +368,11 @@ a.photo-frame-bar-button.photo-frame-cancel.photo-frame-float-left {
 	border-bottom-color: rgb(123, 121, 123);
 	color: rgb(200, 200, 200);
 }
+
+.photo-frame-sortable {
+	margin: 0;
+}
+
 .photo-frame-sortable li {
     float: left;  
 }

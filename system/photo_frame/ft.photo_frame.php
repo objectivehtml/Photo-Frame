@@ -23,7 +23,8 @@ class Photo_frame_ft extends EE_Fieldtype {
 	
 	public $has_array_data 		= TRUE;
 	public $safecracker			= FALSE;
-		
+	public $upload_prefs;
+	
 	private $default_settings	= array(
 	);
 		
@@ -116,13 +117,13 @@ class Photo_frame_ft extends EE_Fieldtype {
 		$this->EE->theme_loader->css('photo_frame');
 		$this->EE->theme_loader->css('jquery.jcrop');
 		$this->EE->theme_loader->javascript('photo_frame');
-		$this->EE->theme_loader->javascript('jquery.ui.widget');
+		$this->EE->theme_loader->javascript('jquery.ui');
 		$this->EE->theme_loader->javascript('jquery.iframe-transport');
 		$this->EE->theme_loader->javascript('jquery.fileupload');
 		$this->EE->theme_loader->javascript('jquery.activity-indicator');
 		$this->EE->theme_loader->javascript('jquery.load-image');
 		$this->EE->theme_loader->javascript('jquery.jcrop');
-		$this->EE->theme_loader->javascript('jquery.color');
+		$this->EE->theme_loader->javascript('jquery.color');		
 		
 		$entry_id  = empty($data) && $data !== FALSE ? $data : ($this->EE->input->get_post('entry_id') ? $this->EE->input->get_post('entry_id') : (isset($this->EE->safecracker) ? $this->EE->safecracker->entry('entry_id') : 0));
 		
@@ -204,11 +205,11 @@ class Photo_frame_ft extends EE_Fieldtype {
 			
 				foreach($saved_data as $index => $row)
 				{
-					$orig_path = $this->EE->photo_frame_model->parse_filename($row['original_file'], 'server_path');
-					$file_path = $this->EE->photo_frame_model->parse_filename($row['file'], 'server_path');
+					$orig_path = $this->EE->photo_frame_model->parse($row['original_file'], 'server_path');					
+					$file_path = $this->EE->photo_frame_model->parse($row['file'], 'server_path');
 					
-					$orig_url  = $this->EE->photo_frame_model->parse_filename($row['original_file']);
-					$file_url  = $this->EE->photo_frame_model->parse_filename($row['file'], 'url');
+					$orig_url  = $this->EE->photo_frame_model->parse($row['original_file']);
+					$file_url  = $this->EE->photo_frame_model->parse($row['file'], 'url');
 					
 					$new_row                       = $row;
 					$new_row['saved_data']         = $row;
@@ -380,6 +381,13 @@ class Photo_frame_ft extends EE_Fieldtype {
 		return $this->replace_tag($data, $params, $tagdata);
 	}
 	
+	public function pre_process($data)
+	{
+		$this->upload_prefs = $this->EE->file_upload_preferences_model->get_file_upload_preferences(NULL, NULL, TRUE);
+		
+		return $data;
+	}
+	
 	public function replace_tag($data, $params = array(), $tagdata)
 	{
 		$this->EE->load->config('photo_frame_config');
@@ -419,14 +427,6 @@ class Photo_frame_ft extends EE_Fieldtype {
 		
 		$photos = $this->EE->photo_frame_model->get_photos($this->field_id, $data);
 		
-		/*
-		if(!is_null($params['size']))
-		{
-			$params['directory_name'] = '_'.ltrim($params['size']);
-			$params['source']         = 'original';
-		}
-		*/
-		
 		if(is_null($params['limit']))
 		{
 			$params['limit'] = $photos->num_rows();
@@ -440,69 +440,24 @@ class Photo_frame_ft extends EE_Fieldtype {
 		$params['limit']  = (int) $params['limit'];
 		$params['offset'] = (int) $params['offset'];
 		
+		$return = array();
+		
 		if($tagdata)
 		{
-			$return = array();
-		}
-		else
-		{
-			$return = NULL;
+			foreach($photos->result_array() as $index => $row)
+			{
+				if($index < $params['limit'] && $index >= $params['offset'])
+				{				
+					$return[$index] = $row;
+					$return[$index]['file'] = $this->EE->photo_frame_model->parse($row['file'], 'file', $this->upload_prefs);
+					$return[$index]['original_file'] = $this->EE->photo_frame_model->parse($row['original_file'], 'file', $this->upload_prefs);
+					$return[$index]['url'] = $this->EE->photo_frame_model->parse($row['file'], 'url', $this->upload_prefs);
+				}	
+			}
+			
 		}
 		
-		foreach($photos->result_array() as $index => $row)
-		{
-			if($index < $params['limit'] && $index >= $params['offset'])
-			{
-				if(is_array($return))
-				{
-					$return[] = $row;
-				}
-				else
-				{
-					$field = $params['source'] == 'framed' ? 'file' : 'original_file';
-					
-					$img_params = NULL;
-					
-					if(empty($params['alt']))
-					{
-						$params['alt'] = $row['file_name'];
-					}
-					
-					foreach($params as $param => $value)
-					{
-						if(!in_array($param, $exclude_params))
-						{
-							if(!empty($value))
-							{
-								$img_params .= $param.'="'.$value.'" ';
-							}
-						}	
-					}
-					
-					if(isset($params['size']))
-					{
-						$sizes = json_decode($row['sizes']);
-						
-						if(isset($sizes->{$params['size']}))
-						{
-							
-							$row[$field] = str_replace(config_item('photo_frame_directory_name'), '', ltrim($sizes->$params['size']->file, '/'));
-							
-						}
-					}
-					
-					if(isset($params['return_html']) && $this->bool_param($params['return_html']) || !isset($params['return_html']))
-					{
-						$return  .= '<img src="'.$row[$field].'" '.trim($img_params).' />';
-					}
-					else
-					{
-						$return .= $row[$field];
-					}
-				}
-			}
-	
-		}
+		exit();
 		
 		if(is_array($return))
 		{
@@ -555,6 +510,11 @@ class Photo_frame_ft extends EE_Fieldtype {
 		}
 				
 		return $return;
+	}
+	
+	private function _parse_filenames()
+	{
+		var_dump($this->upload_prefs);exit();
 	}
 	
 	public function replace_total_photos($data, $params = array(), $tagdata)
