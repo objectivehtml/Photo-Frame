@@ -625,57 +625,7 @@ class Photo_frame_ft extends EE_Fieldtype {
 		{    		
 			$this->EE->photo_frame_model->update($edit_photos);
 		}
-		
-		
-		/*
-		// Create new photos
-		$new_photos = $this->EE->input->post($this->field_name, TRUE);
-		$new_photos = isset($new_photos['new']) ? $new_photos['new'] : array();
-			
-		if(count($new_photos) > 0)
-		{			
-			$new_photos = $this->EE->photo_frame_lib->decode_array($new_photos);
-			
-			foreach($new_photos as $index => $photo)
-			{
-				$new_photos[$index]['site_id']  = config_item('site_id');
-				$new_photos[$index]['field_id'] = $this->field_id;
-			    $new_photos[$index]['order']    = $index;
-				$new_photos[$index]['entry_id'] = $this->settings['entry_id'];
-				
-				$unset = array(
-					'directory' => FALSE,
-				);
-				
-				foreach($unset as $var => $rename)
-				{
-					if(isset($new_photos[$index][$var]))
-					{
-						if($rename)
-						{
-							$new_photos[$index][$rename] = $new_photos[$index][$var];
-						}
-						
-						unset($new_photos[$index][$var]);
-					}
-				}
-			}
-			
-			$this->EE->photo_frame_model->save($new_photos);
-		}
-		
-		// Update existing photos
 					
-		$update_photos = $this->EE->input->post($this->field_name, TRUE);
-		$update_photos = isset($update_photos['edit']) ? $update_photos['edit'] : array();
-		
-		if(is_array($update_photos) && count($update_photos) > 0)
-		{
-			$this->EE->photo_frame_model->update($update_photos);
-		}
-		
-		*/
-			
 		$this->EE->photo_frame_model->update_entry($this->settings['entry_id'], array(
 			'field_id_'.$this->field_id => $this->settings['entry_id']
 		));
@@ -825,7 +775,7 @@ class Photo_frame_ft extends EE_Fieldtype {
 			),
 			'photo_frame_name_format' => array(
 				'label'       => 'Filename Format',
-				'description' => 'If a format is defined, the variables will be parsed to create a dynamic filename which will override the default.<br><br>Available Variables: <i>{channel_id}, {entry_id}, {title}, {url_title}, {filename}, {extension}, {name}, {width}, {height}</i>',
+				'description' => 'If a format is defined, the variables will be parsed to create a dynamic filename which will override the default.<br><br>Available Variables: <i>{channel_id}, {entry_id}, {title}, {url_title}, {filename}, {extension}, {name}, {width}, {height}, {random_alpha}, {random_alnum}, {random_numeric}, {random_string}, {random_nozero}, {random_unique}, {random_sha1}</i>',
 				'type'        => 'input'
 			)
 		);

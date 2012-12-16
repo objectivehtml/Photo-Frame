@@ -16,6 +16,81 @@ class ImageEditor extends BaseClass {
 	
 	protected $bgd_color = 0;
 	
+	/* -----------------------------------------
+		Static Functions
+	----------------------------------------- */
+	
+	/**
+	 * Return ImageEditor object
+	 *
+	 * @access	public
+	 * @param	string 	Valid image filepath
+	 * @return	object
+	 */
+	public static function init($file)
+	{
+		return new ImageEditor($file);
+	}
+	
+	/**
+	 * Return Image Height
+	 *
+	 * @access	public
+	 * @param	string 	Valid image filepath
+	 * @return	object
+	 */
+	public static function height($file)
+	{
+		return ImageEditor::init($file)->getHeight();
+	}
+	
+	/**
+	 * Return Image Object
+	 *
+	 * @access	public
+	 * @param	string 	Valid image filepath
+	 * @return	object
+	 */			
+	public static function image($file)
+	{
+		return ImageEditor::init($file)->getImage();
+	}
+	
+	/**
+	 * Return Image Type
+	 *
+	 * @access	public
+	 * @param	string 	Valid image filepath
+	 * @return	object
+	 */
+	public static function type($file)
+	{
+		return ImageEditor::init($file)->getType();
+	}
+	
+	/**
+	 * Return Image Width
+	 *
+	 * @access	public
+	 * @param	string 	Valid image filepath
+	 * @return	object
+	 */
+	public static function width($file)
+	{
+		return ImageEditor::init($file)->getWidth();
+	}
+	
+	/*---------------------------------------------------------------------------*/
+	
+	/**
+	 * Construct
+	 *
+	 * @access	public
+	 * @param	string 	Valid image filepath
+	 * @param 	array	An associative array of properties to set
+	 * @return	
+	 */
+	
 	public function __construct($filename, $params = array())
 	{		
 		parent::__construct($params);
@@ -50,7 +125,16 @@ class ImageEditor extends BaseClass {
 		}
 	}
 	
-	function save($filename = FALSE, $permissions = NULL)
+	
+	/**
+	 * Save an image object to a file
+	 *
+	 * @access	public
+	 * @param	mixed 	Valid image filepath. If FALSE, filename property is used.
+	 * @param	mixed 	File permissions. If NULL, permissions will be writable
+	 * @return	object
+	 */
+	public function save($filename = FALSE, $permissions = 0777)
 	{
 		//header('Content-Type: image/'.$this->type);
 		
@@ -80,17 +164,26 @@ class ImageEditor extends BaseClass {
 		}
 	}
 	
-	function getImage()
+	
+	/**
+	 * Get the image object
+	 *
+	 * @access	public
+	 * @return	object
+	 */
+	public function getImage()
 	{
 		return $this->image;
 	}
 	
-	function get_image()
-	{
-		return $this->getImage();
-	}
 	
-	function getType($return_int = FALSE)
+	/**
+	 * Get the image tyoe
+	 *
+	 * @access	public
+	 * @return	object
+	 */
+	public function getType($return_int = FALSE)
 	{
 		if($return_int)
 		{
@@ -107,32 +200,39 @@ class ImageEditor extends BaseClass {
 		}
 	}
 	
-	function get_type()
-	{
-		return $this->getType();
-	}
 	
-	function getWidth()
+	/**
+	 * Get the image width
+	 *
+	 * @access	public
+	 * @return	object
+	 */
+	public function getWidth()
 	{
       return imagesx($this->image);
 	}
 	
-	function get_width()
-	{
-		return $this->getWidth();
-	}
 	
-	function getHeight()
+	/**
+	 * Get the image height
+	 *
+	 * @access	public
+	 * @return	object
+	 */
+	public function getHeight()
 	{
       return imagesy($this->image);
 	}
 	
-	function get_height()
-	{
-		return $this->getHeight();
-	}
 	
-	function resizeToHeight($height)
+	/**
+	 * Resize the image to specified height
+	 *
+	 * @access	public
+	 * @param   int		The height of the image
+	 * @return	object
+	 */
+	public function resizeToHeight($height)
 	{	
 		$ratio = $height / $this->getHeight();
 		$width = $this->getWidth() * $ratio;
@@ -140,12 +240,15 @@ class ImageEditor extends BaseClass {
 		$this->resize($width,$height);
 	}
 	
-	function resize_to_height($height)
-	{
-		return $this->resizeToHeight($height);
-	}
 	
-	function resizeToWidth($width)
+	/**
+	 * Resize the image to specified width
+	 *
+	 * @access	public
+	 * @param   int		The width of the image
+	 * @return	object
+	 */
+	public function resizeToWidth($width)
 	{
 		$ratio  = $width / $this->getWidth();
 		$height = $this->getHeight() * $ratio;
@@ -153,23 +256,43 @@ class ImageEditor extends BaseClass {
 		$this->resize($width,$height);
 	}
 	
-	function resize_to_width($width)
-	{
-		return $this->resizeToWidth($width);
-	}
 	
-	function scale($scale)
+	/**
+	 * Resize the image to specified scale
+	 *
+	 * @access	public
+	 * @param   int		The scale of the image
+	 * @return	object
+	 */
+	public function scale($scale)
 	{
 		$width  = $this->getWidth()  * $scale / 100;
 		$height = $this->getHeight() * $scale / 100;
 		$this->resize($width,$height);
 	}
 	
-	function rotate($angle = 0, $ignore_transparent = 0)
+	
+	/**
+	 * Rotate an image to a specified angle
+	 *
+	 * @access	public
+	 * @param   int		The rotation degree
+	 * @param   int		Ignore the image transparency 
+	 * @return	object
+	 */
+	public function rotate($angle = 0, $ignore_transparent = 0)
 	{
 		imagerotate($this->image, $angle , $this->bgd_color, $ignore_transparent);
 	}
 	
+	
+	/**
+	 * Rename an image
+	 *
+	 * @access	public
+	 * @param   string	A valid filepath with a filename included
+	 * @return	object
+	 */
 	public function rename($filename)
 	{
 		if(file_exists($this->filename))
@@ -178,6 +301,20 @@ class ImageEditor extends BaseClass {
 		}
 	}
 	
+	
+	/**
+	 * Duplcate an image
+	 *
+	 * @access	public
+	 * @param   string	A valid filepath with a filename included
+	 * @param   int 	A new image width
+	 * @param   int 	A new image height
+	 * @param   int 	Resize an image to specified X coordinate
+	 * @param   int 	Resize an image to specified Y coordinate
+	 * @param   int 	Resize an image to specified X2 coordinate
+	 * @param   int 	Resize an image to specified Y2 coordinate
+	 * @return	object
+	 */
 	public function duplicate($filename, $width = FALSE, $height = FALSE, $x = 0, $y = 0, $x2 = 0, $y2 = 0)
 	{	
 		if(!file_exists($this->filename))
@@ -206,7 +343,20 @@ class ImageEditor extends BaseClass {
 		}			
 	}
 	
-	function resize($width, $height, $x = 0, $y = 0, $x2 = 0, $y2 = 0)
+	
+	/**
+	 * Resize an image
+	 *
+	 * @access	public
+	 * @param   int 	A new image width
+	 * @param   int 	A new image height
+	 * @param   int 	Resize an image to specified X coordinate
+	 * @param   int 	Resize an image to specified Y coordinate
+	 * @param   int 	Resize an image to specified X2 coordinate
+	 * @param   int 	Resize an image to specified Y2 coordinate
+	 * @return	object
+	 */
+	public function resize($width, $height, $x = 0, $y = 0, $x2 = 0, $y2 = 0)
 	{
 		$resized_image = imagecreatetruecolor($width, $height);
 		
@@ -221,7 +371,17 @@ class ImageEditor extends BaseClass {
 		$this->save();
 	}
 	
-	function preserve_transparency($image = FALSE, $width = FALSE, $height = FALSE)
+	
+	/**
+	 * Preserve image Transparancy
+	 *
+	 * @access	public
+	 * @param   string	A image object
+	 * @param   int 	A new image width
+	 * @param   int 	A new image height
+	 * @return	object
+	 */
+	public function preserve_transparency($image = FALSE, $width = FALSE, $height = FALSE)
 	{
 		$return = TRUE;
 		
@@ -258,7 +418,20 @@ class ImageEditor extends BaseClass {
 		}
 	}
 	
-	function crop($width, $height, $x = 0, $y = 0, $x2 = 0, $y2 = 0)
+	
+	/**
+	 * Crop Image
+	 *
+	 * @access	public
+	 * @param   int 	A new image width
+	 * @param   int 	A new image height
+	 * @param   int 	Resize an image to specified X coordinate
+	 * @param   int 	Resize an image to specified Y coordinate
+	 * @param   int 	Resize an image to specified X2 coordinate
+	 * @param   int 	Resize an image to specified Y2 coordinate
+	 * @return	object
+	 */
+	public function crop($width, $height, $x = 0, $y = 0, $x2 = 0, $y2 = 0)
 	{
 		$resized_image = imagecreatetruecolor($width, $height);
 		
