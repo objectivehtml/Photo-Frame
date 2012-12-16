@@ -5,6 +5,8 @@ class Photo_frame_model extends CI_Model {
 	public function __construct()
 	{
 		parent::__construct();
+		
+		$this->load->driver('channel_data');
 	}
 	
 	public function get_file_upload_groups()
@@ -27,6 +29,12 @@ class Photo_frame_model extends CI_Model {
 	
 	public function parse($string, $type = 'url', $file_uploads = FALSE)
 	{
+		if($type === FALSE || is_array($type))
+		{
+			$file_uploads = $type;
+			$type         = 'url';	
+		}
+		
 		$types = array(
 			'url'         => 'url',
 			'file'        => 'server_path',
@@ -81,9 +89,11 @@ class Photo_frame_model extends CI_Model {
 	
 	public function get_photo($id)
 	{
-		$this->db->where('id', $id);
-		
-		return $this->db->get('photo_frame');
+		return $this->get_photos(array(
+			'where' => array(
+				'id' => $id
+			)
+		));
 	}
 	
 	public function get_entry($entry_id)
@@ -96,43 +106,61 @@ class Photo_frame_model extends CI_Model {
 		return $this->channel_data->get_channel_entry($entry_id);
 	}
 	
-	public function get_entry_photos($entry_id, $site_id = FALSE)
+	public function get_entry_photos($entry_id, $site_id = FALSE, $limit = FALSE, $offset = 0, $order_by = 'order', $sort = 'asc')
 	{
 		if(!$site_id)
 		{
 			$site_id = config_item('site_id');	
 		}
 		
-		$this->db->where('entry_id', $entry_id);
+		$params = array(
+			'where' => array(
+				'entry_id' => $entry_id,
+				'site_id'  => $site_id
+			),
+			'limit'    => $limit,
+			'offset'   => $offset,
+			'order_by' => $order_by,
+			'sort'     => $sort
+		);
 		
-		return $this->db->get('photo_frame');
+		return $this->get_photos($params);
 	}
 	
-	public function get_field_photos($field_id, $site_id = FALSE)
+	public function get_field_photos($field_id, $site_id = FALSE, $limit = FALSE, $offset = 0, $order_by = 'order', $sort = 'asc')
 	{
 		if(!$site_id)
 		{
 			$site_id = config_item('site_id');	
 		}
 		
-		$this->db->where('field_id', $field_id);
+		$params = array(
+			'where' => array(
+				'field_id' => $field_id,
+				'site_id'  => $site_id
+			),
+			'limit'    => $limit,
+			'offset'   => $offset,
+			'order_by' => $order_by,
+			'sort'     => $sort
+		);
 		
-		return $this->db->get('photo_frame');
+		return $this->get_photos($params);
 	}
 	
-	public function get_photos($field_id, $entry_id, $site_id = FALSE)
+	public function get_photos($params)
 	{
-		if(!$site_id)
+		if(!isset($params['order_by']))
 		{
-			$site_id = config_item('site_id');	
+			$params['order_by'] = 'order';
 		}
 		
-		$this->db->where('site_id', $site_id);
-		$this->db->where('field_id', $field_id);
-		$this->db->where('entry_id', $entry_id);
-		$this->db->order_by('order', 'asc');
+		if(!isset($params['sort']))
+		{
+			$params['sort'] = 'sort';
+		}
 		
-		return $this->db->get('photo_frame');
+		return $this->channel_data->get('photo_frame', $params);
 	}
 	
 	public function update_entry($entry_id, $data)
@@ -168,16 +196,20 @@ class Photo_frame_model extends CI_Model {
 			
 			foreach($data as $id => $row)
 			{
-			    if(is_string($row))
-			    {
-				    $row = json_decode($row);
+				if(isset($row->id))
+				{
+				    if(is_string($row))
+				    {
+					    $row = json_decode($row);
+					}
+					
+					$row = (array) $row;
+					
+					$row['sizes'] = json_encode($row['sizes']);
+					
+					$this->db->where('id', $row['id']);
+					$this->db->update('photo_frame', $row);
 				}
-				
-				$row = (array) $row;
-				$row['sizes'] = json_encode($row['sizes']);
-				
-				$this->db->where('id', $row['id']);
-				$this->db->update('photo_frame', $row);
 			}
 		}
 	}			

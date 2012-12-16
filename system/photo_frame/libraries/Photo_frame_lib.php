@@ -228,10 +228,17 @@ class Photo_frame_lib {
 			$this->EE->load->helper('string');
 			
 			$entry  = $this->EE->photo_frame_model->get_entry($entry_id);
-			$photos = $this->EE->photo_frame_model->get_photos($field_id, $entry_id);
+			$photos = $this->EE->photo_frame_model->get_photos(array(
+				'where' => array(
+					'field_id' => $field_id, 
+					'entry_id' => $entry_id
+				)
+			));
+			
 			$sizes  = $settings['photo_frame_cropped_sizes'];
 			$parse  = array(
 				'entry_id'   => $entry_id,
+				'field_id'   => $field_id,
 				'channel_id' => $entry->row('channel_id'),
 				'url_title'  => $entry->row('url_title'),
 				'title'      => $entry->row('title')
@@ -248,6 +255,7 @@ class Photo_frame_lib {
 				$parse['photo_id']       = $photo_id;
 				$parse['name']           = config_item('photo_frame_original_size');
 				$parse['file_name']      = $photo->file_name;
+				$parse['filename']       = $photo->file_name;
 				$parse['random_alpha']   = random_string('alpha', config_item('photo_frame_random_string_len'));
 				$parse['random_alnum']   = random_string('alnum', config_item('photo_frame_random_string_len'));
 				$parse['random_numeric'] = random_string('numeric', config_item('photo_frame_random_string_len'));
@@ -266,22 +274,22 @@ class Photo_frame_lib {
 					
 				if(isset($settings['photo_frame_name_format']) && !empty($settings['photo_frame_name_format']))
 				{
-					$file_name = $this->parse($parse, $settings['photo_frame_name_format']);	
-					
+					$file_name = $this->parse($parse, $settings['photo_frame_name_format']);			
 					$orig  = $matches[0].$file_name;
-					$orig  = $this->EE->photo_frame_model->parse_file($orig, 'server_path');
+					$orig  = $this->EE->photo_frame_model->parse($orig, 'server_path');
 					
 					$parse['name']		= config_item('photo_frame_default_size');
 					
 					$new  = $matches[0].config_item('photo_frame_directory_name').'/'.$file_name;
-					$new  = $this->EE->photo_frame_model->parse_file($new, 'server_path');
+					$new  = $this->EE->photo_frame_model->parse($new, 'server_path');
 					
 					$update['file_name']     = $file_name;
 					
 					foreach(array('file' => $new, 'original_file' => $orig) as $type => $renamed_file)
 					{
-						$rename_photo = $this->EE->photo_frame_model->parse_file($photo->$type, 'server_path');
+						$rename_photo = $this->EE->photo_frame_model->parse($photo->$type, 'server_path');
 						$rename_photo = new ImageEditor($rename_photo);
+						
 						$rename_photo->rename($renamed_file);
 						
 						$update[$type] = str_replace($photo->file_name, $file_name, $photo->$type);
@@ -299,9 +307,9 @@ class Photo_frame_lib {
 					}
 					$width  = (int) $size['width'];
 					$height = (int) $size['height'];					
-					$file   = $this->EE->photo_frame_model->parse_file(isset($update['file']) ? $update['file'] : $photo->file, 'server_path');					
+					$file   = $this->EE->photo_frame_model->parse(isset($update['file']) ? $update['file'] : $photo->file, 'server_path');					
 					$new_format = $matches[0].config_item('photo_frame_directory_name').'/'.$file_name;
-					$new    	= $this->EE->photo_frame_model->parse_file($new_format, 'server_path');
+					$new    	= $this->EE->photo_frame_model->parse($new_format, 'server_path');
 					
 					$resized_photos[$size['name']] = array(
 						'width'  => $width,
@@ -313,14 +321,15 @@ class Photo_frame_lib {
 					
 					$image->duplicate($new, $width, $height);
 				}
+					
+				$update['sizes'] = $resized_photos;
+							
+				if(isset($photo_id))
+				{
+					$this->EE->photo_frame_model->update_photo($photo_id, $update);
+				}
 			}
-						
-			$update['sizes'] = $resized_photos;
-						
-			if(isset($photo_id))
-			{
-				$this->EE->photo_frame_model->update_photo($photo_id, $update);
-			}
+				
 		}	
 	}
 	
@@ -335,10 +344,10 @@ class Photo_frame_lib {
 			// 'file_path'     => $this->dir,
 			'file_name'     => $this->name,
 			'file_url'      => $this->url,
-			'file_path'     => $this->EE->photo_frame_model->parse_filename($new_file, 'server_path'),
-			'original_url'  => $this->EE->photo_frame_model->parse_filename($original_file),
-			'original_path' => $this->EE->photo_frame_model->parse_filename($original_file, 'server_path'),
-			'file'          => $this->EE->photo_frame_model->parse_filename($new_file),
+			'file_path'     => $this->EE->photo_frame_model->parse($new_file, 'server_path'),
+			'original_url'  => $this->EE->photo_frame_model->parse($original_file),
+			'original_path' => $this->EE->photo_frame_model->parse($original_file, 'server_path'),
+			'file'          => $this->EE->photo_frame_model->parse($new_file),
 			'save_data' 	=> json_encode(array_merge(array(
 				'original_file' => $original_file,
 				'file'          => $new_file,
