@@ -48,7 +48,7 @@ if(!function_exists('action_url'))
 		
 		if($current_url)
 		{
-			$url = page_url(TRUE, FALSE);
+			$url = page_url(FALSE, FALSE);
 		}
 		else
 		{

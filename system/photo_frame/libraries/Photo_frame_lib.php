@@ -17,18 +17,7 @@ class Photo_frame_lib {
 		{
 			$this->EE->load->model('photo_frame_model');
 		}
-
-		if(!isset($this->EE->theme_loader))
-		{
-			$this->EE->load->library('Theme_loader');
-		}	
 		
-		$this->EE->theme_loader->module_name = 'photo_frame';
-		
-		$this->EE->load->config('photo_frame_config');
-		$this->EE->load->helper('addon_helper');
-		$this->EE->load->model('photo_frame_model');
-					
 		$this->id   = $this->EE->input->get_post('id', TRUE);
 		$this->name = $this->EE->input->get_post('name', TRUE);
 		$this->img  = $this->EE->input->get_post('image', TRUE);
@@ -262,8 +251,8 @@ class Photo_frame_lib {
 			$parse['width']		     = $photo->width;
 			$parse['photo_id']       = $photo->id;
 			$parse['name']           = config_item('photo_frame_original_size');
-			$parse['file_name']      = $photo->file_name;
-			$parse['filename']       = $photo->file_name;
+			$parse['file_name']      = preg_replace('/.\w*$/', '', $photo->file_name);
+			$parse['filename']       = $parse['file_name'];
 			$parse['random_alpha']   = random_string('alpha', config_item('photo_frame_random_string_len'));
 			$parse['random_alnum']   = random_string('alnum', config_item('photo_frame_random_string_len'));
 			$parse['random_numeric'] = random_string('numeric', config_item('photo_frame_random_string_len'));
@@ -282,26 +271,29 @@ class Photo_frame_lib {
 				
 			if(isset($settings['photo_frame_name_format']) && !empty($settings['photo_frame_name_format']))
 			{
-				$file_name = $this->parse($parse, $settings['photo_frame_name_format']);			
-				$orig  = $matches[0].$file_name;
-				$orig  = $this->EE->photo_frame_model->parse($orig, 'server_path');
+				$file_name = $this->parse($parse, $settings['photo_frame_name_format']);				
+			}
+
+			$orig = $matches[0].$photo->file_name;
+			$orig = $this->EE->photo_frame_model->parse($orig, 'server_path');
+			
+			$orig_path = $matches[0].$file_name;
+			$orig_path = $this->EE->photo_frame_model->parse($orig_path, 'server_path');
+			
+			$framed = $matches[0].config_item('photo_frame_directory_name').'/'.$photo->file_name;
+			$framed = $this->EE->photo_frame_model->parse($framed, 'server_path');
+			
+			$framed_path = $matches[0].config_item('photo_frame_directory_name').'/'.$file_name;
+			$framed_path = $this->EE->photo_frame_model->parse($framed_path, 'server_path');
+			
+			$update['file_name']     = $file_name;
+			$update['file']          = str_replace($photo->file_name, $file_name, $photo->file);
+			$update['original_file'] = str_replace($photo->file_name, $file_name, $photo->original_file);
 				
-				$parse['name'] = config_item('photo_frame_default_size');
-				
-				$new  = $matches[0].config_item('photo_frame_directory_name').'/'.$file_name;
-				$new  = $this->EE->photo_frame_model->parse($new, 'server_path');
-				
-				$update['file_name']     = $file_name;
-				
-				foreach(array('file' => $new, 'original_file' => $orig) as $type => $renamed_file)
-				{
-					$rename_photo = $this->EE->photo_frame_model->parse($photo->$type, 'server_path');
-					$rename_photo = new ImageEditor($rename_photo);
-					
-					$rename_photo->rename($renamed_file);
-					
-					$update[$type] = str_replace($photo->file_name, $file_name, $photo->$type);
-				}
+			if(isset($settings['photo_frame_name_format']) && !empty($settings['photo_frame_name_format']))
+			{
+				ImageEditor::init($orig)->rename($orig_path);
+				ImageEditor::init($framed)->rename($framed_path);			
 			}
 			
 			if(isset($settings['photo_frame_cropped_sizes']))
@@ -315,30 +307,27 @@ class Photo_frame_lib {
 					
 					if(isset($settings['photo_frame_name_format']) && !empty($settings['photo_frame_name_format']))
 					{
-						$file_name = $this->parse($parse, $settings['photo_frame_name_format']);
+						$new_file_name = $this->parse($parse, $settings['photo_frame_name_format']);
 					}
 					
-					$format     = isset($update['file']) ? $update['file'] : $photo->file;
-					$file   	= $this->EE->photo_frame_model->parse($format, 'server_path');					
-					$new_format = $matches[0].config_item('photo_frame_directory_name').'/'.$file_name;
-					$new    	= $this->EE->photo_frame_model->parse($new_format, 'server_path');
-										
+					$format     = $matches[0].config_item('photo_frame_directory_name').'/'.$new_file_name;
+					$sized_path = $this->EE->photo_frame_model->parse($format, 'server_path');
+					
 					$width  = (int) $size['width'];
 					$height = (int) $size['height'];
 					
-					$image  = new ImageEditor($file);					
-					$image->duplicate($new, $width, $height);
-										
+					ImageEditor::init($framed_path)->duplicate($sized_path, $width, $height);
+						
 					$resized_photos[$size['name']] = array(
-						'width'  => ImageEditor::width($new),
-						'height' => ImageEditor::height($new),
-						'file'   => $new_format
-					);					
+						'width'  => $width,
+						'height' => $height,
+						'file'   => $format
+					);			
 				}
 					
 				$update['sizes'] = $resized_photos;
 			}
-										
+			
 			$this->EE->photo_frame_model->update_photo($photo->id, $update);			
 		}	
 	}

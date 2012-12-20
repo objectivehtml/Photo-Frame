@@ -72,6 +72,43 @@ class Photo_frame_ft extends EE_Fieldtype {
 			$this->safecracker = TRUE;
 		}
 		
+		/* Fixes bugs imposed by EE 2.5.2 and earlier */
+		if(version_compare(APP_VER, '2.5.3', '<'))
+		{
+			require_once PATH_THIRD . 'photo_frame/config/photo_frame_config.php';
+			require_once PATH_THIRD . 'photo_frame/helpers/addon_helper.php';
+			require_once PATH_THIRD . 'photo_frame/models/photo_frame_model.php';
+			
+			$this->EE->photo_frame_model = new Photo_frame_model();
+			
+			if(version_compare(APP_VER, '2.4', '<'))
+			{				
+				if(!isset($this->EE->theme_loader))
+				{
+					require_once PATH_THIRD . 'photo_frame/libraries/Theme_loader.php';
+					
+					$this->EE->theme_loader = new Theme_loader();
+				}
+			}
+			else
+			{					
+				if(!isset($this->EE->theme_loader))
+				{
+					$this->EE->load->library('Theme_loader');
+				}	
+			}
+		}
+		else
+		{
+			$this->EE->load->helper('addon_helper');
+			$this->EE->load->model('photo_frame_model');
+							
+			if(!isset($this->EE->theme_loader))
+			{
+				$this->EE->load->library('Theme_loader');
+			}
+		}
+		
 		$this->EE->lang->loadfile('photo_frame');
 					
 		if(count($_FILES) > 0 && count($_POST) == 0)
@@ -79,6 +116,8 @@ class Photo_frame_ft extends EE_Fieldtype {
 			$this->EE->load->library('photo_frame_lib');
 			$this->EE->photo_frame_lib->upload_action();
 		}	
+		
+		$this->EE->theme_loader->module_name = 'photo_frame';
 	}
 	
 	// --------------------------------------------------------------------
@@ -105,9 +144,12 @@ class Photo_frame_ft extends EE_Fieldtype {
 	
 	function display_field($data)
 	{	
+		$this->EE->theme_loader->module_name = 'photo_frame';
+		
 		$this->EE->load->config('photo_frame_config');
 		$this->EE->load->library('photo_frame_lib');
-					
+		
+			
 		$this->EE->theme_loader->css('photo_frame');
 		$this->EE->theme_loader->css('jquery.jcrop');
 		$this->EE->theme_loader->javascript('photo_frame');
@@ -228,9 +270,9 @@ class Photo_frame_ft extends EE_Fieldtype {
 			$saved_data = array();
 		}
 		
-		$url        = page_url() . '&dir_id='.$settings['photo_frame_upload_group'].'&field_id='.$this->field_id;
-		$crop_url   = action_url('photo_frame', 'crop_action');
-		 
+		$url      = page_url() . '&dir_id='.$settings['photo_frame_upload_group'].'&field_id='.$this->field_id;
+		$crop_url = action_url('photo_frame', 'crop_action', FALSE);
+		
 		$min_width  = (int) $this->setting('min_width', 0);
 		$min_height = (int) $this->setting('min_height', 0);
 		

@@ -79,7 +79,7 @@ class ImageEditor extends BaseClass {
 	{
 		return ImageEditor::init($file)->getWidth();
 	}
-	
+		
 	/*---------------------------------------------------------------------------*/
 	
 	/**
