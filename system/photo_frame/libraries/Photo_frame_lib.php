@@ -17,7 +17,18 @@ class Photo_frame_lib {
 		{
 			$this->EE->load->model('photo_frame_model');
 		}
+
+		if(!isset($this->EE->theme_loader))
+		{
+			$this->EE->load->library('Theme_loader');
+		}	
 		
+		$this->EE->theme_loader->module_name = 'photo_frame';
+		
+		$this->EE->load->config('photo_frame_config');
+		$this->EE->load->helper('addon_helper');
+		$this->EE->load->model('photo_frame_model');
+					
 		$this->id   = $this->EE->input->get_post('id', TRUE);
 		$this->name = $this->EE->input->get_post('name', TRUE);
 		$this->img  = $this->EE->input->get_post('image', TRUE);
