@@ -45,18 +45,18 @@ class Photo_frame_mcp {
 		copy($response['rel_path'], $framed_dir.$response['title']);
 		
 		return $this->json(array(
-			'success'         => count($errors) == 0 ? TRUE : FALSE,
-			'response'        => $response,
-			'directory'       => $directory,
-			'file_name'		  => $response['file_name'],
-			'img_url'		  => $directory['url'].$response['file_name'],
-			'framed_img_path' => $directory['server_path'].'/'.$response['file_name'],
-			'framed_img_url'  => $directory['url'].$framed_dir_name.'/'.$response['file_name'],
-			'framed_img_path' => $directory['server_path'].$framed_dir_name.'/'.$response['file_name'],
-			'framed_dir'      => $framed_dir,
-			'framed_dir_name' => $framed_dir_name,
-			'file'            => array(),
-			'errors'          => $errors
+			'success'            => count($errors) == 0 ? TRUE : FALSE,
+			'response'           => $response,
+			'directory'          => $directory,
+			'file_name'		     => $response['file_name'],
+			'img_url'		     => $directory['url'].$response['file_name'],
+			'framed_img_path'    => $directory['server_path'].'/'.$response['file_name'],
+			'framed_img_url'     => $directory['url'].$framed_dir_name.'/'.$response['file_name'],
+			'framed_img_path'    => $directory['server_path'].$framed_dir_name.'/'.$response['file_name'],
+			'framed_dir'         => $framed_dir,
+			'framed_dir_name'    => $framed_dir_name,
+			'file'               => array(),
+			'errors'             => $errors
 		));
 	}
 	

@@ -13,10 +13,15 @@ class Photo_frame_lib {
 		$this->EE->load->config('photo_frame_config');
 		$this->EE->lang->loadfile('photo_frame');
 		
-		if(!class_exists('photo_frame_model'))
+		$this->EE->load->model('photo_frame_model');					
+		$this->EE->load->helper('addon_helper');
+	
+		if(!isset($this->EE->theme_loader))
 		{
-			$this->EE->load->model('photo_frame_model');
+			$this->EE->load->library('Theme_loader');
 		}
+
+		$this->EE->theme_loader->module_name = 'photo_frame';
 		
 		$this->id   = $this->EE->input->get_post('id', TRUE);
 		$this->name = $this->EE->input->get_post('name', TRUE);
@@ -251,7 +256,7 @@ class Photo_frame_lib {
 			$parse['width']		     = $photo->width;
 			$parse['photo_id']       = $photo->id;
 			$parse['name']           = config_item('photo_frame_original_size');
-			$parse['file_name']      = preg_replace('/.\w*$/', '', $photo->file_name);
+			$parse['file_name']      = preg_replace('/.\w*$/', '', $photo->original_file_name);
 			$parse['filename']       = $parse['file_name'];
 			$parse['random_alpha']   = random_string('alpha', config_item('photo_frame_random_string_len'));
 			$parse['random_alnum']   = random_string('alnum', config_item('photo_frame_random_string_len'));
@@ -267,17 +272,24 @@ class Photo_frame_lib {
 			
 			preg_match("/".LD."filedir_(\d*)".RD."/", $photo->file, $matches);
 				
-			$file_name = $photo->file_name;
+			$orig_file_name = $file_name = $photo->original_file_name;
 				
 			if(isset($settings['photo_frame_name_format']) && !empty($settings['photo_frame_name_format']))
 			{
-				$file_name = $this->parse($parse, $settings['photo_frame_name_format']);				
+				$file_name      = $this->parse($parse, $settings['photo_frame_name_format']);		
+			
+				$path = $this->EE->photo_frame_model->parse($photo->original_file, 'server_path');
+				
+				$parse['width']  = ImageEditor::width($path);
+				$parse['height'] = ImageEditor::height($path);
+				
+				$orig_file_name = $this->parse($parse, $settings['photo_frame_name_format']);
 			}
-
+			
 			$orig = $matches[0].$photo->file_name;
 			$orig = $this->EE->photo_frame_model->parse($orig, 'server_path');
 			
-			$orig_path = $matches[0].$file_name;
+			$orig_path = $matches[0].$orig_file_name;
 			$orig_path = $this->EE->photo_frame_model->parse($orig_path, 'server_path');
 			
 			$framed = $matches[0].config_item('photo_frame_directory_name').'/'.$photo->file_name;
@@ -288,11 +300,11 @@ class Photo_frame_lib {
 			
 			$update['file_name']     = $file_name;
 			$update['file']          = str_replace($photo->file_name, $file_name, $photo->file);
-			$update['original_file'] = str_replace($photo->file_name, $file_name, $photo->original_file);
-				
+			$update['original_file'] = str_replace($photo->file_name, $orig_file_name, $photo->original_file);
+			
 			if(isset($settings['photo_frame_name_format']) && !empty($settings['photo_frame_name_format']))
 			{
-				ImageEditor::init($orig)->rename($orig_path);
+				ImageEditor::init($orig)->rename($orig_path);	
 				ImageEditor::init($framed)->rename($framed_path);			
 			}
 			
@@ -302,12 +314,16 @@ class Photo_frame_lib {
 		
 				foreach($sizes as $size)
 				{
-					$parse['file_name'] = $photo->file;
+					$parse['file_name'] = $photo->original_file_name;
 					$parse = array_merge($parse, $size);
 					
 					if(isset($settings['photo_frame_name_format']) && !empty($settings['photo_frame_name_format']))
 					{
 						$new_file_name = $this->parse($parse, $settings['photo_frame_name_format']);
+					}
+					else
+					{
+						$new_file_name = $photo->original_file_name;
 					}
 					
 					$format     = $matches[0].config_item('photo_frame_directory_name').'/'.$new_file_name;

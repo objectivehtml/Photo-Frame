@@ -71,44 +71,7 @@ class Photo_frame_ft extends EE_Fieldtype {
 		{
 			$this->safecracker = TRUE;
 		}
-		
-		/* Fixes bugs imposed by EE 2.5.2 and earlier */
-		if(version_compare(APP_VER, '2.5.3', '<'))
-		{
-			require_once PATH_THIRD . 'photo_frame/config/photo_frame_config.php';
-			require_once PATH_THIRD . 'photo_frame/helpers/addon_helper.php';
-			require_once PATH_THIRD . 'photo_frame/models/photo_frame_model.php';
-			
-			$this->EE->photo_frame_model = new Photo_frame_model();
-			
-			if(version_compare(APP_VER, '2.4', '<'))
-			{				
-				if(!isset($this->EE->theme_loader))
-				{
-					require_once PATH_THIRD . 'photo_frame/libraries/Theme_loader.php';
-					
-					$this->EE->theme_loader = new Theme_loader();
-				}
-			}
-			else
-			{					
-				if(!isset($this->EE->theme_loader))
-				{
-					$this->EE->load->library('Theme_loader');
-				}	
-			}
-		}
-		else
-		{
-			$this->EE->load->helper('addon_helper');
-			$this->EE->load->model('photo_frame_model');
-							
-			if(!isset($this->EE->theme_loader))
-			{
-				$this->EE->load->library('Theme_loader');
-			}
-		}
-		
+				
 		$this->EE->lang->loadfile('photo_frame');
 					
 		if(count($_FILES) > 0 && count($_POST) == 0)
@@ -116,8 +79,6 @@ class Photo_frame_ft extends EE_Fieldtype {
 			$this->EE->load->library('photo_frame_lib');
 			$this->EE->photo_frame_lib->upload_action();
 		}	
-		
-		$this->EE->theme_loader->module_name = 'photo_frame';
 	}
 	
 	// --------------------------------------------------------------------
@@ -144,12 +105,9 @@ class Photo_frame_ft extends EE_Fieldtype {
 	
 	function display_field($data)
 	{	
-		$this->EE->theme_loader->module_name = 'photo_frame';
-		
 		$this->EE->load->config('photo_frame_config');
 		$this->EE->load->library('photo_frame_lib');
-		
-			
+					
 		$this->EE->theme_loader->css('photo_frame');
 		$this->EE->theme_loader->css('jquery.jcrop');
 		$this->EE->theme_loader->javascript('photo_frame');
@@ -433,6 +391,8 @@ class Photo_frame_ft extends EE_Fieldtype {
 	
 	public function replace_tag($data, $params = array(), $tagdata)
 	{
+		$this->EE->load->library('photo_frame_lib');
+		
 		$this->EE->load->config('photo_frame_config');
 		
 		if(!$params)
@@ -528,7 +488,9 @@ class Photo_frame_ft extends EE_Fieldtype {
 	}
 	
 	public function replace_total_photos($data, $params = array(), $tagdata)
-	{				
+	{		
+		$this->EE->load->library('photo_frame_lib');
+				
 		$params = array_merge($this->default_params, $params);
 		
 		$photos = $this->EE->photo_frame_model->get_photos(array(
@@ -564,6 +526,8 @@ class Photo_frame_ft extends EE_Fieldtype {
 	
 	public function post_save($data)
 	{	
+		$this->EE->load->library('photo_frame_lib');
+		
 		$settings = unserialize(base64_decode($this->settings['field_settings']));
 		
 		$this->EE->load->library('photo_frame_lib');
@@ -582,6 +546,7 @@ class Photo_frame_ft extends EE_Fieldtype {
         		    $photo = $this->EE->photo_frame_lib->decode_array($photo);
         		    $photo = $photo['new'];
         		   
+        		    $photo['original_file_name'] = $photo['file_name'];
         		    $photo['site_id']  = config_item('site_id');
     				$photo['field_id'] = $this->field_id;
     			    $photo['order']    = $index;
@@ -658,6 +623,8 @@ class Photo_frame_ft extends EE_Fieldtype {
 
 	public function validate($data)
 	{
+		$this->EE->load->library('photo_frame_lib');
+		
 		$min_photos    = isset($this->settings['photo_frame_min_photos']) ? (int) $this->settings['photo_frame_min_photos'] : 0;
 		$max_photos    = isset($this->settings['photo_frame_max_photos']) ? (int) $this->settings['photo_frame_max_photos'] : 0;
 		$total_photos  = isset($_POST[$this->field_name]) ? count($_POST[$this->field_name]) : 0;		

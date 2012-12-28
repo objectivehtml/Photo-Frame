@@ -5,7 +5,9 @@
 	font-weight: normal;
 	font-style: normal;
 }
-[class^="icon-"]:before,  [class*=" icon-"]:before {
+
+.photo-frame-wrapper [class^="icon-"]:before, 
+.photo-frame-wrapper [class*=" icon-"]:before {
 	font-family: 'photo-frame';
 	font-style: normal;
 	font-weight: normal;
@@ -13,33 +15,17 @@
 	display: inline-block;
 	text-decoration: inherit;
 }
-.icon-info:before {
-	content: '\2139';
-} /* 'ℹ' */
-.icon-save:before {
-	content: '\2611';
-} /* '☑' */
-.icon-edit:before {
-	content: '\270d';
-} /* '✍' */
-.icon-cancel:before {
-	content: '\2715';
-} /* '✕' */
-.icon-warning-sign:before {
-	content: '\2757';
-} /* '❗' */
-.icon-rotate:before {
-	content: '\27f2';
-} /* '⟲' */
-.icon-trash:before {
-	content: '\e801';
-} /* '' */
-.icon-resize:before {
-	content: '\e744';
-} /* '' */
-.icon-upload:before {
-	content: '\e800';
-} /* '' */
+
+.photo-frame-wrapper .icon-info:before { content: '\2139'; } /* 'ℹ' */
+.photo-frame-wrapper .icon-save:before { content: '\2611'; } /* '☑' */
+.photo-frame-wrapper .icon-edit:before { content: '\270d'; } /* '✍' */
+.photo-frame-wrapper .icon-cancel:before { content: '\2715'; } /* '✕' */
+.photo-frame-wrapper .icon-warning-sign:before { content: '\2757'; } /* '❗' */
+.photo-frame-wrapper .icon-rotate:before { content: '\27f2'; } /* '⟲' */
+.photo-frame-wrapper .icon-trash:before { content: '\e801'; } /* '' */
+.photo-frame-wrapper .icon-resize:before { content: '\e744'; } /* '' */
+.photo-frame-wrapper .icon-upload:before { content: '\e800'; } /* '' */
+
 .photo-frame-dimmer img {
 	max-width: none;
 }
@@ -254,9 +240,8 @@
 .photo-frame-activity .photo-frame-button.photo-frame-cancel {
 }
 .photo-frame-activity .photo-frame-indicator {
-	/* left: -35px; */
-
-	top: 13px;
+	left: -15px;
+	top: -35px;
 	position: relative;
 }
 .photo-frame-indicator div {
@@ -463,8 +448,8 @@ a.photo-frame-bar-button.photo-frame-cancel.photo-frame-float-left {
 }
 .photo-frame-saving span {
 	position: relative;
-	top: 13px;
-	right: 20px;
+	top: 15px;
+	right: 30px;
 }
 .photo-frame-float-right {
 	float: right;

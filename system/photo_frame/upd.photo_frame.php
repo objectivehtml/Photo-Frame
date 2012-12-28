@@ -75,6 +75,9 @@ class Photo_frame_upd {
 			'file_name'		=> array(
 				'type' 				=> 'text'
 			),
+			'original_file_name'	=> array(
+				'type' 				=> 'text'
+			),
 			'title'			=> array(
 				'type' 				=> 'text'
 			),
