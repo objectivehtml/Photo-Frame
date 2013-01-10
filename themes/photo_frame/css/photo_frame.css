@@ -380,9 +380,14 @@ a.photo-frame-bar-button.photo-frame-cancel.photo-frame-float-left {
 	line-height: 1em;
 }
 
+.photo-frame-photo {
+	max-width: 100%;	
+}
+
 .photo-frame-photo img {
 	max-width: none;
 	display: block;
+	width: 100%;
 }
 
 .photo-frame-upload {

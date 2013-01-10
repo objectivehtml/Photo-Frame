@@ -107,10 +107,9 @@ class Photo_frame_ft extends EE_Fieldtype {
 	{	
 		$this->EE->load->config('photo_frame_config');
 		$this->EE->load->library('photo_frame_lib');
-					
+			
 		$this->EE->theme_loader->module_name = 'photo_frame';
-		
-		
+				
 		$this->EE->theme_loader->css('photo_frame');
 		$this->EE->theme_loader->css('jquery.jcrop');
 		$this->EE->theme_loader->javascript('photo_frame');
@@ -524,6 +523,36 @@ class Photo_frame_ft extends EE_Fieldtype {
 	
 	public function save($data)
 	{
+		$this->EE->load->library('photo_frame_lib');
+		
+		if(is_string($data) && preg_match("/({filedir_\d})(.*\.\w*)/us", $data, $matches))
+		{
+			$frame_file = $matches[1].config_item('photo_frame_directory_name').'/'.$matches[2];
+			
+			$orig_file   = $this->EE->photo_frame_model->parse($data, 'server_path');			
+			$framed_file = $this->EE->photo_frame_model->parse($frame_file, 'server_path');
+					
+			$_POST[$this->field_name] = array(
+				array('new' => json_encode(array(
+					'original_file' => $data,
+					'file'          => $frame_file,
+					'file_name'     => $matches[2],
+					'title'         => '',
+					'description'   => '',
+					'keywords'      => '',
+					'x'				=> '',
+					'x2'			=> '',
+					'y' 			=> '',
+					'y2' 			=> '',
+					'height'	    => ImageEditor::width($orig_file),
+					'width'		    => ImageEditor::height($orig_file)
+					
+				))
+			));
+			
+			ImageEditor::init($orig_file)->duplicate($framed_file);
+		}
+		
 		return NULL;
 	}
 	
@@ -885,6 +914,8 @@ class Photo_frame_ft extends EE_Fieldtype {
 	
 	public function delete($ids)
 	{
+		$this->EE->load->library('photo_frame_lib');
+		
 		$this->EE->photo_frame_model->delete_entries($ids);
 	}
 	

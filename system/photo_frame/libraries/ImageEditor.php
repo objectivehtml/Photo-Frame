@@ -322,12 +322,9 @@ class ImageEditor extends BaseClass {
 			return;	
 		}
 		
-		if($width || $height)
-		{			
-			copy($this->filename, $filename);
+		copy($this->filename, $filename);	
 			
-			$image = new ImageEditor($filename);	
-		}
+		$image = ImageEditor::init($filename);	
 		
 		if(!$width && $height)
 		{
