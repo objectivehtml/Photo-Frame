@@ -134,7 +134,7 @@ class ImageEditor extends BaseClass {
 	 * @param	mixed 	File permissions. If NULL, permissions will be writable
 	 * @return	object
 	 */
-	public function save($filename = FALSE, $permissions = 0777)
+	public function save($filename = FALSE, $permissions = DIR_WRITE_MODE)
 	{
 		//header('Content-Type: image/'.$this->type);
 		

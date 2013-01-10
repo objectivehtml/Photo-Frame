@@ -379,10 +379,12 @@ a.photo-frame-bar-button.photo-frame-cancel.photo-frame-float-left {
 	display: inline-block;
 	line-height: 1em;
 }
+
 .photo-frame-photo img {
-	max-width: 100%;
-	display:block;
+	max-width: none;
+	display: block;
 }
+
 .photo-frame-upload {
 	clear: both;	
 }
