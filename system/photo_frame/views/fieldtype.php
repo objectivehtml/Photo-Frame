@@ -1,4 +1,4 @@
-<div class="photo-frame-wrapper <?php echo $theme?>" id="<?php echo $field_name?>_wrapper">
+<div class="photo-frame-wrapper <?php echo $theme?>" id="<?php echo $selector?>">
 	
 	<!--[if lt IE 10]> <div class="photo-frame-ie"> <![endif]-->
 	    
@@ -10,12 +10,12 @@
         				<img src="<?php echo $photo->file_url?>?date=<?php echo time()?>" id="ohot" />
         				
         				<div class="photo-frame-action-bar">
-        					<a href="#<?php echo $index?>" class="photo-frame-edit"><span class="icon-edit"></span></a>
-        					<a href="#<?php echo !isset($photo->id) ? $id : $photo->id?>" class="photo-frame-delete"><span class="icon-trash"></span></a>
+        					<a href="#<?php echo $index?>" class="photo-frame-edit" <?php echo isset($photo->new) ? 'data-new-entry="true"' : NULL?>><span class="icon-edit"></span></a>
+        					<a href="#<?php echo !isset($photo->id) ? $id : $photo->id?>" class="photo-frame-delete" <?php echo isset($photo->new) && $photo->new ? 'data-new-entry="true"' : NULL?>><span class="icon-trash"></span></a>
         				</div>
         			</div>
         			
-        			<textarea name="<?php echo $field_name?>[][<?php echo isset($photo->new) ? 'new' : 'edit'?>]" id="photo-frame-<?php echo isset($photo->new) ? 'new' : 'edit'?>-photo-<?php echo !isset($photo->id) ? $id : $photo->id?>-<?php echo $index?>" style="display:none"><?php echo json_encode($photo->saved_data);?></textarea>
+        			<textarea name="<?php echo $field_name?>[][<?php echo isset($photo->new) && $photo->new ? 'new' : 'edit'?>]" id="photo-frame-<?php echo isset($photo->new) ? 'new' : 'edit'?>-photo-<?php echo !isset($photo->id) ? $id : $photo->id?>-<?php echo $index?>" style="display:none"><?php echo json_encode($photo->saved_data);?></textarea>
         		</li>
         		<?php endforeach; ?>
     		</ul>

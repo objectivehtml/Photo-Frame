@@ -23,13 +23,16 @@ class Photo_frame_lib {
 
 		$this->EE->theme_loader->module_name = 'photo_frame';
 		
-		$this->id   = $this->EE->input->get_post('id', TRUE);
-		$this->name = $this->EE->input->get_post('name', TRUE);
-		$this->img  = $this->EE->input->get_post('image', TRUE);
-		$this->dir  = $this->EE->input->get_post('directory', TRUE);
-		$this->orig = $this->EE->input->get_post('original', TRUE);
-		$this->edit = $this->EE->input->get_post('edit', TRUE) == 'true' ? TRUE : FALSE;
-		$this->url  = $this->EE->input->get_post('url', TRUE);
+		$this->id        = $this->EE->input->get_post('id', TRUE);
+		$this->photo_id  = $this->EE->input->get_post('photo_id', TRUE);
+		$this->name      = $this->EE->input->get_post('name', TRUE);
+		$this->img       = $this->EE->input->get_post('image', TRUE);
+		$this->dir       = $this->EE->input->get_post('directory', TRUE);
+		$this->orig      = $this->EE->input->get_post('original', TRUE);
+		$this->orig_file = $this->EE->input->get_post('original_file', TRUE);
+		$this->orig_name = $this->EE->input->get_post('original_file_name', TRUE);
+		$this->edit      = $this->EE->input->get_post('edit', TRUE) == 'true' ? TRUE : FALSE;
+		$this->url       = $this->EE->input->get_post('url', TRUE);
 	}
 		
 	public function build_size($settings, $index)
@@ -126,14 +129,16 @@ class Photo_frame_lib {
 		}
 		
 		return $this->json(array(
-			'success'       => count($errors) == 0 ? TRUE : FALSE,
-			'directory'     => $directory,
-			'file_name'     => isset($file_name) ? $file_name : NULL,
-			'file_url'      => isset($file_url) ? $file_url : NULL,
-			'file_path'     => isset($file_path) ? $file_path : NULL,
-			'original_url'  => isset($orig_url) ? $orig_url : NULL,
-			'original_path' => isset($orig_path) ? $orig_path : NULL,
-			'errors'        => $errors
+			'success'            => count($errors) == 0 ? TRUE : FALSE,
+			'directory'          => $directory,
+			'file_name'          => isset($file_name) ? $file_name : NULL,
+			'file_url'           => isset($file_url) ? $file_url : NULL,
+			'file_path'          => isset($file_path) ? $file_path : NULL,
+			'original_file'      => '{filedir_'.$dir_id.'}'.$response['file_name'],
+			'original_file_name' => $response['file_name'],
+			'original_url'       => isset($orig_url) ? $orig_url : NULL,
+			'original_path'      => isset($orig_path) ? $orig_path : NULL,
+			'errors'             => $errors
 		), $ie);
 	}
 	
@@ -226,16 +231,28 @@ class Photo_frame_lib {
 		));
 	}
 	
-	public function resize_photos($field_id, $entry_id, $settings = array())
+	public function resize_photos($field_id, $entry_id, $col_id = FALSE, $row_id = FALSE, $settings = array(), $matrix = FALSE)
 	{		
 		$this->EE->load->helper('string');
 		
+		$where  = array(
+			'field_id' => $field_id, 
+			'entry_id' => $entry_id
+		);
+		
+		if($col_id)
+		{
+			$where['col_id'] = $col_id;	
+		}
+		
+		if($row_id)
+		{
+			$where['row_id'] = $row_id;	
+		}
+		
 		$entry  = $this->EE->photo_frame_model->get_entry($entry_id);
 		$photos = $this->EE->photo_frame_model->get_photos(array(
-			'where' => array(
-				'field_id' => $field_id, 
-				'entry_id' => $entry_id
-			)
+			'where' => $where
 		));
 		
 		$parse  = array(
@@ -350,22 +367,27 @@ class Photo_frame_lib {
 	
 	public function crop_json($success = TRUE, $save_data = array())
 	{
-		$original_file = '{filedir_'.$this->id.'}'.$this->name;
+		$original_file = $this->orig_file;
+		
 		$new_file      = '{filedir_'.$this->id.'}'.config_item('photo_frame_directory_name').'/'.$this->name;
 		
 		return $this->json(array_merge(array(
 			'id'            => $this->id,
 			'success'       => $success,
+			'photo_id'      => $this->photo_id,
 			// 'file_path'     => $this->dir,
 			'file_name'     => $this->name,
 			'file_url'      => $this->url,
 			'file_path'     => $this->EE->photo_frame_model->parse($new_file, 'server_path'),
+			'original_file' => $original_file,
+			'original_file_name' => $this->name,
 			'original_url'  => $this->EE->photo_frame_model->parse($original_file),
 			'original_path' => $this->EE->photo_frame_model->parse($original_file, 'server_path'),
 			'file'          => $this->EE->photo_frame_model->parse($new_file),
 			'save_data' 	=> json_encode(array_merge(array(
 				'original_file' => $original_file,
 				'file'          => $new_file,
+				'id'      		=> $this->photo_id,
 				'file_name'		=> $this->name,
 				'title' 		=> $this->EE->input->get_post('title', TRUE) ? $this->EE->input->get_post('title', TRUE) : '',
 				'description'   => $this->EE->input->get_post('description', TRUE) ? $this->EE->input->get_post('description', TRUE) : '',

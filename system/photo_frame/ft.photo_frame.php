@@ -21,6 +21,7 @@ class Photo_frame_ft extends EE_Fieldtype {
 		'version'		=> PHOTO_FRAME_VERSION
 	);
 	
+	public $matrix 				= FALSE;
 	public $has_array_data 		= TRUE;
 	public $safecracker			= FALSE;
 	public $upload_prefs;
@@ -79,6 +80,8 @@ class Photo_frame_ft extends EE_Fieldtype {
 			$this->EE->load->library('photo_frame_lib');
 			$this->EE->photo_frame_lib->upload_action();
 		}	
+		
+		$this->EE->load->add_package_path(PATH_THIRD . 'photo_frame');
 	}
 	
 	// --------------------------------------------------------------------
@@ -102,6 +105,21 @@ class Photo_frame_ft extends EE_Fieldtype {
 	 * @param 	array
 	 * @return	string
 	 */
+	 
+	public function display_cell($data)
+	{
+		$this->matrix = TRUE;
+		
+		return $this->display_field($data, $this->settings);
+	}
+	
+	public function display_cell_settings($data)
+	{
+		$this->matrix = TRUE;
+		
+			
+		return $this->display_settings($data);
+	}
 	
 	function display_field($data)
 	{	
@@ -123,7 +141,10 @@ class Photo_frame_ft extends EE_Fieldtype {
 		$this->EE->theme_loader->javascript('jquery.color');		
 		
 		$entry_id  = empty($data) && $data !== FALSE ? $data : ($this->EE->input->get_post('entry_id') ? $this->EE->input->get_post('entry_id') : (isset($this->EE->safecracker) ? $this->EE->safecracker->entry('entry_id') : 0));
-		
+			
+			
+		$uid  = $this->matrix ? md5($this->cell_name) : $this->field_name.'_wrapper';
+			
 		$default_settings = array(
 			'photo_frame_display_info'       => 'true',
 			'photo_frame_display_meta'       => 'false',
@@ -162,16 +183,41 @@ class Photo_frame_ft extends EE_Fieldtype {
 		$saved_data = array();
 		$new_photos = array();
 		
-		$new_photos_set = isset($_POST[$this->field_name]['new']) ? TRUE : FALSE;
+		$new_photos_set = FALSE;
+		$edit_photos_set = FALSE;
+		
+		if($this->matrix)
+		{
+			if(!empty($data) && is_array($data))
+			{
+				$new_photos_set  = $this->EE->photo_frame_model->has_new_photos($data);
+				$edit_photos_set = $this->EE->photo_frame_model->has_edit_photos($data);
+			}
+		}
+		elseif(isset($_POST[$this->field_name]))
+		{
+			$new_photos_set  = $this->EE->photo_frame_model->has_new_photos($_POST[$this->field_name]);
+			$edit_photos_set = $this->EE->photo_frame_model->has_edit_photos($_POST[$this->field_name]);
+		}
+		
+		$where = array(
+			'field_id' => $this->field_id, 
+			'entry_id' => $data
+		);
+		
+		if($this->matrix && !empty($data))
+		{
+			unset($where['entry_id']);
+			
+			$where['col_id'] = $this->col_id;
+			$where['row_id'] = $data;
+		}
 		
 		$saved_data = $this->EE->photo_frame_model->get_photos(array(
-			'where' => array(
-				'field_id' => $this->field_id, 
-				'entry_id' => $data
-			)
+			'where' => $where
 		));
 		
-		if($saved_data->num_rows() > 0 || $new_photos_set)
+		if($saved_data->num_rows() > 0 || $new_photos_set || $edit_photos_set)
 		{
 			if($saved_data->num_rows() > 0)
 			{
@@ -182,22 +228,60 @@ class Photo_frame_ft extends EE_Fieldtype {
 				$saved_data = array();
 			}
 			
+			$post_data = array();
+			
+			if($this->matrix)
+			{
+				$post_data = $data;
+			}
+			else
+			{
+				if(isset($_POST[$this->field_name]))
+				{
+					$post_data = $_POST[$this->field_name];
+				}
+			}
+			
 			if($new_photos_set)
 			{
-				$new_photos = $_POST[$this->field_name]['new'];
-				
-				foreach($new_photos as $index => $new_photo)
+				foreach($post_data as $index => $new_photo)
 				{				
-					$photo = json_decode(html_entity_decode($new_photo));
-					
-					if(!is_null($photo))
+					if(isset($new_photo['new']))
 					{
-						$photo = (array) $photo;
-						$photo['new'] 		= TRUE;
-						$new_photos[$index] = $photo;
-						$saved_data[] 	    = $photo;
+						$new_photo = $new_photo['new'];
+						
+						$photo = json_decode(html_entity_decode($new_photo));
+						
+						if(!is_null($photo))
+						{
+							$photo = (array) $photo;
+							$photo['new'] 		= TRUE;
+							$new_photos[$index] = $photo;
+							$saved_data[] 	    = $photo;
+						}
 					}
 				}
+			}
+			
+			if($edit_photos_set)
+			{
+				foreach($post_data as $index => $edit_photo)
+				{
+					if(isset($edit_photo['edit']))
+					{
+						$edit_photo = $edit_photo['edit'];
+										
+						$photo = json_decode(html_entity_decode($edit_photo));
+						
+						if(!is_null($photo))
+						{
+							$photo = (array) $photo;
+							$photo['new'] 		 = FALSE;
+							$edit_photos[$index] = $photo;
+							$saved_data[] 	     = $photo;
+						}
+					}
+				}	
 			}
 			
 			if(count($saved_data) > 0)
@@ -294,12 +378,13 @@ class Photo_frame_ft extends EE_Fieldtype {
 		
 		$settings_js 	= '
 		
-			$(document).ready(function() {
+			// $(document).ready(function() {
+			
 				var obj = new PhotoFrame({
-					fieldName: \''.$this->field_name.'\',
+					fieldName: \''.($this->matrix ? $this->cell_name : $this->field_name).'\',
 					fieldId: \''.$this->field_id.'\',
 					photos: '.json_encode($saved_data).', 
-					wrapper: $("#'.$this->field_name.'_wrapper"),
+					wrapper: typeof cell == "undefined" ? $("#'.$uid.'") : cell.dom.$td.find(\'.photo-frame-wrapper\'),
 					url: \''.$url.'\',
 					cropUrl: \''.$crop_url.'\',
 					settings: '.json_encode($jcrop_settings).',
@@ -316,7 +401,7 @@ class Photo_frame_ft extends EE_Fieldtype {
 					resizeMax: '.json_encode($resize_max).',
 					sortable: '.(isset($settings['photo_frame_sortable']) ? $settings['photo_frame_sortable'] : 'false').'
 				});
-			});
+			// });
 		';
 		
 		/*
@@ -327,7 +412,31 @@ class Photo_frame_ft extends EE_Fieldtype {
 					
 					*/
 				
-		$this->EE->theme_loader->output($settings_js);		
+		if($this->matrix)
+		{
+			$this->EE->theme_loader->output('
+			Matrix.bind(\'photo_frame\', \'display\', function(cell) {
+				
+			// var cellName = obj.id[rowId][colId],
+			
+				'.$settings_js.'
+				obj.options.fieldName = cell.field.id+"["+cell.row.id+"]["+cell.col.id+"]";
+				
+				console.log(obj);
+								
+			});');
+			
+			if($this->safecracker) {					
+				$this->EE->theme_loader->output('
+				$(document).ready(function() { 
+					'.$settings_js.'
+				});');
+			}
+		}
+		else		
+		{
+			$this->EE->theme_loader->output('$(document).ready(function() {'.$settings_js.'});');
+		}
 		
 		$total_photos = count($saved_data);
 		
@@ -348,13 +457,21 @@ class Photo_frame_ft extends EE_Fieldtype {
 		
 		foreach($saved_data as $index => $data)
 		{
-			$data->saved_data['sizes'] = json_decode($data->saved_data['sizes']);
+			if(isset($data->save_data['sizes']))
+			{
+				$data->saved_data['sizes'] = json_decode($data->saved_data['sizes']);
+			}
+			else
+			{
+				$data->saved_data['sizes'] = NULL;
+			}
 		}
 		
 		$vars = array(
 			'id'             => $this->field_id,
+			'selector'       => $uid,
 			'field_label'    => $settings['field_label'],
-			'field_name'     => $this->field_name,
+			'field_name'     => ($this->matrix ? $this->cell_name : $this->field_name),
 			'theme'          => $theme ? $theme->getWrapperClass() : '',
 			'data'   	     => $saved_data,
 			'new_photos'     => $new_photos,
@@ -401,14 +518,24 @@ class Photo_frame_ft extends EE_Fieldtype {
 		{
 			$params = array();	
 		}
-						
+		
+		$where = array(
+			'field_id' => $this->field_id, 
+			'entry_id' => $data
+		);
+		
+		if(isset($this->row_id))
+		{
+			unset($where['entry_id']);
+			
+			$where['col_id'] = $this->col_id;
+			$where['row_id'] = $this->row_id;
+		}	
+					
 		$params = array_merge($this->default_params, $params);
 		
 		$photos = $this->EE->photo_frame_model->get_photos(array(
-			'where' => array(
-				'field_id' => $this->field_id, 
-				'entry_id' => $data
-			),
+			'where' => $where,
 			'order_by' => $params['order_by'],
 			'sort'     => $params['sort'],
 			'limit'    => $params['limit'],
@@ -494,12 +621,22 @@ class Photo_frame_ft extends EE_Fieldtype {
 		$this->EE->load->library('photo_frame_lib');
 				
 		$params = array_merge($this->default_params, $params);
+				
+		$where = array(
+			'field_id' => $this->field_id, 
+			'entry_id' => $data
+		);
 		
+		if(isset($this->row_id))
+		{
+			unset($where['entry_id']);
+			
+			$where['col_id'] = $this->col_id;
+			$where['row_id'] = $this->row_id;
+		}	
+			
 		$photos = $this->EE->photo_frame_model->get_photos(array(
-			'where' => array(
-				'field_id' => $this->field_id, 
-				'entry_id' => $data
-			),
+			'where' => $where,
 			'order_by' => $params['order_by'],
 			'sort'     => $params['sort'],
 			'limit'    => $params['limit'],
@@ -521,6 +658,20 @@ class Photo_frame_ft extends EE_Fieldtype {
 		return $default;
 	}
 	
+	public function save_cell($data)
+	{
+		$this->matrix = TRUE;
+		
+		$this->save($data);
+		
+		unset($this->EE);
+		
+		if(isset($this->settings['entry_id']))
+		{
+			return $this->settings['entry_id'];
+		}
+	}
+	
 	public function save($data)
 	{
 		$this->EE->load->library('photo_frame_lib');
@@ -532,7 +683,7 @@ class Photo_frame_ft extends EE_Fieldtype {
 			$orig_file   = $this->EE->photo_frame_model->parse($data, 'server_path');			
 			$framed_file = $this->EE->photo_frame_model->parse($frame_file, 'server_path');
 					
-			$_POST[$this->field_name] = array(
+			$post_data = array(
 				array('new' => json_encode(array(
 					'original_file' => $data,
 					'file'          => $frame_file,
@@ -550,24 +701,61 @@ class Photo_frame_ft extends EE_Fieldtype {
 				))
 			));
 			
+			if($this->matrix)
+			{
+				$_POST[$this->settings['field_name']][$this->settings['row_name']][$this->settings['col_name']] = $post_data;
+			}
+			else
+			{
+				$_POST[$this->field_name] = $post_data;
+			}
+			
 			ImageEditor::init($orig_file)->duplicate($framed_file);
 		}
 		
 		return NULL;
 	}
 	
+	public function post_save_cell($data)
+	{
+		$this->matrix = TRUE;
+		
+		$this->post_save($data);
+	}
+	
 	public function post_save($data)
 	{	
 		$this->EE->load->library('photo_frame_lib');
 		
-		$settings = unserialize(base64_decode($this->settings['field_settings']));
-		
-		$this->EE->load->library('photo_frame_lib');
-		
+		if($this->matrix)
+		{
+			$settings = $this->settings;
+		}
+		else
+		{
+			$settings = unserialize(base64_decode($this->settings['field_settings']));
+		}
+				
 		$new_photos  = array();
 		$edit_photos = array();
 		
-		$post = $this->EE->input->post($this->field_name, TRUE);
+		if($this->matrix)
+		{
+			$post = $this->EE->input->post($this->settings['field_name']);
+			
+			if(isset($post[$this->settings['row_name']][$this->settings['col_name']]))
+			{
+				$post = $post[$this->settings['row_name']][$this->settings['col_name']];
+			}
+			else
+			{
+				$post = array();
+			}
+		}
+		else
+		{
+			$post = $this->EE->input->post($this->field_name, TRUE);
+		}
 		
 		if(is_array($post))
 		{
@@ -575,14 +763,25 @@ class Photo_frame_ft extends EE_Fieldtype {
     		{
     		    if(isset($photo['new']))
     		    {
-        		    $photo = $this->EE->photo_frame_lib->decode_array($photo);
-        		    $photo = $photo['new'];
-        		   
+        		    $photo = (array) json_decode($photo['new']);
+        		    
+        		    unset($photo['new']);
+        		    
         		    $photo['original_file_name'] = $photo['file_name'];
         		    $photo['site_id']  = config_item('site_id');
     				$photo['field_id'] = $this->field_id;
     			    $photo['order']    = $index;
     				$photo['entry_id'] = $this->settings['entry_id'];
+    				
+    				if(isset($this->settings['col_id']))
+    				{
+	    				$photo['col_id'] = $this->settings['col_id'];
+    				}
+    				
+    				if(isset($this->settings['row_id']))
+    				{
+	    				$photo['row_id'] = $this->settings['row_id'];
+    				}
     				
     				$unset = array(
     					'directory' => FALSE
@@ -607,27 +806,54 @@ class Photo_frame_ft extends EE_Fieldtype {
     		    if(isset($photo['edit']) && count($photo['edit']))
     		    {
         		    $photo = json_decode($photo['edit']);
+        		    
+        		    if($this->matrix)
+        		    {
+	        		    $photo->col_id = $this->settings['col_id'];
+        		    }
+        		    
         		    $photo->order  = $index;        		    
         		    $edit_photos[] = $photo;
     		    }
     		}
 		}
 		
+		
+		if($this->matrix)
+		{		
+		}
+		
 		if(count($new_photos) > 0)
-		{    		
+		{    
 			$this->EE->photo_frame_model->save($new_photos);
 		}
 		
 		if(count($edit_photos) > 0)
 		{    		
-			$this->EE->photo_frame_model->update($edit_photos);
+			$this->EE->photo_frame_model->update($edit_photos, $this->matrix);
 		}
-					
-		$this->EE->photo_frame_model->update_entry($this->settings['entry_id'], array(
-			'field_id_'.$this->field_id => $this->settings['entry_id']
-		));
 		
-		$this->EE->photo_frame_lib->resize_photos($this->field_id, $this->settings['entry_id'], $settings);
+		if($this->matrix)
+		{	
+			$row_id = $this->settings['row_id'];
+			$col_id = $this->settings['col_id'];
+			
+			$this->EE->photo_frame_model->update_cell($this->settings['row_id'], array(
+				'col_id_'.$col_id => $this->settings['row_id']
+			));			
+		}
+		else
+		{
+			$this->EE->photo_frame_model->update_entry($this->settings['entry_id'], array(
+				'field_id_'.$this->field_id => $this->settings['entry_id']
+			));
+			
+			$row_id = FALSE;
+			$col_id = FALSE;
+		}
+		
+		
+		$this->EE->photo_frame_lib->resize_photos($this->field_id, $this->settings['entry_id'], $col_id, $row_id, $settings, $this->matrix);
 		
 		
 		// Update data with the entry_id
@@ -653,19 +879,41 @@ class Photo_frame_ft extends EE_Fieldtype {
 		return $this->settings['entry_id'];
 	}	
 
+	public function validate_cell($data)
+	{		
+		$this->matrix = TRUE;
+		
+		return $this->validate($data);
+	}
+	
 	public function validate($data)
 	{
-		$this->EE->load->library('photo_frame_lib');
+		$post_data = NULL;
 		
+		if($this->matrix)
+		{
+			if(isset($_POST[$this->settings['field_name']][$this->settings['row_name']][$this->settings['col_name']]))
+			{
+				$post_data = $_POST[$this->settings['field_name']][$this->settings['row_name']][$this->settings['col_name']];
+			}
+		}
+		elseif(isset($_POST[$this->field_name]))
+		{
+			$post_data = $_POST[$this->field_name];	
+		}
+		
+		$this->EE->load->library('photo_frame_lib');
+				
 		$min_photos    = isset($this->settings['photo_frame_min_photos']) ? (int) $this->settings['photo_frame_min_photos'] : 0;
 		$max_photos    = isset($this->settings['photo_frame_max_photos']) ? (int) $this->settings['photo_frame_max_photos'] : 0;
-		$total_photos  = isset($_POST[$this->field_name]) ? count($_POST[$this->field_name]) : 0;		
+		$total_photos  = isset($post_data) && !is_null($post_data)? count($post_data) : 0;		
 		$delete_photos = $this->EE->input->post('photo_frame_delete_photos', TRUE);
-		
-		if(isset($delete_photos[$this->field_id]))
+			
+		if(isset($delete_photos[$this->settings['field_id']]))
 		{
+			$delete_photos = $delete_photos[$this->settings['field_id']];
 			$total_photos  = $total_photos - count($delete_photos);
-			$delete_photos = $delete_photos[$this->field_id];
+			
 			$this->EE->photo_frame_model->delete($delete_photos);
 		}
 		
@@ -674,11 +922,7 @@ class Photo_frame_ft extends EE_Fieldtype {
 			'max_photos' => $max_photos
 		);
 		
-		if(($min_photos > 0 || $max_photos > 0) && !isset($this->EE->TMPL) && !$this->safecracker)
-		{		
-			require APPPATH . 'libraries/Template.php';	
-			$this->EE->TMPL = new EE_Template();		
-		}
+		$this->load_tmpl();
 		
 		if($min_photos > 0 && $min_photos > $total_photos)
 		{
@@ -712,10 +956,27 @@ class Photo_frame_ft extends EE_Fieldtype {
 			
 		require PATH_THIRD . 'photo_frame/libraries/Interface_builder/Interface_builder.php';
 		
+		$this->EE->theme_loader->module_name = 'photo_frame';
 		$this->EE->theme_loader->javascript('InterfaceBuilder');
-		$this->EE->theme_loader->output('
-			var IB = new InterfaceBuilder();
-		');
+		
+		if($this->matrix)
+		{
+			$this->EE->theme_loader->output('
+				var IB;
+				
+				$(".matrix-first select").change(function() {
+					if($(this).val() == "photo_frame") {
+						IB = new InterfaceBuilder();
+					}
+				});
+			');
+		}
+		else
+		{
+			$this->EE->theme_loader->output('
+				var IB = new InterfaceBuilder();
+			');
+		}
 		
 		$IB = new Interface_builder();
 		
@@ -889,20 +1150,21 @@ class Photo_frame_ft extends EE_Fieldtype {
 		);
 		
 		$vars = array(
+			'matrix' 	   => $this->matrix,
 			'resize_table' => $IB->table($resize_fields, $data, array(
-				'class'       => 'mainTable padTable',
+				'class'       => $this->matrix ? 'matrix-col-settings' : 'mainTable padTable',
 				'border'      => 0,
 				'cellpadding' => 0,
 				'cellspacing' => 0
 			)),
 			'crop_table' => $IB->table($crop_fields, $data, array(
-				'class'       => 'mainTable padTable',
+				'class'       => $this->matrix ? 'matrix-col-settings' : 'mainTable padTable',
 				'border'      => 0,
 				'cellpadding' => 0,
 				'cellspacing' => 0
 			)),
 			'info_table' => $IB->table($info_fields, $data, array(
-				'class'       => 'mainTable padTable',
+				'class'       => $this->matrix ? 'matrix-col-settings' : 'mainTable padTable',
 				'border'      => 0,
 				'cellpadding' => 0,
 				'cellspacing' => 0
@@ -953,7 +1215,16 @@ class Photo_frame_ft extends EE_Fieldtype {
 		}
 			
 		return $this->EE->TMPL->parse_variables($tagdata, $vars);
-	}   
+	} 
+	
+	private function load_tmpl()
+	{		
+		if(!isset($this->EE->TMPL))
+		{			
+			require APPPATH . 'libraries/Template.php';	
+			$this->EE->TMPL = new EE_Template();	
+		}
+	}
 }
 
 // END CLASS

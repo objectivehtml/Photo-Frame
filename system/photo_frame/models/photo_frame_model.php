@@ -29,6 +29,11 @@ class Photo_frame_model extends CI_Model {
 	
 	public function parse($string, $type = 'url', $file_uploads = FALSE)
 	{
+		if($string === FALSE)
+		{
+			return;	
+		}
+		
 		if($type === FALSE || is_array($type))
 		{
 			$file_uploads = $type;
@@ -169,6 +174,38 @@ class Photo_frame_model extends CI_Model {
 		$this->db->update('channel_data', $data);
 	}
 	
+	public function update_cell($row_id, $data)
+	{
+		$this->db->where('row_id', $row_id);
+		$this->db->update('matrix_data', $data);
+	}
+	
+	public function has_new_photos($data = array())
+	{
+		foreach($data as $index => $row)
+		{
+			if(isset($row['new']))
+			{
+				return TRUE;
+			}
+		}
+		
+		return FALSE;
+	}
+	
+	public function has_edit_photos($data = array())
+	{
+		foreach($data as $index => $row)
+		{
+			if(isset($row['edit']))
+			{
+				return TRUE;
+			}
+		}
+		
+		return FALSE;
+	}
+	
 	public function update_photo($photo_id, $data = array())
 	{
 		if(count($data) == 0)
@@ -185,7 +222,7 @@ class Photo_frame_model extends CI_Model {
 		$this->db->update('photo_frame', $data);	
 	}
 	
-	public function update($data)
+	public function update($data, $matrix = FALSE)
 	{
 		if($data)
 		{
@@ -205,7 +242,12 @@ class Photo_frame_model extends CI_Model {
 					
 					$row = (array) $row;
 					
-					$row['sizes'] = json_encode($row['sizes']);
+					if(isset($row['sizes']))
+					{
+						$row['sizes'] = json_encode($row['sizes']);
+					}
+					
+					unset($row['new']);
 					
 					$this->db->where('id', $row['id']);
 					$this->db->update('photo_frame', $row);
