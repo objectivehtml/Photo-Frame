@@ -40,6 +40,10 @@ class Photo_frame_upd {
 				'type'				=> 'int',
 				'constraint'		=> 50
 			),
+			'row_id'	=> array(
+				'type'				=> 'int',
+				'constraint'		=> 50
+			),
 			'col_id'	=> array(
 				'type'				=> 'int',
 				'constraint'		=> 50
@@ -76,10 +80,10 @@ class Photo_frame_upd {
 			'original_file' => array(
 				'type'				=> 'text'
 			),
-			'file_name'		=> array(
-				'type' 				=> 'text'
+			'original_file_name' => array(
+				'type'				=> 'text'
 			),
-			'original_file_name'	=> array(
+			'file_name'		=> array(
 				'type' 				=> 'text'
 			),
 			'title'			=> array(

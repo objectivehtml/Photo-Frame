@@ -1,6 +1,6 @@
 <?php if ( ! defined('BASEPATH')) exit('No direct script access allowed');
 
-$config['photo_frame_version'] = '0.8.0';
+$config['photo_frame_version'] = '0.9.0';
 
 if(!defined('PHOTO_FRAME_VERSION'))
 {
