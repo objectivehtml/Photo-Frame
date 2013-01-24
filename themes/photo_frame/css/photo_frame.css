@@ -6,8 +6,10 @@
 	font-style: normal;
 }
 
-.photo-frame-wrapper [class^="icon-"]:before, 
-.photo-frame-wrapper [class*=" icon-"]:before {
+.photo-frame-wrapper [class^="icon-"]:before,  
+.photo-frame-wrapper [class*=" icon-"]:before,
+.photo-frame-dimmer  [class^="icon-"]:before,  
+.photo-frame-dimmer  [class*=" icon-"]:before {
 	font-family: 'photo-frame';
 	font-style: normal;
 	font-weight: normal;
@@ -16,19 +18,50 @@
 	text-decoration: inherit;
 }
 
-.photo-frame-wrapper .icon-info:before { content: '\2139'; } /* 'ℹ' */
-.photo-frame-wrapper .icon-save:before { content: '\2611'; } /* '☑' */
-.photo-frame-wrapper .icon-edit:before { content: '\270d'; } /* '✍' */
-.photo-frame-wrapper .icon-cancel:before { content: '\2715'; } /* '✕' */
-.photo-frame-wrapper .icon-warning-sign:before { content: '\2757'; } /* '❗' */
-.photo-frame-wrapper .icon-rotate:before { content: '\27f2'; } /* '⟲' */
-.photo-frame-wrapper .icon-trash:before { content: '\e801'; } /* '' */
-.photo-frame-wrapper .icon-resize:before { content: '\e744'; } /* '' */
-.photo-frame-wrapper .icon-upload:before { content: '\e800'; } /* '' */
-
-.photo-frame-dimmer img {
+.photo-frame-dimmer .icon-info:before,
+.photo-frame-wrapper .icon-info:before {
+	content: '\2139';
+} /* 'ℹ' */
+.icon-save:before,
+.photo-frame-wrapper .icon-save:before {
+	content: '\2611';
+} /* '☑' */
+.photo-frame-dimmer .icon-edit:before,
+.photo-frame-wrapper .icon-edit:before {
+	content: '\270d';
+} /* '✍' */
+.photo-frame-dimmer .icon-cancel:before,
+.photo-frame-wrapper .icon-cancel:before {
+	content: '\2715';
+} /* '✕' */
+.photo-frame-dimmer .icon-warning-sign:before,
+.photo-frame-wrapper .icon-warning-sign:before {
+	content: '\2757';
+} /* '❗' */
+.photo-frame-dimmer .icon-rotate:before,
+.photo-frame-wrapper .icon-rotate:before {
+	content: '\27f2';
+} /* '⟲' */
+.photo-frame-dimmer .icon-trash:before,
+.photo-frame-wrapper .icon-trash:before {
+	content: '\e801';
+} /* '' */
+.photo-frame-dimmer .icon-resize:before,
+.photo-frame-wrapper .icon-resize:before {
+	content: '\e744';
+} /* '' */
+.photo-frame-dimmer .icon-upload:before,
+.photo-frame-wrapper .icon-upload:before {
+	content: '\e800';
+} /* '' */
+.photo-frame-photo-frame-dimmer .photo-frame-dimmer img,
+.photo-frame-wrapper .photo-frame-dimmer img {
 	max-width: none;
 }
+
+
+
+
 .photo-frame-invalid {
 	color: rgb(238, 57, 45);
 	font-weight: bold;
