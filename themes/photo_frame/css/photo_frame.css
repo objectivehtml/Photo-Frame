@@ -322,6 +322,12 @@
 	-moz-box-shadow: 0 0 20px rgba(0, 0, 0, .7);
 	box-shadow: 0 0 20px rgba(0, 0, 0, .7);
 }
+
+.photo-frame-image img {
+	max-width: none;
+}
+
+
 .photo-frame-placeholder {
 	display: none;
 }
@@ -432,6 +438,11 @@ a.photo-frame-bar-button.photo-frame-cancel.photo-frame-float-left {
     width: 100%; 
     display: block;
 }
+
+.photo-frame-preview li {
+	list-style: none;	
+}
+
 .photo-frame-photo:hover .photo-frame-action-bar {
 	bottom: 0;
 }
