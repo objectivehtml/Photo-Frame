@@ -72,7 +72,7 @@ class Photo_frame_ft extends EE_Fieldtype {
 		{
 			$this->safecracker = TRUE;
 		}
-				
+			
 		$this->EE->lang->loadfile('photo_frame');
 					
 		if(count($_FILES) > 0 && count($_POST) == 0)
@@ -123,6 +123,11 @@ class Photo_frame_ft extends EE_Fieldtype {
 	
 	function display_field($data)
 	{	
+		if(isset($this->EE->safecracker_lib))
+		{
+			$this->safecracker = TRUE;
+		}
+		
 		$this->EE->load->config('photo_frame_config');
 		$this->EE->load->library('photo_frame_lib');
 			
@@ -469,6 +474,7 @@ class Photo_frame_ft extends EE_Fieldtype {
 		
 		$vars = array(
 			'id'             => $this->field_id,
+			'safecracker'    => $this->safecracker,
 			'selector'       => $uid,
 			'field_label'    => $settings['field_label'],
 			'field_name'     => ($this->matrix ? $this->cell_name : $this->field_name),
@@ -890,6 +896,19 @@ class Photo_frame_ft extends EE_Fieldtype {
 	{
 		$post_data = NULL;
 		
+		if($this->safecracker)
+		{
+			foreach($_POST[$this->settings['field_name']] as $index => $post)
+			{
+				unset($_POST[$this->settings['field_name']][$index]['placeholder']);
+				
+				if(count($_POST[$this->settings['field_name']][$index]) == 0)
+				{
+					unset($_POST[$this->settings['field_name']][$index]);
+				}
+			}
+		}
+		
 		if($this->matrix)
 		{
 			if(isset($_POST[$this->settings['field_name']][$this->settings['row_name']][$this->settings['col_name']]))
@@ -918,28 +937,43 @@ class Photo_frame_ft extends EE_Fieldtype {
 		}
 		
 		$vars = array(
-			'min_photos' => $min_photos,
-			'max_photos' => $max_photos
+			'min_photos' 	  => $min_photos,
+			'max_photos'      => $max_photos,
+			'max_photos_name' => $max_photos > 1 || $max_photos < 1 ? 'photos' : 'photo',
+			'min_photos_name' => $min_photos > 1 || $min_photos < 1 ? 'photos' : 'photo'
 		);
 		
-		$this->load_tmpl();
+		
+		//var_dump($min_photos);exit();
+		
+		//$this->load_tmpl();
 		
 		if($min_photos > 0 && $min_photos > $total_photos)
 		{
-			$error = $this->EE->TMPL->parse_variables_row(lang('photo_frame_min_photos_error'), $vars);
+			$error = $this->parse_variables(lang('photo_frame_min_photos_error'), $vars);
 		}
 		
 		if($max_photos > 0 && $max_photos < $total_photos)
 		{
-			$error = $this->EE->TMPL->parse_variables_row(lang('photo_frame_max_photos_error'), $vars);
+			$error = $this->parse_variables(lang('photo_frame_max_photos_error'), $vars);
 		}
 		
 		if(isset($error))
 		{
-			return $this->EE->TMPL->advanced_conditionals($error);
+			return $error;	
 		}
 		
 		return TRUE;
+	}
+	
+	public function parse_variables($str, $vars = array())
+	{
+		foreach($vars as $var => $value)
+		{
+			$str = preg_replace('/'.LD.'('.$var.')'.RD.'/', $value, $str);
+		}
+		
+		return $str;
 	}
 	
 	public function display_settings($data)
@@ -1219,10 +1253,10 @@ class Photo_frame_ft extends EE_Fieldtype {
 	
 	private function load_tmpl()
 	{		
-		if(!isset($this->EE->TMPL))
+		if(!$this->safecracker)
 		{			
 			require APPPATH . 'libraries/Template.php';	
-			$this->EE->TMPL = new EE_Template();	
+			$this->EE->TMPL = new EE_Template();
 		}
 	}
 }

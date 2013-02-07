@@ -27,6 +27,10 @@
 		<?php if(!empty($upload_helper)): ?>
 			<p class="photo-frame-helper" <?php if($overlimit):?>style="display:none"<?php endif; ?>><?php echo $upload_helper?></p>
 		<?php endif; ?>
+		
+		<?php if($safecracker): ?>
+			<input type="hidden" name="<?php echo $field_name?>[][placeholder]" value="1" />
+		<?php endif; ?>
 	
 	<!--[if lt IE 10]> </div> <![endif]-->
 

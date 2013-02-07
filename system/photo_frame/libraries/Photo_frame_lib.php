@@ -134,8 +134,8 @@ class Photo_frame_lib {
 			'file_name'          => isset($file_name) ? $file_name : NULL,
 			'file_url'           => isset($file_url) ? $file_url : NULL,
 			'file_path'          => isset($file_path) ? $file_path : NULL,
-			'original_file'      => '{filedir_'.$dir_id.'}'.$response['file_name'],
-			'original_file_name' => $response['file_name'],
+			'original_file'      => isset($response['file_name']) ? '{filedir_'.$dir_id.'}'.$response['file_name'] : NULL,
+			'original_file_name' => isset($response['file_name']) ? $response['file_name'] : NULL,
 			'original_url'       => isset($orig_url) ? $orig_url : NULL,
 			'original_path'      => isset($orig_path) ? $orig_path : NULL,
 			'errors'             => $errors
