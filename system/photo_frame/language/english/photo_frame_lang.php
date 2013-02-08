@@ -22,6 +22,8 @@ $lang	= array(
 	'photo_frame_min_width'			    => 'The image must have a minimum width of {min_width}px',
 	'photo_frame_min_height'			=> 'The image must have a minimum height of {min_height}px',
 	
+	'photo_frame_upload_dir_not_exists' => 'The following directory does not exist: {directory}',
+	
 	//--------------------------------------------
 	'', ''
 );

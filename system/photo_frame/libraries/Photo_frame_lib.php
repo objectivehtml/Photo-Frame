@@ -107,15 +107,23 @@ class Photo_frame_lib {
 			
 			if(!is_dir($framed_dir))
 			{
-				mkdir($framed_dir, DIR_WRITE_MODE);
+				if(!is_dir($directory['server_path']))
+				{
+					$errors = array($this->parse(array(
+						'directory' => $directory['server_path']
+					), lang('photo_frame_upload_dir_not_exists')));
+				}
+				else
+				{					
+					mkdir($framed_dir, DIR_WRITE_MODE);
+
+					$response  = $this->EE->filemanager->upload_file($dir_id);								
+					$errors    = isset($response['error']) ? array($response['error']) : array();					
+				}
 			}
-			
-			$response  = $this->EE->filemanager->upload_file($dir_id);
-			
+					
 			$file_name = $file_path = $file_url = $orig_path = $orig_url = NULL;
-			
-			$errors    = isset($response['error']) ? array($response['error']) : array();
-			
+					
 			if(count($errors) == 0)
 			{
 				$file_name = $response['file_name'];
