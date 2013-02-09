@@ -116,12 +116,12 @@ class Photo_frame_lib {
 				else
 				{					
 					mkdir($framed_dir, DIR_WRITE_MODE);
-
-					$response  = $this->EE->filemanager->upload_file($dir_id);								
-					$errors    = isset($response['error']) ? array($response['error']) : array();					
 				}
 			}
-					
+				
+			$response  = $this->EE->filemanager->upload_file($dir_id);												
+			$errors    = isset($response['error']) ? array($response['error']) : array();
+						
 			$file_name = $file_path = $file_url = $orig_path = $orig_url = NULL;
 					
 			if(count($errors) == 0)

@@ -439,6 +439,10 @@ a.photo-frame-bar-button.photo-frame-cancel.photo-frame-float-left {
     display: block;
 }
 
+.photo-frame-preview ul {
+	margin: 0;	
+}
+
 .photo-frame-preview li {
 	list-style: none;	
 }
