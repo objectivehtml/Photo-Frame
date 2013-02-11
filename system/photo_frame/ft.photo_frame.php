@@ -898,13 +898,16 @@ class Photo_frame_ft extends EE_Fieldtype {
 		
 		if($this->safecracker)
 		{
-			foreach($_POST[$this->settings['field_name']] as $index => $post)
-			{
-				unset($_POST[$this->settings['field_name']][$index]['placeholder']);
-				
-				if(count($_POST[$this->settings['field_name']][$index]) == 0)
+			if(isset($_POST[$this->settings['field_name']]))
+			{			
+				foreach($_POST[$this->settings['field_name']] as $index => $post)
 				{
-					unset($_POST[$this->settings['field_name']][$index]);
+					unset($_POST[$this->settings['field_name']][$index]['placeholder']);
+					
+					if(count($_POST[$this->settings['field_name']][$index]) == 0)
+					{
+						unset($_POST[$this->settings['field_name']][$index]);
+					}
 				}
 			}
 		}
