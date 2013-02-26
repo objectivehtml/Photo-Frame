@@ -429,6 +429,7 @@ a.photo-frame-bar-button.photo-frame-cancel.photo-frame-float-left {
 	max-width: none;
 	display: block;
 	width: 100%;
+	height: 100%;
 }
 
 .photo-frame-upload {
@@ -528,6 +529,11 @@ a.photo-frame-meta-toggle {
 a.photo-frame-meta-toggle.active,  a.photo-frame-meta-toggle:hover {
 	color: rgb(47, 143, 216);
 }
+
+.photo-frame-wrapper {
+	text-align: left;	
+}
+
 .photo-frame-wrapper .clearfix:after {
 	content: ".";
 	display: block;
