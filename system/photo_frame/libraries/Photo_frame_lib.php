@@ -385,17 +385,6 @@ class Photo_frame_lib {
 							$size['width'] = ceil($size['height'] * $ratio);	
 						}
 						
-						if(isset($photo_sizes->{$size['name']}))
-						{
-							$photo_size      = $photo_sizes->{$size['name']};
-							$photo_size_path = $this->EE->photo_frame_model->parse($photo_size->file, 'server_path');;
-							
-							if(file_exists($photo_size_path))
-							{
-								continue;
-							}
-						}					
-						
 						$parse = array_merge($this->parse_vars($photo), $size);
 						
 						if(isset($settings['photo_frame_name_format']) && !empty($settings['photo_frame_name_format']))
@@ -409,6 +398,18 @@ class Photo_frame_lib {
 						
 						$format     = $matches[0].config_item('photo_frame_directory_name').'/'.$new_file_name;
 						$sized_path = $this->EE->photo_frame_model->parse($format, 'server_path');
+						
+						if(isset($photo_sizes->{$size['name']}))
+						{
+							$photo_size      = $photo_sizes->{$size['name']};
+							$photo_size_path = $this->EE->photo_frame_model->parse($photo_size->file, 'server_path');;
+							
+							if(file_exists($photo_size_path))
+							{
+								$format     = $photo_size->file;
+								$sized_path = $photo_size_path;
+							}
+						}					
 						
 						$width  = (int) $size['width'];
 						$height = (int) $size['height'];
