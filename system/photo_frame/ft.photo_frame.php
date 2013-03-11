@@ -162,7 +162,8 @@ class Photo_frame_ft extends EE_Fieldtype {
 			'photo_frame_cropped_max_height' => FALSE,
 			'photo_frame_cropped_width'      => FALSE,
 			'photo_frame_cropped_height'     => FALSE,
-			'photo_frame_max_size'			 => FALSE
+			'photo_frame_max_size'			 => FALSE,
+			'photo_frame_delete_files'		 => FALSE
 		);
 	
 		$settings = array_merge($default_settings, $this->settings);
@@ -793,6 +794,34 @@ class Photo_frame_ft extends EE_Fieldtype {
         		    
         		    unset($photo['new']);
         		    
+        		    if($this->matrix)
+					{
+						$post = $this->EE->input->post($this->settings['field_name']);
+						
+						if(isset($post[$this->settings['row_name']][$this->settings['col_name']]))
+						{
+							$post = $post[$this->settings['row_name']][$this->settings['col_name']];
+						}
+						else
+						{
+							$post = array();
+						}
+					}
+					else
+					{
+						$post = $this->EE->input->post($this->field_name, TRUE);
+					}
+					
+					foreach($_POST['photo_frame_uploaded_photo'] as $upload_index => $uploaded_photo)
+					{						
+						$uploaded_photo = json_decode($uploaded_photo);
+						
+						if($photo['file_name'] == $uploaded_photo->file)
+						{
+							unset($_POST['photo_frame_uploaded_photo'][$upload_index]);
+						}	
+					}
+					
         		    $photo['original_file_name'] = $photo['file_name'];
         		    $photo['site_id']  = config_item('site_id');
     				$photo['field_id'] = $this->field_id;
@@ -844,6 +873,26 @@ class Photo_frame_ft extends EE_Fieldtype {
         		    $edit_photos[] = $photo;
     		    }
     		}
+		}
+		
+		if(isset($_POST['photo_frame_uploaded_photo']) && count($_POST['photo_frame_uploaded_photo']) > 0)
+		{
+			foreach($_POST['photo_frame_uploaded_photo'] as $index => $uploaded_photo)
+			{						
+				$uploaded_photo = json_decode($uploaded_photo);
+				
+				if(file_exists($uploaded_photo->original_path))
+				{
+					unlink($uploaded_photo->original_path);
+				}
+				
+				if(file_exists($uploaded_photo->path))
+				{
+					unlink($uploaded_photo->path);
+				}
+				
+				unset($_POST['photo_frame_uploaded_photo'][$index]);
+			}
 		}
 		
 		if(count($new_photos) > 0)
@@ -952,7 +1001,7 @@ class Photo_frame_ft extends EE_Fieldtype {
 			$delete_photos = $delete_photos[$this->settings['field_id']];
 			$total_photos  = $total_photos - count($delete_photos);
 			
-			$this->EE->photo_frame_model->delete($delete_photos);
+			$this->EE->photo_frame_model->delete($delete_photos, $this->settings);
 		}
 		
 		$vars = array(
@@ -1042,6 +1091,17 @@ class Photo_frame_ft extends EE_Fieldtype {
 				'type'        => 'select',
 				'settings' => array(
 					'options' => $this->EE->photo_frame_model->upload_options()
+				)
+			),
+			'photo_frame_delete_files' => array(
+				'label'       => 'Delete Files',
+				'description' => 'Do you want to delete the files stored on the server when users delete photos within the entries? If this setting is set to False, then the files will always remain on the server.',
+				'type'        => 'select',
+				'settings' => array(
+					'options' => array(
+						'true'  => 'True',
+						'false' => 'False'
+					)
 				)
 			),
 			'photo_frame_jpeg_compression' => array(

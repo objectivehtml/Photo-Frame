@@ -264,8 +264,55 @@ class Photo_frame_model extends CI_Model {
 		}
 	}		
 	
-	public function delete($photos)
-	{
+	public function delete($photos, $settings = FALSE)
+	{	
+		if(!is_array($settings))
+		{		
+			$field_id = $this->input->get_post('field_id');
+			$settings = $this->photo_frame_model->get_settings($field_id);		
+		}
+		
+		if(isset($settings['photo_frame_delete_files']) && 
+		   $settings['photo_frame_delete_files'] == 'true')
+		{
+			$file_uploads = $this->get_file_upload_groups();
+			
+			foreach($photos as $photo_id)
+			{
+				$photo = $this->get_photo($photo_id);
+				
+				if($photo->num_rows() > 0)
+				{
+					$original = $this->parse($photo->row('original_file'), 'server_path', $file_uploads);
+					$framed   = $this->parse($photo->row('file'), 'server_path', $file_uploads);
+					$sizes    = json_decode($photo->row('sizes'));
+					
+					if(is_object($sizes))
+					{
+						foreach((array) $sizes as $size)
+						{
+							$file = $this->parse($size->file, 'server_path', $file_uploads);
+							
+							if(file_exists($file))
+							{
+								unlink($file);
+							}
+						}
+					}
+					
+					if(file_exists($original))
+					{
+						unlink($original);
+					}
+					
+					if(file_exists($framed))
+					{
+						unlink($framed);
+					}
+				}
+			}
+		}
+		
 		if(!is_array($photos))
 		{
 			$photos = array($photos);
@@ -277,51 +324,7 @@ class Photo_frame_model extends CI_Model {
 			$this->db->delete('photo_frame');
 		}
 	}	
-	
-	/*
-	public function parse_filename($name, $field = 'url', $framed_dir = FALSE, $framed_dir_name = FALSE)
-	{
-		$parse = $this->parse_filenames(array(array('file' => $name)), $field, $framed_dir, $framed_dir_name);
 		
-		return $this->functions->remove_double_slashes($parse[0]->file);
-	}
-	
-	public function parse_filenames($data, $field = 'url', $framed_dir = FALSE, $framed_dir_name = FALSE)
-	{
-		if(!$framed_dir_name)
-		{
-			$framed_dir_name = config_item('photo_frame_directory_name');
-		}		
-		
-		$file_groups = $this->db->get('upload_prefs');
-		
-		$vars = array();
-		
-		foreach($file_groups->result() as $row)
-		{
-			$vars['filedir_'.$row->id] = $row->$field . ($framed_dir ? $framed_dir_name . '/' : NULL);
-		}
-			
-		foreach($data as $index => $row)
-		{
-			$row = (object) $row;
-			
-			foreach($row as $field => $value)
-			{
-				foreach($vars as $var => $url)
-				{
-					$row->$field = str_replace(LD.$var.RD, $url, $row->$field);	
-					
-				}				
-			}
-				
-			$data[$index] = $row;
-		}
-		
-		return $data;
-	}
-	*/
-	
 	public function upload_options($index_field = 'id', $name_field = 'name')
 	{
 		$options = array();
