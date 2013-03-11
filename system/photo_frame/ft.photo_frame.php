@@ -162,6 +162,7 @@ class Photo_frame_ft extends EE_Fieldtype {
 			'photo_frame_cropped_max_height' => FALSE,
 			'photo_frame_cropped_width'      => FALSE,
 			'photo_frame_cropped_height'     => FALSE,
+			'photo_frame_max_size'			 => FALSE
 		);
 	
 		$settings = array_merge($default_settings, $this->settings);
@@ -288,7 +289,7 @@ class Photo_frame_ft extends EE_Fieldtype {
 					}
 				}	
 			}
-			
+				
 			if(count($saved_data) > 0)
 			{
 				$directory  = $this->EE->photo_frame_model->get_upload_group($this->settings['photo_frame_upload_group']);
@@ -319,8 +320,27 @@ class Photo_frame_ft extends EE_Fieldtype {
 			$saved_data = array();
 		}
 		
-		$url      = page_url() . '&dir_id='.$settings['photo_frame_upload_group'].'&field_id='.$this->field_id;
-		$crop_url = action_url('photo_frame', 'crop_action', FALSE);
+		if(!$this->safecracker)
+		{
+			$url = page_url();
+		}
+		else
+		{
+			$url = page_url(TRUE, TRUE, FALSE);
+		}
+
+		if(!$this->safecracker)
+		{
+			$url = page_url();
+		}
+		else
+		{
+			$url = page_url(TRUE, TRUE, FALSE);
+		}
+		
+		$url .= (!preg_match('/\?/', $url) ? '?' : '&') . 'dir_id='.$settings['photo_frame_upload_group'].'&field_id='.$this->field_id;
+		
+		$crop_url   = action_url('photo_frame', 'crop_action', FALSE);
 		
 		$min_width  = (int) $this->setting('min_width', 0);
 		$min_height = (int) $this->setting('min_height', 0);
@@ -462,7 +482,7 @@ class Photo_frame_ft extends EE_Fieldtype {
 		
 		foreach($saved_data as $index => $data)
 		{
-			if(isset($data->save_data['sizes']))
+			if(isset($data->saved_data['sizes']))
 			{
 				$data->saved_data['sizes'] = json_decode($data->saved_data['sizes']);
 			}
@@ -596,11 +616,11 @@ class Photo_frame_ft extends EE_Fieldtype {
 				$img = array(
 					'src="'.$this->EE->photo_frame_model->parse($row['file']).'"'
 				);
-				
+								
 				if(empty($params['alt']))
 				{
-					$params['alt'] = !empty($row['title']) ? $row['title'] : $this->row['title'];
-				}
+					$params['alt'] = !empty($row['title']) ? $row['title'] : (isset($this->row['title']) ? $this->row['title'] : NULL);
+				}				
 				
 				foreach($params as $param => $value)
 				{				
@@ -789,6 +809,8 @@ class Photo_frame_ft extends EE_Fieldtype {
 	    				$photo['row_id'] = $this->settings['row_id'];
     				}
     				
+    				$photo = (array) $this->EE->photo_frame_lib->rename($photo, $settings);
+    				
     				$unset = array(
     					'directory' => FALSE
     				);
@@ -824,11 +846,6 @@ class Photo_frame_ft extends EE_Fieldtype {
     		}
 		}
 		
-		
-		if($this->matrix)
-		{		
-		}
-		
 		if(count($new_photos) > 0)
 		{    
 			$this->EE->photo_frame_model->save($new_photos);
@@ -857,8 +874,7 @@ class Photo_frame_ft extends EE_Fieldtype {
 			$row_id = FALSE;
 			$col_id = FALSE;
 		}
-		
-		
+				
 		$this->EE->photo_frame_lib->resize_photos($this->field_id, $this->settings['entry_id'], $col_id, $row_id, $settings, $this->matrix);
 		
 		
@@ -1113,6 +1129,10 @@ class Photo_frame_ft extends EE_Fieldtype {
 			'photo_frame_max_height' => array(
 				'label' => 'Photo Max Height',
 				'description' => 'Values should be numerical and in pixels.'
+			),
+			'photo_frame_max_size' => array(
+				'label'       => 'Maximum File Size (MB)',
+				'description' => 'Enter a maximum file size you wish to accept. If no size if defined any size will be accepted. This value should be numeric and is measured in Megabytes.'
 			),
 			'photo_frame_aspect_ratio' => array(
 				'label'       => 'Photo Aspect Ratio',

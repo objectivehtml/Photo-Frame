@@ -219,7 +219,7 @@ class Photo_frame_model extends CI_Model {
 		}
 		
 		$this->db->where('id', $photo_id);
-		$this->db->update('photo_frame', $data);	
+		$this->db->update('photo_frame', $data);
 	}
 	
 	public function update($data, $matrix = FALSE)
@@ -342,7 +342,7 @@ class Photo_frame_model extends CI_Model {
 			$settings = $this->photo_frame_model->get_settings($field_id);		
 		}
 		
-		$image      = new ImageEditor($_FILES['files']['tmp_name']);
+		$image = new ImageEditor($_FILES['files']['tmp_name']);
 		
 		if(!$image->getImage())
 		{
@@ -350,8 +350,7 @@ class Photo_frame_model extends CI_Model {
 			
 			return $errors;
 		}
-		
-		
+	
 		$width      = $image->getWidth();
 		$height     = $image->getHeight();
 		$gcd	    = $width > $height ? 'width' : 'height';
@@ -360,11 +359,15 @@ class Photo_frame_model extends CI_Model {
 		
 		$resizeMaxWidth  = isset($settings['photo_frame_resize_max_width']) &&
 						   !empty($settings['photo_frame_resize_max_width']) ? 
-						   (int) $settings['photo_frame_resize_max_width'] : false;
+						   (int) $settings['photo_frame_resize_max_width'] : FALSE;
 						   		
-		$resizeMaxHeight  = isset($settings['photo_frame_resize_max_height']) &&
+		$resizeMaxHeight = isset($settings['photo_frame_resize_max_height']) &&
 						   !empty($settings['photo_frame_resize_max_height']) ? 
-						   (int) $settings['photo_frame_resize_max_height'] : false;
+						   (int) $settings['photo_frame_resize_max_height'] : FALSE;
+		
+		$max_size        = isset($settings['photo_frame_max_size']) &&
+						   !empty($settings['photo_frame_max_size']) ? 
+						   (float) $settings['photo_frame_max_size'] * 1000000: FALSE;
 		
 		if($resizeMaxWidth && $width > $resizeMaxWidth && ($gcd == 'width' || $resizeMaxHeight == 0))
 		{	
@@ -374,6 +377,14 @@ class Photo_frame_model extends CI_Model {
 		if($resizeMaxHeight && $height > $resizeMaxHeight && ($gcd == 'height' || $resizeMaxWidth == 0))
 		{
 			$image->resizeToHeight($resizeMaxHeight);
+		}
+		
+		if($max_size && $image->getSize() > $max_size)
+		{	
+			$errors[] = $this->photo_frame_lib->parse(array(
+				'max_size' => $settings['photo_frame_max_size'].'MB'.($settings['photo_frame_max_size'] ? 's' : NULL)
+			), lang('photo_frame_max_size_exceeded'));
+			
 		}
 		
 		if(!empty($settings['photo_frame_min_width']))

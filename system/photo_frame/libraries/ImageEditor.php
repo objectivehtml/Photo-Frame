@@ -226,6 +226,18 @@ class ImageEditor extends BaseClass {
 	
 	
 	/**
+	 * Get the image size
+	 *
+	 * @access	public
+	 * @return	object
+	 */
+	public function getSize()
+	{
+      return filesize($this->filename);
+	}
+	
+	
+	/**
 	 * Resize the image to specified height
 	 *
 	 * @access	public

@@ -2,7 +2,8 @@ jQuery.fn.center = function () {
     var w = $(window);
     this.css("position","fixed");
     
-    if(!isNaN(w.outerHeight()) && !isNaN(w.outerHeight())) {
+    if(w.outerHeight() != null && w.outerWidth() != null && 
+       !isNaN(w.outerHeight()) && !isNaN(w.outerWidth())) {
 	    var outerHeight = w.outerHeight();
 	    var outerWidth  = w.outerWidth();
     } else {	  

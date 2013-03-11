@@ -7,7 +7,7 @@ $lang	= array(
 	'photo_frame_module_description'	=> '',
 		
 	'photo_frame_button_text'			=> 'Upload',
-	'photo_frame_instructions'			=> 'Crop the photo by clicking and dragging on the photo.',
+	'photo_frame_instructions'			=> 'Crop the photo by clicking and dragging.',
 	
 	'photo_frame_min_photos_error'		=> 'You must upload at least {min_photos} {min_photos_name}.',
 	'photo_frame_max_photos_error'		=> 'You must upload at least {max_photos} {max_photos_name}.',
@@ -23,6 +23,7 @@ $lang	= array(
 	'photo_frame_min_height'			=> 'The image must have a minimum height of {min_height}px',
 	
 	'photo_frame_upload_dir_not_exists' => 'The following directory does not exist: {directory}',
+	'photo_frame_max_size_exceeded' 	=> 'The photo you are trying to upload exceeds the maximum file size of {max_size}.',
 	
 	//--------------------------------------------
 	'', ''
