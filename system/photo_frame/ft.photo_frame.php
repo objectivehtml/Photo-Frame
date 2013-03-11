@@ -485,7 +485,10 @@ class Photo_frame_ft extends EE_Fieldtype {
 		{
 			if(isset($data->saved_data['sizes']))
 			{
-				$data->saved_data['sizes'] = json_decode($data->saved_data['sizes']);
+				if(is_string($data->saved_data['sizes']))
+				{
+					$data->saved_data['sizes'] = json_decode($data->saved_data['sizes']);
+				}
 			}
 			else
 			{
@@ -812,14 +815,17 @@ class Photo_frame_ft extends EE_Fieldtype {
 						$post = $this->EE->input->post($this->field_name, TRUE);
 					}
 					
-					foreach($_POST['photo_frame_uploaded_photo'] as $upload_index => $uploaded_photo)
-					{						
-						$uploaded_photo = json_decode($uploaded_photo);
-						
-						if($photo['file_name'] == $uploaded_photo->file)
-						{
-							unset($_POST['photo_frame_uploaded_photo'][$upload_index]);
-						}	
+					if(isset($_POST['photo_frame_uploaded_photo']))
+					{
+						foreach($_POST['photo_frame_uploaded_photo'] as $upload_index => $uploaded_photo)
+						{						
+							$uploaded_photo = json_decode($uploaded_photo);
+							
+							if($photo['file_name'] == $uploaded_photo->file)
+							{
+								unset($_POST['photo_frame_uploaded_photo'][$upload_index]);
+							}	
+						}
 					}
 					
         		    $photo['original_file_name'] = $photo['file_name'];
@@ -999,7 +1005,7 @@ class Photo_frame_ft extends EE_Fieldtype {
 		if(isset($delete_photos[$this->settings['field_id']]))
 		{
 			$delete_photos = $delete_photos[$this->settings['field_id']];
-			$total_photos  = $total_photos - count($delete_photos);
+			// $total_photos  = $total_photos - count($delete_photos);
 			
 			$this->EE->photo_frame_model->delete($delete_photos, $this->settings);
 		}
