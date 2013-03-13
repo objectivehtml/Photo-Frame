@@ -1007,7 +1007,21 @@ class Photo_frame_ft extends EE_Fieldtype {
 				
 		$min_photos    = isset($this->settings['photo_frame_min_photos']) ? (int) $this->settings['photo_frame_min_photos'] : 0;
 		$max_photos    = isset($this->settings['photo_frame_max_photos']) ? (int) $this->settings['photo_frame_max_photos'] : 0;
-		$total_photos  = isset($post_data) && !is_null($post_data)? count($post_data) : 0;		
+		$total_photos  = isset($post_data) && !is_null($post_data) ? TRUE : 0;
+		
+		if($total_photos === TRUE)
+		{
+			$total_photos = 0;
+			
+			foreach($post_data as $index => $photo)
+			{
+				if(isset($photo['new']) || isset($photo['edit']))
+				{
+					$total_photos++;
+				}
+			}
+		}
+		
 		$delete_photos = $this->EE->input->post('photo_frame_delete_photos', TRUE);
 			
 		if(isset($delete_photos[$this->settings['field_id']]))
