@@ -680,7 +680,7 @@ var PhotoFrame = function(options) {
 		
 		if(t.response.success) {
 			
-			t.$wrapper.append('<textarea name="photo_frame_uploaded_photo[]" style="display:none">{"path": "'+t.response.file_path+'", "original_path": "'+t.response.original_path+'", "file": "'+t.response.file_name+'"}</textarea>');
+			t.$wrapper.append('<textarea name="photo_frame_uploaded_photo[]" style="display:none">{"field_id": "'+t.options.fieldId+'", "path": "'+t.response.file_path+'", "original_path": "'+t.response.original_path+'", "file": "'+t.response.file_name+'"}</textarea>');
 			
 			t.stopUpload(t.response);
 		}

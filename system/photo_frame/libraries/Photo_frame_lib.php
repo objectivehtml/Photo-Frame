@@ -242,7 +242,7 @@ class Photo_frame_lib {
 	
 	public function parse_vars($photo = FALSE)
 	{
-		$parse = array(
+		$parse = array_merge((array) $photo, array(
 			'random_alpha'   => random_string('alpha', config_item('photo_frame_random_string_len')),
 			'random_alnum'   => random_string('alnum', config_item('photo_frame_random_string_len')),
 			'random_numeric' => random_string('numeric', config_item('photo_frame_random_string_len')),
@@ -250,7 +250,7 @@ class Photo_frame_lib {
 			'random_nozero'  => random_string('nozero', config_item('photo_frame_random_string_len')),
 			'random_unique'  => random_string('unique', config_item('photo_frame_random_string_len')),
 			'random_sha1'    => random_string('sha1', config_item('photo_frame_random_string_len'))
-		);
+		));
 		
 		if($photo)
 		{
@@ -385,7 +385,7 @@ class Photo_frame_lib {
 							$size['width'] = ceil($size['height'] * $ratio);	
 						}
 						
-						$parse = array_merge($this->parse_vars($photo), $size);
+						$parse = array_merge($entry->row_array(), $this->parse_vars($photo), $size);
 						
 						if(isset($settings['photo_frame_name_format']) && !empty($settings['photo_frame_name_format']))
 						{
@@ -426,7 +426,7 @@ class Photo_frame_lib {
 				
 				if(isset($resized_photos))
 				{
-					$update['sizes'] = array_merge((array) $photo_sizes, $resized_photos);
+					$update['sizes'] = $resized_photos;
 					
 					$this->EE->photo_frame_model->update_photo($photo->id, $update);
 				}				

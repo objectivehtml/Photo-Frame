@@ -821,18 +821,22 @@ class Photo_frame_ft extends EE_Fieldtype {
 						{						
 							$uploaded_photo = json_decode($uploaded_photo);
 							
-							if($photo['file_name'] == $uploaded_photo->file)
+							if($photo['file_name'] == $uploaded_photo->file &&
+							   $this->field_id == $uploaded_photo->field_id)
 							{
 								unset($_POST['photo_frame_uploaded_photo'][$upload_index]);
-							}	
+							}
 						}
 					}
+					
+					$entry = $this->EE->channel_data->get_entry($this->settings['entry_id'])->row();
 					
         		    $photo['original_file_name'] = $photo['file_name'];
         		    $photo['site_id']  = config_item('site_id');
     				$photo['field_id'] = $this->field_id;
     			    $photo['order']    = $index;
     				$photo['entry_id'] = $this->settings['entry_id'];
+    				$photo['channel_id'] = $entry->channel_id;
     				
     				if(isset($this->settings['col_id']))
     				{
@@ -847,7 +851,8 @@ class Photo_frame_ft extends EE_Fieldtype {
     				$photo = (array) $this->EE->photo_frame_lib->rename($photo, $settings);
     				
     				$unset = array(
-    					'directory' => FALSE
+    					'channel_id' => FALSE,
+    					'directory'  => FALSE
     				);
     				
     				foreach($unset as $var => $rename)
@@ -887,17 +892,20 @@ class Photo_frame_ft extends EE_Fieldtype {
 			{						
 				$uploaded_photo = json_decode($uploaded_photo);
 				
-				if(file_exists($uploaded_photo->original_path))
+				if($this->field_id == $uploaded_photo->field_id)
 				{
-					unlink($uploaded_photo->original_path);
+					if(file_exists($uploaded_photo->original_path))
+					{
+						unlink($uploaded_photo->original_path);
+					}
+					
+					if(file_exists($uploaded_photo->path))
+					{
+						unlink($uploaded_photo->path);
+					}
+					
+					unset($_POST['photo_frame_uploaded_photo'][$index]);
 				}
-				
-				if(file_exists($uploaded_photo->path))
-				{
-					unlink($uploaded_photo->path);
-				}
-				
-				unset($_POST['photo_frame_uploaded_photo'][$index]);
 			}
 		}
 		
