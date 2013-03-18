@@ -207,6 +207,11 @@ class Photo_frame_ft extends EE_Fieldtype {
 			$edit_photos_set = $this->EE->photo_frame_model->has_edit_photos($_POST[$this->field_name]);
 		}
 		
+		if(is_array($data))
+		{
+			$data = 0;
+		}
+		
 		$where = array(
 			'field_id' => $this->field_id, 
 			'entry_id' => $data
@@ -990,7 +995,6 @@ class Photo_frame_ft extends EE_Fieldtype {
 				}
 			}
 		}
-		
 		if($this->matrix)
 		{
 			if(isset($_POST[$this->settings['field_name']][$this->settings['row_name']][$this->settings['col_name']]))
@@ -1002,7 +1006,7 @@ class Photo_frame_ft extends EE_Fieldtype {
 		{
 			$post_data = $_POST[$this->field_name];	
 		}
-		
+			
 		$this->EE->load->library('photo_frame_lib');
 				
 		$min_photos    = isset($this->settings['photo_frame_min_photos']) ? (int) $this->settings['photo_frame_min_photos'] : 0;
