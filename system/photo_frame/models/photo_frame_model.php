@@ -69,8 +69,8 @@ class Photo_frame_model extends CI_Model {
 		return str_replace($tag, $file_uploads[$id][$type], $string);		
 	}
 	
-	public function delete_entries($ids = array(), $field_id = FALSE)
-	{
+	public function delete_entries($ids = array(), $field_id = FALSE, $settings = FALSE)
+	{	
 		foreach($ids as $id)
 		{
 			if($field_id)
@@ -78,7 +78,99 @@ class Photo_frame_model extends CI_Model {
 				$this->db->where('field_id', $field_id);	
 			}
 			
+			$photos = $this->get_entry_photos($id);
+			
+			$delete_photos  = array();
+			$settings_array = array();
+			
+			foreach($photos->result() as $photo)
+			{					
+				$field_id = $photo->field_id;
+				
+				if(!isset($settings_array[$photo->field_id]))
+				{
+					$settings = $this->photo_frame_model->get_settings($field_id);
+					
+					if(isset($settings['photo_frame_delete_files']) && $settings['photo_frame_delete_files'] == 'true')
+					{
+						$settings_array[$field_id]  = $settings;
+						$delete_photos[$field_id][] = $photo->id;	
+					}
+				}
+						
+			}
+			
+			foreach($delete_photos as $field_id => $photos)
+			{
+				if(count($photos) > 0)
+				{
+					$this->delete($photos, $settings_array[$field_id]);
+				}
+			}
+		
+					
 			$this->db->where('entry_id', $id);
+			$this->db->delete('photo_frame');
+		}
+	}
+	
+	public function delete($photos, $settings = FALSE)
+	{	
+		if(!is_array($settings))
+		{		
+			$field_id = $this->input->get_post('field_id');
+			$settings = $this->photo_frame_model->get_settings($field_id);		
+		}
+		
+		if(isset($settings['photo_frame_delete_files']) && 
+		   $settings['photo_frame_delete_files'] == 'true')
+		{
+			$file_uploads = $this->get_file_upload_groups();
+			
+			foreach($photos as $photo_id)
+			{
+				$photo = $this->get_photo($photo_id);
+				
+				if($photo->num_rows() > 0)
+				{
+					$original = $this->parse($photo->row('original_file'), 'server_path', $file_uploads);
+					$framed   = $this->parse($photo->row('file'), 'server_path', $file_uploads);
+					$sizes    = json_decode($photo->row('sizes'));
+					
+					if(is_object($sizes))
+					{
+						foreach((array) $sizes as $size)
+						{
+							$file = $this->parse($size->file, 'server_path', $file_uploads);
+							
+							if(file_exists($file))
+							{
+								unlink($file);
+							}
+						}
+					}
+					
+					if(file_exists($original))
+					{
+						unlink($original);
+					}
+					
+					if(file_exists($framed))
+					{
+						unlink($framed);
+					}
+				}
+			}
+		}
+		
+		if(!is_array($photos))
+		{
+			$photos = array($photos);
+		}
+		
+		foreach($photos as $photo)
+		{
+			$this->db->where('id', $photo);
 			$this->db->delete('photo_frame');
 		}
 	}
@@ -118,11 +210,13 @@ class Photo_frame_model extends CI_Model {
 			$site_id = config_item('site_id');	
 		}
 		
+		$where = array(
+			'entry_id' => $entry_id,
+			'site_id'  => $site_id
+		);
+		
 		$params = array(
-			'where' => array(
-				'entry_id' => $entry_id,
-				'site_id'  => $site_id
-			),
+			'where'    => $where,
 			'limit'    => $limit,
 			'offset'   => $offset,
 			'order_by' => $order_by,
@@ -263,68 +357,7 @@ class Photo_frame_model extends CI_Model {
 			$this->db->insert_batch('photo_frame', $data);
 		}
 	}		
-	
-	public function delete($photos, $settings = FALSE)
-	{	
-		if(!is_array($settings))
-		{		
-			$field_id = $this->input->get_post('field_id');
-			$settings = $this->photo_frame_model->get_settings($field_id);		
-		}
-		
-		if(isset($settings['photo_frame_delete_files']) && 
-		   $settings['photo_frame_delete_files'] == 'true')
-		{
-			$file_uploads = $this->get_file_upload_groups();
 			
-			foreach($photos as $photo_id)
-			{
-				$photo = $this->get_photo($photo_id);
-				
-				if($photo->num_rows() > 0)
-				{
-					$original = $this->parse($photo->row('original_file'), 'server_path', $file_uploads);
-					$framed   = $this->parse($photo->row('file'), 'server_path', $file_uploads);
-					$sizes    = json_decode($photo->row('sizes'));
-					
-					if(is_object($sizes))
-					{
-						foreach((array) $sizes as $size)
-						{
-							$file = $this->parse($size->file, 'server_path', $file_uploads);
-							
-							if(file_exists($file))
-							{
-								unlink($file);
-							}
-						}
-					}
-					
-					if(file_exists($original))
-					{
-						unlink($original);
-					}
-					
-					if(file_exists($framed))
-					{
-						unlink($framed);
-					}
-				}
-			}
-		}
-		
-		if(!is_array($photos))
-		{
-			$photos = array($photos);
-		}
-		
-		foreach($photos as $photo)
-		{
-			$this->db->where('id', $photo);
-			$this->db->delete('photo_frame');
-		}
-	}	
-		
 	public function upload_options($index_field = 'id', $name_field = 'name')
 	{
 		$options = array();
