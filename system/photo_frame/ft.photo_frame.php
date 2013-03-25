@@ -480,12 +480,15 @@ class Photo_frame_ft extends EE_Fieldtype {
 		{
 		    $theme = $this->EE->photo_frame_lib->get_theme($settings['photo_frame_cp_theme']);
 		    
-		    foreach($theme->getCss() as $file)
+		    if(is_object($theme))
 		    {
-    		     $this->EE->theme_loader->css($file);   
+			    foreach($theme->getCss() as $file)
+			    {
+	    		     $this->EE->theme_loader->css($file);   
+			    }
 		    }
 		}
-		
+				
 		foreach($saved_data as $index => $data)
 		{
 			if(isset($data->saved_data['sizes']))
