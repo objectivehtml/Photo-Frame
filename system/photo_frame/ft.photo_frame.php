@@ -540,8 +540,9 @@ class Photo_frame_ft extends EE_Fieldtype {
 	
 	public function pre_process($data)
 	{
-		$this->EE->load->model('file_upload_preferences_model');
-		$this->upload_prefs = $this->EE->file_upload_preferences_model->get_file_upload_preferences(NULL, NULL, TRUE);
+		$this->EE->load->model('photo_frame_model');
+		
+		$this->upload_prefs = $this->EE->photo_frame_model->get_file_upload_groups();
 		
 		return $data;
 	}

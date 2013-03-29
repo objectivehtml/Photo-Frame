@@ -1,12 +1,48 @@
+jQuery.isVersion = function(left, oper, right) {
+    if (left) {
+        var pre = /pre/i,
+            replace = /[^\d]+/g,
+            oper = oper || "==",
+            right = right || jQuery.fn.jquery,
+            l = left.replace(replace, ''),
+            r = right.replace(replace, ''),
+            l_len = l.length, r_len = r.length,
+            l_pre = pre.test(left), r_pre = pre.test(right);
+
+        l = (r_len > l_len ? parseInt(l) * ((r_len - l_len) * 10) : parseInt(l));
+        r = (l_len > r_len ? parseInt(r) * ((l_len - r_len) * 10) : parseInt(r));
+
+        switch(oper) {
+            case "==": {
+                return (true === (l == r && (l_pre == r_pre)));
+            }
+            case ">=": {
+                return (true === (l >= r && (!l_pre || l_pre == r_pre)));
+            }
+            case "<=": {
+                return (true === (l <= r && (!r_pre || r_pre == l_pre)));
+            }
+            case ">": {
+                return (true === (l > r || (l == r && r_pre)));
+            }
+            case "<": {
+                return (true === (l < r || (l == r && l_pre)));
+            }
+        }
+    }
+
+    return false;
+}
+
 jQuery.fn.center = function () {
     var w = $(window);
     this.css("position","fixed");
     
-    if(w.outerHeight() != null && w.outerWidth() != null && 
+    if($.isVersion('1.7.0', '<=') && w.outerHeight() != null && w.outerWidth() != null && 
        !isNaN(w.outerHeight()) && !isNaN(w.outerWidth())) {
 	    var outerHeight = w.outerHeight();
 	    var outerWidth  = w.outerWidth();
-    } else {	  
+    } else {
     	var outerHeight = w.height();
 	    var outerWidth  = w.width();
     }

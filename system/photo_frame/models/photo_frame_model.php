@@ -15,7 +15,21 @@ class Photo_frame_model extends CI_Model {
 		{			
 			$this->load->model('file_upload_preferences_model');
 				
-			$groups = $this->file_upload_preferences_model->get_file_upload_preferences(NULL, NULL, TRUE);
+			if(method_exists($this->file_upload_preferences_model, 'get_file_upload_preferences'))
+			{
+				$groups = $this->file_upload_preferences_model->get_file_upload_preferences(NULL, NULL, TRUE);
+			}
+			else
+			{
+				$prefs = $this->file_upload_preferences_model->get_upload_preferences(NULL, NULL)->result_array();
+				
+				$groups = array();
+				
+				foreach($prefs as $pref)
+				{
+					$groups[$pref['id']] = $pref;
+				}
+			}
 			
 			$this->session->set_cache('photo_frame', 'upload_prefs', $groups);
 		}

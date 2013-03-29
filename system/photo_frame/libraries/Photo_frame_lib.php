@@ -124,7 +124,7 @@ class Photo_frame_lib {
 			$errors    = isset($response['error']) ? array($response['error']) : array();
 						
 			$file_name = $file_path = $file_url = $orig_path = $orig_url = NULL;
-					
+				
 			if(count($errors) == 0)
 			{
 				$file_name = $response['file_name'];
@@ -132,7 +132,12 @@ class Photo_frame_lib {
 				$orig_path = $directory['server_path'] . $file_name;
 				$file_url  = $directory['url'] . $framed_dir_name . '/' . $file_name;
 				$orig_url  = $directory['url'] . $file_name;
-							
+				
+				if(!isset($response['title']))
+				{
+					$response['title'] = $file_name;
+				}		
+				
 				copy($response['rel_path'], $framed_dir.$response['title']);
 			}
 		}
