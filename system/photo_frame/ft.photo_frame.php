@@ -29,6 +29,8 @@ class Photo_frame_ft extends EE_Fieldtype {
 	private $default_settings	= array(
 	);
 	
+	private $data;
+	
 	public $default_params = array(
 		'id'              => '',
 		'class'           => '',
@@ -538,13 +540,65 @@ class Photo_frame_ft extends EE_Fieldtype {
 		return $this->replace_tag($data, $params, $tagdata);
 	}
 	
-	public function pre_process($data)
+	public function pre_loop($data)
 	{
+		$this->EE->load->model('file_upload_preferences_model');
+		$this->upload_prefs = $this->EE->file_upload_preferences_model->get_file_upload_preferences(NULL, NULL, TRUE);
+		
+		$entry_ids = array();
+		
+		foreach($data as $entry_id)
+		{
+			$entry_ids[] = 'or '.$entry_id;
+		}
+		
 		$this->EE->load->model('photo_frame_model');
 		
-		$this->upload_prefs = $this->EE->photo_frame_model->get_file_upload_groups();
+		$data = $this->EE->photo_frame_model->get_photos(array(
+			'where' => array(
+				'entry_id' => $entry_ids,
+				'site_id'  => config_item('site_id')
+			)
+		));
 		
-		return $data;
+		$photos = array();
+		
+		foreach($data->result() as $photo)
+		{
+			$photos[$photo->entry_id][$photo->field_id] = (array) $photo;
+		}
+		
+		$this->data = $photos;
+	}
+	
+	private function _get_photos($field_id)
+	{
+		$entry_id = $this->row['entry_id'];
+		$photos   = isset($this->data[$entry_id]) ? $this->data[$entry_id] : array();
+		
+		$return = array();
+		
+		foreach($photos as $photo)
+		{
+			$valid = TRUE;
+			
+			if($photo['field_id'] != $field_id)
+			{
+				$valid = FALSE;	
+			}
+			
+			if($this->matrix)
+			{
+				
+			}
+			
+			if($valid)
+			{
+				$return[] = $photo;
+			}
+		}
+		
+		return $return;
 	}
 	
 	public function replace_tag($data, $params = array(), $tagdata)
@@ -557,36 +611,20 @@ class Photo_frame_ft extends EE_Fieldtype {
 		{
 			$params = array();	
 		}
-		
-		$where = array(
-			'field_id' => $this->field_id, 
-			'entry_id' => $data
-		);
-		
-		if(isset($this->row_id))
-		{
-			unset($where['entry_id']);
-			
-			$where['col_id'] = $this->col_id;
-			$where['row_id'] = $this->row_id;
-		}	
 					
 		$params = array_merge($this->default_params, $params);
+		$params['offset'] = (int) $params['offset'];
 		
-		$photos = $this->EE->photo_frame_model->get_photos(array(
-			'where' => $where,
-			'order_by' => $params['order_by'],
-			'sort'     => $params['sort'],
-			'limit'    => $params['limit'],
-			'offset'   => $params['offset']
-		));
+		$photos = $this->_get_photos($this->field_id);
 		
 		$return = array();
 		
-		if($tagdata)
+		$total_photos = 0;
+		
+		foreach($photos as $index => $row)
 		{
-			foreach($photos->result_array() as $index => $row)
-			{		
+			if($params['offset'] <= $index && (!$params['limit'] || $total_photos < $params['limit']))
+			{				
 				if(!empty($row['sizes']))
 				{
 					$row['sizes'] = json_decode($row['sizes']);
@@ -595,59 +633,52 @@ class Photo_frame_ft extends EE_Fieldtype {
 					{
 						$row = array_merge($row, (array) $row['sizes']->{$params['size']});
 					}
-				}				
-								
-				$return[$index] = $row;
-				$return[$index]['file'] = $this->EE->photo_frame_model->parse($row['file'], 'file', $this->upload_prefs);
-				$return[$index]['original_file'] = $this->EE->photo_frame_model->parse($row['original_file'], 'file', $this->upload_prefs);
-				$return[$index]['url'] = $this->EE->photo_frame_model->parse($row['file'], 'url', $this->upload_prefs);
-				$return[$index]['count'] = $index + 1;
-				$return[$index]['index'] = $index;
-				$return[$index]['total_photos'] = $photos->num_rows();
-				$return[$index]['is_first_photo'] = ($index == 0) ? TRUE : FALSE;
-				$return[$index]['is_last_photo']  = ($index + 1 == $photos->num_rows()) ? TRUE : FALSE;
-			}
-			
-			$return = $this->EE->channel_data->utility->add_prefix(isset($params['prefix']) ? $params['prefix'] : 'photo', $return);
-			
-			return $this->parse($return, $tagdata);
-		}
-		else
-		{
-			foreach($photos->result_array() as $index => $row)
-			{
-				if(!empty($row['sizes']))
-				{
-					$row['sizes'] = json_decode($row['sizes']);
-					
-					if(isset($row['sizes']->{$params['size']}))	
-					{
-						$row = array_merge($row, (array) $row['sizes']->{$params['size']});
-					}
-				}				
-					
-				$img = array(
-					'src="'.$this->EE->photo_frame_model->parse($row['file']).'"'
-				);
-								
-				if(empty($params['alt']))
-				{
-					$params['alt'] = !empty($row['title']) ? $row['title'] : (isset($this->row['title']) ? $this->row['title'] : NULL);
-				}				
+				}	
 				
-				foreach($params as $param => $value)
-				{				
-					if(!empty($value) && !in_array($param, $this->exclude_params))
+				if($tagdata)
+				{							
+					$return[$index] = $row;
+					$return[$index]['file'] = $this->EE->photo_frame_model->parse($row['file'], 'file', $this->upload_prefs);
+					$return[$index]['original_file'] = $this->EE->photo_frame_model->parse($row['original_file'], 'file', $this->upload_prefs);
+					$return[$index]['url'] = $this->EE->photo_frame_model->parse($row['file'], 'url', $this->upload_prefs);
+					$return[$index]['count'] = $index + 1;
+					$return[$index]['index'] = $index;
+					$return[$index]['total_photos'] = $photos->num_rows();
+					$return[$index]['is_first_photo'] = ($index == 0) ? TRUE : FALSE;
+					$return[$index]['is_last_photo']  = ($index + 1 == $photos->num_rows()) ? TRUE : FALSE;
+				}
+				else
+				{					
+					$img = array(
+						'src="'.$this->EE->photo_frame_model->parse($row['file']).'"'
+					);
+									
+					if(empty($params['alt']))
 					{
-						$img[] = $param.'="'.$value.'"';
+						$params['alt'] = !empty($row['title']) ? $row['title'] : (isset($this->row['title']) ? $this->row['title'] : NULL);
+					}				
+					
+					foreach($params as $param => $value)
+					{				
+						if(!empty($value) && !in_array($param, $this->exclude_params))
+						{
+							$img[] = $param.'="'.$value.'"';
+						}
 					}
+					
+					$return[] = '<img '.implode(' ', $img).' />';
 				}
 				
-				$return[] = '<img '.implode(' ', $img).' />';
+				$total_photos++;
 			}
-			
-			return implode("\r\n", $return);
 		}
+		
+		if($tagdata)
+		{
+			$return = $this->EE->channel_data->utility->add_prefix(isset($params['prefix']) ? $params['prefix'] : 'photo', $return);
+		}
+		
+		return implode("\r\n", $return);
 	}
 	
 	private function _parse_filenames()
@@ -657,32 +688,7 @@ class Photo_frame_ft extends EE_Fieldtype {
 	
 	public function replace_total_photos($data, $params = array(), $tagdata)
 	{		
-		$this->EE->load->library('photo_frame_lib');
-				
-		$params = array_merge($this->default_params, $params);
-				
-		$where = array(
-			'field_id' => $this->field_id, 
-			'entry_id' => $data
-		);
-		
-		if(isset($this->row_id))
-		{
-			unset($where['entry_id']);
-			
-			$where['col_id'] = $this->col_id;
-			$where['row_id'] = $this->row_id;
-		}	
-			
-		$photos = $this->EE->photo_frame_model->get_photos(array(
-			'where' => $where,
-			'order_by' => $params['order_by'],
-			'sort'     => $params['sort'],
-			'limit'    => $params['limit'],
-			'offset'   => $params['offset']
-		));
-		
-		return $photos->num_rows();
+		return count($this->_get_photos($this->field_id));
 	}
 	
 	public function setting($index, $default = FALSE)
