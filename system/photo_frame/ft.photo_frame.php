@@ -170,24 +170,7 @@ class Photo_frame_ft extends EE_Fieldtype {
 		$settings = array_merge($default_settings, $this->settings);
 	
 		$preview_styles = NULL;
-		
-		/*
-		foreach(array('preview_width', 'preview_height') as $key)
-		{
-			if(!empty($settings['photo_frame_'.$key]))
-			{
-				$uom = '';
-				
-				if(!preg_match('/px|\%/', $settings['photo_frame_'.$key]))
-				{
-					$uom = 'px';
-				}
-				
-				$preview_styles .= str_replace('preview_', '', $key).': '.$settings['photo_frame_'.$key] . $uom . '; ';
-			}	
-		}
-		*/
-		
+	
 		$saved_data = array();
 		$new_photos = array();
 		
@@ -430,15 +413,7 @@ class Photo_frame_ft extends EE_Fieldtype {
 			resizeMax: '.json_encode($resize_max).',
 			sortable: '.(isset($settings['photo_frame_sortable']) ? $settings['photo_frame_sortable'] : 'false').'
 		}';
-		
-		/*
-		
-		,
-					resizeMaxWidth: '.(!empty($settings['photo_frame_resize_max_width']) ? $settings['photo_frame_resize_max_width'] : 'false').',
-					resizeMinHeight: '.(!empty($settings['photo_frame_resize_max_height']) ? $settings['photo_frame_resize_max_height'] : 'false').'
-					
-					*/
-				
+
 		if($this->matrix)
 		{
 			$this->EE->theme_loader->output('
@@ -461,7 +436,6 @@ class Photo_frame_ft extends EE_Fieldtype {
 					new PhotoFrame($("#'.$uid.'"), 	'.$settings_js.')
 				});'
 			);
-			//}
 		}
 		else		
 		{
@@ -505,11 +479,6 @@ class Photo_frame_ft extends EE_Fieldtype {
 			}
 		}
 		
-		if(!empty($data))
-		{
-		//var_dump($data);exit();
-		}
-		
 		$vars = array(
 			'id'             => $this->field_id,
 			'safecracker'    => $this->safecracker,
@@ -546,8 +515,7 @@ class Photo_frame_ft extends EE_Fieldtype {
 	
 	public function pre_loop($data)
 	{
-		$this->EE->load->model('file_upload_preferences_model');
-		$this->upload_prefs = $this->EE->file_upload_preferences_model->get_file_upload_preferences(NULL, NULL, TRUE);
+		$this->upload_prefs = $this->EE->photo_frame_model->get_file_upload_groups();
 		
 		$entry_ids = array();
 		
@@ -569,7 +537,7 @@ class Photo_frame_ft extends EE_Fieldtype {
 		
 		foreach($data->result() as $photo)
 		{
-			$photos[$photo->entry_id][$photo->field_id] = (array) $photo;
+			$photos[$photo->entry_id][$photo->field_id][] = (array) $photo;
 		}
 		
 		$this->data = $photos;
@@ -582,23 +550,21 @@ class Photo_frame_ft extends EE_Fieldtype {
 		
 		$return = array();
 		
-		foreach($photos as $photo)
+		foreach($photos as $entry)
 		{
-			$valid = TRUE;
-			
-			if($photo['field_id'] != $field_id)
+			foreach($entry as $photo)
 			{
-				$valid = FALSE;	
-			}
-			
-			if($this->matrix)
-			{
-				exit('test');
-			}
-			
-			if($valid)
-			{
-				$return[] = $photo;
+				$valid = TRUE;
+				
+				if($photo['field_id'] != $field_id)
+				{
+					$valid = FALSE;	
+				}
+				
+				if($valid)
+				{
+					$return[] = $photo;
+				}				
 			}
 		}
 		
@@ -606,7 +572,7 @@ class Photo_frame_ft extends EE_Fieldtype {
 	}
 	
 	public function replace_tag($data, $params = array(), $tagdata)
-	{
+	{		
 		$this->EE->load->library('photo_frame_lib');
 		
 		$this->EE->load->config('photo_frame_config');
@@ -628,33 +594,34 @@ class Photo_frame_ft extends EE_Fieldtype {
 		foreach($photos as $index => $row)
 		{
 			if($params['offset'] <= $index && (!$params['limit'] || $total_photos < $params['limit']))
-			{				
+			{		
+				$row = $this->EE->photo_frame_lib->parse_vars($row, $this->upload_prefs);
+				
 				if(!empty($row['sizes']))
 				{
-					$row['sizes'] = json_decode($row['sizes']);
+					$sizes = json_decode($row['sizes']);
 					
-					if(isset($row['sizes']->{$params['size']}))	
+					if(isset($sizes->{$params['size']}))	
 					{
-						$row = array_merge($row, (array) $row['sizes']->{$params['size']});
+						$row['file'] = $this->EE->photo_frame_model->parse($sizes->{$params['size']}->file, 'file');						
+						$row['url']  = $this->EE->photo_frame_model->parse($sizes->{$params['size']}->file, 'url');					
+						$row['file_name'] = $this->EE->photo_frame_model->file_name($sizes->{$params['size']}->file);
 					}
 				}	
 				
 				if($tagdata)
 				{							
 					$return[$index] = $row;
-					$return[$index]['file'] = $this->EE->photo_frame_model->parse($row['file'], 'file', $this->upload_prefs);
-					$return[$index]['original_file'] = $this->EE->photo_frame_model->parse($row['original_file'], 'file', $this->upload_prefs);
-					$return[$index]['url'] = $this->EE->photo_frame_model->parse($row['file'], 'url', $this->upload_prefs);
 					$return[$index]['count'] = $index + 1;
 					$return[$index]['index'] = $index;
-					$return[$index]['total_photos'] = $photos->num_rows();
+					$return[$index]['total_photos'] = count($this->_get_photos($this->field_id));
 					$return[$index]['is_first_photo'] = ($index == 0) ? TRUE : FALSE;
-					$return[$index]['is_last_photo']  = ($index + 1 == $photos->num_rows()) ? TRUE : FALSE;
+					$return[$index]['is_last_photo']  = ($index + 1 == $return[$index]['total_photos']) ? TRUE : FALSE;
 				}
 				else
 				{					
 					$img = array(
-						'src="'.$this->EE->photo_frame_model->parse($row['file']).'"'
+						'src="'.$this->EE->photo_frame_model->parse($row['url']).'"'
 					);
 									
 					if(empty($params['alt']))
@@ -681,8 +648,15 @@ class Photo_frame_ft extends EE_Fieldtype {
 		{
 			$return = $this->EE->channel_data->utility->add_prefix(isset($params['prefix']) ? $params['prefix'] : 'photo', $return);
 		}
+		else
+		{
+			return implode("\r\n", $return);
+		}
 		
-		return implode("\r\n", $return);
+		if(is_array($return))
+		{
+			return $this->parse($return, $tagdata);
+		}
 	}
 	
 	private function _parse_filenames()
@@ -800,38 +774,7 @@ class Photo_frame_ft extends EE_Fieldtype {
     		    if(isset($photo['new']))
     		    {
         		    $photo = (array) json_decode($photo['new']);
-        		    
-        		    /*
-        		    unset($photo['new']);
-        		    
-					if(isset($_POST['photo_frame_uploaded_photo']))
-					{
-						foreach($_POST['photo_frame_uploaded_photo'] as $upload_index => $uploaded_photo)
-						{						
-							$uploaded_photo = json_decode($uploaded_photo);
-							
-							if(!$this->matrix)
-							{
-								if($photo['file_name'] == $uploaded_photo->file &&
-								   $this->field_id == $uploaded_photo->field_id)
-								{
-									unset($_POST['photo_frame_uploaded_photo'][$upload_index]);
-								}
-							}
-							else
-							{
-								if($photo['file_name'] == $uploaded_photo->file &&
-								   $this->field_id == $uploaded_photo->field_id &&
-								   $this->settings['row_id'] == $uploaded_photo->row_id &&
-								   $this->settings['col_id'] == $uploaded_photo->col_id)
-								{
-									unset($_POST['photo_frame_uploaded_photo'][$upload_index]);
-								}
-							}
-						}
-					}
-					*/
-					
+        		   					
 					$entry = $this->EE->channel_data->get_entry($this->settings['entry_id'])->row();
 					
 					$photo_names[] = $photo['file_name'];
@@ -917,38 +860,6 @@ class Photo_frame_ft extends EE_Fieldtype {
 			}
 		}
 		
-		/*
-		if(isset($_POST['photo_frame_uploaded_photo']) && count($_POST['photo_frame_uploaded_photo']) > 0)
-		{
-			foreach($_POST['photo_frame_uploaded_photo'] as $index => $uploaded_photo)
-			{						
-				$uploaded_photo = json_decode($uploaded_photo);
-				
-				if($this->field_id == $uploaded_photo->field_id)
-				{
-					var_dump($photo_names);exit();
-					
-					if(!$this->matrix || $this->matrix && $this->settings['row_id'] == $uploaded_photo->row_id && $this->settings['col_id'] == $uploaded_photo->col_id)
-					{
-						var_dump($uploaded_photo);exit();
-						
-						if(file_exists($uploaded_photo->original_path))
-						{
-							unlink($uploaded_photo->original_path);
-						}
-						
-						if(file_exists($uploaded_photo->path))
-						{
-							unlink($uploaded_photo->path);
-						}
-						
-						unset($_POST['photo_frame_uploaded_photo'][$index]);
-					}
-				}
-			}
-		}
-		*/
-		
 		if(count($new_photos) > 0)
 		{   
 			$this->EE->photo_frame_model->save($new_photos);
@@ -979,28 +890,7 @@ class Photo_frame_ft extends EE_Fieldtype {
 		}
 				
 		$this->EE->photo_frame_lib->resize_photos($this->field_id, $this->settings['entry_id'], $col_id, $row_id, $settings, $this->matrix);
-		
-		
-		// Update data with the entry_id
 			
-		/*
-		$channel_id = $this->EE->input->get_post('channel_id');
-		
-		if($this->safecracker)
-		{
-			$channel_id = $this->EE->safecracker->channel['channel_id'];
-		}
-			
-		$entry = $this->
-		
-		$parse_vars = array(
-			'channel_id' => $channel_id,
-			'entry_id'   => $this->settings['entry_id'],
-			'title' 	 => 
-		);
-		
-		*/
-		
 		return $this->settings['entry_id'];
 	}	
 
@@ -1069,11 +959,6 @@ class Photo_frame_ft extends EE_Fieldtype {
 			'max_photos_name' => $max_photos > 1 || $max_photos < 1 ? 'photos' : 'photo',
 			'min_photos_name' => $min_photos > 1 || $min_photos < 1 ? 'photos' : 'photo'
 		);
-		
-		
-		//var_dump($min_photos);exit();
-		
-		//$this->load_tmpl();
 		
 		if($min_photos > 0 && $min_photos > $total_photos)
 		{

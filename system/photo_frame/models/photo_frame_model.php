@@ -77,6 +77,11 @@ class Photo_frame_model extends CI_Model {
 		
 		preg_match("/".LD."filedir_(\d*)".RD."/", $string, $matches);
 		
+		if(!isset($matches[0]))
+		{
+			return $string;	
+		}
+		
 		$tag = $matches[0];
 		$id  = $matches[1];
 		
@@ -126,6 +131,11 @@ class Photo_frame_model extends CI_Model {
 			$this->db->where('entry_id', $id);
 			$this->db->delete('photo_frame');
 		}
+	}
+	
+	public function file_name($string)
+	{
+		return preg_replace('/.*\//us', '', $string);
 	}
 	
 	public function delete($photos, $settings = FALSE)

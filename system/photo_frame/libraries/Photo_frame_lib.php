@@ -246,7 +246,7 @@ class Photo_frame_lib {
 		));
 	}
 	
-	public function parse_vars($photo = FALSE)
+	public function parse_vars($photo = FALSE, $upload_prefs = FALSE)
 	{
 		$parse = array_merge((array) $photo, array(
 			'random_alpha'   => random_string('alpha', config_item('photo_frame_random_string_len')),
@@ -267,14 +267,35 @@ class Photo_frame_lib {
 			$parse['height']    = $photo->height;
 			$parse['width']     = $photo->width;
 			
-			if(isset($photo->photo_id))
+			if(isset($photo->sizes))
 			{
-				$parse['photo_id']  = $photo->photo_id;
+				$sizes = json_decode($photo->sizes);
+				
+				if(is_object($sizes))
+				{
+					foreach($sizes as $index => $size)
+					{
+						$parse[$index.':file_name'] = $this->EE->photo_frame_model->parse($size->file);
+						$parse[$index.':file_name'] = $this->EE->photo_frame_model->file_name($parse[$index.':file_name']);
+						$parse[$index]  	   = $this->EE->photo_frame_model->parse($size->file);
+						$parse[$index.':url']  = $this->EE->photo_frame_model->parse($size->file);
+						$parse[$index.':file'] = $this->EE->photo_frame_model->parse($size->file, 'server_path');
+					}
+				}
 			}
 			
-			$parse['file_name'] = preg_replace('/.\w*$/', '', $photo->original_file_name);
-			$parse['filename']  = $parse['file_name'];
-			$parse['extension'] = ltrim($ext_matches[0], '.');
+			if(isset($photo->photo_id))
+			{
+				$parse['photo_id'] = $photo->photo_id;
+				$parse['id']   	   = $photo->photo_id;
+			}
+			
+			$parse['file_name']     = preg_replace('/.\w*$/', '', $photo->original_file_name);
+			$parse['filename']      = $parse['file_name'];
+			$parse['extension']     = ltrim($ext_matches[0], '.');
+			$parse['file']          = $this->EE->photo_frame_model->parse($parse['file'], 'file', $upload_prefs);
+			$parse['original_file'] = $this->EE->photo_frame_model->parse($parse['original_file'], 'file', $upload_prefs);
+			$parse['url']           = $this->EE->photo_frame_model->parse($parse['file'], 'url', $upload_prefs);
 		}
 		
 		return $parse;

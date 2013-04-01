@@ -13,9 +13,106 @@
  
 class Photo_frame {
 	
+	protected $exclude_params = array(
+		'where'    => FALSE,
+		'limit'    => FALSE,
+		'offset'   => 0,
+		'order_by' => 'order',
+		'sort'     => 'asc',
+		'field_id' => FALSE,
+		'entry_id' => FALSE,
+	);
+	
+	protected $where_params = array(
+		'field_id' => FALSE,
+		'entry_id' => FALSE,
+		'id'	   => FALSE,
+	);
+	
 	public function __construct()
 	{
 		$this->EE =& get_instance();
+		
+		$this->EE->load->library('photo_frame_lib');
+		$this->EE->load->model('photo_frame_model');
+	}
+	
+	public function photos()
+	{
+		if($field_name = $this->param('field_name'))
+		{
+			$this->EE->TMPl->tagparams['field_id'] = $this->EE->channel_data->get_field_by_name($field_name)->row('field_id');	
+		}
+		
+		$where = array('site_id' => config_item('site_id'));
+		
+		foreach($this->where_params as $var_name => $default)
+		{
+			if($value = $this->param($var_name, $default))
+			{
+				$where[$var_name] = $value;		
+			}
+		}
+		
+		if(is_array($this->EE->TMPL->tagparams))
+		{
+			foreach($this->EE->TMPL->tagparams as $param => $value)
+			{
+				if(!isset($this->exclude_params[$param]))
+				{					
+					if(preg_match('/^where:/', $param))
+					{
+						$param = preg_replace('/^where:/', '', $param);
+						
+						$where[$param] = $value;
+					}
+				}
+			}
+		}
+		
+		$photos = $this->EE->photo_frame_model->get_photos(array(
+			'where'    => $where,
+			'limit'    => $this->param('limit'),
+			'offset'   => $this->param('offset'),
+			'order_by' => $this->param('order_by', 'order'),
+			'sort'     => $this->param('sort', 'asc'),
+		));
+		
+		$return = array();
+		
+		$upload_prefs = $this->EE->photo_frame_model->get_file_upload_groups();
+
+		foreach($photos->result() as $index => $row)
+		{
+			$row = $this->EE->photo_frame_lib->parse_vars($row, $upload_prefs);
+				
+			if(!empty($row['sizes']))
+			{
+				$sizes = json_decode($row['sizes']);
+				
+				if(isset($sizes->{$this->param('size')}))	
+				{
+					$row['file'] = $this->EE->photo_frame_model->parse($sizes->{$this->param('size')}->file, 'file');						
+					$row['url']  = $this->EE->photo_frame_model->parse($sizes->{$this->param('size')}->file, 'url');					
+					$row['file_name'] = $this->EE->photo_frame_model->file_name($sizes->{$this->param('size')}->file);
+				}
+			}	
+			
+			$return[$index] = (array) $row;
+			
+			$return[$index]['count'] = $index + 1;
+			$return[$index]['index'] = $index;
+			$return[$index]['total_photos'] = $photos->num_rows();
+			$return[$index]['is_first_photo'] = ($index == 0) ? TRUE : FALSE;
+			$return[$index]['is_last_photo']  = ($index + 1 == $return[$index]['total_photos']) ? TRUE : FALSE;					
+		}
+		
+		if($prefix = $this->param('prefix', 'photo'))
+		{
+			$return = $this->EE->channel_data->utility->add_prefix($prefix, $return);
+		}
+		
+		return $this->parse($return);
 	}
 	
 	public function crop_action()
