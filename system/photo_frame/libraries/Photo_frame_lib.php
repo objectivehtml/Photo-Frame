@@ -293,9 +293,10 @@ class Photo_frame_lib {
 			$parse['file_name']     = preg_replace('/.\w*$/', '', $photo->original_file_name);
 			$parse['filename']      = $parse['file_name'];
 			$parse['extension']     = ltrim($ext_matches[0], '.');
-			$parse['file']          = $this->EE->photo_frame_model->parse($parse['file'], 'file', $upload_prefs);
-			$parse['original_file'] = $this->EE->photo_frame_model->parse($parse['original_file'], 'file', $upload_prefs);
+			
 			$parse['url']           = $this->EE->photo_frame_model->parse($parse['file'], 'url', $upload_prefs);
+			$parse['file']          = $this->EE->photo_frame_model->parse($parse['file'], 'file', $upload_prefs);
+			$parse['original_file'] = $this->EE->photo_frame_model->parse($parse['original_file'], 'file', $upload_prefs);			
 		}
 		
 		return $parse;

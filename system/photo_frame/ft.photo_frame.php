@@ -515,6 +515,8 @@ class Photo_frame_ft extends EE_Fieldtype {
 	
 	public function pre_loop($data)
 	{
+		$this->EE->load->model('photo_frame_model');
+		
 		$this->upload_prefs = $this->EE->photo_frame_model->get_file_upload_groups();
 		
 		$entry_ids = array();
@@ -608,7 +610,7 @@ class Photo_frame_ft extends EE_Fieldtype {
 						$row['file_name'] = $this->EE->photo_frame_model->file_name($sizes->{$params['size']}->file);
 					}
 				}	
-				
+					
 				if($tagdata)
 				{							
 					$return[$index] = $row;
@@ -619,11 +621,11 @@ class Photo_frame_ft extends EE_Fieldtype {
 					$return[$index]['is_last_photo']  = ($index + 1 == $return[$index]['total_photos']) ? TRUE : FALSE;
 				}
 				else
-				{					
+				{				
 					$img = array(
-						'src="'.$this->EE->photo_frame_model->parse($row['url']).'"'
+						'src="'.$this->EE->photo_frame_model->parse($row['url'], 'url').'"'
 					);
-									
+							
 					if(empty($params['alt']))
 					{
 						$params['alt'] = !empty($row['title']) ? $row['title'] : (isset($this->row['title']) ? $this->row['title'] : NULL);
