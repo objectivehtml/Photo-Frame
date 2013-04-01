@@ -189,11 +189,20 @@ class Photo_frame_model extends CI_Model {
 		}
 	}
 	
-	public function get_settings($field_id)
+	public function get_settings($field_id, $col_id = FALSE)
 	{
 		$this->db->where('field_id', $field_id);
-		$settings = $this->db->get('channel_fields');
-		$settings = unserialize(base64_decode($settings->row('field_settings')));
+		
+		if(!$col_id)
+		{
+			$settings = $this->db->get('channel_fields');
+			$settings = unserialize(base64_decode($settings->row('field_settings')));
+		}
+		else
+		{				
+			$settings = $this->db->get('matrix_cols');
+			$settings = unserialize(base64_decode($settings->row('col_settings')));
+		}
 		
 		return $settings;
 	}

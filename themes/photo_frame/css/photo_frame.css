@@ -422,7 +422,8 @@ a.photo-frame-bar-button.photo-frame-cancel.photo-frame-float-left {
 }
 
 .photo-frame-photo {
-	max-width: 100%;	
+	max-width: 100%;
+	height: auto;	
 }
 
 .photo-frame-photo img {
@@ -430,6 +431,10 @@ a.photo-frame-bar-button.photo-frame-cancel.photo-frame-float-left {
 	display: block;
 	width: 100%;
 	height: 100%;
+}
+
+.matrix .photo-frame-photo img {
+	height: auto;
 }
 
 .photo-frame-upload {

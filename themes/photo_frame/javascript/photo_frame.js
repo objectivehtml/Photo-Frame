@@ -53,16 +53,16 @@ jQuery.fn.center = function () {
     return this;
 }
 
-var PhotoFrame = function(options) {
+var PhotoFrame = function(obj, options) {
 	
 	var t          = this;
 	
 	t.options      = options;
-	t.settings     = t.options.settings;
-	t.$wrapper     = $(t.options.wrapper);
+	t.settings     = options.settings;
+	t.$wrapper     = $(obj);
 	t.response     = {};
 	t.jcrop        = {};
-	t.photos       = t.options.photos;
+	t.photos       = options.photos;
 	t.edit         = false;
 	t.edit_id	   = 0;
 	t.isNewPhoto   = true;
@@ -76,12 +76,12 @@ var PhotoFrame = function(options) {
 	t.initialized  = false;
 	t.scale        = 1;
 	t.rotate	   = 0;
-	t.resize 	   = t.options.resize ? t.options.resize: false;
-	t.resizeMax    = t.options.resizeMax ? t.options.resizeMax: false;
-	t.title		   = t.options.title ? t.options.title : '';
-	t.description  = t.options.description ? t.options.description : '';
-	t.keywords     = t.options.keywords ? t.options.keywords : '';
-	t.compression  = t.options.compression;
+	t.resize 	   = options.resize ? options.resize: false;
+	t.resizeMax    = options.resizeMax ? options.resizeMax: false;
+	t.title		   = options.title ? options.title : '';
+	t.description  = options.description ? options.description : '';
+	t.keywords     = options.keywords ? options.keywords : '';
+	t.compression  = options.compression;
 	
 	t.ui   = {
 		body: $('body'),
@@ -715,8 +715,7 @@ var PhotoFrame = function(options) {
 		t.ui.toolbar.hide();
 		
 		if(t.response.success) {
-			
-			t.$wrapper.append('<textarea name="photo_frame_uploaded_photo[]" style="display:none">{"field_id": "'+t.options.fieldId+'", "path": "'+t.response.file_path+'", "original_path": "'+t.response.original_path+'", "file": "'+t.response.file_name+'"}</textarea>');
+			t.$wrapper.append('<textarea name="'+t.options.fieldName+'[][uploaded]" style="display:none">{"field_id": "'+t.options.fieldId+'", "col_id": "'+t.options.colId+'", "row_id": "'+t.options.rowId+'", "path": "'+t.response.file_path+'", "original_path": "'+t.response.original_path+'", "file": "'+t.response.file_name+'"}</textarea>');
 			
 			t.stopUpload(t.response);
 		}
@@ -725,9 +724,8 @@ var PhotoFrame = function(options) {
 		}
 	}
 	
-	t.init = function(settings, photos) {
+	t.init = function(settings) {
 		
-				
 		var html = [
 			'<form id="photo-frame-upload" class="photo-frame-form photo-frame-wrapper" action="'+t.options.url+(t.IE() ? '&ie=true' : '')+'" method="POST" enctype="multipart/form-data" id="photo-frame-upload-'+t.index+'" '+(t.IE() ? 'target="photo-frame-iframe-'+t.index+'"' : '')+'>',
 				'<h3>Select a file to upload...</h3>',
@@ -948,6 +946,7 @@ var PhotoFrame = function(options) {
 		t.ui.edit.live('click', function(e) {
 			var $t = $(this)
 			var id = $t.attr('href').replace('#', '');
+			
 			var photo = t.photos[id];
 			
 			t.response    = photo;
@@ -1125,3 +1124,4 @@ var PhotoFrame = function(options) {
 }
 
 PhotoFrame.instances = [];
+PhotoFrame.matrix = [];

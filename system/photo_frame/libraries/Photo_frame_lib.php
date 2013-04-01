@@ -96,6 +96,7 @@ class Photo_frame_lib {
 		
 		$dir_id     = $this->EE->input->get_post('dir_id');
 		$field_id   = $this->EE->input->get_post('field_id');
+		
 		$settings   = $this->EE->photo_frame_model->get_settings($field_id);
 		$errors     = $this->EE->photo_frame_model->validate_image_size($settings);
 		
