@@ -164,8 +164,11 @@ class Photo_frame_model extends CI_Model {
 			$file_ids[] = $file->file_id;
 		}
 		
-		$this->load->model('file_model');
-		$this->file_model->delete_files($file_ids, $delete_raw_files);	
+		if(count($file_ids) > 0)
+		{
+			$this->load->model('file_model');
+			$this->file_model->delete_files($file_ids, $delete_raw_files);	
+		}
 		
 		return $file_ids;
 	}

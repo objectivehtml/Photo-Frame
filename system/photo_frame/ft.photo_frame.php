@@ -342,6 +342,11 @@ class Photo_frame_ft extends EE_Fieldtype {
 			$url = page_url(TRUE, TRUE, FALSE);
 		}
 		
+		if(!isset($settings['photo_frame_upload_group']))
+		{
+			show_error('You don\'t have a file upload group set');
+		}
+		
 		$url .= (!preg_match('/\?/', $url) ? '?' : '&') . 'dir_id='.$settings['photo_frame_upload_group'].'&field_id='.$this->field_id;
 		
 		$crop_url     = action_url('photo_frame', 'crop_action', FALSE);
@@ -679,9 +684,9 @@ class Photo_frame_ft extends EE_Fieldtype {
 					$return[$index]['is_last_photo']  = ($index + 1 == $return[$index]['total_photos']) ? TRUE : FALSE;
 				}
 				else
-				{				
+				{		
 					$img = array(
-						'src="'.$this->EE->photo_frame_model->parse((isset($params['directory']) ? $row[$params['directory']] : $row['url']), 'url').'"'
+						'src="'.$this->EE->photo_frame_model->parse((isset($params['directory']) && $params['directory'] ? $row[$params['directory']] : $row['url']), 'url').'"'
 					);
 							
 					if(empty($params['alt']))
