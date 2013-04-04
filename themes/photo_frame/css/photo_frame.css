@@ -59,7 +59,22 @@
 	max-width: none;
 }
 
+.photo-frame-drop-text { display: none; }
 
+.photo-frame-dragging .photo-frame-drop-text { 
+	text-align: center;
+	font-size: 24px;
+	display: block;
+}
+
+.photo-frame-dragging .photo-frame-drop-zone {
+	border: 5px dashed rgb(105, 105, 105);
+	top: 0;
+	left: 0;
+	min-height: 150px;
+}
+
+.photo-frame-dragging .photo-frame-button { visibility: hidden; }
 
 
 .photo-frame-invalid {
@@ -536,7 +551,8 @@ a.photo-frame-meta-toggle.active,  a.photo-frame-meta-toggle:hover {
 }
 
 .photo-frame-wrapper {
-	text-align: left;	
+	text-align: left;
+	position: relative;
 }
 
 .photo-frame-wrapper .clearfix:after {

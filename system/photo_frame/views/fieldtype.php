@@ -2,6 +2,10 @@
 	
 	<!--[if lt IE 10]> <div class="photo-frame-ie"> <![endif]-->
 	    
+	<div class="photo-frame-drop-zone">
+	    
+	    <div class="photo-frame-drop-text">Drop photo to upload</div>
+	    
 		<div class="photo-frame-preview clearfix">
     		<ul class="<?php echo $sortable ? 'photo-frame-sortable' : NULL?> clearfix">
         		<?php foreach($data as $index => $photo): ?>
@@ -31,6 +35,8 @@
 		<?php if($safecracker): ?>
 			<input type="hidden" name="<?php echo $field_name?>[][placeholder]" value="1" />
 		<?php endif; ?>
+	
+	</div>
 	
 	<!--[if lt IE 10]> </div> <![endif]-->
 

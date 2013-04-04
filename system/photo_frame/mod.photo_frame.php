@@ -37,11 +37,41 @@ class Photo_frame {
 		$this->EE->load->model('photo_frame_model');
 	}
 	
-	public function photos()
+	private function _set_param($param, $value)
+	{
+		$this->EE->TMPL->tagparams[$param] = $value;	
+	}
+	
+	public function first_photo()
+	{
+		$offset = 0 + (int) $this->param('offset');
+		
+		$this->_set_param('limit', 1 + (int) $this->param('limit', 0));
+		$this->_set_param('offset', $offset);
+		
+		return $this->photos();
+	} 
+	
+	public function last_photo()
+	{
+		$offset = $this->total_photos() - 1 - (int) $this->param('offset');
+		
+		$this->_set_param('limit', 1 + (int) $this->param('limit', 0));		
+		$this->_set_param('offset', $offset);
+		
+		return $this->photos();
+	} 
+	
+	public function total_photos()
+	{
+		return $this->photos(TRUE)->num_rows();
+	}
+	
+	public function photos($return = FALSE)
 	{
 		if($field_name = $this->param('field_name'))
 		{
-			$this->EE->TMPl->tagparams['field_id'] = $this->EE->channel_data->get_field_by_name($field_name)->row('field_id');	
+			$this->_set_param('field_id', $this->EE->channel_data->get_field_by_name($field_name)->row('field_id'));	
 		}
 		
 		$where = array('site_id' => config_item('site_id'));
@@ -78,13 +108,18 @@ class Photo_frame {
 			'sort'     => $this->param('sort', 'asc'),
 		));
 		
+		if($return)
+		{
+			return $photos;
+		}
+		
 		$return = array();
 		
 		$upload_prefs = $this->EE->photo_frame_model->get_file_upload_groups();
 
 		foreach($photos->result() as $index => $row)
 		{
-			$row = $this->EE->photo_frame_lib->parse_vars($row, $upload_prefs);
+			$row = $this->EE->photo_frame_lib->parse_vars($row, $upload_prefs, $this->param('directory'));
 				
 			if(!empty($row['sizes']))
 			{

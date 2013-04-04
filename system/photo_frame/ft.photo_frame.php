@@ -41,34 +41,37 @@ class Photo_frame_ft extends EE_Fieldtype {
 		'lang'            => '',
 		'title'           => '',
 		'source'          => NULL, // [NULL|original]
-		'parse_filenames' => 'true', // [framed|original],
+		//'parse_filenames' => 'true', // [framed|original],
 		'order_by'		  => 'order',
 		'sort'			  => 'asc',
 		'limit' 		  => FALSE,
 		'offset' 		  => 0,
-		'directory_name'  => FALSE,
+		'directory'  	  => FALSE,
 		'size' 			  => NULL
 	);
 	
 	public $exclude_params = array(
 		'source',
-		'parse_filenames',
+		//'parse_filenames',
 		'limit',
 		'offset',
-		'directory_name',
+		'directory',
 		'size',
 		'order_by',
-		'sort'
+		'sort',
+		'directory'
 	);	
 
 	public function __construct()
 	{
 		$this->EE =& get_instance();
 		
+		/*
 		if($this->default_params['directory_name'])
 		{
 			$this->default_params['directory_name'] = config_item('photo_frame_directory_name');
 		}
+		*/
 		
 		if(isset($this->EE->safecracker_lib))
 		{
@@ -424,8 +427,6 @@ class Photo_frame_ft extends EE_Fieldtype {
 					if(cell.row.isNew) {
 						var settings = PhotoFrame.matrix[cell.col.id];
 						
-						console.log(settings);
-						
 						settings.fieldName = cell.field.id+"["+cell.row.id+"]["+cell.col.id+"]";
 				
 						new PhotoFrame(cell.dom.$td, settings);
@@ -498,18 +499,10 @@ class Photo_frame_ft extends EE_Fieldtype {
 		return $this->EE->load->view('fieldtype', $vars, TRUE);
 	}
 	
-	public function replace_original($data, $params = array(), $tagdata)
+	public function replace_thumb($data, $params = array(), $tagdata)
 	{
-		$params['source']         = 'original';
+		$params['directory'] = '_thumbs';
 		
-		return $this->replace_tag($data, $params, $tagdata);
-	}
-	
-	public function replace_thumbs($data, $params = array(), $tagdata)
-	{
-		$params['directory_name'] = '_thumbs';
-		$params['source']         = 'original';
-
 		return $this->replace_tag($data, $params, $tagdata);
 	}
 	
@@ -573,6 +566,49 @@ class Photo_frame_ft extends EE_Fieldtype {
 		return $return;
 	}
 	
+	public function replace_total_photos($data, $params = array(), $tagdata)
+	{		
+		return count($this->_get_photos($this->field_id));
+	}
+	
+	public function replace_first_photo($data, $params, $tagdata)
+	{
+		$total_photos = $this->replace_total_photos($data, $params, $tagdata);
+		$offset       = isset($params['offset']) ? (int) $params['offset'] : 0;
+		$limit   	  = isset($params['limit']) ? (int) $params['limit'] : 1;
+		
+		unset($params['offset']);
+		
+		$params['limit']  = $limit;
+		$params['offset'] = 0 + $offset;
+		
+		if($params['offset'] >= $total_photos)
+		{
+			$params['offset'] = $total_photos - 1;
+		}
+		
+		return $this->replace_tag($data, $params, $tagdata);
+	}
+	
+	public function replace_last_photo($data, $params, $tagdata)
+	{
+		$total_photos = $this->replace_total_photos($data, $params, $tagdata);
+		$offset 	  = isset($params['offset']) ? (int) $params['offset'] : 0;
+		$limit   	  = isset($params['limit']) ? (int) $params['limit'] : 1;
+		
+		unset($params['offset']);
+		
+		$params['limit']  = $limit;
+		$params['offset'] = $this->replace_total_photos($data, $params, $tagdata) - 1 - $offset;
+		
+		if($params['offset'])
+		{
+			$params['offset'] = 0;
+		}
+		
+		return $this->replace_tag($data, $params, $tagdata);
+	}
+	
 	public function replace_tag($data, $params = array(), $tagdata)
 	{		
 		$this->EE->load->library('photo_frame_lib');
@@ -597,7 +633,9 @@ class Photo_frame_ft extends EE_Fieldtype {
 		{
 			if($params['offset'] <= $index && (!$params['limit'] || $total_photos < $params['limit']))
 			{		
-				$row = $this->EE->photo_frame_lib->parse_vars($row, $this->upload_prefs);
+				$row['thumb'] = $this->EE->photo_frame_model->parse($this->EE->photo_frame_lib->swap_filename($row['original_file_name'], $row['original_file'], '_thumbs/'), 'url');
+								
+				$row = $this->EE->photo_frame_lib->parse_vars($row, $this->upload_prefs, $params['directory']);
 				
 				if(!empty($row['sizes']))
 				{
@@ -610,7 +648,7 @@ class Photo_frame_ft extends EE_Fieldtype {
 						$row['file_name'] = $this->EE->photo_frame_model->file_name($sizes->{$params['size']}->file);
 					}
 				}	
-					
+				
 				if($tagdata)
 				{							
 					$return[$index] = $row;
@@ -623,7 +661,7 @@ class Photo_frame_ft extends EE_Fieldtype {
 				else
 				{				
 					$img = array(
-						'src="'.$this->EE->photo_frame_model->parse($row['url'], 'url').'"'
+						'src="'.$this->EE->photo_frame_model->parse((isset($params['directory']) ? $row[$params['directory']] : $row['url']), 'url').'"'
 					);
 							
 					if(empty($params['alt']))
@@ -664,11 +702,6 @@ class Photo_frame_ft extends EE_Fieldtype {
 	private function _parse_filenames()
 	{
 		var_dump($this->upload_prefs);exit();
-	}
-	
-	public function replace_total_photos($data, $params = array(), $tagdata)
-	{		
-		return count($this->_get_photos($this->field_id));
 	}
 	
 	public function setting($index, $default = FALSE)
@@ -1020,7 +1053,7 @@ class Photo_frame_ft extends EE_Fieldtype {
 		    $themes[$theme->getName()] = $theme->getTitle();
 		}
 			
-		require PATH_THIRD . 'photo_frame/libraries/Interface_builder/Interface_builder.php';
+		require PATH_THIRD . 'photo_frame/libraries/InterfaceBuilder/InterfaceBuilder.php';
 		
 		$this->EE->theme_loader->module_name = 'photo_frame';
 		$this->EE->theme_loader->javascript('InterfaceBuilder');
@@ -1043,8 +1076,6 @@ class Photo_frame_ft extends EE_Fieldtype {
 				var IB = new InterfaceBuilder();
 			');
 		}
-		
-		$IB = new Interface_builder();
 		
 		$settings = array();
 		
@@ -1232,19 +1263,19 @@ class Photo_frame_ft extends EE_Fieldtype {
 		
 		$vars = array(
 			'matrix' 	   => $this->matrix,
-			'resize_table' => $IB->table($resize_fields, $data, array(
+			'resize_table' => InterfaceBuilder::table($resize_fields, $data, array(), array(
 				'class'       => $this->matrix ? 'matrix-col-settings' : 'mainTable padTable',
 				'border'      => 0,
 				'cellpadding' => 0,
 				'cellspacing' => 0
 			)),
-			'crop_table' => $IB->table($crop_fields, $data, array(
+			'crop_table' => InterfaceBuilder::table($crop_fields, $data, array(), array(
 				'class'       => $this->matrix ? 'matrix-col-settings' : 'mainTable padTable',
 				'border'      => 0,
 				'cellpadding' => 0,
 				'cellspacing' => 0
 			)),
-			'info_table' => $IB->table($info_fields, $data, array(
+			'info_table' => InterfaceBuilder::table($info_fields, $data, array(), array(
 				'class'       => $this->matrix ? 'matrix-col-settings' : 'mainTable padTable',
 				'border'      => 0,
 				'cellpadding' => 0,

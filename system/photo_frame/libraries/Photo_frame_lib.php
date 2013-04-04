@@ -246,7 +246,7 @@ class Photo_frame_lib {
 		));
 	}
 	
-	public function parse_vars($photo = FALSE, $upload_prefs = FALSE)
+	public function parse_vars($photo = FALSE, $upload_prefs = FALSE, $directory = FALSE)
 	{
 		$parse = array_merge((array) $photo, array(
 			'random_alpha'   => random_string('alpha', config_item('photo_frame_random_string_len')),
@@ -275,6 +275,8 @@ class Photo_frame_lib {
 				{
 					foreach($sizes as $index => $size)
 					{
+						$parse[$index.':height'] = $size->height;
+						$parse[$index.':width']  = $size->width;
 						$parse[$index.':file_name'] = $this->EE->photo_frame_model->parse($size->file);
 						$parse[$index.':file_name'] = $this->EE->photo_frame_model->file_name($parse[$index.':file_name']);
 						$parse[$index]  	   = $this->EE->photo_frame_model->parse($size->file);
@@ -290,16 +292,43 @@ class Photo_frame_lib {
 				$parse['id']   	   = $photo->photo_id;
 			}
 			
+			if($directory)
+			{
+				$parse[$directory] = $this->EE->photo_frame_model->parse($this->EE->photo_frame_lib->swap_filename($parse['file_name'], $parse['original_file'], $directory.'/'));
+				$parse[$directory.':file_name'] = $this->EE->photo_frame_model->file_name($parse[$directory]);
+				$parse[$directory.':url']  = $parse[$directory];
+				$parse[$directory.':file'] = $this->EE->photo_frame_model->parse($this->EE->photo_frame_lib->swap_filename($parse['file_name'], $parse['original_file'], $directory.'/'), 'file');
+			}
+			
 			$parse['file_name']     = preg_replace('/.\w*$/', '', $photo->original_file_name);
 			$parse['filename']      = $parse['file_name'];
-			$parse['extension']     = ltrim($ext_matches[0], '.');
-			
+			$parse['extension']     = ltrim($ext_matches[0], '.');			
 			$parse['url']           = $this->EE->photo_frame_model->parse($parse['file'], 'url', $upload_prefs);
 			$parse['file']          = $this->EE->photo_frame_model->parse($parse['file'], 'file', $upload_prefs);
+			$parse['original_url']  = $this->EE->photo_frame_model->parse($parse['original_file'], 'url', $upload_prefs);	
 			$parse['original_file'] = $this->EE->photo_frame_model->parse($parse['original_file'], 'file', $upload_prefs);			
 		}
 		
 		return $parse;
+	}
+	
+	public function filename($string, $replace = '')
+	{
+		$return = preg_replace('/.*\//us', $replace, $string);
+		
+		if($return == $string)
+		{
+			return !empty($replace) ? $replace : $return;	
+		}
+		
+		return $return;
+	}
+	
+	public function swap_filename($filename, $file_path, $insert = NULL)
+	{
+		preg_match("/(".LD."filedir_(\d*)".RD.")(.*)/", $file_path, $matches);
+		
+		return $matches[1] . $insert . $this->filename($matches[3], $filename);
 	}
 	
 	public function rename($photo, $settings = FALSE, $return_parse = FALSE)

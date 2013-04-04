@@ -135,7 +135,7 @@ class Photo_frame_model extends CI_Model {
 	
 	public function file_name($string)
 	{
-		return preg_replace('/.*\//us', '', $string);
+		return $this->photo_frame_lib->filename($string);
 	}
 	
 	public function delete($photos, $settings = FALSE)
