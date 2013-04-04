@@ -150,6 +150,13 @@ class Photo_frame {
 		return $this->parse($return);
 	}
 	
+	public function response_action()
+	{		
+		$this->EE->load->library('photo_frame_lib');
+		
+		$this->EE->photo_frame_lib->response_action();
+	}
+	
 	public function crop_action()
 	{		
 		$this->EE->load->library('photo_frame_lib');

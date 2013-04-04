@@ -138,6 +138,38 @@ class Photo_frame_model extends CI_Model {
 		return $this->photo_frame_lib->filename($string);
 	}
 	
+	public function get_original_files($orig_file)
+	{
+		return $this->get_photos(array(
+			'where' => array(
+				'site_id'       => config_item('site_id'),
+				'original_file' => $orig_file
+			)
+		));
+	}
+	
+	public function delete_files($original_path, $delete_raw_files = TRUE)
+	{		
+		$files = $this->channel_data->get('files', array(
+			'where' => array(
+				'site_id'  => config_item('site_id'),
+				'rel_path' => $original_path 
+			)
+		));
+		
+		$file_ids = array();
+		
+		foreach($files->result() as $file)
+		{
+			$file_ids[] = $file->file_id;
+		}
+		
+		$this->load->model('file_model');
+		$this->file_model->delete_files($file_ids, $delete_raw_files);	
+		
+		return $file_ids;
+	}
+	
 	public function delete($photos, $settings = FALSE)
 	{	
 		if(!is_array($settings))
@@ -174,9 +206,9 @@ class Photo_frame_model extends CI_Model {
 						}
 					}
 					
-					if(file_exists($original))
-					{
-						unlink($original);
+					if($this->get_original_files($photo->row('original_file'))->num_rows() == 1)
+					{			
+						$this->delete_files($original);						
 					}
 					
 					if(file_exists($framed))

@@ -5,6 +5,8 @@ var PhotoFrame;
 		
 		var t          = this;
 		
+		t.dirId		   = options.dirId;
+		t.assetSheet   = false;
 		t.options      = options;
 		t.settings     = options.settings;
 		t.$wrapper     = $(obj);
@@ -172,7 +174,6 @@ var PhotoFrame;
 		        		if(typeof t.options.size == "string") {
 			        		//t.ui.instructions.hide();
 		        		}
-		        		
 		        	}
 		        	else {
 			        	t.ui.instructions = false;
@@ -657,22 +658,66 @@ var PhotoFrame;
 			});
 		};
 	
-		t.callback = function(data) {
+		t.callback = function(data, existingAsset) {
 			t.response = data;
 			
 			t.ui.toolbar.hide();
 			
 			if(t.response.success) {
-				t.$wrapper.append('<textarea name="'+t.options.fieldName+'[][uploaded]" style="display:none">{"field_id": "'+t.options.fieldId+'", "col_id": "'+t.options.colId+'", "row_id": "'+t.options.rowId+'", "path": "'+t.response.file_path+'", "original_path": "'+t.response.original_path+'", "file": "'+t.response.file_name+'"}</textarea>');
+				if(!existingAsset) {
+					t.$wrapper.append('<textarea name="'+t.options.fieldName+'[][uploaded]" style="display:none">{"field_id": "'+t.options.fieldId+'", "col_id": "'+t.options.colId+'", "row_id": "'+t.options.rowId+'", "path": "'+t.response.file_path+'", "original_path": "'+t.response.original_path+'", "file": "'+t.response.file_name+'"}</textarea>');
+				}
 				
-				t.stopUpload(t.response);
+				t.stopUpload(data);
 			}
 			else {
 				t.showErrors(t.response.errors);	
 			}
 		}
 		
+		t.getResponse = function(file, callback) {
+			$.get(t.options.responseUrl, 
+				{
+					field_id: t.options.fieldId, 
+					file: file
+				}, function(response) {
+					if(typeof callback == "function") {
+						callback(response);
+					}
+				}
+			);
+		}
+		
+		t.isAssetsInstalled = function() {
+			if(typeof Assets == "object") {
+				return true;
+			}
+			
+			return false;
+		}
+		
 		t.init = function(settings) {
+		
+			if(t.isAssetsInstalled()) {
+				console.log('test');
+				
+				t.assetSheet = new Assets.Sheet({
+				    multiSelect: false,
+				    filedirs: [t.dirId],
+				    kinds: ['image'],
+				    onSelect: function(files) {
+				    	t.edit = false;
+				    	
+				    	t.getResponse(files[0].url, function(response) {
+				    		t.callback(response, true);
+				    	});
+				    }
+				});
+			}
+			
+			t.$wrapper.find('.photo-frame-browse').click(function() {
+				t.assetSheet.show();
+			});
 			
 			t.$wrapper.bind('dragover', function(e) {
 				

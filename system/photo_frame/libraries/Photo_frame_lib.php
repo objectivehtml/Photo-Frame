@@ -34,6 +34,17 @@ class Photo_frame_lib {
 		$this->edit      = $this->EE->input->get_post('edit', TRUE) == 'true' ? TRUE : FALSE;
 		$this->url       = $this->EE->input->get_post('url', TRUE);
 	}
+	
+	public function assets_installed()
+	{		
+		// Make sure that Assets is installed
+		if (array_key_exists('assets', $this->EE->addons->get_installed()))
+		{
+			return TRUE;
+		}
+		
+		return FALSE;
+	}
 		
 	public function build_size($settings, $index)
 	{
@@ -87,6 +98,47 @@ class Photo_frame_lib {
 	    return FALSE;
 	}
 	
+	public function response_action()
+	{
+		$this->EE->load->library('filemanager');
+		$this->EE->load->config('photo_frame_config');
+		
+		$framed_dir_name = config_item('photo_frame_directory_name');
+		
+		$errors        = array();	
+		$field_id      = $this->EE->input->get_post('field_id');
+		$original_url  = $this->EE->input->get_post('file');			
+		$settings      = $this->EE->photo_frame_model->get_settings($field_id);	
+		$dir_id        = $settings['photo_frame_upload_group'];	
+		$directory     = $this->EE->filemanager->directory($dir_id, FALSE, TRUE);		
+		$framed_dir    = $directory['server_path'] . $framed_dir_name . '/';			
+		$file_name     = $this->EE->photo_frame_lib->filename($original_url);
+		$file_url      = $directory['url'] . $framed_dir_name . '/' . $file_name;
+		$file_path     = $directory['server_path'] . $framed_dir_name . '/' . $file_name;
+		$original_path = $directory['server_path'] . $file_name;
+		
+		$response = $this->create_directory($directory);
+		$errors   = array_merge($errors, $response->errors);
+		
+		if($response->exists)
+		{
+			copy($original_path, $framed_dir.$file_name);
+		}
+		
+		return $this->json(array(
+			'success'            => count($errors) == 0 ? TRUE : FALSE,
+			'directory'          => $directory,
+			'file_name'          => isset($file_name) ? $file_name : NULL,
+			'file_url'           => isset($file_url)  ? $file_url  : NULL,
+			'file_path'          => isset($file_path) ? $file_path : NULL,
+			'original_file'      => '{filedir_'.$dir_id.'}'.$file_name,
+			'original_file_name' => $file_name,
+			'original_url'       => $original_url,
+			'original_path'      => $original_path,
+			'errors'             => $errors
+		));
+	}
+	
 	public function upload_action()
 	{
 		$this->EE->load->library('filemanager');
@@ -105,25 +157,14 @@ class Photo_frame_lib {
 		
 		if(count($errors) == 0)
 		{
-			$framed_dir = $directory['server_path'] . $framed_dir_name . '/';
-			
-			if(!is_dir($framed_dir))
-			{
-				if(!is_dir($directory['server_path']))
-				{
-					$errors = array($this->parse(array(
-						'directory' => $directory['server_path']
-					), lang('photo_frame_upload_dir_not_exists')));
-				}
-				else
-				{					
-					mkdir($framed_dir, DIR_WRITE_MODE);
-				}
-			}
-				
 			$response  = $this->EE->filemanager->upload_file($dir_id);												
 			$errors    = isset($response['error']) ? array($response['error']) : array();
 						
+			$dir_response = $this->EE->photo_frame_lib->create_directory($directory, $framed_dir_name);			
+			$framed_dir   = $dir_response->path;
+		
+			$errors = array_merge($errors, $dir_response->errors);
+			
 			$file_name = $file_path = $file_url = $orig_path = $orig_url = NULL;
 				
 			if(count($errors) == 0)
@@ -155,6 +196,41 @@ class Photo_frame_lib {
 			'original_path'      => isset($orig_path) ? $orig_path : NULL,
 			'errors'             => $errors
 		), $ie);
+	}
+	
+	public function create_directory($directory, $framed_dir_name = FALSE)
+	{
+		if(!$framed_dir_name)
+		{
+			$framed_dir_name = config_item('photo_frame_directory_name');
+		}
+		
+		$path = $directory['server_path'] . $framed_dir_name . '/';;
+		
+		$errors = array();
+		$dir_exists = TRUE;
+		
+		if(!is_dir($path))
+		{
+			if(!is_dir($path['server_path']))
+			{
+				$errors = array($this->parse(array(
+					'directory' => $directory['server_path']
+				), lang('photo_frame_upload_dir_not_exists')));
+				$dir_exists = FALSE;
+			}
+			else
+			{			
+				mkdir($path, DIR_WRITE_MODE);
+				$dir_exists = TRUE;
+			}
+		}
+		
+		return (object) array(
+			'errors' => $errors,
+			'path'   => $path,
+			'exists' => $dir_exists
+		);
 	}
 	
 	public function crop_action()
@@ -314,7 +390,7 @@ class Photo_frame_lib {
 	
 	public function filename($string, $replace = '')
 	{
-		$return = preg_replace('/.*\//us', $replace, $string);
+		$return = basename($string);
 		
 		if($return == $string)
 		{
@@ -365,10 +441,11 @@ class Photo_frame_lib {
 		
 			$path = $this->EE->photo_frame_model->parse($photo->original_file, 'server_path');
 			
-			$orig = $matches[0].$photo->file_name;
+			//$orig = $matches[0].$photo->file_name;
+			$orig = $matches[0].$orig_file_name;
 			$orig = $this->EE->photo_frame_model->parse($orig, 'server_path');
 			
-			$orig_path = $matches[0].$file_name;
+			$orig_path = $matches[0].$orig_file_name;
 			$orig_path = $this->EE->photo_frame_model->parse($orig_path, 'server_path');
 			
 			$framed = $matches[0].config_item('photo_frame_directory_name').'/'.$photo->file_name;
@@ -377,11 +454,11 @@ class Photo_frame_lib {
 			$framed_path = $matches[0].config_item('photo_frame_directory_name').'/'.$file_name;
 			$framed_path = $this->EE->photo_frame_model->parse($framed_path, 'server_path');
 			
-			$orig_file_name = $this->parse($parse, $settings['photo_frame_name_format']);
+			//$orig_file_name = $this->parse($parse, $settings['photo_frame_name_format']);
 			
 			$photo->file_name     = $file_name;
 			$photo->file          = $matches[0].config_item('photo_frame_directory_name').'/'.$file_name;
-			$photo->original_file = $matches[0].$file_name;
+			$photo->original_file = $matches[0].$orig_file_name;
 			
 			ImageEditor::init($orig)->rename($orig_path);	
 			ImageEditor::init($framed)->rename($framed_path);			

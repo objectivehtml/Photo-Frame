@@ -26,7 +26,9 @@
 		</div>
 		
 		<a href="#" class="photo-frame-button photo-frame-upload photo-frame-margin-top" <?php if($overlimit):?>style="display:none"<?php endif; ?>><span class="icon-upload"></span> <?php echo $button_text?></a>
-		
+		<?php if($assets): ?>
+			<a href="#" class="photo-frame-button photo-frame-browse photo-frame-margin-top" <?php if($overlimit):?>style="display:none"<?php endif; ?>><span class="icon-search"></span> Browse</a>
+		<?php endif; ?>
 		
 		<?php if(!empty($upload_helper)): ?>
 			<p class="photo-frame-helper" <?php if($overlimit):?>style="display:none"<?php endif; ?>><?php echo $upload_helper?></p>

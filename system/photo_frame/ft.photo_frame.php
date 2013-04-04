@@ -126,15 +126,26 @@ class Photo_frame_ft extends EE_Fieldtype {
 	}
 	
 	function display_field($data)
-	{	
+	{			
+		$this->EE->load->config('photo_frame_config');
+		$this->EE->load->library('photo_frame_lib');
+			
+		$assets_installed = $this->EE->photo_frame_lib->assets_installed();
+		
+		// Make sure that Assets is installed
+		if($assets_installed)
+		{
+			require_once PATH_THIRD.'assets/helper.php';
+		
+			$assets_helper = new Assets_helper;
+			$assets_helper->include_sheet_resources();
+		}
+		
 		if(isset($this->EE->safecracker_lib))
 		{
 			$this->safecracker = TRUE;
 		}
 		
-		$this->EE->load->config('photo_frame_config');
-		$this->EE->load->library('photo_frame_lib');
-			
 		$this->EE->theme_loader->module_name = 'photo_frame';
 				
 		$this->EE->theme_loader->css('photo_frame');
@@ -333,7 +344,8 @@ class Photo_frame_ft extends EE_Fieldtype {
 		
 		$url .= (!preg_match('/\?/', $url) ? '?' : '&') . 'dir_id='.$settings['photo_frame_upload_group'].'&field_id='.$this->field_id;
 		
-		$crop_url   = action_url('photo_frame', 'crop_action', FALSE);
+		$crop_url     = action_url('photo_frame', 'crop_action', FALSE);
+		$response_url = action_url('photo_frame', 'response_action', FALSE);
 		
 		$min_width  = (int) $this->setting('min_width', 0);
 		$min_height = (int) $this->setting('min_height', 0);
@@ -397,11 +409,13 @@ class Photo_frame_ft extends EE_Fieldtype {
 		$settings_js 	= '{
 			fieldName: \''.($this->matrix ? $this->cell_name : $this->field_name).'\',
 			fieldId: \''.$this->field_id.'\',
+			dirId: '.$this->settings['photo_frame_upload_group'].',
 			colId: '.(isset($this->col_id) ? '\'col_id_'.$this->col_id.'\'' : 'false').',
 			rowId: '.(isset($this->row_id) ? '\'row_id_'.$this->row_id.'\'' : 'false').',
 			photos: '.json_encode($saved_data).',
 			url: \''.$url.'\',
 			cropUrl: \''.$crop_url.'\',
+			responseUrl: \''.$response_url.'\',
 			settings: '.json_encode($jcrop_settings).',
 			directory: '.json_encode($directory).',
 			infoPanel: '.$settings['photo_frame_display_info'].',
@@ -492,9 +506,15 @@ class Photo_frame_ft extends EE_Fieldtype {
 			'preview_styles' => trim($preview_styles),
 			'button_text'	 => $button_text,
 			'overlimit'	 	 => $overlimit,
+			'assets'		 => FALSE,
 			'upload_helper'	 => isset($settings['photo_frame_upload_helper']) ? $settings['photo_frame_upload_helper'] : '',
 			'sortable'       => (isset($settings['photo_frame_sortable'])  && $settings['photo_frame_sortable'] == 'true'? TRUE : FALSE)
 		);
+		
+		if($assets_installed && isset($settings['photo_frame_assets']) && $settings['photo_frame_assets'] == 'true')
+		{
+			$vars['assets'] = TRUE;
+		}
 		
 		return $this->EE->load->view('fieldtype', $vars, TRUE);
 	}
@@ -835,7 +855,9 @@ class Photo_frame_ft extends EE_Fieldtype {
     				
     				$unset = array(
     					'channel_id' => FALSE,
-    					'directory'  => FALSE
+    					'directory'  => FALSE,
+    					'new'        => FALSE,
+    					'id'
     				);
     				
     				foreach($unset as $var => $rename)
@@ -1046,6 +1068,8 @@ class Photo_frame_ft extends EE_Fieldtype {
 		$this->EE->load->config('photo_frame_config');
 		$this->EE->load->library('photo_frame_lib');
 		
+		$assets_installed = $this->EE->photo_frame_lib->assets_installed();		
+		
 		$themes = array('' => 'Default');
 		
 		foreach($this->EE->photo_frame_lib->get_themes() as $theme)
@@ -1211,7 +1235,25 @@ class Photo_frame_ft extends EE_Fieldtype {
 				'settings' => array(
 					'options' => $themes
 				)
-			),
+			)
+		);
+		
+		if($assets_installed)
+		{
+			$info_fields['photo_frame_assets'] = array(
+				'label'       => 'Enable Assets Browsing?',
+				'description' => 'If you want have Pixel & Tonic\'s Assets installed, you can use it to browse the existing assets. Photo Frame will make a copy of the asset and use it to create a new framed photo for you to crop.',
+				'type'        => 'select',
+				'settings' => array(
+					'options' => array(
+						'true'  => 'True',
+						'false' => 'False'
+					)
+				)
+			);
+		}
+		
+		$info_fields = array_merge($info_fields, array(
 			'photo_frame_sortable' => array(
 				'label'       => 'Enable Photo Sorting',
 				'description' => 'If you want to disallow the user to reorder the photos with drag and drop select FALSE.',
@@ -1259,7 +1301,7 @@ class Photo_frame_ft extends EE_Fieldtype {
 				'description' => 'You have add additional instructions below the upload button to instruct users about file types and/or sizes (for example). Otherwise, use this field as you wish.',
 				'type'		  => 'textarea',
 			)
-		);
+		));
 		
 		$vars = array(
 			'matrix' 	   => $this->matrix,

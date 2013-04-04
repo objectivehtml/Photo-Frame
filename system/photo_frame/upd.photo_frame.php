@@ -105,6 +105,10 @@ class Photo_frame_upd {
 		array(
 			'class'  => 'Photo_frame',
 			'method' => 'crop_action'
+		),
+		array(
+			'class'  => 'Photo_frame',
+			'method' => 'response_action'
 		)
 	);
 		

@@ -54,6 +54,12 @@
 .photo-frame-wrapper .icon-upload:before {
 	content: '\e800';
 } /* '' */
+
+.photo-frame-dimmer .icon-search:before,
+.photo-frame-wrapper .icon-search:before {
+	content: '\1f50d';
+} /* '' */
+
 .photo-frame-photo-frame-dimmer .photo-frame-dimmer img,
 .photo-frame-wrapper .photo-frame-dimmer img {
 	max-width: none;
