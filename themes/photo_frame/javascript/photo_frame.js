@@ -35,6 +35,7 @@ var PhotoFrame;
 		
 		t.ui   = {
 			body: $('body'),
+			browse: t.$wrapper.find('.photo-frame-browse'),
 			upload: t.$wrapper.find('.photo-frame-upload'),
 			form: $('#photo-frame-upload'),
 			dimmer: $('.photo-frame-dimmer'),
@@ -715,7 +716,7 @@ var PhotoFrame;
 				});
 			}
 			
-			t.$wrapper.find('.photo-frame-browse').click(function() {
+			t.ui.browse.click(function() {
 				t.assetSheet.show();
 			});
 			
@@ -1031,11 +1032,13 @@ var PhotoFrame;
 		
 		t.showUpload = function() {
 			t.ui.upload.show();
+			t.ui.browse.show();
 			t.ui.helper.show();	
 		}
 		
 		t.hideUpload = function() {
 			t.ui.upload.hide();
+			t.ui.browse.hide();
 			t.ui.helper.hide();	
 		}
 		
