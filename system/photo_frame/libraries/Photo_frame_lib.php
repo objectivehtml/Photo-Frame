@@ -107,12 +107,22 @@ class Photo_frame_lib {
 		
 		$errors        = array();	
 		$field_id      = $this->EE->input->get_post('field_id');
-		$original_url  = $this->EE->input->get_post('file');			
+		$original_url  = $this->EE->input->get_post('url');	
+		$original_path = $this->EE->input->get_post('path');	
+		
+		if($original_url)
+		{		
+			$file_name = $this->EE->photo_frame_lib->filename($original_url);
+		}
+		else
+		{
+			$file_name = $this->EE->photo_frame_lib->filename($original_path);
+		}
+		
 		$settings      = $this->EE->photo_frame_model->get_settings($field_id);	
 		$dir_id        = $settings['photo_frame_upload_group'];	
 		$directory     = $this->EE->filemanager->directory($dir_id, FALSE, TRUE);		
-		$framed_dir    = $directory['server_path'] . $framed_dir_name . '/';			
-		$file_name     = $this->EE->photo_frame_lib->filename($original_url);
+		$framed_dir    = $directory['server_path'] . $framed_dir_name . '/';	
 		$file_url      = $directory['url'] . $framed_dir_name . '/' . $file_name;
 		$file_path     = $directory['server_path'] . $framed_dir_name . '/' . $file_name;
 		$original_path = $directory['server_path'] . $file_name;
@@ -220,8 +230,9 @@ class Photo_frame_lib {
 				$dir_exists = FALSE;
 			}
 			else
-			{			
+			{		
 				mkdir($path, DIR_WRITE_MODE);
+				
 				$dir_exists = TRUE;
 			}
 		}

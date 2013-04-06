@@ -675,12 +675,25 @@ var PhotoFrame;
 			}
 		}
 		
-		t.getResponse = function(file, callback) {
-			$.get(t.options.responseUrl, 
-				{
-					field_id: t.options.fieldId, 
-					file: file
-				}, function(response) {
+		t.getResponse = function(file, isPath, callback) {
+			
+			var post = {
+				field_id: t.options.fieldId
+			};
+			
+			if(typeof isPath == "function") {
+				callback = isPath;
+				isPath   = false;	
+			}
+			
+			if(isPath) {
+				post['path'] = file;
+			}
+			else {
+				post['url']  = file;
+			}
+			
+			$.get(t.options.responseUrl, post, function(response) {
 					if(typeof callback == "function") {
 						callback(response);
 					}
@@ -690,7 +703,7 @@ var PhotoFrame;
 		
 		t.isAssetsInstalled = function() {
 			if(typeof Assets == "object") {
-				return true;
+				//return true;
 			}
 			
 			return false;
@@ -716,8 +729,24 @@ var PhotoFrame;
 			}
 			
 			t.$wrapper.find('.photo-frame-browse').click(function() {
-				t.assetSheet.show();
+				if(t.isAssetsInstalled()) {
+					t.assetSheet.show();
+				}
+				else {
+				}
 			});
+			
+			if(!t.isAssetsInstalled()) {
+				$.ee_filebrowser(); // initialize the filebrowser
+				$.ee_filebrowser.add_trigger(t.$wrapper.find('.photo-frame-browse'), function(a){
+				// Handle upload (variables available include a.thumb, a.name, a.directory, a.dimensions, a.is_image)
+				
+				// Reset the filebrowser
+					t.getResponse(a.rel_path, function(data) {
+						console.log(data);
+					});
+				});
+			}
 			
 			t.$wrapper.bind('dragover', function(e) {
 				
@@ -855,7 +884,8 @@ var PhotoFrame;
 						});
 					},
 					done: function (e, data) {
-						t.callback(data.result);
+						console.log(data.result);
+						//t.callback(data.result);
 					}
 		    	});
 	    	}
