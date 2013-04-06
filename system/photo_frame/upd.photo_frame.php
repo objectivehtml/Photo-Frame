@@ -28,6 +28,9 @@ class Photo_frame_upd {
 				'primary_key' 		=> TRUE,
 	            'auto_increment' 	=> TRUE
 			),
+			'date' 	=> array(
+				'type'				=> 'timestamp',
+			),
 			'site_id' 	=> array(
 				'type'				=> 'int',
 				'constraint'		=> 50
@@ -98,6 +101,57 @@ class Photo_frame_upd {
 			'sizes'			=> array(
 				'type' 				=> 'text'
 			)
+		),
+		'photo_frame_colors' => array(
+			'id' => array(
+				'type' 				=> 'int',
+				'constraint' 		=> 50,
+				'primary_key' 		=> TRUE,
+	            'auto_increment' 	=> TRUE
+			),
+			'photo_id' 	=> array(
+				'type'				=> 'int',
+				'constraint'		=> 50
+			),
+			'site_id' 	=> array(
+				'type'				=> 'int',
+				'constraint'		=> 50
+			),
+			'field_id' 	=> array(
+				'type'				=> 'int',
+				'constraint'		=> 50
+			),
+			'entry_id'	=> array(
+				'type'				=> 'int',
+				'constraint'		=> 50
+			),
+			'row_id'	=> array(
+				'type'				=> 'int',
+				'constraint'		=> 50
+			),
+			'col_id'	=> array(
+				'type'				=> 'int',
+				'constraint'		=> 50
+			),
+			'date' 	=> array(
+				'type'				=> 'timestamp',
+			),
+			'priority' 	=> array(
+				'type'				=> 'int',
+				'constraint'		=> 50
+			),
+			'r' 	=> array(
+				'type'				=> 'int',
+				'constraint'		=> 50
+			),
+			'g' 	=> array(
+				'type'				=> 'int',
+				'constraint'		=> 50
+			),
+			'b' 	=> array(
+				'type'				=> 'int',
+				'constraint'		=> 50
+			),
 		)
 	);
 	

@@ -231,6 +231,9 @@ class Photo_frame_model extends CI_Model {
 		{
 			$this->db->where('id', $photo);
 			$this->db->delete('photo_frame');
+			
+			$this->db->where('photo_id', $photo);
+			$this->db->delete('photo_frame_colors');
 		}
 	}
 	
@@ -420,9 +423,49 @@ class Photo_frame_model extends CI_Model {
 	
 	public function save($data)
 	{
-		if(count($data) > 0)
+		if(is_array($data))
 		{
-			$this->db->insert_batch('photo_frame', $data);
+			foreach($data as $index => $photo)
+			{
+				$photo['date'] = date('Y-m-d H:i:s', time());
+				$colors = $photo['colors'];
+				
+				unset($photo['colors']);
+				unset($photo['id']);
+				
+				$this->db->insert('photo_frame', $photo);
+				
+				$photo_id = $this->db->insert_id();
+				
+				foreach($colors as $color_index => $color)
+				{
+					$color_data = array(
+						'photo_id' => $photo_id,
+						'site_id'  => $photo['site_id'],
+						'field_id' => $photo['field_id'],
+						'entry_id' => $photo['entry_id'],
+						'row_id'   => 0,
+						'col_id'   => 0,
+						'date'     => $photo['date'],
+						'priority' => $color_index,
+						'r'		   => $color->r,
+						'g'		   => $color->g,
+						'b'		   => $color->b
+					);
+					
+					if(isset($photo['row_id']))
+					{
+						$color_data['row_id'] = $photo['row_id'];
+					}
+					
+					if(isset($photo['col_id']))
+					{
+						$color_data['col_id'] = $photo['col_id'];
+					}
+					
+					$this->db->insert('photo_frame_colors', $color_data);
+				}
+			}
 		}
 	}		
 			

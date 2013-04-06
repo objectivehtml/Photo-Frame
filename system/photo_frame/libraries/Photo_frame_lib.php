@@ -45,6 +45,13 @@ class Photo_frame_lib {
 		
 		return FALSE;
 	}
+	
+	public function get_colors($file, $num_colors = 3, $granularity = 5)
+	{
+		$file = $this->EE->photo_frame_model->parse($file, 'server_path');
+		
+		return ImageEditor::init($file)->colorPalette($num_colors, $granularity);
+	}
 		
 	public function build_size($settings, $index)
 	{

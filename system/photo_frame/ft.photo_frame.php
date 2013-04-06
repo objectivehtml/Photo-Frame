@@ -856,7 +856,11 @@ class Photo_frame_ft extends EE_Fieldtype {
 	    				$photo['row_id'] = $this->settings['row_id'];
     				}
     				
+    				$colors = $this->EE->photo_frame_lib->get_colors($photo['file'], config_item('photo_frame_save_colors'));
+    				
     				$photo = (array) $this->EE->photo_frame_lib->rename($photo, $settings);
+    				
+    				$photo['colors'] = $colors;
     				
     				$unset = array(
     					'channel_id' => FALSE,
