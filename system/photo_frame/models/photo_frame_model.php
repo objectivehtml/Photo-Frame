@@ -333,6 +333,24 @@ class Photo_frame_model extends CI_Model {
 		return $this->channel_data->get('photo_frame', $params);
 	}
 	
+	public function get_colors($params)
+	{
+		$params['select'][] = '*, TRIM(CONCAT_WS(", ", `r`, `g`, `b`)) as \'color_rgb\'';
+		$params['group_by'] = 'color_rgb';
+		
+		if(!isset($params['order_by']))
+		{
+			$params['order_by'] = 'order';
+		}
+		
+		if(!isset($params['sort']))
+		{
+			$params['sort'] = 'sort';
+		}
+		
+		return $this->channel_data->get('photo_frame_colors', $params);
+	}
+	
 	public function update_entry($entry_id, $data)
 	{
 		$this->db->where('entry_id', $entry_id);

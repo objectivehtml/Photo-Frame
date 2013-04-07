@@ -27,6 +27,7 @@ class Photo_frame {
 		'field_id' => FALSE,
 		'entry_id' => FALSE,
 		'id'	   => FALSE,
+		'photo_id' => FALSE,
 	);
 	
 	public function __construct()
@@ -67,38 +68,48 @@ class Photo_frame {
 		return $this->photos(TRUE)->num_rows();
 	}
 	
+	public function colors($return = FALSE)
+	{
+		$where = $this->_where();
+		
+		$colors = $this->EE->photo_frame_model->get_colors(array(
+			'where'    => $where,
+			'limit'    => $this->param('limit'),
+			'offset'   => $this->param('offset'),
+			'order_by' => $this->param('order_by', 'depth'),
+			'sort'     => $this->param('sort', 'asc'),
+		));
+		
+		if($return)
+		{
+			return $colors;
+		}
+		
+		$return = array();
+		
+		foreach($colors->result() as $index => $row)
+		{
+			$return[$index] = (array) $row;			
+			$return[$index]['count'] = $index + 1;
+			$return[$index]['index'] = $index;
+			$return[$index]['rgb']   = 'rgb('.$row->r.','.$row->g.','.$row->b.')';
+			$return[$index]['hex']   = $this->EE->photo_frame_lib->rgb2hex($return[$index]['rgb']);
+			$return[$index]['total_colors']   = $colors->num_rows();
+			$return[$index]['is_first_color'] = ($index == 0) ? TRUE : FALSE;
+			$return[$index]['is_last_color']  = ($index + 1 == $return[$index]['total_colors']) ? TRUE : FALSE;	
+		}
+		
+		if($prefix = $this->param('prefix', 'color'))
+		{
+			$return = $this->EE->channel_data->utility->add_prefix($prefix, $return);
+		}
+		
+		return $this->parse($return);
+	}
+	
 	public function photos($return = FALSE)
 	{
-		if($field_name = $this->param('field_name'))
-		{
-			$this->_set_param('field_id', $this->EE->channel_data->get_field_by_name($field_name)->row('field_id'));	
-		}
-		
-		$where = array('site_id' => config_item('site_id'));
-		
-		foreach($this->where_params as $var_name => $default)
-		{
-			if($value = $this->param($var_name, $default))
-			{
-				$where[$var_name] = $value;		
-			}
-		}
-		
-		if(is_array($this->EE->TMPL->tagparams))
-		{
-			foreach($this->EE->TMPL->tagparams as $param => $value)
-			{
-				if(!isset($this->exclude_params[$param]))
-				{					
-					if(preg_match('/^where:/', $param))
-					{
-						$param = preg_replace('/^where:/', '', $param);
-						
-						$where[$param] = $value;
-					}
-				}
-			}
-		}
+		$where = $this->_where();
 		
 		$photos = $this->EE->photo_frame_model->get_photos(array(
 			'where'    => $where,
@@ -162,6 +173,49 @@ class Photo_frame {
 		$this->EE->load->library('photo_frame_lib');
 		
 		$this->EE->photo_frame_lib->crop_action();
+	}
+	
+	private function _where()
+	{
+		if($field_name = $this->param('field_name'))
+		{
+			$this->_set_param('field_id', $this->EE->channel_data->get_field_by_name($field_name)->row('field_id'));	
+		}
+		
+		$where = array('site_id' => config_item('site_id'));
+		
+		foreach($this->where_params as $var_name => $default)
+		{
+			if($value = $this->param($var_name, $default))
+			{
+				$value = explode('|', $value);
+				
+				foreach($value as $index => $val)
+				{
+					$value[$index] = 'or '.$val;
+				}
+				
+				$where[$var_name] = $value;		
+			}
+		}
+		
+		if(is_array($this->EE->TMPL->tagparams))
+		{
+			foreach($this->EE->TMPL->tagparams as $param => $value)
+			{
+				if(!isset($this->exclude_params[$param]))
+				{					
+					if(preg_match('/^where:/', $param))
+					{
+						$param = preg_replace('/^where:/', '', $param);
+						
+						$where[$param] = $value;
+					}
+				}
+			}
+		}
+		
+		return $where;
 	}
 	
 	private function parse($vars, $tagdata = FALSE)
