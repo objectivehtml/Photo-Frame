@@ -70,18 +70,55 @@
 .photo-frame-dragging .photo-frame-drop-text { 
 	text-align: center;
 	font-size: 24px;
-	display: block;
+	display: inline-block;
+	z-index: 1;
 }
 
 .photo-frame-dragging .photo-frame-drop-zone {
 	border: 5px dashed rgb(105, 105, 105);
 	top: 0;
 	left: 0;
+	width: 100%;
 	min-height: 150px;
+	height: 100%;
+	background: rgb(236, 241, 244);
+	position: absolute;
+	z-index: 100;
+	-webkit-box-sizing: border-box;
+	-moz-box-sizing: border-box;
+	box-sizing: border-box;
+}
+
+.photo-frame-dragging .photo-frame-drop-cover {
+	position: absolute;
+	top: 0;
+	left: 0;
+	width: 100%;
+	height: 100%;
+	z-index: 100;
 }
 
 .photo-frame-dragging .photo-frame-button { visibility: hidden; }
 
+.photo-frame-progress {
+	width: 400px;
+	height: 20px;
+	border: 3px solid rgb(220, 220, 220);
+	border-radius: 1000px;
+	display: none;
+	overflow: hidden;
+}
+
+.photo-frame-progress-fill {
+	position: absolute;
+	top: 0;
+	left: 0;
+	height: 20px;
+	background: rgb(220, 220, 220);
+	-webkit-transition: .3s;
+	-moz-transition: .3s;
+	transition: .3s;
+}
 
 .photo-frame-invalid {
 	color: rgb(238, 57, 45);

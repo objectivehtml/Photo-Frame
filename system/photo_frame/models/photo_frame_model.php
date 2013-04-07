@@ -447,7 +447,7 @@ class Photo_frame_model extends CI_Model {
 						'row_id'   => 0,
 						'col_id'   => 0,
 						'date'     => $photo['date'],
-						'priority' => $color_index,
+						'depth'    => $color_index,
 						'r'		   => $color->r,
 						'g'		   => $color->g,
 						'b'		   => $color->b
@@ -481,7 +481,7 @@ class Photo_frame_model extends CI_Model {
 		return $options;
 	}
 	
-	public function validate_image_size($settings = FALSE)
+	public function validate_image_size($file, $settings = FALSE)
 	{
 		if(!is_array($settings))
 		{		
@@ -489,7 +489,7 @@ class Photo_frame_model extends CI_Model {
 			$settings = $this->photo_frame_model->get_settings($field_id);		
 		}
 		
-		$image = new ImageEditor($_FILES['files']['tmp_name']);
+		$image = new ImageEditor($file);
 		
 		if(!$image->getImage())
 		{

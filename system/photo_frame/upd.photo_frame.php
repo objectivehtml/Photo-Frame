@@ -136,7 +136,7 @@ class Photo_frame_upd {
 			'date' 	=> array(
 				'type'				=> 'timestamp',
 			),
-			'priority' 	=> array(
+			'depth'	=> array(
 				'type'				=> 'int',
 				'constraint'		=> 50
 			),
