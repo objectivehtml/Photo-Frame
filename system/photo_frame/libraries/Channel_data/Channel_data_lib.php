@@ -13,8 +13,8 @@
  * @author		Justin Kimbrell
  * @copyright	Copyright (c) 2012, Justin Kimbrell
  * @link 		http://www.objectivehtml.com/libraries/channel_data
- * @version		0.8.19
- * @build		20120215
+ * @version		0.8.20
+ * @build		20120404
  */
 
 if(!class_exists('Channel_data_lib'))

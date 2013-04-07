@@ -23,15 +23,15 @@ class PhotoFrame_channel_search_rule extends Base_rule {
 		),	
 		'max_proximity' => array(
 			'label'       => 'Maximum Color Proximity',
-			'description' => 'This is the maximum color proxmity. The color proximity is the value used to determine if a particular color is in the same proximity of the color being searched. The smaller the number the closer to an exact match the colors must be. Increase the number to make the search less strict. The default value is <b>8000</b>.<br><br>Use the following equation to figure out the best threshold for you.<br><b>(R - Ri)^2 + (G - Gi)^2 + (B - Bi)^2</b>',
+			'description' => 'This is the maximum color proxmity. The color proximity is the value used to determine if a particular color is in the same proximity of the color being searched. The smaller the number the closer to an exact match the colors must be. Increase the number to make the search less strict. The default value is <b>12,000</b>.<br><br>Use the following equation to figure out the best threshold for you.<br><b>(R - Ri)^2 + (G - Gi)^2 + (B - Bi)^2</b>',
 		),	
 		'min_color_depth' => array(
 			'label'       => 'Minimum Color Depth',
-			'description' => 'The color depth allows you to choose how many colors to search. For instance, by default Photo Frame indexes the 3 most used colors in a photo. This settings allows you to define the minimum depth to search. The default is <b>0</b>.',
+			'description' => 'The color depth allows you to choose how many colors to search. This settings allows you to define the minimum depth to search. The default is <b>0</b>.',
 		),	
 		'max_color_depth' => array(
 			'label'       => 'Maximum Color Depth',
-			'description' => 'The color depth allows you to choose how many colors to search. For instance, by default Photo Frame indexes the 3 most used colors in a photo. This settings allows you to define the maximum depth to search. The default is <b>3</b>.',
+			'description' => 'The color depth allows you to choose how many colors to search. For instance, by default Photo Frame indexes the 8 most used colors in a photo. This settings allows you to define the maximum depth to search. The default is <b>3</b>.',
 		),		
 		'color_index' => array(
 			'label'       => 'Color Index',
