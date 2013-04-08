@@ -120,7 +120,6 @@ class Photo_frame_ft extends EE_Fieldtype {
 	public function display_cell_settings($data)
 	{
 		$this->matrix = TRUE;
-		
 			
 		return $this->display_settings($data);
 	}
@@ -178,7 +177,12 @@ class Photo_frame_ft extends EE_Fieldtype {
 			'photo_frame_cropped_width'      => FALSE,
 			'photo_frame_cropped_height'     => FALSE,
 			'photo_frame_max_size'			 => FALSE,
-			'photo_frame_delete_files'		 => FALSE
+			'photo_frame_delete_files'		 => FALSE,
+			'photo_frame_file_browser'		 => 'true',
+			'photo_frame_file_upload'		 => 'true',
+			'photo_frame_sortable'			 => 'true',
+			'photo_frame_upload_helper'		 => '',
+			'photo_frame_assets'			 => 'false'
 		);
 	
 		$settings = array_merge($default_settings, $this->settings);
@@ -204,6 +208,8 @@ class Photo_frame_ft extends EE_Fieldtype {
 			$new_photos_set  = $this->EE->photo_frame_model->has_new_photos($_POST[$this->field_name]);
 			$edit_photos_set = $this->EE->photo_frame_model->has_edit_photos($_POST[$this->field_name]);
 		}
+		
+		$orig_data = $data;
 		
 		if(is_array($data))
 		{
@@ -242,20 +248,17 @@ class Photo_frame_ft extends EE_Fieldtype {
 			
 			if($this->matrix)
 			{
-				$post_data = $data;
+				$post_data = $orig_data;
 			}
-			else
+			else if(isset($_POST[$this->field_name]))
 			{
-				if(isset($_POST[$this->field_name]))
-				{
-					$post_data = $_POST[$this->field_name];
-				}
+				$post_data = $_POST[$this->field_name];
 			}
 			
 			if($new_photos_set)
 			{
 				foreach($post_data as $index => $new_photo)
-				{				
+				{
 					if(isset($new_photo['new']))
 					{
 						$new_photo = $new_photo['new'];
@@ -422,6 +425,7 @@ class Photo_frame_ft extends EE_Fieldtype {
 			cropUrl: \''.$crop_url.'\',
 			responseUrl: \''.$response_url.'\',
 			settings: '.json_encode($jcrop_settings).',
+			useAssets: '.$settings['photo_frame_assets'].',
 			directory: '.json_encode($directory).',
 			infoPanel: '.$settings['photo_frame_display_info'].',
 			instructions: '.json_encode($instructions).',
@@ -433,7 +437,7 @@ class Photo_frame_ft extends EE_Fieldtype {
 			buttonText: '.json_encode($button_text).',
 			resize: '.json_encode($resize).',
 			resizeMax: '.json_encode($resize_max).',
-			sortable: '.(isset($settings['photo_frame_sortable']) ? $settings['photo_frame_sortable'] : 'false').'
+			sortable: '.$settings['photo_frame_sortable'].'
 		}';
 
 		if($this->matrix)
@@ -512,8 +516,10 @@ class Photo_frame_ft extends EE_Fieldtype {
 			'button_text'	 => $button_text,
 			'overlimit'	 	 => $overlimit,
 			'assets'		 => FALSE,
-			'upload_helper'	 => isset($settings['photo_frame_upload_helper']) ? $settings['photo_frame_upload_helper'] : '',
-			'sortable'       => (isset($settings['photo_frame_sortable'])  && $settings['photo_frame_sortable'] == 'true'? TRUE : FALSE)
+			'file_browser'	 => $settings['photo_frame_file_browser'] == 'true' ? TRUE : FALSE,
+			'file_upload'	 => $settings['photo_frame_file_upload'] == 'true' ? TRUE : FALSE,
+			'upload_helper'	 => $settings['photo_frame_upload_helper'],
+			'sortable'       => $settings['photo_frame_sortable'] == 'true' ? TRUE : FALSE
 		);
 		
 		if($assets_installed && isset($settings['photo_frame_assets']) && $settings['photo_frame_assets'] == 'true')
@@ -1265,6 +1271,28 @@ class Photo_frame_ft extends EE_Fieldtype {
 		}
 		
 		$info_fields = array_merge($info_fields, array(
+			'photo_frame_file_upload' => array(
+				'label'       => 'Show File Upload Button',
+				'description' => 'If you want to display the upload button, set this option to "True".',
+				'type'        => 'select',
+				'settings' => array(
+					'options' => array(
+						'true'  => 'True',
+						'false' => 'False'
+					)
+				)
+			),
+			'photo_frame_file_browser' => array(
+				'label'       => 'Show File Browser Button',
+				'description' => 'If you want to display the file browser button, set this option to "True".',
+				'type'        => 'select',
+				'settings' => array(
+					'options' => array(
+						'true'  => 'True',
+						'false' => 'False'
+					)
+				)
+			),
 			'photo_frame_sortable' => array(
 				'label'       => 'Enable Photo Sorting',
 				'description' => 'If you want to disallow the user to reorder the photos with drag and drop select FALSE.',

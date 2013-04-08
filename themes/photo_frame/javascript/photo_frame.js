@@ -24,6 +24,7 @@ var PhotoFrame;
 		t.size 		   = t.options.size;
 		t.released	   = false;
 		t.initialized  = false;
+		t.useAssets	   = t.options.useAssets;
 		t.scale        = 1;
 		t.rotate	   = 0;
 		t.resize 	   = options.resize ? options.resize: false;
@@ -744,6 +745,7 @@ var PhotoFrame;
 			$.get(t.options.responseUrl, 
 				{
 					field_id: t.options.fieldId, 
+					col_id: t.options.colId,
 					file: file
 				}, function(response) {
 					if(typeof callback == "function") {
@@ -754,7 +756,7 @@ var PhotoFrame;
 		}
 		
 		t.isAssetsInstalled = function() {
-			if(typeof Assets == "object") {
+			if(typeof Assets == "object" && t.useAssets) {
 				return true;
 			}
 			
@@ -800,12 +802,23 @@ var PhotoFrame;
 			}
 			
 			t.ui.browse.click(function() {
-				t.assetSheet.show();
+				if(t.isAssetsInstalled()) {
+					t.assetSheet.show();
+				}
 			});
 			
+			if(!t.isAssetsInstalled()) {								
+				$.ee_filebrowser.add_trigger(t.ui.browse, id, {
+					content_type: 'images',
+					directory:    t.directory.id,
+				}, function(file, field){
+			    	t.getResponse(file.rel_path, function(response) {
+			    		t.callback(response, true);
+			    	});
+				});
+			}
+			
 			t.$wrapper.bind('dragover', function(e) {
-				console.log(e);
-				
 				var obj 	= t.$wrapper.find('.photo-frame-drop-text');
 				var parent  = obj.parent();
 				
@@ -1454,7 +1467,6 @@ var PhotoFrame;
 		}
 		
 		t.center = function() {		
-			console.log(t.ui.wrapper);
 			t.ui.wrapper.position({
 				of: t.ui.parent,
 				my: 'center',
