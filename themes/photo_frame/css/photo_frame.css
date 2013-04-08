@@ -70,18 +70,77 @@
 .photo-frame-dragging .photo-frame-drop-text { 
 	text-align: center;
 	font-size: 24px;
-	display: block;
+	display: inline-block;
+	z-index: 1;
 }
 
 .photo-frame-dragging .photo-frame-drop-zone {
 	border: 5px dashed rgb(105, 105, 105);
 	top: 0;
 	left: 0;
+	width: 100%;
 	min-height: 150px;
+	height: 100%;
+	background: rgb(236, 241, 244);
+	position: absolute;
+	z-index: 100;
+	-webkit-box-sizing: border-box;
+	-moz-box-sizing: border-box;
+	box-sizing: border-box;
+}
+
+.photo-frame-dragging .photo-frame-drop-cover {
+	position: absolute;
+	top: 0;
+	left: 0;
+	width: 100%;
+	height: 100%;
+	z-index: 100;
 }
 
 .photo-frame-dragging .photo-frame-button { visibility: hidden; }
 
+.photo-frame-progress-wrapper {
+	width: 400px;
+	height: 28px;
+	position: relative;
+	display: none;
+}
+
+.photo-frame-progress {
+	position: relative;
+	border: 3px solid rgb(220, 220, 220);
+	border-radius: 1000px;
+	height: 100%;
+	overflow: hidden;
+	box-sizing: border-box;
+}
+
+.photo-frame-progress-fill {
+	position: absolute;
+	top: 0;
+	left: 0;
+	height: 100%;
+	background: rgb(220, 220, 220);
+	-webkit-transition: .3s;
+	-moz-transition: .3s;
+	transition: .3s;
+}
+
+.photo-frame-progress-cancel,
+a.photo-frame-progress-cancel {
+	background: rgb(220, 220, 220);
+	border-radius: 1000px;
+	-moz-border-radius: 1000px;
+	-webkit-border-radius: 1000px;
+	color: rgb(63, 62, 62);
+	padding: 6px 9px 6px 9px;
+	position: absolute;
+	right: -35px;
+	font-size: 15px;
+	line-height: 16px;
+	text-decoration: none;
+}
 
 .photo-frame-invalid {
 	color: rgb(238, 57, 45);
@@ -136,7 +195,7 @@
 	padding: .5em;
 	background: white;
 	min-width: 350px;
-	border: solid 5px #fff; /* added by Brent */
+	border: 1px solid rgb(214, 214, 214); /* added by Brent */
 	-moz-border-radius: 4px;  /* added by Brent */
 	-webkit-border-radius: 4px; /* added by Brent */
 	border-radius: 4px; /* added by Brent */
@@ -146,6 +205,7 @@
 }
 .photo-frame-meta li {
 	margin-bottom: 1em;
+	list-style: none;
 }
 .photo-frame-message {
 	background: white;

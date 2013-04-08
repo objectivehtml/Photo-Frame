@@ -45,6 +45,13 @@ class Photo_frame_lib {
 		
 		return FALSE;
 	}
+	
+	public function get_colors($file, $num_colors = 3, $granularity = 5)
+	{
+		$file = $this->EE->photo_frame_model->parse($file, 'server_path');
+		
+		return ImageEditor::init($file)->colorPalette($num_colors, $granularity);
+	}
 		
 	public function build_size($settings, $index)
 	{
@@ -149,6 +156,16 @@ class Photo_frame_lib {
 		));
 	}
 	
+	public function rgb2hex($rgb)
+	{
+		$hex = "#";
+		$hex .= str_pad(dechex($rgb[0]), 2, "0", STR_PAD_LEFT);
+		$hex .= str_pad(dechex($rgb[1]), 2, "0", STR_PAD_LEFT);
+		$hex .= str_pad(dechex($rgb[2]), 2, "0", STR_PAD_LEFT);
+	
+		return $hex; // returns the hex value including the number sign (#)
+	}
+	
 	public function upload_action()
 	{
 		$this->EE->load->library('filemanager');
@@ -160,52 +177,69 @@ class Photo_frame_lib {
 		$field_id   = $this->EE->input->get_post('field_id');
 		
 		$settings   = $this->EE->photo_frame_model->get_settings($field_id);
-		$errors     = $this->EE->photo_frame_model->validate_image_size($settings);
-		
 		$directory  = $this->EE->filemanager->directory($dir_id, FALSE, TRUE);
 		$ie			= $this->EE->input->get_post('ie') == 'true' ? TRUE : FALSE;
 		
-		if(count($errors) == 0)
-		{
-			$response  = $this->EE->filemanager->upload_file($dir_id);												
-			$errors    = isset($response['error']) ? array($response['error']) : array();
-						
-			$dir_response = $this->EE->photo_frame_lib->create_directory($directory, $framed_dir_name);			
-			$framed_dir   = $dir_response->path;
+		$files 		= $_FILES;
 		
-			$errors = array_merge($errors, $dir_response->errors);
+		for($x = 0; $x < count($files['files']['name']); $x++)
+		{
+			$_FILES = array(
+				'files' => array(
+					'name'     => $files['files']['name'][$x],
+					'type'     => $files['files']['type'][$x],
+					'tmp_name' => $files['files']['tmp_name'][$x],
+					'error'    => $files['files']['error'][$x],
+					'size'     => $files['files']['size'][$x],
+				)
+			);
 			
-			$file_name = $file_path = $file_url = $orig_path = $orig_url = NULL;
-				
+			$errors = $this->EE->photo_frame_model->validate_image_size($_FILES['files']['tmp_name'], $settings);
+		
 			if(count($errors) == 0)
 			{
-				$file_name = $response['file_name'];
-				$file_path = $framed_dir . $file_name;
-				$orig_path = $directory['server_path'] . $file_name;
-				$file_url  = $directory['url'] . $framed_dir_name . '/' . $file_name;
-				$orig_url  = $directory['url'] . $file_name;
+				$response  = $this->EE->filemanager->upload_file($dir_id);												
+				$errors    = isset($response['error']) ? array($response['error']) : array();
+							
+				$dir_response = $this->EE->photo_frame_lib->create_directory($directory, $framed_dir_name);			
+				$framed_dir   = $dir_response->path;
+			
+				$errors = array_merge($errors, $dir_response->errors);
 				
-				if(!isset($response['title']))
+				$file_name = $file_path = $file_url = $orig_path = $orig_url = NULL;
+					
+				if(count($errors) == 0)
 				{
-					$response['title'] = $file_name;
-				}		
-				
-				copy($response['rel_path'], $framed_dir.$response['title']);
+					$file_name = $response['file_name'];
+					$file_path = $framed_dir . $file_name;
+					$orig_path = $directory['server_path'] . $file_name;
+					$file_url  = $directory['url'] . $framed_dir_name . '/' . $file_name;
+					$orig_url  = $directory['url'] . $file_name;
+					
+					if(!isset($response['title']))
+					{
+						$response['title'] = $file_name;
+					}		
+					
+					copy($response['rel_path'], $framed_dir.$response['title']);
+				}
 			}
+			
+			$return[] = array(
+				'success'            => count($errors) == 0 ? TRUE : FALSE,
+				'directory'          => $directory,
+				'file_name'          => isset($file_name) ? $file_name : NULL,
+				'file_url'           => isset($file_url) ? $file_url : NULL,
+				'file_path'          => isset($file_path) ? $file_path : NULL,
+				'original_file'      => isset($response['file_name']) ? '{filedir_'.$dir_id.'}'.$response['file_name'] : NULL,
+				'original_file_name' => isset($response['file_name']) ? $response['file_name'] : NULL,
+				'original_url'       => isset($orig_url) ? $orig_url : NULL,
+				'original_path'      => isset($orig_path) ? $orig_path : NULL,
+				'errors'             => $errors
+			);
 		}
 		
-		return $this->json(array(
-			'success'            => count($errors) == 0 ? TRUE : FALSE,
-			'directory'          => $directory,
-			'file_name'          => isset($file_name) ? $file_name : NULL,
-			'file_url'           => isset($file_url) ? $file_url : NULL,
-			'file_path'          => isset($file_path) ? $file_path : NULL,
-			'original_file'      => isset($response['file_name']) ? '{filedir_'.$dir_id.'}'.$response['file_name'] : NULL,
-			'original_file_name' => isset($response['file_name']) ? $response['file_name'] : NULL,
-			'original_url'       => isset($orig_url) ? $orig_url : NULL,
-			'original_path'      => isset($orig_path) ? $orig_path : NULL,
-			'errors'             => $errors
-		), $ie);
+		return $this->json($return, $ie);
 	}
 	
 	public function create_directory($directory, $framed_dir_name = FALSE)
@@ -222,7 +256,7 @@ class Photo_frame_lib {
 		
 		if(!is_dir($path))
 		{
-			if(!is_dir($path['server_path']))
+			if(!is_dir($directory['server_path']))
 			{
 				$errors = array($this->parse(array(
 					'directory' => $directory['server_path']
