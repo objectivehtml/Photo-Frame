@@ -62,6 +62,9 @@
             ih = img.height,
             canvas,
             ctx;
+            
+            console.log('test');
+            
         if (iw * ih > 1024 * 1024) { // only consider mexapixel images
             canvas = document.createElement('canvas');
             canvas.width = canvas.height = 1;

@@ -229,6 +229,7 @@ var PhotoFrame;
 			        	t.ui.instructions = false;
 		        	}
 		        	
+		        			        	
 		        	t.ui.image = $('<div class="photo-frame-image"></div>');
 			        t.ui.crop.prepend(t.ui.image);   	
 		            t.ui.image.html(img).show();	        	

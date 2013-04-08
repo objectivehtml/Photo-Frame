@@ -185,6 +185,7 @@ class Photo_frame_ft extends EE_Fieldtype {
 			'photo_frame_assets'			 => 'false',
 			'photo_frame_button_text'	     => '',
 			'photo_frame_browse_button_text' => '',
+			'photo_frame_drop_zone'			 => 'true'
 		);
 	
 		$settings = array_merge($default_settings, $this->settings);
@@ -521,6 +522,7 @@ class Photo_frame_ft extends EE_Fieldtype {
 			'browse_button_text' => $browse_button_text,
 			'overlimit'	 	 => $overlimit,
 			'assets'		 => FALSE,
+			'drop_zone'	     => $settings['photo_frame_drop_zone'] == 'true' ? TRUE : FALSE,
 			'file_browser'	 => $settings['photo_frame_file_browser'] == 'true' ? TRUE : FALSE,
 			'file_upload'	 => $settings['photo_frame_file_upload'] == 'true' ? TRUE : FALSE,
 			'upload_helper'	 => $settings['photo_frame_upload_helper'],
@@ -1277,7 +1279,7 @@ class Photo_frame_ft extends EE_Fieldtype {
 		
 		$info_fields = array_merge($info_fields, array(
 			'photo_frame_file_upload' => array(
-				'label'       => 'Show File Upload Button',
+				'label'       => 'Show File Upload Button?',
 				'description' => 'If you want to display the upload button, set this option to "True".',
 				'type'        => 'select',
 				'settings' => array(
@@ -1288,8 +1290,19 @@ class Photo_frame_ft extends EE_Fieldtype {
 				)
 			),
 			'photo_frame_file_browser' => array(
-				'label'       => 'Show File Browser Button',
+				'label'       => 'Show File Browser Button?',
 				'description' => 'If you want to display the file browser button, set this option to "True".',
+				'type'        => 'select',
+				'settings' => array(
+					'options' => array(
+						'true'  => 'True',
+						'false' => 'False'
+					)
+				)
+			),
+			'photo_frame_drop_zone' => array(
+				'label'       => 'Enable Drag/Drop Uploads?',
+				'description' => 'If you want to allow photos to be uploaded using drag and drop, set this option to "True".',
 				'type'        => 'select',
 				'settings' => array(
 					'options' => array(
@@ -1300,7 +1313,7 @@ class Photo_frame_ft extends EE_Fieldtype {
 			),
 			'photo_frame_sortable' => array(
 				'label'       => 'Enable Photo Sorting',
-				'description' => 'If you want to disallow the user to reorder the photos with drag and drop select FALSE.',
+				'description' => 'If you want to disallow the user to reorder the photos with drag and drop, set this option to "True".',
 				'type'        => 'select',
 				'settings' => array(
 					'options' => array(
@@ -1311,7 +1324,7 @@ class Photo_frame_ft extends EE_Fieldtype {
 			),
 			'photo_frame_display_meta' => array(
 				'label'       => 'Display Meta on Save',
-				'description' => 'If you want the meta dialog will always prompt the user before the photo is saved, then choose <i>true</i>.',
+				'description' => 'If you want the meta dialog will always prompt the user before the photo is saved, set this option to "True".',
 				'type'        => 'select',
 				'settings' => array(
 					'options' => array(
@@ -1322,7 +1335,7 @@ class Photo_frame_ft extends EE_Fieldtype {
 			),
 			'photo_frame_display_info' => array(
 				'label'       => 'Display Info Panel',
-				'description' => 'If you want to display coordinates, image size, and aspect ratio, then choose <i>true</i>.',
+				'description' => 'If you want to display coordinates, image size, and aspect ratio, set this option to "True".',
 				'type'        => 'select',
 				'settings' => array(
 					'options' => array(
