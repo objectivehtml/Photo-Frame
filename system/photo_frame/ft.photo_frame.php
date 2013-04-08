@@ -656,6 +656,8 @@ class Photo_frame_ft extends EE_Fieldtype {
 		
 		foreach($photos as $index => $row)
 		{
+			$index = count($return);
+			
 			if($params['offset'] <= $index && (!$params['limit'] || $total_photos < $params['limit']))
 			{		
 				$row['thumb'] = $this->EE->photo_frame_model->parse($this->EE->photo_frame_lib->swap_filename($row['original_file_name'], $row['original_file'], '_thumbs/'), 'url');
