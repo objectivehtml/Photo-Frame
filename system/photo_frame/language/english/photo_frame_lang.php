@@ -7,6 +7,7 @@ $lang	= array(
 	'photo_frame_module_description'	=> '',
 		
 	'photo_frame_button_text'			=> 'Upload',
+	'photo_frame_browse_button_text'    => 'Browse',
 	'photo_frame_instructions'			=> 'Crop the photo by clicking and dragging.',
 	
 	'photo_frame_min_photos_error'		=> 'You must upload at least {min_photos} {min_photos_name}.',

@@ -182,7 +182,9 @@ class Photo_frame_ft extends EE_Fieldtype {
 			'photo_frame_file_upload'		 => 'true',
 			'photo_frame_sortable'			 => 'true',
 			'photo_frame_upload_helper'		 => '',
-			'photo_frame_assets'			 => 'false'
+			'photo_frame_assets'			 => 'false',
+			'photo_frame_button_text'	     => '',
+			'photo_frame_browse_button_text' => '',
 		);
 	
 		$settings = array_merge($default_settings, $this->settings);
@@ -407,6 +409,8 @@ class Photo_frame_ft extends EE_Fieldtype {
 		
 		$button_text = empty($settings['photo_frame_button_text']) ? lang('photo_frame_button_text') : $settings['photo_frame_button_text'];
 		
+		$browse_button_text = empty($settings['photo_frame_browse_button_text']) ? lang('photo_frame_browse_button_text') : $settings['photo_frame_browse_button_text'];
+		
 		$instructions = empty($settings['photo_frame_instructions']) ? lang('photo_frame_instructions') : $settings['photo_frame_instructions'];
 		
 		$size = isset($settings['photo_frame_default_size']) && !empty($settings['photo_frame_default_size']) ? $settings['photo_frame_default_size'] : 'false';
@@ -514,6 +518,7 @@ class Photo_frame_ft extends EE_Fieldtype {
 			'new_photos'     => $new_photos,
 			'preview_styles' => trim($preview_styles),
 			'button_text'	 => $button_text,
+			'browse_button_text' => $browse_button_text,
 			'overlimit'	 	 => $overlimit,
 			'assets'		 => FALSE,
 			'file_browser'	 => $settings['photo_frame_file_browser'] == 'true' ? TRUE : FALSE,
@@ -1327,8 +1332,12 @@ class Photo_frame_ft extends EE_Fieldtype {
 				)
 			),
 			'photo_frame_button_text' => array(
-				'label' 	  => 'Button Text',
-				'description' => 'Override the default button text. If no value is present the default text will be used.'
+				'label' 	  => 'Upload Button Text',
+				'description' => 'Override the default upload button text. If no value is present the default text will be used.'
+			),
+			'photo_frame_browse_button_text' => array(
+				'label' 	  => 'Browse Button Text',
+				'description' => 'Override the default browse button text. If no value is present the default text will be used.'
 			),
 			'photo_frame_instructions' => array(
 				'label' 	  => 'Instructions',
