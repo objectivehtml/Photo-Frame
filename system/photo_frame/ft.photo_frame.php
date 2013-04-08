@@ -422,6 +422,7 @@ class Photo_frame_ft extends EE_Fieldtype {
 			cropUrl: \''.$crop_url.'\',
 			responseUrl: \''.$response_url.'\',
 			settings: '.json_encode($jcrop_settings).',
+			useAssets: '.(isset($settings['photo_frame_assets']) && $settings['photo_frame_assets'] == 'true' ? 'true' : 'false').',
 			directory: '.json_encode($directory).',
 			infoPanel: '.$settings['photo_frame_display_info'].',
 			instructions: '.json_encode($instructions).',
