@@ -139,6 +139,7 @@ a.photo-frame-progress-cancel {
 	right: -35px;
 	font-size: 15px;
 	line-height: 16px;
+	text-decoration: none;
 }
 
 .photo-frame-invalid {
@@ -194,7 +195,7 @@ a.photo-frame-progress-cancel {
 	padding: .5em;
 	background: white;
 	min-width: 350px;
-	border: solid 5px #fff; /* added by Brent */
+	border: 1px solid rgb(214, 214, 214); /* added by Brent */
 	-moz-border-radius: 4px;  /* added by Brent */
 	-webkit-border-radius: 4px; /* added by Brent */
 	border-radius: 4px; /* added by Brent */
@@ -204,6 +205,7 @@ a.photo-frame-progress-cancel {
 }
 .photo-frame-meta li {
 	margin-bottom: 1em;
+	list-style: none;
 }
 .photo-frame-message {
 	background: white;
