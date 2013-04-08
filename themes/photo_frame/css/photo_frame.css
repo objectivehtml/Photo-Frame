@@ -100,24 +100,45 @@
 
 .photo-frame-dragging .photo-frame-button { visibility: hidden; }
 
-.photo-frame-progress {
+.photo-frame-progress-wrapper {
 	width: 400px;
-	height: 20px;
+	height: 28px;
+	position: relative;
+	display: none;
+}
+
+.photo-frame-progress {
+	position: relative;
 	border: 3px solid rgb(220, 220, 220);
 	border-radius: 1000px;
-	display: none;
+	height: 100%;
 	overflow: hidden;
+	box-sizing: border-box;
 }
 
 .photo-frame-progress-fill {
 	position: absolute;
 	top: 0;
 	left: 0;
-	height: 20px;
+	height: 100%;
 	background: rgb(220, 220, 220);
 	-webkit-transition: .3s;
 	-moz-transition: .3s;
 	transition: .3s;
+}
+
+.photo-frame-progress-cancel,
+a.photo-frame-progress-cancel {
+	background: rgb(220, 220, 220);
+	border-radius: 1000px;
+	-moz-border-radius: 1000px;
+	-webkit-border-radius: 1000px;
+	color: rgb(63, 62, 62);
+	padding: 6px 9px 6px 9px;
+	position: absolute;
+	right: -35px;
+	font-size: 15px;
+	line-height: 16px;
 }
 
 .photo-frame-invalid {

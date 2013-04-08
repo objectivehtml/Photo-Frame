@@ -140,7 +140,7 @@ var PhotoFrame;
 			t.ui.crop.hide();
 			t.ui.activity.hide();
 			t.progressBar.show();
-			t.progressBar.reset();
+			t.progressBar.resetProgress();
 		}
 		
 		t.showProgress = function(progress, callback) {
@@ -232,6 +232,7 @@ var PhotoFrame;
 			        t.ui.crop.prepend(t.ui.image);   	
 		            t.ui.image.html(img).show();	        	
 		            t.ui.crop.center();
+		            
 		            t.hideMeta();
 		            
 		            t.settings.onChange = function() {
@@ -803,6 +804,7 @@ var PhotoFrame;
 			});
 			
 			t.$wrapper.bind('dragover', function(e) {
+				console.log(e);
 				
 				var obj 	= t.$wrapper.find('.photo-frame-drop-text');
 				var parent  = obj.parent();
@@ -929,13 +931,26 @@ var PhotoFrame;
 			t.ui.meta       = t.ui.dimmer.find('.photo-frame-meta');
 			t.ui.metaToggle = t.ui.dimmer.find('.photo-frame-meta-toggle');
 			t.ui.metaClose  = t.ui.dimmer.find('.photo-frame-close-meta');
+			t.ui.dropZone   = t.$wrapper.find('.photo-frame-drop-zone');
 			
-			t.progressBar   = new PhotoFrame.progress(t.ui.progress);
+			t.progressBar   = new PhotoFrame.progress(t.ui.progress, {
+				callbacks: {
+					cancel: function() {
+						if(t.jqXHR) {
+							t.jqXHR.abort();
+						}
+						
+						t.ui.dimmer.fadeOut();
+						t.resetProgress();
+					}
+				}
+			});
 			
 			if(!t.IE()) {
 				t.ui.form.fileupload({
 					//url: '/live/home/index',
 					started: function() {
+						t.ui.dropZone.hide();
 						t.showProgress(0);
 					},
 					progress: function(e, data) {
@@ -944,7 +959,7 @@ var PhotoFrame;
 						t.showProgress(progress);
 					},
 					singleFileUploads: false,
-					dropZone: t.$wrapper.find('.photo-frame-drop-zone'),
+					dropZone: t.ui.dropZone,
 					url: t.options.url,
 					add: function (e, data) {
 						t.initialized = false;	
@@ -952,8 +967,11 @@ var PhotoFrame;
 						t.startUpload(data.files, function() {
 							t.showProgress(0);
 							
-							data.submit();
+							t.jqXHR = data.submit();
 						});
+					},
+					fail: function (e, data) {
+						t.showErrors(['An unexpected error has occurred. Please try again.']);	
 					},
 					done: function (e, data) {
 						var errors = [];
@@ -1314,9 +1332,19 @@ var PhotoFrame;
 		var t        = this;
 		var $obj     = $(obj);		
 		var _default = {
+			callbacks: {
+				init: function() {},
+				cancel: function() {},
+				onProgress: function() {},	
+				hide: function() {},	
+				show: function() {},	
+				reset: function() {},	
+			},
 			duration: 333,
 			classes: {
-				progress: 'photo-frame-progress-fill'
+				progress: 'photo-frame-progress-fill',
+				cancel: 'photo-frame-progress-cancel',
+				wrapper: 'photo-frame-progress-wrapper'
 			}	
 		};
 		
@@ -1344,12 +1372,30 @@ var PhotoFrame;
 		
 		t.init = function() {
 			if(!t.ui.obj.data('init')) {
-				t.ui.fill = $('<div class="'+t.options.classes.progress+'" />');
+				t.ui.fill    = $('<div class="'+t.options.classes.progress+'" />');
+				t.ui.cancel  = $('<a href="#" class="'+t.options.classes.cancel+'"><span class="icon-cancel"></span></a>');
 				
+				t.ui.obj.wrap('<div class="'+t.options.classes.wrapper+'" />');
+				t.ui.cancel.insertBefore(t.ui.obj);
 				t.ui.obj.append(t.ui.fill);
 				t.ui.obj.data('init', 'true');
 				
-				t.setProgress(t.progess);
+				t.ui.wrapper = t.ui.obj.parent('.'+t.options.classes.wrapper);
+				
+				t.ui.cancel.click(function(e) {	
+					
+					t.options.callbacks.cancel(t, e);
+					
+					t.hide(function() {
+						t.resetProgress(0);
+					});
+					
+					e.preventDefault();
+				});
+				
+				t.options.callbacks.init(t);
+					
+				t.setProgress(t.progress);
 			}
 			
 			$(window).resize(function() {
@@ -1366,6 +1412,8 @@ var PhotoFrame;
 			
 			t.ui.fill.css('width', t.progress);
 			
+			t.options.callbacks.onProgress(t, progress);
+			
 			setTimeout(function() {
 				if(typeof callback == "function") {
 					callback(t);
@@ -1378,6 +1426,8 @@ var PhotoFrame;
 		}
 		
 		t.resetProgress = function() {
+			t.options.callbacks.reset(t);
+			
 			t.setProgress(0);
 		}
 		
@@ -1403,8 +1453,9 @@ var PhotoFrame;
 			});
 		}
 		
-		t.center = function() {			
-			t.ui.obj.position({
+		t.center = function() {		
+			console.log(t.ui.wrapper);
+			t.ui.wrapper.position({
 				of: t.ui.parent,
 				my: 'center',
 				at: 'center'
@@ -1422,7 +1473,9 @@ var PhotoFrame;
 				var duration = t.options.duration;
 			}
 			
-			t.ui.obj.fadeIn(duration, function() {
+			t.ui.wrapper.fadeIn(duration, function() {
+				t.options.callbacks.show(t);
+			
 				if(typeof callback == "function") {
 					callback(t);
 				}				
@@ -1442,7 +1495,9 @@ var PhotoFrame;
 				var duration = t.options.duration;
 			}
 			
-			t.ui.obj.fadeOut(duration, function() {		
+			t.ui.wrapper.fadeOut(duration, function() {	
+				t.options.callbacks.hide(t);
+				
 				if(typeof callback == "function") {
 					callback(t);
 				}				

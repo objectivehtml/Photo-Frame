@@ -214,7 +214,7 @@ class Photo_frame_lib {
 					copy($response['rel_path'], $framed_dir.$response['title']);
 				}
 			}
-					
+			
 			$return[] = array(
 				'success'            => count($errors) == 0 ? TRUE : FALSE,
 				'directory'          => $directory,
@@ -246,7 +246,7 @@ class Photo_frame_lib {
 		
 		if(!is_dir($path))
 		{
-			if(!is_dir($path['server_path']))
+			if(!is_dir($directory['server_path']))
 			{
 				$errors = array($this->parse(array(
 					'directory' => $directory['server_path']
