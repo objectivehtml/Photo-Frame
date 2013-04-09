@@ -24,7 +24,8 @@
     var loadImage = function (file, callback, options) {
             var img = document.createElement('img'),
                 url,
-                oUrl;
+                oUrl,
+                date = new Date();
             img.onerror = callback;
             img.onload = function () {
                 if (oUrl && !(options && options.noRevoke)) {
@@ -42,6 +43,7 @@
             } else {
                 url = file;
             }
+            url += '?_'+date.getTime();
             if (url) {
                 img.src = url;
                 return img;

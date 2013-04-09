@@ -149,6 +149,7 @@ class Photo_frame_ft extends EE_Fieldtype {
 				
 		$this->EE->theme_loader->css('photo_frame');
 		$this->EE->theme_loader->css('jquery.jcrop');
+		$this->EE->theme_loader->javascript('base');
 		$this->EE->theme_loader->javascript('photo_frame');
 		$this->EE->theme_loader->javascript('jquery.ui');
 		$this->EE->theme_loader->javascript('jquery.ui.widget');
@@ -158,6 +159,7 @@ class Photo_frame_ft extends EE_Fieldtype {
 		$this->EE->theme_loader->javascript('jquery.load-image');
 		$this->EE->theme_loader->javascript('jquery.jcrop');
 		$this->EE->theme_loader->javascript('jquery.color');		
+		$this->EE->theme_loader->output('PhotoFrame.Lang = '.$this->_lang().';');
 		
 		$entry_id  = empty($data) && $data !== FALSE ? $data : ($this->EE->input->get_post('entry_id') ? $this->EE->input->get_post('entry_id') : (isset($this->EE->safecracker) ? $this->EE->safecracker->entry('entry_id') : 0));
 			
@@ -443,7 +445,7 @@ class Photo_frame_ft extends EE_Fieldtype {
 			resize: '.json_encode($resize).',
 			resizeMax: '.json_encode($resize_max).',
 			sortable: '.$settings['photo_frame_sortable'].',
-			safecracker: '.($this->safecracker ? 'true' : 'false').'
+			safecracker: '.($this->safecracker ? 'true' : 'false').' 
 		}';
 
 		if($this->matrix)
@@ -458,19 +460,19 @@ class Photo_frame_ft extends EE_Fieldtype {
 						
 						settings.fieldName = cell.field.id+"["+cell.row.id+"]["+cell.col.id+"]";
 				
-						new PhotoFrame(cell.dom.$td, settings);
+						new PhotoFrame.Factory(cell.dom.$td, settings);
 					}
 				});
 			
 				$(document).ready(function() { 
-					new PhotoFrame($("#'.$uid.'"), 	'.$settings_js.')
+					new PhotoFrame.Factory($("#'.$uid.'"), 	'.$settings_js.')
 				});'
 			);
 		}
 		else		
 		{
 			$this->EE->theme_loader->output('$(document).ready(function() {
-				new PhotoFrame($("#'.$uid.'"), '.$settings_js.');
+				new PhotoFrame.Factory($("#'.$uid.'"), '.$settings_js.');
 			});');
 		}
 		
@@ -536,6 +538,23 @@ class Photo_frame_ft extends EE_Fieldtype {
 		}
 		
 		return $this->EE->load->view('fieldtype', $vars, TRUE);
+	}
+	
+	private function _lang()
+	{
+		$lang = array();
+		
+		foreach($this->EE->lang->language as $key => $value)
+		{
+			$pattern = '/^photo_frame_/';
+			
+			if(preg_match($pattern, $key))
+			{
+				$lang[preg_replace($pattern, '', $key)] = $value;
+			}
+		}
+		
+		return json_encode($lang);
 	}
 	
 	public function replace_thumb($data, $params = array(), $tagdata)
@@ -1392,6 +1411,8 @@ class Photo_frame_ft extends EE_Fieldtype {
 	
 	public function delete_rows($row_ids)
 	{
+		$this->EE->load->model('photo_frame_model');
+		
 		foreach($row_ids as $index => $row_id)
 		{
 			unset($row_ids[$index]);

@@ -20,9 +20,8 @@
     					<a href="#<?php echo $index?>" class="photo-frame-edit" <?php echo isset($photo->new) ? 'data-new-entry="true"' : NULL?>><span class="icon-edit"></span></a>
     					<a href="#<?php echo !isset($photo->id) ? $id : $photo->id?>" class="photo-frame-delete" <?php echo isset($photo->new) && $photo->new ? 'data-new-entry="true"' : NULL?>><span class="icon-trash"></span></a>
     				</div>
+    				<textarea name="<?php echo $field_name?>[][<?php echo isset($photo->new) && $photo->new ? 'new' : 'edit'?>]" id="photo-frame-<?php echo isset($photo->new) ? 'new' : 'edit'?>-photo-<?php echo !isset($photo->id) ? $id : $photo->id?>-<?php echo $index?>" style="display:none"><?php echo json_encode($photo->saved_data);?></textarea>
     			</div>
-    			
-    			<textarea name="<?php echo $field_name?>[][<?php echo isset($photo->new) && $photo->new ? 'new' : 'edit'?>]" id="photo-frame-<?php echo isset($photo->new) ? 'new' : 'edit'?>-photo-<?php echo !isset($photo->id) ? $id : $photo->id?>-<?php echo $index?>" style="display:none"><?php echo json_encode($photo->saved_data);?></textarea>
     		</li>
     		<?php endforeach; ?>
 		</ul>

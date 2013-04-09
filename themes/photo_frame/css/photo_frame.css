@@ -399,13 +399,14 @@ a.photo-frame-progress-cancel {
 	display: inline-block;
 	display: none;
 }
-.photo-frame-image {
+.photo-frame-crop-photo {
 	-webkit-box-shadow: 0 0 20px rgba(0, 0, 0, .7);
 	-moz-box-shadow: 0 0 20px rgba(0, 0, 0, .7);
 	box-shadow: 0 0 20px rgba(0, 0, 0, .7);
+	z-index: 100;
 }
 
-.photo-frame-image img {
+.photo-frame-crop-photo img {
 	max-width: none;
 	width: 100%;
 	display: block;

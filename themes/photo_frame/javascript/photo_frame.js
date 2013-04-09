@@ -1,170 +1,450 @@
-var PhotoFrame;
+var PhotoFrame = function() {};
 
 (function($) {
-	PhotoFrame = function(obj, options) {
+	
+	PhotoFrame.Class = Base.extend({
 		
-		var t          = this;
+		/**
+		 * Sets the default options
+		 *
+		 * @param	object 	The default options
+		 * @param	object 	The override options
+		 */
+		constructor: function(_default, options) {
+			if(typeof _default != "object") {
+				var _default = {};
+			}
+			if(typeof options != "object") {
+				var options = {};
+			}
+			this.setOptions($.extend(true, _default, options));
+		},
 		
-		t.dirId		   = options.dirId;
-		t.assetSheet   = false;
-		t.options      = options;
-		t.settings     = options.settings;
-		t.$wrapper     = $(obj);
-		t.response     = {};
-		t.jcrop        = {};
-		t.photos       = options.photos;
-		t.edit         = false;
-		t.edit_id	   = 0;
-		t.isNewPhoto   = true;
-		t.directory    = t.options.directory;
-		t.index        = PhotoFrame.instances.length;
-		t.messageWidth = 500; 
-		t.instructions = t.options.instructions;
-		t.disable      = false;
-		t.size 		   = t.options.size;
-		t.released	   = false;
-		t.initialized  = false;
-		t.useAssets	   = t.options.useAssets;
-		t.scale        = 1;
-		t.rotate	   = 0;
-		t.resize 	   = options.resize ? options.resize: false;
-		t.resizeMax    = options.resizeMax ? options.resizeMax: false;
-		t.title		   = options.title ? options.title : '';
-		t.description  = options.description ? options.description : '';
-		t.keywords     = options.keywords ? options.keywords : '';
-		t.compression  = options.compression;
+		/**
+		 * Get an single option value. Returns false if option does not exist
+		 *
+		 * @param 	string 	The name of the option
+		 * @return	mixed
+		 */		
+		 
+		getOption: function(index) {
+			if(this[index]) {
+				return this[index];
+			}
+			return false;
+		},
 		
-		t.ui   = {
-			body: $('body'),
-			browse: t.$wrapper.find('.photo-frame-browse'),
-			upload: t.$wrapper.find('.photo-frame-upload'),
-			form: $('#photo-frame-upload'),
-			dimmer: $('.photo-frame-dimmer'),
-			activity: $('.photo-frame-activity'),
-			preview: t.$wrapper.find('.photo-frame-preview'),
-			del: t.$wrapper.find('.photo-frame-delete'),
-			edit: t.$wrapper.find('.photo-frame-edit'),
-			helper: t.$wrapper.find('.photo-frame-helper')
-		};
+		/**
+		 * Get all options
+		 *
+		 * @return	bool
+		 */		
+		 
+		getOptions: function() {
+			return this;
+		},
 		
-		t.IE = function() {
-			return t.$wrapper.children().hasClass('photo-frame-ie');
+		/**
+		 * Set a single option value
+		 *
+		 * @param 	string 	The name of the option
+		 * @param 	mixed 	The value of the option
+		 */		
+		 
+		setOption: function(index, value) {
+			this[index] = value;
+		},
+		
+		/**
+		 * Set a multiple options by passing a JSON object
+		 *
+		 * @param 	object 	The object with the options
+		 * @param 	mixed 	The value of the option
+		 */		
+		
+		setOptions: function(options) {
+  			for(key in options) {
+	  			this.setOption(key, options[key]);
+  			}
 		}
+	});
+	
+	PhotoFrame.Factory = PhotoFrame.Class.extend({
 		
-		t.save = function(data, edit) {
+		/**
+		 * The default CSS classes
+		 */		
+		
+		classes: {
+			actionBar: 'photo-frame-action-bar',
+			editPhoto: 'photo-frame-edit',
+			deletePhoto: 'photo-frame-delete',
+			photo: 'photo-frame-photo',
+			cropPhoto: 'photo-frame-crop-photo',
+			jcropTracker: 'jcrop-tracker',
+			jcropHolder: 'jcrop-holder'
+		},	
+		
+		/**
+		 * The object of the photo being cropped
+		 */		
+		 
+		cropPhoto: false,
+				 
+		/**
+		 * Icon Classes
+		 */		
+		 
+		icons: {
+			editPhoto: 'icon-edit',
+			deletePhoto: 'icon-trash',
+		},	
+		 
+		/**
+		 * The wrapping DOM object
+		 */		
+		 
+		$wrapper: false,
+				
+		/**
+		 * Photos Array.
+		 */		
+		 
+		photos: [],
+		
+		/**
+		 * Crop Settings.
+		 */		
+		 
+		settings: {},
+				
+		/**
+		 * An object of UI elements.
+		 */		
+		 
+		ui: {},
+		
+		/**
+		 * Constructor to set the options and UI events.
+		 *
+		 * @param object  The wrapper object
+		 * @param object  An array of options to be set
+		 */		
+		 
+		constructor: function(obj, options) {
 			
-			if(typeof edit == "undefined") {
-				edit = false;	
+			// Use this property to access "this" within jQuery events
+			var t = this;
+				
+			t.base(options);			
+			t.$wrapper = $(obj);
+			
+			t.ui = {
+				body: $('body'),
+				browse: t.$wrapper.find('.photo-frame-browse'),
+				upload: t.$wrapper.find('.photo-frame-upload'),
+				form: $('#photo-frame-upload'),
+				dimmer: $('.photo-frame-dimmer'),
+				activity: $('.photo-frame-activity'),
+				preview: t.$wrapper.find('.photo-frame-preview'),
+				//del: t.$wrapper.find('.photo-frame-delete'),
+				//edit: t.$wrapper.find('.photo-frame-edit'),
+				helper: t.$wrapper.find('.photo-frame-helper')
 			}
 			
-			var date  = new Date();
-			var index = edit === false ? t.photos.length : edit;
+			for(x in t.photos) {
+				var data  = t.photos[x];
+				var photo = t.$wrapper.find('.'+t.classes.photo);
+			}
+			
+			var html = [
+				'<form id="photo-frame-upload" class="photo-frame-form photo-frame-wrapper" action="'+t.url+(t.IE() ? '&ie=true' : '')+'" method="POST" enctype="multipart/form-data" id="photo-frame-upload-'+t.index+'" '+(t.IE() ? 'target="photo-frame-iframe-'+t.index+'"' : '')+'>',
+					'<h3>Select a file to upload...</h3>',
+					'<input type="file" name="files[]" multiple>',
+					'<button type="submit" class="photo-frame-button"><span class="icon-upload"></span>'+t.buttonText+'</button>',
+				'</form>'
+			].join('');
+			
+			t.ui.form = $(html);
+			
+			t.ui.form.submit(function() {
+				if(t.IE()) {
+					t.startUpload();
+				}
+			});
+			
+			t.ui.body.append(t.ui.form);
+			t.ui.window = $(window);
+			
+			var html = [
+				'<div class="photo-frame-dimmer">',
+					'<a href="#" class="photo-frame-meta-toggle"><span class="icon-info"></span></a>',
+					'<div class="photo-frame-info-panel">',
+						'<a href="#" class="photo-frame-close"><span class="icon-cancel"></span></a>',
+						'<p class="size">W: <span class="width"></span> H: <span class="height"></span></p>',
+						'<div class="coords">',
+							'<p>',
+								'<label><b>X</b>: <span class="x"></span></label>',
+								'<label><b>Y</b>: <span class="y"></span></label>',
+							'</p>',
+							'<p>',
+								'<label><b>X2</b>: <span class="x2"></span></label>',
+								'<label><b>Y2</b>: <span class="y2"></span></label>',
+							'</p>',
+						'</div>',
+						'<p class="aspect"></p>',
+					'</div>',
+					'<div class="photo-frame-activity">',
+						'<span class="photo-frame-indicator"></span> <p>Uploading...</p>',
+						'<a class="photo-frame-button photo-frame-cancel"><span class="icon-cancel"></span> Cancel</a>',
+					'</div>',
+					'<div class="photo-frame-progress"></div>',
+					'<div class="photo-frame-errors">',
+						'<h3>Errors</h3>',
+						'<ul></ul>',
+						'<a class="photo-frame-button photo-frame-cancel"><span class="icon-cancel"></span> Close</a>',
+					'</div>',
+					'<div class="photo-frame-crop">',
+						'<div class="'+t.classes.cropPhoto+'"></div>',
+						'<div class="photo-frame-meta">',
+							'<a href="#" class="photo-frame-close-meta photo-frame-float-right"><span class="icon-cancel"></span></a>',
+							'<h3>Photo Details</h3>',
+							'<ul>',
+								'<li>',
+									'<label for="title">Title</label>',
+									'<input type="text" name="title" value="'+t.title+'" id="title" />',
+								'</li>',
+								'<!-- <li>',
+									'<label for="keywords">Keywords</label>',
+									'<input type="text" name="keywords" value="'+t.keywords+'" id="keywords" />',
+								'</li> -->',
+								'<li>',
+									'<label for="title">Description</label>',
+									'<textarea name="description" id="description">'+t.description+'</textarea>',
+								'</li>',
+							'</ul>',
+						'</div>',
+						'<div class="photo-frame-toolbar">',
+							'<a class="photo-frame-bar-button photo-frame-cancel photo-frame-float-left"><span class="icon-cancel"></span> Cancel</a>',
+							'<a class="photo-frame-bar-button photo-frame-save photo-frame-float-right"><span class="icon-save"></span> Save</a>',
+						'</div>',
+					'</div>',
+				'</div>'
+			].join('');
+			
+			t.ui.dimmer  = $(html);
+			t.ui.toolbar = t.ui.dimmer.find('.photo-frame-toolbar');
+			t.ui.toolbar.hide();
+			
+			t.ui.body.append(t.ui.dimmer);
 		
-		    data.title = t.title;
-		    data.description = t.description;
-		    data.keywords = t.keywords;
-		    
-			if(edit === false) {
-				var html = $([
-				    '<li>',
-	    				'<div class="photo-frame-photo" id="photo-frame-photo-'+t.options.fieldId+'-'+index+'">',
-	    					//'<img src="'+data.file+'?_='+date.getTime()+'" alt="'+data.file_name+'" />',				
-	    					'<div class="photo-frame-action-bar">',
-	    						'<a href="#'+index+'" class="photo-frame-edit" data-new-entry="true"><span class="icon-edit"></span></a>',
-	    						'<a href="#'+index+'" class="photo-frame-delete" data-new-entry="true"><span class="icon-trash"></span></a>',
-	    					'</div>',
-	    					'<textarea name="'+t.options.fieldName+'[][new]" id="photo-frame-new-photo-'+t.options.fieldId+'-'+index+'" style="display:none">'+data.save_data+'</textarea>',
-	    				'</div>',
-					'</li>'
-				].join(''));
-				
-				t.photos.push(data); 
-						 
-				window.loadImage(
-			        data.file,
-			        function (img) {
-				     	$(html).find('.photo-frame-photo').prepend(img);
-			    
-						t.ui.preview.find('ul').append(html);
+			if(t.infoPanel) {
+				t.ui.info = t.ui.dimmer.find('.photo-frame-info-panel');
+				t.ui.info.draggable();
+				t.ui.info.find('.photo-frame-close').click(function(e) {			
+					t.ui.info.fadeOut();
+					e.preventDefault();
+				});
+			}
+					
+			t.ui.activity = t.ui.dimmer.find('.photo-frame-activity');
+			t.ui.activity.find('.photo-frame-indicator').activity({color: '#fff'});
+			
+			t.ui.progress   = t.ui.dimmer.find('.photo-frame-progress');
+			t.ui.save       = t.ui.dimmer.find('.photo-frame-save');
+			t.ui.cancel     = t.ui.dimmer.find('.photo-frame-cancel');
+			t.ui.errors     = t.ui.dimmer.find('.photo-frame-errors');
+			t.ui.crop       = t.ui.dimmer.find('.photo-frame-crop');
+			t.ui.cropPhoto  = t.ui.dimmer.find('.'+t.classes.cropPhoto);
+			t.ui.meta       = t.ui.dimmer.find('.photo-frame-meta');
+			t.ui.metaToggle = t.ui.dimmer.find('.photo-frame-meta-toggle');
+			t.ui.metaClose  = t.ui.dimmer.find('.photo-frame-close-meta');
+			t.ui.dropZone   = t.$wrapper.find('.photo-frame-drop-zone');
+			
+			t.progressBar   = new PhotoFrame.ProgressBar(t.ui.progress, {
+				callbacks: {
+					cancel: function() {
+						if(t.jqXHR) {
+							t.jqXHR.abort();
+						}
 						
-						if(t.options.maxPhotos > 0 && (t.options.maxPhotos <= t.getTotalPhotos())) {
-							t.hideUpload();
+						t.ui.dimmer.fadeOut();
+						t.resetProgress();
+					}
+				}
+			});
+
+			if(!t.IE()) {
+				
+				console.log(t.ui.form);
+				
+				t.ui.form.fileupload({
+					//url: '/live/home/index',
+					started: function() {
+						console.log('started');
+						//t.ui.dropZone.hide();
+						//t.showProgress(0);
+					},
+					progress: function(e, data) {
+						t.showProgress(parseInt(data.loaded / data.total * 100));
+					},
+					singleFileUploads: false,
+					dropZone: t.ui.dropZone,
+					url: t.url,
+					add: function (e, data) {
+						t.initialized = false;	
+						
+						t.startUpload(data.files, function() {
+							t.showProgress(0);
+							t.jqXHR = data.submit();
+						});
+					},
+					fail: function (e, data) {
+						console.log('fail');
+						t.showErrors(['An unexpected error has occurred. Please try again.']);	
+					},
+					done: function (e, data) {
+						var errors = [];
+										
+						if(typeof data.result[0] == "undefined") {							
+							errors = ['An unexpected error has occurred. Please try again.'];
 						}	
 						
-						if(t.ui.saving) {			
-							t.ui.saving.remove();
+						if(typeof data.result == "object" && data.result.length == 1) {
+							t.hideProgress(function() {
+								t._uploadResponseHandler(data.result[0]);
+							});
 						}
+						else {
+							
+							if(typeof data.result[0].success != "undefined") {
+								$.each(data.result, function(i, response) {
+									//t.saveResponse(response);
+								});
+							}
+							else {
+								t.hideProgress();
+								console.log(errors);
+								t.showErrors(errors);
+							}
+						}
+					}
+		    	});
+	    	}
+	    	else {
+		    	t.ui.iframe = $('<iframe name="photo-frame-iframe-'+t.index+'" id="photo-frame-iframe-'+t.index+'" src="#" style="display:none;width:0;height:0"></iframe>');
+		    	t.ui.body.append(t.ui.iframe);
+	    	}
+	    		
+			t.ui.upload.click(function(e) {
+				t.isNewPhoto = true;
+				
+				if(!t.IE()) {
+					// All this extra code is there to support older versions of Chrome and 
+					// Safari. File inputs cannot be triggered if the form or field is hidden.
+					// This is best hack I could find at the time. - 1/9/2013
+					t.ui.form.css({
+						position: 'absolute',
+						left: -1000	
+					}).show();
+					
+					t.ui.form.find('input').show().click();
+				}
+				else {
+					t.ui.dimmer.show();
+					t.ui.crop.hide();
+					
+					if(t.ui.instructions) {
+						t.ui.instructions.hide();
+					}
+					
+					//t.ui.cropPhoto.hide();
+					t.ui.form.show().center();
+				}
 						
-						t.hideProgress();
-						t.ui.dimmer.hide();
-			        }
-			    );
+				e.preventDefault();
+			});
+			
+			t.ui.browse.click(function(e) {
+				console.log('browse');
+				
+				e.preventDefault();
+			});
+		},
+		
+		clearNotices: function(callback) {
+			for(x in this.notices) {
+				this.notices[x].clear(callback);
+			}			
+		},
+		
+		getTotalPhotos: function() {
+			return t.photos.length;	
+		},
+		
+		_uploadResponseHandler: function(response, existingAsset) {
+			this.response = response;			
+			this.ui.toolbar.hide();
+			
+			if(this.response.success) {
+				if(!existingAsset) {
+					this.$wrapper.append('<textarea name="'+this.fieldName+'[][uploaded]" style="display:none">{"field_id": "'+this.fieldId+'", "col_id": "'+this.colId+'", "row_id": "'+this.rowId+'", "path": "'+this.response.file_path+'", "original_path": "'+this.response.original_path+'", "file": "'+this.response.file_name+'"}</textarea>');
+				}
+				
+				var photo = new PhotoFrame.Photo(this, response, {
+					settings: this.settings,
+					compression: this.compression,
+					resize: this.resize,
+					resizeMax: this.resizeMax,
+					index: this.photos.length
+				});
+				
+				photo.startCrop();
 			}
 			else {
-				
-				var obj = $('#photo-frame-photo-'+t.options.fieldId+'-'+edit);
-				
-				if(obj.find('a').attr('data-new-entry')) {
-					t.$wrapper.find('#photo-frame-new-photo-'+t.options.fieldId+'-'+edit+'').html(data.save_data);
-				}
-				else {	
-					data.id = t.edit_id;
-					
-					t.$wrapper.find('#photo-frame-edit-photo-'+t.edit_id+'-'+index).html(data.save_data);
-				}
-				
-				window.loadImage(
-			        data.file,
-			        function (img) {
-				        var parent = t.ui.preview.find('#photo-frame-photo-'+t.options.fieldId+'-'+edit);
-				        var photo  = parent.find('img');
-				        
-				        parent.prepend(img);
-				        photo.remove();
-				        
-				        t.edit = false;
-						
-						if(t.ui.saving) {			
-							t.ui.saving.remove();
-						}
-								
-						t.hideProgress();
-						t.ui.dimmer.hide();			
-			        }
-			    );
-			    
-				t.photos[edit] = data;
+				this.showErrors(this.response.errors);	
 			}
-		};
+		},
 		
-		t.resetProgress = function() {
-			t.ui.crop.hide();
-			t.ui.activity.hide();
-			t.progressBar.show();
-			t.progressBar.resetProgress();
-		}
+		/**
+		 * Returns TRUE if the user is using InternetExplorer, otherwise
+		 * returns FALSE.
+		 *
+		 * @return	bool
+		 */		
+		 
+		IE: function() {
+			return this.$wrapper.children().hasClass('photo-frame-ie');
+		},
+						
+		save: function() { console.log('save'); },
 		
-		t.showProgress = function(progress, callback) {
-			t.progressBar.show(function() {
-				t.progressBar.setProgress(progress, function() {
-					if(typeof callback == "function") {
-						callback(progress);
-					}					
-				});
-			});
-		}
+		showMeta: function() {
+			this.ui.metaToggle.addClass('active');	
+			this.ui.meta.fadeIn('fast');
+			this.ui.meta.center();
+		},
 		
-		t.hideProgress = function(callback) {
-			t.progressBar.hide(function() {
-				t.progressBar.setProgress(0);
-				
-				if(typeof callback == "function") {
-					callback();
-				}
-			});
-		}
+		hideMeta: function() {	
+			this.ui.metaToggle.removeClass('active');	
+			this.ui.meta.fadeOut('fast');
+		},
 		
-		t.startUpload = function(files, callback) {
+		showUpload: function() {
+			this.ui.upload.show();
+			this.ui.browse.show();
+			this.ui.helper.show();	
+		},
+		
+		hideUpload: function() {
+			this.ui.upload.hide();
+			this.ui.browse.hide();
+			this.ui.helper.hide();	
+		},
+		
+		startUpload: function(files, callback) {
+			var t = this;
+			
 			if(typeof files == "function") {
 				callback = files;
 				files    = [];	
@@ -185,170 +465,536 @@ var PhotoFrame;
 					callback();	
 				}
 			});
-		};
+		},
 		
-		t.stopUpload = function(data, image, callback) {
+		/**
+		 * Show the progress bar.
+		 */		
+		showProgress: function(progress, callback) {
+			this.progressBar.show();
+			this.progressBar.set(progress, callback);
+		},
+		
+		/**
+		 * Show the progress bar.
+		 */		
+		hideProgress: function(callback) {
+			this.progressBar.hide(callback);
+		},
+		
+		/**
+		 * Resets the progress bar.
+		 */		
+		 
+		resetProgress: function() {
+			this.ui.crop.hide();
+			this.ui.activity.hide();			
+			this.progressBar.show();
+			this.progressBar.reset();
+		}
+		
+	});
+	
+	
+	PhotoFrame.Photo = PhotoFrame.Class.extend({
 			
-			if(typeof image == "function") {
-				callback = image;
-				image = false;
-			}
+		/**
+		 * Image Compression (1-100)
+		 */	
+		 
+		compression: 100,
+		
+		/**
+		 * Photo Description
+		 */	
+		 
+		description: false,
+		 
+		/**
+		 * Is this photo being edit? If false, then a new photo
+		 */	
+		 
+		edit: false,
+		 
+		/**
+		 * The Photo Frame Factory object
+		 */	
+		
+		factory: false,
+		
+		/**
+		 * Photo Index
+		 */	
+		 
+		index: false,
+		
+		/**
+		 * Photo ID
+		 */	
+		 
+		id: false,
 			
-			if(!image) {
-				image = data.file_url;
-			}
-			
-			t.ui.dimmer.show();
-			t.ui.errors.hide();
-			t.ui.image.hide();
-			t.ui.crop.show();
-			
-			t.resetMeta();
-			
-			if(t.jcrop.destroy) {
-				t.jcrop.destroy();	
-			}
-			
-			t.ui.window = $(window);
+		/**
+		 * jCrop object
+		 */	
+		 
+		jcrop: false,
+		
+		/**
+		 * Photo Keywords
+		 */	
+		 
+		keywords: false,
+		
+		/**
+		 * Resize (expiremental)
+		 */	
+		 
+		resize: false,
+		 
+		/**
+		 * Resize Max (expiremental)
+		 */	
+		 
+		resizeMax: false,
+		 
+		/**
+		 * Rotate Degrees
+		 */	
+		 
+		rotate: false,
+		 
+		/**
+		 * Default Crop Size
+		 */
+		 
+		scale: false,
+		 
+		/**
+		 * Default Crop Size
+		 */
+		 
+		size: false,
+		 
+		/**
+		 * Crop Settings
+		 */
+		 
+		settings: {},
+		
+		/**
+		 * Photo Title
+		 */	
+		 
+		title: false,
+		 		
+		/**
+		 * An object of UI elements
+		 */	
+		 
+		ui: {
+			actionBar: false,
+			edit: false,
+			del: false,
+			image: false,
+			photo: false,
+			saving: false
+		},
 					
-			window.loadImage(
-		        image,
-		        function (img) {
-			        t.ui.activity.hide();
-		        	t.ui.image.remove();
-		        	
-		        	if(t.instructions && t.edit === false) {
-		        		t.ui.instructions = $('<div class="photo-frame-instructions" />').html(t.instructions);
-		        		
-		        		t.ui.dimmer.append(t.ui.instructions);
-		        		if(typeof t.options.size == "string") {
-			        		//t.ui.instructions.hide();
-		        		}
-		        	}
-		        	else {
-			        	t.ui.instructions = false;
-		        	}
-		        	
-		        			        	
-		        	t.ui.image = $('<div class="photo-frame-image"></div>');
-			        t.ui.crop.prepend(t.ui.image);   	
-		            t.ui.image.html(img).show();	        	
-		            t.ui.crop.center();
-		            
-		            t.hideMeta();
-		            
-		            t.settings.onChange = function() {
-			          	t.updateInfo();
-		            };
-		            
-		            if(t.ui.instructions && t.ui.instructions.css('display') != 'none') {
-			            t.settings.onChange = function() {
-			          		t.updateInfo();
-				            if(t.initialized) {
-				            	t.ui.instructions.fadeOut();
-				            }
-			            }
-		            }
-		            
-		            if(t.edit === false && t.size != 'false') {
-		            	var size = t.size.split('x');
-		            	
-		            	size[0] = parseInt(size[0]);
-		            	size[1] = parseInt(size[1]);
-		            	
-		           		var x  = (t.ui.image.width()  / 2) - (size[0] / 2);
-		           		var x2 = x + size[0];
-		           		var y  = (t.ui.image.height() / 2) - (size[1] / 2);
-		           		var y2 = y + size[1];
-		           		
-		           		t.settings.setSelect = [x, y, x2, y2];
-		            }
-		            
-		            t.settings.onRelease = function() {
-			            t.released = true;
-		            };
-		            
-		            t.settings.onSelect = function() {
-			            t.released = false;
-		            }
-		            
-	            	var photo = t.photos[t.edit];
-	            	
-	            	if(photo) {
-		            	if(photo.title) {
-			        		t.ui.meta.find('input[name="title"]').val(photo.title);
-			        	}
-			        	
-			        	if(photo.keywords) {
-			        		t.ui.meta.find('input[name="keywords"]').val(photo.keywords);
-			        	}
-			        	
-			        	if(photo.description) {
-			        		t.ui.meta.find('textarea').val(photo.description);
-			        	}
-		        	}
-	            	
-		            t.initJcrop(callback);				
-		        }
-		    );
-		};
+		/**
+		 * The photo URL
+		 */
+		 
+		url: false,
+					
+		/**
+		 * Has the crop utility been released?
+		 */
+		 
+		released: false,
+				
+		/**
+		 * The wrapping DOM object
+		 */
+		 
+		$wrapper: false,
 		
-		t.initJcrop = function(callback) {
-			t.setScale();
-	        
+		/**
+		 * Constructor to set the options and UI events.
+		 *
+		 * @param object  The wrapper object
+		 * @param object  An array of options to be set
+		 */	
+		 	
+		constructor: function(factory, response, options) {	
+			var t = this;
+			
+			t.factory     = factory;
+			t.response    = response;
+			t.originalUrl = response.original_url;
+			t.url         = response.file_url;
+			t.ui          = $.extend(true, factory.ui, t.ui);
+			
+			t._bindClickEvents();
+			t.base(options);
+			
+			if(!t.index) {
+				t.index = t.photos.length;
+			}
+			
+			factory.photos.push(t);
+		},
+		
+		_bindClickEvents: function() {
+			var t = this;
+			
+			if(t.ui.edit) {
+				t.ui.edit.unbind('click').click(function(e) {
+					t.startCrop();					
+					e.preventDefault();
+				});
+			}
+			
+			if(t.ui.del) {
+				t.ui.del.unbind('click').click(function(e) {
+					
+					var $t = $(this);
+					var id = $t.attr('href').replace('#', '');
+						
+					$t.parents('.photo-frame-photo').parent('li').remove();
+						
+					if(t.id === false) {
+						t.factory.$wrapper.append('<input type="hidden" name="photo_frame_delete_photos['+t.factory.fieldId+'][]" value="'+t.id+'" />');
+					}
+					
+					t.ui.parent.fadeOut(function() {
+						t.ui.parent.remove();
+						
+						if((t.factory.maxPhotos > 0 && t.factory.maxPhotos > t.getTotalPhotos()) || (t.factory.minPhotos == 0 && t.factory.maxPhotos == 0)) {
+							t.showUpload();
+						}
+						else {
+							t.hideUpload();
+						}									
+					});
+				
+					e.preventDefault();
+				});
+			}
+		},
+		
+		showMeta: function() {
+			this.factory.showMeta();	
+		},
+		
+		hideMeta: function() {
+			this.factory.hideMeta();	
+		},
+		
+		showUpload: function() {
+			this.factory.showUpload();	
+		},
+		
+		hideUpload: function() {
+			this.factory.showUpload();	
+		},
+		
+		toggleMeta: function(image) {
+			if(this.ui.meta.css('display') == 'none') {
+				this.showMeta();
+				/*
+				if(image) {
+					this.hideImage();
+				}
+				*/
+			}
+			else {
+				this.hideMeta();
+				
+				/*
+				if(image) {
+					this.showImage();
+				}
+				*/
+			}
+		},
+		
+		initJcrop: function(callback) {
+			var t = this;
+			
 			t.ui.toolbar.show();
-	        t.ui.image.Jcrop(t.settings, function() {
-	        	t.jcrop = this;
-	        	t.updateInfo();
+			
+				console.log(t.jcrop);
+				
+			if(!t.jcrop) {
+				console.log('init jcrop');
+				
+				t.ui.cropPhoto.Jcrop(t.settings, function() {
+		        	t.jcrop = this;
+		        	t.updateInfo();
+		            if(typeof callback == "function") {
+			            callback();
+		            }
+		        });
+	        }
+	        else {		
+				console.log('skip init jcrop');
+				        
 	            if(typeof callback == "function") {
 		            callback();
 	            }
-	        });
+	        }
 	        
-			t.initialized = true;
-		}
+			t.initialized = true;				
+		},
 		
-		t.closeMessages = function(animation) {
+		hideProgress: function() {
+			this.factory.hideProgress();
+		},
 		
-			if(!animation) {
-				animation = 300;
+		showProgress: function() {
+			this.factory.showProgress();
+		},
+		
+		clearNotices: function(callback) {
+			this.factory.clearNotices(callback);
+		}, 
+		
+		/*
+		setScale: function(scale) {
+			if(scale) {
+				t.scale = scale;
+			}	
+				
+			if(t.scale != 1) {
+		        var img = t.ui.cropPhoto.find('img');
+		        var w = parseInt(img.css('width').replace('px', ''));
+		        var h = parseInt(img.css('height').replace('px', ''));
+		        
+		        w = w * t.scale;
+		        h = h * t.scale;
+		        	            
+		        img.css({
+		           width: w,
+		           height: h 
+		        });
+		        
+		        $(window).resize();
+	        }
+		},
+		*/
+		
+		updateInfo: function() {
+			console.log('updateInfo()');	
+		},
+
+		load: function(file, callback) {
+			if(typeof file == "function") {
+				callback = file;
+				file = this.url;
 			}
+			window.loadImage(file, function(img) {
+				if(typeof callback == "function") {
+					callback(img);
+				}
+			});	
+		},
+		
+		startCrop: function(callback) {
+			var t = this;
 			
-			$('.photo-frame-message').each(function() {
-				$(this).animate({right: -t.messageWidth}, animation);
+			t.factory.cropPhoto = t;
+			t.ui.dimmer.fadeIn('fast');
+			
+			t.load(t.originalUrl, function(img) {
+	        	
+				if(!t.ui.cropPhoto) {
+	        		t.ui.cropPhoto = $('<div class="'+t.factory.classes.cropPhoto+'"></div>');
+				}
+				
+	        	t.ui.instructions = $('<div class="photo-frame-instructions" />').html(PhotoFrame.Lang.instructions);	
+	        	
+	            t.ui.cropPhoto.html(img);	            
+		        t.ui.crop.prepend(t.ui.cropPhoto);         	
+	            t.ui.crop.center();
+	            t.ui.crop.show();
+	        		      	
+	            t.hideMeta();
+	            
+	            t.settings.onChange = function() {
+		          	t.updateInfo();
+	            };
+	            
+	            t.settings.onRelease = function() {
+		            t.released = true;
+	            };
+	            
+	            t.settings.onSelect = function() {
+		            t.released = false;
+	            }
+	            
+	            if(t.ui.instructions && t.ui.instructions.css('display') != 'none') {
+		            t.settings.onChange = function() {
+		          		t.updateInfo();
+			            if(t.initialized) {
+			            	t.ui.instructions.fadeOut();
+			            }
+		            }
+	            }
+	            
+	            if(t.edit === false && t.size) {
+	            	var size = t.size.split('x');
+	            	
+	            	size[0] = parseInt(size[0]);
+	            	size[1] = parseInt(size[1]);
+	            	
+	           		var x  = (t.ui.cropPhoto.width()  / 2) - (size[0] / 2);
+	           		var x2 = x + size[0];
+	           		var y  = (t.ui.cropPhoto.height() / 2) - (size[1] / 2);
+	           		var y2 = y + size[1];
+	           		
+	           		t.settings.setSelect = [x, y, x2, y2];
+	            }
+	            
+            	if(t.edit) {
+	            	if(t.title) {
+		        		t.ui.meta.find('input[name="title"]').val(t.title);
+		        	}
+		        	
+		        	if(t.keywords) {
+		        		t.ui.meta.find('input[name="keywords"]').val(t.keywords);
+		        	}
+		        	
+		        	if(t.description) {
+		        		t.ui.meta.find('textarea').val(t.description);
+		        	}
+	        	}
+            	
+	            t.initJcrop(callback);	
 			});
-		}
-		
-		t.getTotalPhotos = function() {
-			return t.$wrapper.find('.photo-frame-photo').length;
-		}
-		
-		t.cropImage = function(image, size) {
 			
-			var response = t.response;
-			var errors   = t.validate();
+			t.ui.save.unbind('click').bind('click', function(e) {
+				if(this.showMeta && this.ui.meta.css('display') == 'none') {
+	    			var errors = t.validate();
+	    		
+	    			if(errors.length == 0) {
+			    		t.showMeta();
+			    	}
+			    	else {
+				    	t.notify(errors);
+			    	}
+		    	}
+		    	else {
+		    		t.hideMeta();		    		
+			    	t.saveCrop();
+		    	}
+			});
 			
-			if(!size) {	
-	    		var size = {
-	    			x: 0,
-	    			y: 0,
-	    			x2: 0,
-	    			y2: 0,
-	    			w: 0,
-	    			h: 0
-	    		};		    		
+			t.ui.cancel.unbind('click').bind('click', function(e) {
+				t.clearNotices();			
+				t.ui.dimmer.fadeOut('fast');	
+				t.hideMeta();
+				t.hideProgress();
+				
+				if(t.ui.saving) {
+					t.ui.saving.fadeOut(function() {
+						$(this).remove();
+					});
+				}
+				
+				e.preventDefault();
+			});
+		},
+		
+		save: function(saveData) {
+			var t 	 = this;			
+			var date = new Date();
+			var edit = t.edit;
+			
+			console.log(edit);
+			
+			if(!edit) {			
+				t._createPhoto(saveData);
 			}
+			else {				
+				t._updatePhoto(saveData);	
+			}
+				
+			t.load(function(img) {
+				if(t.factory.maxPhotos > 0 && (t.factory.maxPhotos <= t.getTotalPhotos())) {
+					t.hideUpload();
+				}	
+				
+				if(!edit) {					    
+					t.ui.preview.find('ul').append(t.ui.parent);
+				}
+	       		t.ui.photo.find('img').remove();
+	       		t.ui.photo.append(img);
+	       		
+				if(t.ui.saving) {			
+					t.ui.saving.remove();
+				}
+				
+				t.hideProgress();
+				t.ui.dimmer.hide();
+			});
+		},
+		
+		_createPhoto: function(saveData) {	
+			var t    = this;	
+			var html = $([
+			    '<li>',
+    				'<div class="'+t.factory.classes.photo+'" id="'+t.factory.classes.photo+'-'+t.factory.fieldId+'-'+t.index+'">',			
+    					'<div class="'+t.factory.classes.actionBar+'">',
+    						'<a href="#'+t.index+'" class="'+t.factory.classes.editPhoto+'"><span class="'+t.factory.icons.editPhoto+'"></span></a>',
+    						'<a href="#'+t.index+'" class="'+t.factory.classes.deletePhoto+'"><span class="'+t.factory.icons.deletePhoto+'"></span></a>',
+    					'</div>',
+    				'</div>',
+				'</li>'
+			].join(''));
 			
+			t.edit 		   = t;	
+			t.ui.parent    = $(html);
+			t.ui.photo 	   = t.ui.parent.find('.'+t.factory.classes.photo);
+			t.ui.actionBar = t.ui.parent.find('.'+t.factory.classes.actionBar);
+			t.ui.edit	   = t.ui.actionBar.find('.'+t.factory.classes.editPhoto);
+			t.ui.del	   = t.ui.actionBar.find('.'+t.factory.classes.deletePhoto);
+			t.ui.field     = $('<textarea name="'+t.factory.fieldName+'[][new]" id="'+t.factory.classes.editPhoto+'-'+t.factory.fieldId+'-'+t.index+'" style="display:none">'+saveData+'</textarea>');
+			t.ui.photo.append(t.ui.field);	
+			
+			t._bindClickEvents();
+		},
+		
+		_updatePhoto: function(saveData) {
+			this.ui.field.val(saveData).html(saveData);
+		},
+		
+		saveCrop: function() {
+			var t = this;
+			
+			console.log(t.jcrop);
+			
+    		var size = this.released ? {
+    			 x: 0,
+    			 y: 0,
+    			x2: 0,
+    			y2: 0,
+    			 w: 0,
+    			 h: 0
+    		} : t.jcrop.tellScaled();
+    		  	
+			var errors = t.validate();
+			  
 			if(errors.length > 0) {
 				t.notify(errors);
 			}
 			else {
-				t.closeMessages();
+				t.clearNotices();
 				
 				t.ui.saving = $('<div class="photo-frame-saving"><span></span> Saving...</div>');
 				t.ui.dimmer.append(t.ui.saving);			
 				t.ui.dimmer.find('.photo-frame-saving span').activity();			
-				t.ui.crop.fadeOut();
+				//t.ui.crop.fadeOut();
 				
 				if(t.ui.info) {
 					t.ui.info.fadeOut();
@@ -361,12 +1007,12 @@ var PhotoFrame;
 				t.description = t.ui.meta.find('textarea').val();
 				t.keywords    = t.ui.meta.find('input[name="keywords"]').val();
 				
-				$.get(t.options.cropUrl, {
-					id: t.directory.id,
+				$.get(t.factory.cropUrl, {
+					id: t.factory.directory.id,
 					photo_id: t.edit_id,
-					image: image,
+					image: t.response.file_path,
 					name: t.response.file_name,
-					directory: t.directory.server_path,
+					directory: t.factory.directory.server_path,
 					original: t.response.original_path,
 					original_file: t.response.original_file,
 					url: t.response.file_url,
@@ -385,26 +1031,41 @@ var PhotoFrame;
 					description: t.description,
 					keywords: t.keywords,
 					compression: t.compression,
-				}, function(data) {
-					t.save(data, t.edit);
+				}, function(cropResponse) {
+					t.factory.cropPhoto = false;
+					t.save(cropResponse.save_data);
 				});
 			}
-		};
+		},
 		
-		t.isCropped = function(cropSize) {
-		
-			if(!cropSize && t.jcrop.tellSelect) {
-				var cropSize = t.jcrop.tellSelect();
+		isCropped: function(cropSize) {
+			
+			if(!cropSize) {
+				var cropSize = this.cropDimensions();
 			}
 			
-			if(t.ui.dimmer.find('.jcrop-tracker').width() == 0) {
+			if(!cropSize && this.jcrop.tellSelect) {
+				var cropSize = this.jcrop.tellSelect();
+			}
+			
+			if(this.ui.dimmer.find('.jcrop-tracker').width() == 0) {
 				return false;
 			}
 			
 			return typeof cropSize == "undefined" || cropSize.x || cropSize.y || cropSize.x2 || cropSize.y2 ? true : false;	
-		}
+		},
 		
-		t.cropDimensions = function(cropSize) {
+		reduce: function(numerator, denominator) {
+			var gcd = function gcd (a, b) {
+	            return (b == 0) ? a : gcd (b, a%b);
+	        }
+			
+			gcd = gcd(numerator,denominator);
+			
+			return [numerator/gcd, denominator/gcd];
+		},
+		
+		cropDimensions: function(cropSize) {
 			var defaultCropSize = {
 				w: 0,
 				h: 0,
@@ -414,26 +1075,26 @@ var PhotoFrame;
 				y2: 0
 			}
 				
-			if(!cropSize && t.jcrop.tellSelect) {
-				var cropSize = t.jcrop.tellSelect();
+			if(!cropSize && this.jcrop.tellSelect) {
+				var cropSize = this.jcrop.tellSelect();
 			}
 			else {
 				var cropSize = defaultCropSize;
 			}
 			
 			var image = {
-				w: t.ui.image.find('img').width(),
-				h: t.ui.image.find('img').height()
+				w: this.ui.cropPhoto.find('img').width(),
+				h: this.ui.cropPhoto.find('img').height()
 			};
 			
 			cropSize.w = cropSize.w == 0 ? image.w : cropSize.w;
 			cropSize.h = cropSize.h == 0 ? image.h : cropSize.h;
 			
-			if(!t.settings.aspectRatio) {
-				var aspect = t.reduce(Math.ceil(cropSize.w), Math.ceil(cropSize.h));
+			if(!this.settings.aspectRatio) {
+				var aspect = this.reduce(Math.ceil(cropSize.w), Math.ceil(cropSize.h));
 			}
 			else {
-				var aspect = t.settings.aspectRatioString.split(':');
+				var aspect = this.settings.aspectRatioString.split(':');
 				
 				if(typeof aspect[0] == "undefined") {
 					aspect[0] = 0;
@@ -443,27 +1104,27 @@ var PhotoFrame;
 					aspect[1] = 0;
 				}	
 				
-				if(!t.isCropped()) {
+				if(!t.isCropped(cropSize)) {
 					aspect = [cropSize.w, cropSize.h];	
 				}
 				
-				aspect = t.reduce(aspect[0], aspect[1]);
+				aspect = this.reduce(aspect[0], aspect[1]);
 			}
 			
-			if(!t.isCropped()) {
+			if(!this.isCropped(cropSize)) {
 				cropSize   = defaultCropSize;
 				cropSize.w = image.w;
 				cropSize.h = image.h;
 				
-				aspect = t.reduce(image.w, image.h);
+				aspect = this.reduce(image.w, image.h);
 			};
 			
 			cropSize.a = aspect;		
 			
 			return cropSize;
-		}
+		},
 		
-		t.aspectRatio = function(d) {
+		aspectRatio: function(d) {
 		    var df = 1, top = 1, bot = 1;
 		    var limit = 1e5; //Increase the limit to get more precision.
 		 
@@ -479,17 +1140,10 @@ var PhotoFrame;
 		    }
 		  
 		    return top + '/' + bot;
-		}
+		},
 		
-		t.round = function(number, place) {
-			if(!place) {
-				var place = 100;
-			}
-			
-			return Math.round(number * place) / place;
-		}
-		
-		t.validate = function(json) {
+		validate: function(json) {
+			var t = this;
 			
 			if(!json) {
 				var json = false;	
@@ -509,8 +1163,8 @@ var PhotoFrame;
 			var height      = cropSize.h;
 			var width       = cropSize.w;
 			var errors      = [];
-			var imgWidth    = Math.ceil(t.ui.image.find('img').width());
-			var imgHeight   = Math.ceil(t.ui.image.find('img').height());
+			var imgWidth    = Math.ceil(t.ui.cropPhoto.find('img').width());
+			var imgHeight   = Math.ceil(t.ui.cropPhoto.find('img').height());
 			
 			var response    = {
 				validWidth: true,
@@ -564,864 +1218,136 @@ var PhotoFrame;
 			}
 			
 			return errors;
-		}
-		
-		t.autoScale = function() {
-			var window = t.ui.window;
-			var img    = t.ui.image.find('img');
-			var scale  = 1;
-				
-			window = {
-				w: window.width(),
-				h: window.height()
-			};
-			
-			img = {
-				w: img.width(),
-				h: img.height()
-			};
-			
-			if(img.w < img.h) {
-				if(img.w > window.w) {
-					scale = window.w / img.w;		
-				}
-			}
-			else {
-				if(img.h > window.h) {
-					scale = window.h / img.h;
-				}
-			}
-			
-			if(scale != 1) {
-				t.ui.image.find('img').css({
-					width: img.w * scale,
-					height: img.h * scale,
-				});
-				
-				if(t.jcrop.destroy) {
-					t.jcrop.destroy();
-				}
-			}
-			
-			t.scale = scale;
-			
-			return scale;
-		}
-		
-		t.setScale = function(scale) {
-			if(scale) {
-				t.scale = scale;
-			}	
-				
-			if(t.scale != 1) {
-		        var img = t.ui.image.find('img');
-		        var w = parseInt(img.css('width').replace('px', ''));
-		        var h = parseInt(img.css('height').replace('px', ''));
-		        
-		        w = w * t.scale;
-		        h = h * t.scale;
-		        	            
-		        img.css({
-		           width: w,
-		           height: h 
-		        });
-		        
-		        $(window).resize();
-	        }
-		}
-		
-		t.getScale = function() {
-			return t.scale;
-		}
-		
-		t.notify = function(notifications, delay, animation) {
-			
-			var $panel   = $('.photo-frame-panel');
-			var messages = [];
-				
-			if(!delay) {
-				delay = 190;	
-			}
-			
-			if(!animation) {
-				animation = 300;
-			}
-			
-			function show() {
-				var html = $('<div class="photo-frame-panel" />');
-				
-				$.each(notifications, function(i, message) {
-					message = $([
-						'<div class="photo-frame-message">',
-							'<p><span class="icon-warning-sign"></span>'+message+'</p>',
-							'<a href="#" class="photo-frame-close"><span class="icon-cancel"></span></a>',
-						'</div>'
-					].join(''));
-					
-					messages.push(message);
-					html.append(message);
-				});
-				
-				$('body').append(html);
-			}
-			
-			if($panel.length == 1) {
-				$panel.fadeOut(function() {
-					$panel.remove();
-					t.notify(notifications, delay, animation);
-				});
-			}
-			else {
-				show();
-			}
-			
-			var loopDelay  = 0;
-			var closeDelay = 0;
-			
-			$.each(messages, function(i, message) {
-			
-				setTimeout(function() {
-					
-					$(message).animate({
-						right: 50
-					}, animation, function() {
-					
-						setTimeout(function() { 
-							$(message).animate({right: -t.messageWidth}, animation);
-						}, 5000 + closeDelay);
-						
-						closeDelay = (delay*(i+1));
-					});
-					
-				}, loopDelay);
-				
-				loopDelay = (delay*(i+1));
-			});
-			
-			$('.photo-frame-message .photo-frame-close').click(function() {
-				$(this).parent().fadeOut('fast');
-			});
-			
-			return notifications;
-		}
-		
-		t.showError = function(error) {
-			t.hideProgress(function() {
-				t.ui.errors.find('ul').append('<li>'+error+'</li>');
-				t.ui.errors.show();
-				t.ui.errors.center();
-				t.ui.dimmer.fadeIn();
-				t.progressBar.setProgress(0);
-			});
-		};
-		
-		t.showErrors = function(errors) {
-			t.ui.errors.find('ul').html('');
-			t.ui.errors.hide();
-			t.ui.activity.hide();
-			t.ui.crop.hide();
-			
-			$.each(errors, function(i, error) {
-				t.showError(error);
-			});
-		};
+		}	
+	});
 	
-		t.callback = function(data, existingAsset) {
-			t.response = data;
-			
-			t.ui.toolbar.hide();
-			
-			if(t.response.success) {
-				if(!existingAsset) {
-					t.$wrapper.append('<textarea name="'+t.options.fieldName+'[][uploaded]" style="display:none">{"field_id": "'+t.options.fieldId+'", "col_id": "'+t.options.colId+'", "row_id": "'+t.options.rowId+'", "path": "'+t.response.file_path+'", "original_path": "'+t.response.original_path+'", "file": "'+t.response.file_name+'"}</textarea>');
-				}
-				
-				t.stopUpload(data);
-			}
-			else {
-				t.showErrors(t.response.errors);	
-			}
-		}
+	PhotoFrame.ProgressBar = PhotoFrame.Class.extend({
 		
-		t.getResponse = function(file, callback) {
-			$.get(t.options.responseUrl, 
-				{
-					field_id: t.options.fieldId, 
-					col_id: t.options.colId,
-					file: file
-				}, function(response) {
-					if(typeof callback == "function") {
-						callback(response);
-					}
-				}
-			);
-		}
-		
-		t.isAssetsInstalled = function() {
-			if(typeof Assets == "object" && t.useAssets) {
-				return true;
-			}
-			
-			return false;
-		}
-		
-		t.init = function(settings) {
-		
-			if(t.isAssetsInstalled()) {
-				t.assetSheet = new Assets.Sheet({
-				    multiSelect: true,
-				    filedirs: [t.dirId],
-				    kinds: ['image'],
-				    onSelect: function(files) {
-				    	t.edit = false;
-				    	
-				    	if(files.length == 1) {
-					    	t.getResponse(files[0].url, function(response) {
-					    		t.callback(response, true);
-					    	});
-				    	}
-				    	else {
-				    		t.startUpload(function() {
-				    			t.showProgress(0, function() {
-						    		var count = 1;
-						    		
-							    	$.each(files, function(i, file) {
-								    	t.getResponse(file.url, function(response) {
-								    		var progress = parseInt(count / files.length * 100);
-								    		
-								    		t.showProgress(progress);
-									    	t.saveResponse(response);
-								    		
-								    		count++;
-								    	});
-							    	});
-				    			});
-				    		});
-				    		
-				    	}
-				    }
-				});
-			}
-			
-			t.ui.browse.click(function() {
-				if(t.isAssetsInstalled()) {
-					t.assetSheet.show();
-				}
-			});
-			
-			if(!t.isAssetsInstalled()) {
-				if(!t.options.safecracker) {
-					$.ee_filebrowser.add_trigger(t.ui.browse, t.directory.id, {
-						content_type: 'images',
-						directory:    t.directory.id,
-					}, function(file, field){
-				    	t.getResponse(file.rel_path, function(response) {
-				    		t.showErrors(response.errors);			    		
-				    		t.callback(response, true);
-				    	});
-					});
-				}
-			}
-			
-			t.$wrapper.bind('dragover', function(e) {
-				var obj 	= t.$wrapper.find('.photo-frame-drop-text');
-				var parent  = obj.parent();
+		/**
+		 * The wrapping DOM object.
+		 */		
+		 
+		$wrapper: false,
 				
-				obj.position({
-					of: parent,
-					my: 'center',
-					at: 'center'
-				});
+		/**
+		 * An object of UI elements.
+		 */		
+		 
+		ui: {},
 				
-				t.$wrapper.addClass('photo-frame-dragging');
-												
-				e.preventDefault();
-			});
-			
-			t.$wrapper.find('.photo-frame-drop-cover').bind('drop dragleave', function(e) {
-				
-				if(!$(e.target).hasClass('photo-frame-drop-text')) {				
-					t.$wrapper.removeClass('photo-frame-dragging');
-				}
-				
-				e.preventDefault();
-			});
-			
-			var html = [
-				'<form id="photo-frame-upload" class="photo-frame-form photo-frame-wrapper" action="'+t.options.url+(t.IE() ? '&ie=true' : '')+'" method="POST" enctype="multipart/form-data" id="photo-frame-upload-'+t.index+'" '+(t.IE() ? 'target="photo-frame-iframe-'+t.index+'"' : '')+'>',
-					'<h3>Select a file to upload...</h3>',
-					'<input type="file" name="files[]" multiple>',
-					'<button type="submit" class="photo-frame-button"><span class="icon-upload"></span>'+t.options.buttonText+'</button>',
-				'</form>'
-			].join('');
-			
-			t.ui.form = $(html);
-			
-			t.ui.form.submit(function() {
-				if(t.IE()) {
-					t.startUpload();
-				}
-			});
-			
-			t.ui.body.append(t.ui.form);
-			t.ui.window = $(window);
-			
-			var html = [
-				'<div class="photo-frame-dimmer" id="photo-frame-dimmer-"'+t.options.index+'">',
-					'<a href="#" class="photo-frame-meta-toggle"><span class="icon-info"></span></a>',
-					'<div class="photo-frame-info-panel">',
-						'<a href="#" class="photo-frame-close"><span class="icon-cancel"></span></a>',
-						'<p class="size">W: <span class="width"></span> H: <span class="height"></span></p>',
-						'<div class="coords">',
-							'<p>',
-								'<label><b>X</b>: <span class="x"></span></label>',
-								'<label><b>Y</b>: <span class="y"></span></label>',
-							'</p>',
-							'<p>',
-								'<label><b>X2</b>: <span class="x2"></span></label>',
-								'<label><b>Y2</b>: <span class="y2"></span></label>',
-							'</p>',
-						'</div>',
-						'<p class="aspect"></p>',
-					'</div>',
-					'<div class="photo-frame-activity">',
-						'<span class="photo-frame-indicator"></span> <p>Uploading...</p>',
-						'<a class="photo-frame-button photo-frame-cancel"><span class="icon-cancel"></span> Cancel</a>',
-					'</div>',
-					'<div class="photo-frame-progress"></div>',
-					'<div class="photo-frame-errors">',
-						'<h3>Errors</h3>',
-						'<ul></ul>',
-						'<a class="photo-frame-button photo-frame-cancel"><span class="icon-cancel"></span> Close</a>',
-					'</div>',
-					'<div class="photo-frame-crop">',
-						'<div class="photo-frame-image"></div>',
-						'<div class="photo-frame-meta">',
-							'<a href="#" class="photo-frame-close-meta photo-frame-float-right"><span class="icon-cancel"></span></a>',
-							'<h3>Photo Details</h3>',
-							'<ul>',
-								'<li>',
-									'<label for="title">Title</label>',
-									'<input type="text" name="title" value="'+t.description+'" id="title" />',
-								'</li>',
-								'<!-- <li>',
-									'<label for="keywords">Keywords</label>',
-									'<input type="text" name="keywords" value="'+t.keywords+'" id="keywords" />',
-								'</li> -->',
-								'<li>',
-									'<label for="title">Description</label>',
-									'<textarea name="description" id="description">'+t.description+'</textarea>',
-								'</li>',
-							'</ul>',
-						'</div>',
-						'<div class="photo-frame-toolbar">',
-							'<a class="photo-frame-bar-button photo-frame-cancel photo-frame-float-left"><span class="icon-cancel"></span> Cancel</a>',
-							'<a class="photo-frame-bar-button photo-frame-save photo-frame-float-right"><span class="icon-save"></span> Save</a>',
-						'</div>',
-					'</div>',
-				'</div>'
-			].join('');
-			
-			t.ui.dimmer  = $(html);
-			t.ui.toolbar = t.ui.dimmer.find('.photo-frame-toolbar');
-			t.ui.toolbar.hide();
-			
-			t.ui.body.append(t.ui.dimmer);
+		/**
+		 * The progress percentage.
+		 */		
+		 
+		progress: 0,				
 		
-			if(t.options.infoPanel) {
-				t.ui.info = t.ui.dimmer.find('.photo-frame-info-panel');
-				t.ui.info.draggable();
-				t.ui.info.find('.photo-frame-close').click(function(e) {			
-					t.ui.info.fadeOut();
-					e.preventDefault();
-				});
-			}
+		/**
+		 * Constructor to set the options and UI events.
+		 *
+		 * @param object  The wrapper object
+		 * @param object  An array of options to be set
+		 */	
+		 
+		constructor: function(obj, progress, options) {	
+			var t = this;
 					
-			t.ui.activity = t.ui.dimmer.find('.photo-frame-activity');
-			t.ui.activity.find('.photo-frame-indicator').activity({color: '#fff'});
+			t.$wrapper = $(obj);
+						
+			if(typeof progress == "object") {
+				options  = progress;
+				progress = 0;
+			}
 			
-			t.ui.progress   = t.ui.dimmer.find('.photo-frame-progress');
-			t.ui.save       = t.ui.dimmer.find('.photo-frame-save');
-			t.ui.cancel     = t.ui.dimmer.find('.photo-frame-cancel');
-			t.ui.errors     = t.ui.dimmer.find('.photo-frame-errors');
-			t.ui.crop       = t.ui.dimmer.find('.photo-frame-crop');
-			t.ui.image      = t.ui.dimmer.find('.photo-frame-image');
-			t.ui.meta       = t.ui.dimmer.find('.photo-frame-meta');
-			t.ui.metaToggle = t.ui.dimmer.find('.photo-frame-meta-toggle');
-			t.ui.metaClose  = t.ui.dimmer.find('.photo-frame-close-meta');
-			t.ui.dropZone   = t.$wrapper.find('.photo-frame-drop-zone');
+			if(typeof progress == "undefined") {
+				var progress = 0;
+			}
 			
-			t.progressBar   = new PhotoFrame.progress(t.ui.progress, {
+			if(typeof options == "undefined") {
+				var options = {};
+			}
+
+			var _default = {
 				callbacks: {
-					cancel: function() {
-						if(t.jqXHR) {
-							t.jqXHR.abort();
-						}
-						
-						t.ui.dimmer.fadeOut();
-						t.resetProgress();
-					}
-				}
-			});
+					init: function() {},
+					cancel: function() {},
+					onProgress: function() {},	
+					hide: function() {},	
+					show: function() {},	
+					reset: function() {},	
+				},
+				duration: 333,
+				classes: {
+					progress: 'photo-frame-progress-fill',
+					cancel: 'photo-frame-progress-cancel',
+					wrapper: 'photo-frame-progress-wrapper'
+				}	
+			};
 			
-			if(!t.IE()) {
-				t.ui.form.fileupload({
-					//url: '/live/home/index',
-					started: function() {
-						t.ui.dropZone.hide();
-						t.showProgress(0);
-					},
-					progress: function(e, data) {
-						var progress = parseInt(data.loaded / data.total * 100);
-						
-						t.showProgress(progress);
-					},
-					singleFileUploads: false,
-					dropZone: t.ui.dropZone,
-					url: t.options.url,
-					add: function (e, data) {
-						t.initialized = false;	
-						
-						t.startUpload(data.files, function() {
-							t.showProgress(0);
-							
-							t.jqXHR = data.submit();
-						});
-					},
-					fail: function (e, data) {
-						t.showErrors(['An unexpected error has occurred. Please try again.']);	
-					},
-					done: function (e, data) {
-						var errors = [];
-						
-						if(typeof data.result[0] == "undefined") {							
-							errors = ['An unexpected error has occurred. Please try again.'];
-						}	
-						
-						if(typeof data.result == "object" && data.result.length == 1) {
-							t.hideProgress(function() {	
-								t.callback(data.result[0]);
-							});
-						}
-						else {
-							
-							if(typeof data.result[0].success != "undefined") {
-								$.each(data.result, function(i, response) {
-									t.saveResponse(response);
-								});
-							}
-							else {
-								t.hideProgress();
-								t.showErrors(errors);
-							}
-						}
-					}
-		    	});
-	    	}
-	    	else {
-		    	t.ui.iframe = $('<iframe name="photo-frame-iframe-'+t.index+'" id="photo-frame-iframe-'+t.index+'" src="#" style="display:none;width:0;height:0"></iframe>');
-		    	t.ui.body.append(t.ui.iframe);
-	    	}
-	    	 
-	    	t.saveResponse = function(response) {
-		    	if(response.success) {
-					var size = {
-		    			x: 0,
-		    			y: 0,
-		    			x2: 0,
-		    			y2: 0,
-		    			w: 0,
-		    			h: 0
-		    		};
-		    		
-					$.get(t.options.cropUrl, {
-						id: t.directory.id,
-						photo_id: 0,
-						image: response.file_path,
-						name: response.file_name,
-						directory: t.directory.server_path,
-						original: response.original_path,
-						original_file: response.original_file,
-						url: response.file_url,
-						edit: false,
-						height: size.h,
-						width: size.w,
-						scale: t.scale,
-						rotate: t.rotate,
-						resize: t.resize,
-						resizeMax: t.resizeMax,
-						x: size.x,
-						x2: size.x2,
-						y: size.y,
-						y2: size.y2,
-						title: '',
-						description: '',
-						keywords: '',
-						compression: t.compression,
-					}, function(data) {
-						t.save(data, false);
-					});
-				}
-				else {
-					t.showErrors(response.errors);
-				}
-	    	}	
-	    	
-	    	t.ui.metaToggle.click(function(e) {
-		    	t.toggleMeta();	    		    	
-		    	e.preventDefault();
-	    	});
-	    	
-	    	t.ui.metaClose.click(function(e) {
-	    		t.hideMeta();
-		    	e.preventDefault();
-	    	});
-	    	
-	    	t.ui.save.click(function() {
-	    		if(t.options.showMeta && t.ui.meta.css('display') == 'none') {
-	    			var errors = t.validate();
-	    		
-	    			if(errors.length == 0) {
-			    		t.showMeta();
-			    	}
-			    	else {
-				    	t.notify(errors);
-			    	}
-		    	}
-		    	else {
-		    		var _default = {
-		    			x: 0,
-		    			y: 0,
-		    			x2: 0,
-		    			y2: 0,
-		    			w: 0,
-		    			h: 0
-		    		};
-		    		
-		    		var size = t.released ? _default : t.jcrop.tellScaled();
-		    		
-		    		t.hideMeta();
-			    	t.cropImage(t.response.file_path, size);
-		    	}
-	    	});
-	    	
-			t.ui.upload.click(function(e) {
-				t.isNewPhoto = true;
-				
-				if(!t.IE()) {
-					// All this extra code is there to support older versions of Chrome and 
-					// Safari. File inputs cannot be triggered if the form or field is hidden.
-					// This is best hack I could find at the time. - 1/9/2013
-					
-					t.ui.form.css({
-						position: 'absolute',
-						left: -1000	
-					}).show();
-					
-					t.ui.form.find('input').show().click();
-				}
-				else {
-					t.ui.dimmer.show();
-					t.ui.crop.hide();
-					
-					if(t.ui.instructions) {
-						t.ui.instructions.hide();
-					}
-					
-					//t.ui.image.hide();
-					t.ui.form.show().center();
-				}
-				
-				t.resetMeta();			
-				e.preventDefault();
-			});
+			t.ui = {
+				obj: t.$wrapper,
+				parent: t.$wrapper.parent(),
+				fill: t.$wrapper.find	
+			};
 			
-			t.ui.cancel.click(function(e) {			
-				t.closeMessages();			
-				t.ui.dimmer.fadeOut('fast');	
-				t.hideMeta();
-				t.hideProgress();
-				e.preventDefault();
-			});
+			t.base(_default, options);
 			
-			$(window).resize(function() {
-				//t.autoScale();
-				
-				if(t.ui.crop.css('display') != 'none') {
-					t.ui.crop.center();
-				}
-				
-				if(t.ui.meta.css('display') != 'none') {
-					t.ui.meta.center();
-				}
-				
-				if(t.ui.saving) {
-					t.ui.saving.center();
-				}
-				
-				if(t.ui.errors.css('display') != 'none') {
-					t.ui.errors.center();
-				}
-			});
-			
-			t.ui.edit.live('click', function(e) {
-				var $t = $(this)
-				var id = $t.attr('href').replace('#', '');
-				
-				var photo = t.photos[id];
-				
-				t.response    = photo;
-				t.edit        = id;
-				t.edit_id	  = photo.id;
-				t.edit_index  = id;
-				t.isNewPhoto  = false;
-			
-				if($t.attr('data-new-entry') == 'true') {
-					t.isNewPhoto = true;
-				}
-				
-				t.stopUpload(photo, photo.original_url, function() {
-					if(photo.x != '0' || photo.y != '0' || photo.x2 != '0' || photo.y2 != '0') {
-						t.jcrop.setSelect([photo.x, photo.y, photo.x2, photo.y2]);
-					}
-				});
-					
-				e.preventDefault();
-			});
-				
-			t.ui.del.live('click', function(e) {
-				
-				var $t = $(this);
-				var id = $t.attr('href').replace('#', '');
-					
-				$t.parents('.photo-frame-photo').parent('li').remove();
-					
-				if($t.attr('data-new-entry') != 'true') {
-					t.$wrapper.append('<input type="hidden" name="photo_frame_delete_photos['+t.options.fieldId+'][]" value="'+id+'" />');
-				}
-				
-				$(this).parents('.photo-frame-photo').fadeOut(function() {
-					$(this).remove();
-					
-					if((t.options.maxPhotos > 0 && t.options.maxPhotos > t.getTotalPhotos()) || (t.options.minPhotos == 0 && t.options.maxPhotos == 0)) {
-						t.showUpload();
-					}
-					else {
-						t.hideUpload();
-					}									
-				});
-				
-				e.preventDefault();
-			});
-	
-			$(window).keyup(function(e) {
-				if (e.keyCode == 27) { 
-					t.ui.cancel.click();
-				} 
-			});
-				
-			t.sortable();
-		};
-		
-		t.sortable = function() {    	
-			if(t.options.sortable) {
-			    t.$wrapper.find('.photo-frame-sortable').sortable({
-	                placeholder: "photo-frame-sortable-placeholder"
-	            });
-	            
-	            t.$wrapper.find('.photo-frame-sortable').disableSelection();
-			}
-		}
-		
-		t.showUpload = function() {
-			t.ui.upload.show();
-			t.ui.browse.show();
-			t.ui.helper.show();	
-		}
-		
-		t.hideUpload = function() {
-			t.ui.upload.hide();
-			t.ui.browse.hide();
-			t.ui.helper.hide();	
-		}
-		
-		t.showCrop = function() {
-			t.ui.crop.fadeIn('fast');	
-		}
-		
-		t.hideCrop = function() {
-			t.ui.crop.fadeOut('fast');	
-		}
-		
-		t.showImage = function() {
-			t.ui.image.parent().fadeIn('fast');	
-		}
-		
-		t.hideImage = function() {
-			t.ui.image.parent().fadeOut('fast');	
-		}
-		
-		t.resetMeta = function() {
-			t.ui.meta.find('input[name="title"]').val('');
-	    	t.ui.meta.find('input[name="keywords"]').val('');
-	    	t.ui.meta.find('textarea').val('');  
-		}
-		
-		t.showMeta = function() {
-			t.ui.metaToggle.addClass('active');	
-			t.ui.meta.fadeIn('fast');
-			t.ui.meta.center();
-		}
-		
-		t.hideMeta = function() {	
-			t.ui.metaToggle.removeClass('active');	
-			t.ui.meta.fadeOut('fast');
-		}
-		
-		t.toggleMeta = function(image) {
-			if(t.ui.meta.css('display') == 'none') {
-				t.showMeta();
-				
-				if(image) {
-					t.hideImage();
-				}
-			}
-			else {
-				t.hideMeta();
-				
-				if(image) {
-					t.showImage();
-				}
-			}
-		}
-		
-		t.reduce = function(numerator,denominator){
-			var gcd = function gcd (a, b) {
-	            return (b == 0) ? a : gcd (b, a%b);
-	        }
-			
-			gcd = gcd(numerator,denominator);
-			
-			return [numerator/gcd, denominator/gcd];
-		};
-			
-		t.updateInfo = function() {
-			if(t.ui.info) {		
-				var crop = t.cropDimensions();		
-				var aspect = crop.a;
-				
-				t.ui.info.fadeIn();
-				t.ui.info.find('.size .width').html(Math.ceil(crop.w)+'px');
-				t.ui.info.find('.size .height').html(Math.ceil(crop.h)+'px');
-				t.ui.info.find('.aspect').html('('+aspect[0]+':'+aspect[1]+')');
-				t.ui.info.find('.x').html(Math.ceil(crop.x)+'px');
-				t.ui.info.find('.x2').html(Math.ceil(crop.x2)+'px');
-				t.ui.info.find('.y').html(Math.ceil(crop.y)+'px');
-				t.ui.info.find('.y2').html(Math.ceil(crop.y2)+'px');
-				
-				var errors = t.validate(true);
-				
-				t.ui.info.find('.width').removeClass('photo-frame-invalid');
-				t.ui.info.find('.height').removeClass('photo-frame-invalid');
-				t.ui.info.find('.aspect').removeClass('photo-frame-invalid');
-				
-				if(!errors.validWidth) {
-					t.ui.info.find('.width').addClass('photo-frame-invalid');
-				}
-				
-				if(!errors.validHeight) {
-					t.ui.info.find('.height').addClass('photo-frame-invalid');
-				}
-				
-				if(!errors.validRatio) {
-					t.ui.info.find('.aspect').addClass('photo-frame-invalid');
-				}
-			}
-		}
-		
-		t.init(t.settings, t.photos);
-				
-		PhotoFrame.instances.push(t);
-		
-		return t;
-	}
-	
-	PhotoFrame.progress = function(obj, progress, options) {
-		var t        = this;
-		var $obj     = $(obj);		
-		var _default = {
-			callbacks: {
-				init: function() {},
-				cancel: function() {},
-				onProgress: function() {},	
-				hide: function() {},	
-				show: function() {},	
-				reset: function() {},	
-			},
-			duration: 333,
-			classes: {
-				progress: 'photo-frame-progress-fill',
-				cancel: 'photo-frame-progress-cancel',
-				wrapper: 'photo-frame-progress-wrapper'
-			}	
-		};
-		
-		if(typeof progress == "object") {
-			options  = progress;
-			progress = 0;
-		}
-		
-		if(typeof progress == "undefined") {
-			var progress = 0;
-		}
-		
-		if(typeof options == "undefined") {
-			var options = {};
-		}
-		
-		t.progress = progress;
-		t.ui 	   = {
-			obj: $obj,
-			parent: $obj.parent(),
-			fill: $obj.find	
-		};
-		
-		t.options  = $.extend(true, _default, options);
-		
-		t.init = function() {
 			if(!t.ui.obj.data('init')) {
-				t.ui.fill    = $('<div class="'+t.options.classes.progress+'" />');
-				t.ui.cancel  = $('<a href="#" class="'+t.options.classes.cancel+'"><span class="icon-cancel"></span></a>');
+				t.ui.fill    = $('<div class="'+t.classes.progress+'" />');
+				t.ui.cancel  = $('<a href="#" class="'+t.classes.cancel+'"><span class="icon-cancel"></span></a>');
 				
-				t.ui.obj.wrap('<div class="'+t.options.classes.wrapper+'" />');
+				t.ui.obj.wrap('<div class="'+t.classes.wrapper+'" />');
 				t.ui.cancel.insertBefore(t.ui.obj);
 				t.ui.obj.append(t.ui.fill);
 				t.ui.obj.data('init', 'true');
 				
-				t.ui.wrapper = t.ui.obj.parent('.'+t.options.classes.wrapper);
+				t.ui.wrapper = t.ui.obj.parent('.'+t.classes.wrapper);
 				
 				t.ui.cancel.click(function(e) {	
 					
-					t.options.callbacks.cancel(t, e);
+					t.callbacks.cancel(t, e);
 					
 					t.hide(function() {
-						t.resetProgress(0);
+						t.reset(0);
 					});
 					
 					e.preventDefault();
 				});
 				
-				t.options.callbacks.init(t);
+				t.callbacks.init(t);
 					
-				t.setProgress(t.progress);
+				t.set(t.progress);
 			}
 			
 			$(window).resize(function() {
 				t.center();				
 			});
-		}
+		},
 		
-		t.setProgress = function(value, callback) {
+		/**
+		 * Reset the progress bar back to zero
+		 */	
+		 
+		reset: function(callback) {
+			var t = this;
+			
+			t.set(0, function() {				
+				t.callbacks.reset(t);
+				
+				if(typeof callback == "function") {
+					callback();
+				}
+			});
+		}, 
+		
+		/**
+		 * Set the progress bar to a defined value.
+		 *
+		 * @param object    The progress value
+		 * @param callback  A function to be used for a callback
+		 */	
+		 
+		set: function(value, callback) {
+			var t      = this;
 			var outer  = t.ui.obj.outerWidth();
 			var width  = outer && !isNaN(outer) && outer > 0 ? outer : t.ui.obj.width();
 
@@ -1430,56 +1356,46 @@ var PhotoFrame;
 			
 			t.ui.fill.css('width', t.progress);
 			
-			t.options.callbacks.onProgress(t, progress);
+			t.callbacks.onProgress(t, t.progress);
 			
 			setTimeout(function() {
 				if(typeof callback == "function") {
 					callback(t);
 				}
 			}, t.duration);
-		}
+		},
 		
-		t.getProgress = function() {
-			return t.progress;
-		}
+		/**
+		 * Get the progress bar value.
+		 *
+		 * @return int The amount of progress in the bar
+		 */	
+		 
+		get: function() {
+			return this.progress;
+		},
 		
-		t.resetProgress = function() {
-			t.options.callbacks.reset(t);
-			
-			t.setProgress(0);
-		}
-		
-		t.getOption = function(index) {
-			if(t.options[index]) {
-				return t.options[index];
-			}
-			
-			return false;
-		}
-		
-		t.setOption = function(index, value) {
-			t.options[index] = value;
-		}
-				
-		t.getOptions = function() {
-			return t.options;
-		}
-		
-		t.setOptions = function(options) {
-			$.each(options, function(option, value) {
-				t.setOption(option, value);
-			});
-		}
-		
-		t.center = function() {		
-			t.ui.wrapper.position({
-				of: t.ui.parent,
+		/**
+		 * Center the progress bar within the parent.
+		 */	
+		 
+		center: function() {		
+			this.ui.wrapper.position({
+				of: this.ui.parent,
 				my: 'center',
 				at: 'center'
 			});	
-		}
+		},
 		
-		t.show = function(duration, callback) {
+		/**
+		 * Show the progress bar.
+		 *
+		 * @param mixed  The animation duration.
+		 * @param mixed  The callback function.
+		 */	
+		 
+		show: function(duration, callback) {
+			var t = this;
 			
 			if(typeof duration == "function") {
 				callback = duration;
@@ -1487,11 +1403,11 @@ var PhotoFrame;
 			}
 			
 			if(typeof duration == "undefined") {
-				var duration = t.options.duration;
+				var duration = t.duration;
 			}
 			
 			t.ui.wrapper.fadeIn(duration, function() {
-				t.options.callbacks.show(t);
+				t.callbacks.show(t);
 			
 				if(typeof callback == "function") {
 					callback(t);
@@ -1499,9 +1415,17 @@ var PhotoFrame;
 			});
 			
 			t.center();
-		}
+		},
 		
-		t.hide = function(duration, callback) {
+		/**
+		 * Hide the progress bar.
+		 *
+		 * @param mixed  The animation duration.
+		 * @param mixed  The callback function.
+		 */	
+		 
+		hide: function(duration, callback) {
+			var t = this;
 			
 			if(typeof duration == "function") {
 				callback = duration;
@@ -1509,27 +1433,23 @@ var PhotoFrame;
 			}
 			
 			if(typeof duration == "undefined") {
-				var duration = t.options.duration;
+				var duration = t.duration;
 			}
 			
 			t.ui.wrapper.fadeOut(duration, function() {	
-				t.options.callbacks.hide(t);
+				t.callbacks.hide(t);
 				
 				if(typeof callback == "function") {
 					callback(t);
 				}				
 			});
 		}
-		
-		t.init();
-		
-		return t;
-	}
-		
+	});
+	
+	PhotoFrame.instances = [];
+	PhotoFrame.matrix = [];
+	
 }(jQuery));
-
-PhotoFrame.instances = [];
-PhotoFrame.matrix = [];
 
 /**
  * Get the current jQuery version and test is similar to version_compare();

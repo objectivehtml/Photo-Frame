@@ -290,8 +290,6 @@ class Photo_frame_lib {
 	
 	public function crop_action()
 	{
-		// var_dump(array_merge($_GET, $_POST));exit();
-		
 		$height     = $this->EE->input->get_post('height', TRUE);
 		$width      = $this->EE->input->get_post('width', TRUE);
 		$x          = $this->EE->input->get_post('x', TRUE);
