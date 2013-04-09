@@ -442,7 +442,8 @@ class Photo_frame_ft extends EE_Fieldtype {
 			buttonText: '.json_encode($button_text).',
 			resize: '.json_encode($resize).',
 			resizeMax: '.json_encode($resize_max).',
-			sortable: '.$settings['photo_frame_sortable'].'
+			sortable: '.$settings['photo_frame_sortable'].',
+			safecracker: '.($this->safecracker ? 'true' : 'false').'
 		}';
 
 		if($this->matrix)

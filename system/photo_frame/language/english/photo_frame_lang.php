@@ -23,7 +23,8 @@ $lang	= array(
 	'photo_frame_min_width'			    => 'The image must have a minimum width of {min_width}px',
 	'photo_frame_min_height'			=> 'The image must have a minimum height of {min_height}px',
 	
-	'photo_frame_upload_dir_not_exists' => 'The following directory does not exist: {directory}',
+	'photo_frame_upload_dir_not_exists'  => 'The following directory does not exist: {directory}',
+	'photo_frame_upload_file_not_exists' => 'The following file does not exist: {file}',
 	'photo_frame_max_size_exceeded' 	=> 'The photo you are trying to upload exceeds the maximum file size of {max_size}.',
 	
 	//--------------------------------------------

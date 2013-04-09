@@ -134,7 +134,22 @@ class Photo_frame_lib {
 		
 		if($response->exists)
 		{
-			copy($original_path, $framed_dir.$file_name);
+			if(file_exists($original_path))
+			{
+				copy($original_path, $framed_dir.$file_name);
+			}
+			else
+			{
+				$errors[] = $this->EE->photo_frame_lib->parse(array(
+					'file' => $original_path
+				), lang('photo_frame_upload_file_not_exists'));
+			}
+		}
+		else
+		{
+			$errors[] = $this->EE->photo_frame_lib->parse(array(
+				'directory' => $directory['server_path']
+			), lang('photo_frame_upload_dir_not_exists'));
 		}
 		
 		return $this->json(array(

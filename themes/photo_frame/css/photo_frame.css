@@ -374,6 +374,7 @@ a.photo-frame-progress-cancel {
 	width: 36%;
 	min-width: 300px;
 	display: none;
+	word-wrap: break-word;
 }
 .photo-frame-errors h3 {
 	font-size: 30px;

@@ -710,6 +710,7 @@ var PhotoFrame;
 				t.ui.errors.find('ul').append('<li>'+error+'</li>');
 				t.ui.errors.show();
 				t.ui.errors.center();
+				t.ui.dimmer.fadeIn();
 				t.progressBar.setProgress(0);
 			});
 		};
@@ -808,15 +809,18 @@ var PhotoFrame;
 				}
 			});
 			
-			if(!t.isAssetsInstalled()) {								
-				$.ee_filebrowser.add_trigger(t.ui.browse, id, {
-					content_type: 'images',
-					directory:    t.directory.id,
-				}, function(file, field){
-			    	t.getResponse(file.rel_path, function(response) {
-			    		t.callback(response, true);
-			    	});
-				});
+			if(!t.isAssetsInstalled()) {
+				if(!t.options.safecracker) {
+					$.ee_filebrowser.add_trigger(t.ui.browse, t.directory.id, {
+						content_type: 'images',
+						directory:    t.directory.id,
+					}, function(file, field){
+				    	t.getResponse(file.rel_path, function(response) {
+				    		t.showErrors(response.errors);			    		
+				    		t.callback(response, true);
+				    	});
+					});
+				}
 			}
 			
 			t.$wrapper.bind('dragover', function(e) {
