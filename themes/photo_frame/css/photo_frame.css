@@ -575,8 +575,10 @@ a.photo-frame-bar-button.photo-frame-cancel.photo-frame-float-left {
 	float: left;
 	border-right: 1px solid rgb(39, 39, 39);
 }
+
+p.photo-frame-helper,
 .photo-frame-helper {
-	margin-top: 10px;
+	margin: 10px 0 0 0;
 	font-size: 12px;
 }
 .photo-frame-instructions {

@@ -32,7 +32,7 @@
 		<a href="#" class="photo-frame-button photo-frame-upload photo-frame-margin-top" <?php if($overlimit):?>style="display:none"<?php endif; ?>><span class="icon-upload"></span> <?php echo $button_text?></a>
 	<?php endif; ?>
 	
-	<?php if($file_browser && !$safecracker): ?>
+	<?php if($file_browser && (!$safecracker || $assets)): ?>
 		<a href="#" class="photo-frame-button photo-frame-browse photo-frame-margin-top" <?php if($overlimit):?>style="display:none"<?php endif; ?>><span class="icon-search"></span> <?php echo $browse_button_text?></a>
 	<?php endif; ?>
 	

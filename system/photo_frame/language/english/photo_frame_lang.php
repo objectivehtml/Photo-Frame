@@ -15,8 +15,10 @@ $lang	= array(
 			
 	'photo_frame_interface_settings'	=> 'Interface Settings',
 	'photo_frame_resize_settings'		=> 'Resize Settings',
+	'photo_frame_general_settings'		=> 'General Settings',
 	'photo_frame_ignore_settings'		=> 'Any setting with an empty value will be ignored.',
 	'photo_frame_crop_settings'			=> 'Crop Settings',
+	'photo_frame_photo_settings'		=> 'Photo Settings',
 	
 	'photo_frame_invalid_format'        => 'The image is an invalid format. The image must be <i>gif</i>, <i>jpeg</i>, or a <i>png</i>.',
 	

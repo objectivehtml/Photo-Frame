@@ -1143,8 +1143,8 @@ class Photo_frame_ft extends EE_Fieldtype {
 				'type'        => 'select',
 				'settings' => array(
 					'options' => array(
+						'false' => 'False',
 						'true'  => 'True',
-						'false' => 'False'
 					)
 				)
 			),
@@ -1329,8 +1329,8 @@ class Photo_frame_ft extends EE_Fieldtype {
 				'type'        => 'select',
 				'settings' => array(
 					'options' => array(
+						'false' => 'False',
 						'true'  => 'True',
-						'false' => 'False'
 					)
 				)
 			),
@@ -1340,8 +1340,8 @@ class Photo_frame_ft extends EE_Fieldtype {
 				'type'        => 'select',
 				'settings' => array(
 					'options' => array(
+						'false' => 'False',
 						'true'  => 'True',
-						'false' => 'False'
 					)
 				)
 			),
