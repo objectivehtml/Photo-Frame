@@ -1,4 +1,4 @@
-<div class="photo-frame-wrapper <?php echo $theme?>" id="<?php echo $selector?>">
+<div class="photo-frame-wrapper photo-frame-icons <?php echo $theme?>" id="<?php echo $selector?>">
 	
 	<!--[if lt IE 10]> <div class="photo-frame-ie"> <![endif]-->
 	   

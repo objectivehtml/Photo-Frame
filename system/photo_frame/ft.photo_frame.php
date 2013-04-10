@@ -416,7 +416,7 @@ class Photo_frame_ft extends EE_Fieldtype {
 		
 		$instructions = empty($settings['photo_frame_instructions']) ? lang('photo_frame_instructions') : $settings['photo_frame_instructions'];
 		
-		$size = isset($settings['photo_frame_default_size']) && !empty($settings['photo_frame_default_size']) ? $settings['photo_frame_default_size'] : 'false';
+		$size = isset($settings['photo_frame_default_size']) && !empty($settings['photo_frame_default_size']) ? '\''.$settings['photo_frame_default_size'].'\'' : 'false';
 		
 		$resize 	= $this->EE->photo_frame_lib->build_size($settings, 'cropped');
 		$resize_max = $this->EE->photo_frame_lib->build_size($settings, 'cropped_max');
@@ -436,7 +436,7 @@ class Photo_frame_ft extends EE_Fieldtype {
 			directory: '.json_encode($directory).',
 			infoPanel: '.$settings['photo_frame_display_info'].',
 			instructions: '.json_encode($instructions).',
-			size: \''.$size.'\',
+			size: '.$size.',
 			minPhotos: '.(!empty($settings['photo_frame_min_photos']) ? $settings['photo_frame_min_photos'] : 0).',
 			maxPhotos: '.(!empty($settings['photo_frame_max_photos']) ? $settings['photo_frame_max_photos'] : 0).',
 			showMetaOnSave: '.($settings['photo_frame_display_meta'] == 'true' ? 'true' : 'false').',

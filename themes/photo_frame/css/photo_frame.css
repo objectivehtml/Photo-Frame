@@ -6,10 +6,8 @@
 	font-style: normal;
 }
 
-.photo-frame-wrapper [class^="icon-"]:before,  
-.photo-frame-wrapper [class*=" icon-"]:before,
-.photo-frame-dimmer  [class^="icon-"]:before,  
-.photo-frame-dimmer  [class*=" icon-"]:before {
+.photo-frame-icons [class^="icon-"]:before,  
+.photo-frame-icons [class*=" icon-"]:before {
 	font-family: 'photo-frame';
 	font-style: normal;
 	font-weight: normal;
@@ -18,45 +16,34 @@
 	text-decoration: inherit;
 }
 
-.photo-frame-dimmer .icon-info:before,
-.photo-frame-wrapper .icon-info:before {
+.photo-frame-icons .icon-info:before {
 	content: '\2139';
 } /* 'ℹ' */
-.icon-save:before,
-.photo-frame-wrapper .icon-save:before {
+.photo-frame-icons .icon-save:before {
 	content: '\2611';
 } /* '☑' */
-.photo-frame-dimmer .icon-edit:before,
-.photo-frame-wrapper .icon-edit:before {
+.photo-frame-icons .icon-edit:before {
 	content: '\270d';
 } /* '✍' */
-.photo-frame-dimmer .icon-cancel:before,
-.photo-frame-wrapper .icon-cancel:before {
+.photo-frame-icons .icon-cancel:before {
 	content: '\2715';
 } /* '✕' */
-.photo-frame-dimmer .icon-warning-sign:before,
-.photo-frame-wrapper .icon-warning-sign:before {
-	content: '\2757';
+.photo-frame-icons .icon-warning-sign:before {
+	 content: '\26a0';
 } /* '❗' */
-.photo-frame-dimmer .icon-rotate:before,
-.photo-frame-wrapper .icon-rotate:before {
+.photo-frame-icons .icon-rotate:before {
 	content: '\27f2';
 } /* '⟲' */
-.photo-frame-dimmer .icon-trash:before,
-.photo-frame-wrapper .icon-trash:before {
+.photo-frame-icons .icon-trash:before {
 	content: '\e801';
 } /* '' */
-.photo-frame-dimmer .icon-resize:before,
-.photo-frame-wrapper .icon-resize:before {
+.photo-frame-icons .icon-resize:before {
 	content: '\e744';
 } /* '' */
-.photo-frame-dimmer .icon-upload:before,
-.photo-frame-wrapper .icon-upload:before {
+.photo-frame-icons .icon-upload:before {
 	content: '\e800';
 } /* '' */
-
-.photo-frame-dimmer .icon-search:before,
-.photo-frame-wrapper .icon-search:before {
+.photo-frame-icons .icon-search:before {
 	content: '\1f50d';
 } /* '' */
 
