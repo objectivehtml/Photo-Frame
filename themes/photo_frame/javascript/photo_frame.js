@@ -878,6 +878,8 @@ var PhotoFrame = function() {};
 			this.ui.errors.hide();
 			this.progressBar.show();
 			this.progressBar.set(progress, callback);
+			this.hideMeta();
+			this.hideInfo();
 		},
 				
 		toggleMeta: function() {
@@ -888,6 +890,19 @@ var PhotoFrame = function() {};
 				this.hideMeta();
 			}
 		},
+		
+		hideInfo: function(callback) {
+			if(this.ui.info) {
+				this.ui.info.hide(callback);
+			}
+		},
+		
+		showInfo: function(callback) {
+			if(this.ui.info) {
+				this.ui.info.fadeIn
+				(callback);
+			}
+		}
 		
 	});
 	
@@ -1311,6 +1326,8 @@ var PhotoFrame = function() {};
 			
 			t.load(t.originalUrl, function(img) {
 			
+				t.factory.hideProgress();
+				
 				t.ui.cropPhoto = $('<div class="'+t.factory.classes.cropPhoto+'"></div>');
 				t.factory.ui.cropPhoto = t.ui.cropPhoto;
 	        	t.ui.instructions = $('<div class="" />').html(PhotoFrame.Lang.instructions);	
@@ -1358,8 +1375,10 @@ var PhotoFrame = function() {};
 	        	if(t.description) {
 	        		t.factory.ui.metaDescription.val(t.description);
 	        	}
-
-	            t.initJcrop(callback);	
+	        	
+	            t.initJcrop(callback);
+	            
+	            $(window).resize();	
 			});
 			
 			t.factory.ui.save.unbind('click').bind('click', function(e) {
@@ -1381,10 +1400,12 @@ var PhotoFrame = function() {};
 			});
 			
 			t.factory.ui.cancel.unbind('click').bind('click', function(e) {
-				t.clearNotices();			
-				t.factory.ui.dimmer.fadeOut('fast');	
+				t.clearNotices();				
 				t.hideMeta();
 				t.hideProgress();
+				
+				t.factory.hideDimmer();
+				t.factory.resetProgress();
 				
 				if(t.factory.cropPhoto) {
 					t.factory.cropPhoto.destroyJcrop();	
