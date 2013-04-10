@@ -5,6 +5,16 @@ var PhotoFrame = function() {};
 	PhotoFrame.Class = Base.extend({
 		
 		/**
+		 * Build Date
+		 */
+		buildDate: '2013-04-10',
+		
+		/**
+		 * Version
+		 */
+		version: '.950',
+		
+		/**
 		 * Sets the default options
 		 *
 		 * @param	object 	The default options
@@ -78,6 +88,7 @@ var PhotoFrame = function() {};
 		classes: {
 			actionBar: 'photo-frame-action-bar',
 			activity: 'photo-frame-activity',
+			aspect: 'aspect',
 			barButton: 'photo-frame-bar-button',
 			browse: 'photo-frame-browse',
 			button: 'photo-frame-button',
@@ -87,13 +98,20 @@ var PhotoFrame = function() {};
 			cropPhoto: 'photo-frame-crop-photo',
 			editPhoto: 'photo-frame-edit',
 			deletePhoto: 'photo-frame-delete',
+			dimmer: 'photo-frame-dimmer',
+			dragging: 'photo-frame-dragging',
+			dropCover: 'photo-frame-drop-cover',
+			dropText: 'photo-frame-drop-text',
 			dropZone: 'photo-frame-drop-zone',
 			errors: 'photo-frame-errors',
 			form: 'photo-frame-form',
 			floatLeft: 'photo-frame-float-left',
 			floatRight: 'photo-frame-float-right',
 			helper: 'photo-frame-helper',
+			invalid: 'photo-frame-invalid',
+			id: 'photo-frame-ie',
 			indicator: 'photo-frame-indicator',
+			instructions: 'photo-frame-instructions',
 			infoPanel: 'photo-frame-info-panel',
 			jcropTracker: 'jcrop-tracker',
 			jcropHolder: 'jcrop-holder',
@@ -104,7 +122,10 @@ var PhotoFrame = function() {};
 			progress: 'photo-frame-progress',
 			preview: 'photo-frame-preview',
 			save: 'photo-frame-save',
-			sortable: 'photo-frame-sortable-placeholder',
+			saving: 'photo-frame-saving',
+			size: 'size',
+			sortable: 'photo-frame-sortable',
+			sortablePlaceholder: 'photo-frame-sortable-placeholder',
 			toolbar: 'photo-frame-toolbar',
 			upload: 'photo-frame-upload',
 			wrapper: 'photo-frame-wrapper'
@@ -123,7 +144,8 @@ var PhotoFrame = function() {};
 			cancel: 'icon-cancel',
 			editPhoto: 'icon-edit',
 			deletePhoto: 'icon-trash',
-			info: 'icon-info'
+			info: 'icon-info',
+			save: 'icon-save'
 		},	
 		 
 		/**
@@ -159,29 +181,27 @@ var PhotoFrame = function() {};
 		 
 		constructor: function(obj, options) {
 			
-			// Use this property to access "this" within jQuery events
-			var t = this;
-				
+			var t      = this;
+			var photos = options.photos;
+			
+			delete options.photos;
+			
 			t.$wrapper = $(obj);
 			t.sortable();	
 			t.base(options);	
+			t.photos = [];
 			
 			t.ui = {
 				body: $('body'),
 				browse: t.$wrapper.find('.'+t.classes.browse),
 				upload: t.$wrapper.find('.'+t.classes.upload),
 				form: $('#'+t.classes.upload),
-				dimmer: $('.photo-frame-dimmer'),
+				dimmer: $('.'+t.classes.dimmer),
 				activity: $('.'+t.classes.activity),
 				preview: t.$wrapper.find('.'+t.classes.preview),
 				//del: t.$wrapper.find('.photo-frame-delete'),
 				//edit: t.$wrapper.find('.photo-frame-edit'),
 				helper: t.$wrapper.find('.'+t.classes.helper)
-			}
-			
-			for(x in t.photos) {
-				var data  = t.photos[x];
-				var photo = t.$wrapper.find('.'+t.classes.photo);
 			}
 			
 			var html = [
@@ -204,11 +224,11 @@ var PhotoFrame = function() {};
 			t.ui.window = $(window);
 			
 			var html = [
-				'<div class="photo-frame-dimmer">',
+				'<div class="'+t.classes.dimmer+'">',
 					'<a href="#" class="'+t.classes.metaToggle+'"><span class="'+t.icons.info+'"></span></a>',
 					'<div class="'+t.classes.infoPanel+'">',
 						'<a href="#" class="'+t.classes.close+'"><span class="'+t.icons.cancel+'"></span></a>',
-						'<p class="size">W: <span class="width"></span> H: <span class="height"></span></p>',
+						'<p class="'+t.classes.size+'">W: <span class="width"></span> H: <span class="height"></span></p>',
 						'<div class="coords">',
 							'<p>',
 								'<label><b>X</b>: <span class="x"></span></label>',
@@ -219,7 +239,7 @@ var PhotoFrame = function() {};
 								'<label><b>Y2</b>: <span class="y2"></span></label>',
 							'</p>',
 						'</div>',
-						'<p class="aspect"></p>',
+						'<p class="'+t.classes.aspect+'"></p>',
 					'</div>',
 					'<div class="'+t.classes.activity+'">',
 						'<span class="'+t.classes.indicator+'"></span> <p>Uploading...</p>',
@@ -252,8 +272,8 @@ var PhotoFrame = function() {};
 							'</ul>',
 						'</div>',
 						'<div class="'+t.classes.toolbar+'">',
-							'<a class="'+t.classes.barButton+' '+t.classes.cancel+' '+t.classes.floatLeft+'"><span class="icon-cancel"></span> Cancel</a>',
-							'<a class="'+t.classes.barButton+' '+t.classes.save+' '+t.classes.floatRight+'"><span class="icon-save"></span> Save</a>',
+							'<a class="'+t.classes.barButton+' '+t.classes.cancel+' '+t.classes.floatLeft+'"><span class="'+t.icons.cancel+'"></span> Cancel</a>',
+							'<a class="'+t.classes.barButton+' '+t.classes.save+' '+t.classes.floatRight+'"><span class="'+t.icons.save+'"></span> Save</a>',
 						'</div>',
 					'</div>',
 				'</div>'
@@ -267,7 +287,7 @@ var PhotoFrame = function() {};
 			if(t.infoPanel) {
 				t.ui.info = t.ui.dimmer.find('.'+t.classes.infoPanel);
 				t.ui.info.draggable();
-				t.ui.info.find('.photo-frame-close').click(function(e) {			
+				t.ui.info.find('.'+t.classes.close).click(function(e) {			
 					t.ui.info.fadeOut();
 					e.preventDefault();
 				});
@@ -381,8 +401,8 @@ var PhotoFrame = function() {};
 		    	t.ui.body.append(t.ui.iframe);
 	    	}
 	    	
-	    	for(x in t.photos) {
-		    	var photo = t.photos[x];
+	    	for(x in photos) {
+		    	var photo = photos[x];
 		    	
 		    	new PhotoFrame.Photo(t, photo, {
 		    		id: photo.id,
@@ -468,7 +488,7 @@ var PhotoFrame = function() {};
 			}
 			
 			t.$wrapper.bind('dragover', function(e) {
-				var obj 	= t.$wrapper.find('.photo-frame-drop-text');
+				var obj 	= t.$wrapper.find('.'+t.classes.dropText);
 				var parent  = obj.parent();
 				
 				obj.position({
@@ -477,15 +497,15 @@ var PhotoFrame = function() {};
 					at: 'center'
 				});
 				
-				t.$wrapper.addClass('photo-frame-dragging');
+				t.$wrapper.addClass(t.classes.dragging);
 												
 				e.preventDefault();
 			});
 			
-			t.$wrapper.find('.photo-frame-drop-cover').bind('drop dragleave', function(e) {
+			t.$wrapper.find('.'+t.classes.dropCover).bind('drop dragleave', function(e) {
 				
-				if(!$(e.target).hasClass('photo-frame-drop-text')) {				
-					t.$wrapper.removeClass('photo-frame-dragging');
+				if(!$(e.target).hasClass(t.classes.dropTag)) {				
+					t.$wrapper.removeClass(t.classes.dragging);
 				}
 				
 				e.preventDefault();
@@ -551,8 +571,8 @@ var PhotoFrame = function() {};
 		
 		sortable: function() {    	
 			if(this.sortable) {
-			    this.ui.list = this.$wrapper.find('.photo-frame-sortable');
-			    this.ui.list.sortable({placeholder:this.classes.sortable});
+			    this.ui.list = this.$wrapper.find('.'+this.classes.sortable);
+			    this.ui.list.sortable({placeholder:this.classes.sortablePlaceholder});
 	            this.ui.list.disableSelection();
 			}
 		},
@@ -564,7 +584,15 @@ var PhotoFrame = function() {};
 		},
 		
 		getTotalPhotos: function() {
-			return this.photos.length;	
+			var count = 0;
+			
+			$.each(this.photos, function(i, photo) {
+				if(photo) {
+					count++;
+				}	
+			});
+			
+			return count;	
 		},
 		
 		_assetResponseHandler: function(response, progress, callback) {
@@ -612,14 +640,16 @@ var PhotoFrame = function() {};
 				if(!existingAsset) {
 					this.$wrapper.append('<textarea name="'+this.fieldName+'[][uploaded]" style="display:none">{"field_id": "'+this.fieldId+'", "col_id": "'+this.colId+'", "row_id": "'+this.rowId+'", "path": "'+this.response.file_path+'", "original_path": "'+this.response.original_path+'", "file": "'+this.response.file_name+'"}</textarea>');
 				}
-			
-				var photo = new PhotoFrame.Photo(this, response, {
+				
+				var props = $.extend(true, {}, {
 					settings: this.settings,
 					compression: this.compression,
 					resize: this.resize,
 					resizeMax: this.resizeMax,
 					index: this.photos.length
 				});
+				
+				var photo = new PhotoFrame.Photo(this, response, props);
 				
 				if(!noCrop) {
 					this.hideProgress(function() {
@@ -643,7 +673,7 @@ var PhotoFrame = function() {};
 		 */		
 		 
 		IE: function() {
-			return this.$wrapper.children().hasClass('photo-frame-ie');
+			return this.$wrapper.children().hasClass(this.classes.ie);
 		},
 		
 		hideInstructions: function() {
@@ -754,6 +784,7 @@ var PhotoFrame = function() {};
 		 */		
 		showProgress: function(progress, callback) {
 			this.ui.dimmer.fadeIn();
+			this.ui.errors.hide();
 			this.progressBar.show();
 			this.progressBar.set(progress, callback);
 		},
@@ -993,6 +1024,8 @@ var PhotoFrame = function() {};
 			
 			t.ui.field.remove();
 			
+			console.log(t.id);
+			
 			if(t.id !== false) {
 				t.factory.$wrapper.append('<input type="hidden" name="photo_frame_delete_photos['+t.factory.fieldId+'][]" value="'+t.id+'" />');
 			}
@@ -1000,12 +1033,14 @@ var PhotoFrame = function() {};
 			t.ui.parent.fadeOut(function() {
 				t.ui.parent.remove();
 				
-				if((t.factory.maxPhotos > 0 && t.factory.maxPhotos > t.getTotalPhotos()) || (t.factory.minPhotos == 0 && t.factory.maxPhotos == 0)) {
+				if((t.factory.maxPhotos > 0 && t.factory.maxPhotos > t.factory.getTotalPhotos() - 1) || (t.factory.minPhotos == 0 && t.factory.maxPhotos == 0)) {
 					t.factory.showUpload();
 				}
 				else {
 					t.factory.hideUpload();
-				}									
+				}
+				
+				t.factory.photos[t.index] = false;								
 			});
 		},
 		
@@ -1037,10 +1072,13 @@ var PhotoFrame = function() {};
             
             t.settings.onRelease = function() {
 	            this.released = true;
+            	console.log('released', this.released);
+            	
             };
             
             t.settings.onSelect = function() {
 	            this.released = false;
+            	console.log('select', this.released);
             }
             
 			if(t.settings.setSelect) {
@@ -1135,20 +1173,20 @@ var PhotoFrame = function() {};
 				
 				var errors = t.validate(true);
 				
-				t.factory.ui.info.find('.width').removeClass('photo-frame-invalid');
-				t.factory.ui.info.find('.height').removeClass('photo-frame-invalid');
-				t.factory.ui.info.find('.aspect').removeClass('photo-frame-invalid');
+				t.factory.ui.info.find('.width').removeClass(t.factory.classes.invalid);
+				t.factory.ui.info.find('.height').removeClass(t.factory.classes.invalid);
+				t.factory.ui.info.find('.aspect').removeClass(t.factory.classes.invalid);
 				
 				if(!errors.validWidth) {
-					t.factory.ui.info.find('.width').addClass('photo-frame-invalid');
+					t.factory.ui.info.find('.width').addClass(t.factory.classes.invalid);
 				}
 				
 				if(!errors.validHeight) {
-					t.factory.ui.info.find('.height').addClass('photo-frame-invalid');
+					t.factory.ui.info.find('.height').addClass(t.factory.classes.invalid);
 				}
 				
 				if(!errors.validRatio) {
-					t.factory.ui.info.find('.aspect').addClass('photo-frame-invalid');
+					t.factory.ui.info.find('.aspect').addClass(t.factory.classes.invalid);
 				}
 			}	
 			
@@ -1185,13 +1223,13 @@ var PhotoFrame = function() {};
 			t.factory.resetMeta();
 			
 			t.load(t.originalUrl, function(img) {
-	        	
+			
 				t.ui.cropPhoto = $('<div class="'+t.factory.classes.cropPhoto+'"></div>');
 				t.factory.ui.cropPhoto = t.ui.cropPhoto;
-	        	t.ui.instructions = $('<div class="photo-frame-instructions" />').html(PhotoFrame.Lang.instructions);	
+	        	t.ui.instructions = $('<div class="" />').html(PhotoFrame.Lang.instructions);	
 	        	
 	        	if(t.factory.instructions && t.edit === false) {
-	        		t.factory.ui.instructions = $('<div class="photo-frame-instructions" />').html(t.factory.instructions);
+	        		t.factory.ui.instructions = $('<div class="'+t.factory.classes.instructions+'" />').html(t.factory.classes.instructions);
 	        		t.factory.ui.dimmer.append(t.factory.ui.instructions);
 	        	}
 	        	else {
@@ -1289,8 +1327,8 @@ var PhotoFrame = function() {};
 			}
 				
 			t.load(function(img) {
-				if(t.factory.maxPhotos > 0 && (t.factory.maxPhotos <= t.getTotalPhotos())) {
-					t.hideUpload();
+				if(t.factory.maxPhotos > 0 && (t.factory.maxPhotos <= t.factory.getTotalPhotos())) {
+					t.factory.hideUpload();
 				}	
 				
 				if(!edit) {					    
@@ -1358,9 +1396,9 @@ var PhotoFrame = function() {};
 			else {
 				t.clearNotices();
 				
-				t.ui.saving = $('<div class="photo-frame-saving"><span></span> Saving...</div>');
+				t.ui.saving = $('<div class="'+t.factory.classes.saving+'"><span></span> Saving...</div>');
 				t.factory.ui.dimmer.append(t.ui.saving);			
-				t.factory.ui.dimmer.find('.photo-frame-saving span').activity();			
+				t.factory.ui.dimmer.find('.'+t.factory.classes.saving+' span').activity();			
 				//t.ui.crop.fadeOut();
 				
 				if(t.ui.info) {
@@ -1394,7 +1432,26 @@ var PhotoFrame = function() {};
 				var response = this.response;
 			}
 			
-			var t    = this;		
+			var t = this;
+					
+			var _defaultSize = {
+    			 x: 0,
+    			 y: 0,
+    			x2: 0,
+    			y2: 0,
+    			 w: 0,
+    			 h: 0
+    		};
+    		
+    		var size = t.released ? _defaultSize : t.tellScaled();
+    		
+    		if(!size.w || !size.h) {
+    			size = _defaultSize;
+	    		delete t.settings.setSelect;
+    		}
+    		else {
+    			t.settings.setSelect = [size.x, size.y, size.x2, size.y2];
+    		}
     		
 			$.get(t.factory.cropUrl, {
 				id: t.factory.directory.id,
