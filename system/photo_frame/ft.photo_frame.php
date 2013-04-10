@@ -439,7 +439,7 @@ class Photo_frame_ft extends EE_Fieldtype {
 			size: \''.$size.'\',
 			minPhotos: '.(!empty($settings['photo_frame_min_photos']) ? $settings['photo_frame_min_photos'] : 0).',
 			maxPhotos: '.(!empty($settings['photo_frame_max_photos']) ? $settings['photo_frame_max_photos'] : 0).',
-			showMeta: '.($settings['photo_frame_display_meta'] == 'true' ? 'true' : 'false').',
+			showMetaOnSave: '.($settings['photo_frame_display_meta'] == 'true' ? 'true' : 'false').',
 			compression: '.(!empty($settings['photo_frame_jpeg_compression']) ? $settings['photo_frame_jpeg_compression'] : 100).',
 			buttonText: '.json_encode($button_text).',
 			resize: '.json_encode($resize).',

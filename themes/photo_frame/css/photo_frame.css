@@ -620,7 +620,8 @@ a.photo-frame-meta-toggle {
 	text-shadow: 0 0 1px black, 0 0 10px rgba(0, 0, 0, .7);
 	width: 1em;
 	height: 1em;
-	display: none; /* added by Brent */
+	z-index: 100;
+	display: none;
 }
 a.photo-frame-meta-toggle.active,  a.photo-frame-meta-toggle:hover {
 	color: rgb(47, 143, 216);

@@ -152,6 +152,16 @@ class Photo_frame_lib {
 			), lang('photo_frame_upload_dir_not_exists'));
 		}
 		
+		if(!$original_path)
+		{
+			$original_path = $directory['server_path'] . '/' . $file_name;
+		}
+		
+		if(!$original_url)
+		{
+			$original_url  = $directory['url'] . '/' . $file_name;
+		}
+		
 		return $this->json(array(
 			'success'            => count($errors) == 0 ? TRUE : FALSE,
 			'directory'          => $directory,
