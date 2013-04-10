@@ -452,6 +452,21 @@ var PhotoFrame = function() {};
 				});
 			}
 			
+			$(window).resize(function() {
+				if(t.ui.crop.css('display') != 'none') {
+					t.ui.crop.center();
+				}				
+				if(t.ui.meta.css('display') != 'none') {
+					t.ui.meta.center();
+				}				
+				if(t.ui.saving) {
+					t.ui.saving.center();
+				}				
+				if(t.ui.errors.css('display') != 'none') {
+					t.ui.errors.center();
+				}
+			});
+			
 	    	t.ui.metaToggle.click(function(e) {
 		    	t.toggleMeta();	    		    	
 		    	e.preventDefault();

@@ -451,6 +451,50 @@ a.photo-frame-bar-button.photo-frame-cancel.photo-frame-float-left {
 	margin-left: 40%
 }
 
+@media all and (max-width: 850px) {
+	a.photo-frame-bar-button.photo-frame-cancel.photo-frame-float-left {
+		margin-left: 38% 
+	}
+	a.photo-frame-bar-button.photo-frame-save.photo-frame-float-right {
+		margin-right: 38% 
+	}
+}
+
+@media all and (max-width: 750px) {
+	a.photo-frame-bar-button.photo-frame-cancel.photo-frame-float-left {
+		margin-left: 34% 
+	}
+	a.photo-frame-bar-button.photo-frame-save.photo-frame-float-right {
+		margin-right: 34% 
+	}
+}
+
+@media all and (max-width: 650px) {
+	a.photo-frame-bar-button.photo-frame-cancel.photo-frame-float-left {
+		margin-left: 32%; 
+	}
+	a.photo-frame-bar-button.photo-frame-save.photo-frame-float-right {
+		margin-right: 32%; 
+	}
+}
+
+@media all and (max-width: 550px) {
+	a.photo-frame-bar-button.photo-frame-cancel.photo-frame-float-left {
+		margin-left: 28%; 
+	}
+	a.photo-frame-bar-button.photo-frame-save.photo-frame-float-right {
+		margin-right: 28%; 
+	}
+}
+
+@media all and (max-width: 450px) {
+	a.photo-frame-bar-button.photo-frame-cancel.photo-frame-float-left {
+		margin-left: 25%;
+	}
+	a.photo-frame-bar-button.photo-frame-save.photo-frame-float-right {
+		margin-right: 25%;
+	}
+}
 
 .photo-frame-bar-button:active {
 	box-shadow: 0 0 5px rgba(0, 0, 0, .5) inset;
