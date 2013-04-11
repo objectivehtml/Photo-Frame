@@ -12,7 +12,7 @@ var PhotoFrame = function() {};
 		/**
 		 * Version
 		 */
-		version: '.950',
+		version: '0.9.5',
 		
 		/**
 		 * Sets the default options
