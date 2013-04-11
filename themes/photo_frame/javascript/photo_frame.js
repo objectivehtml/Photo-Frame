@@ -1548,9 +1548,10 @@ var PhotoFrame = function() {};
 				t.clearNotices();
 				
 				t.ui.saving = $('<div class="'+t.factory.classes.saving+'"><span></span> Saving...</div>');
+				
 				t.factory.ui.dimmer.append(t.ui.saving);			
 				t.factory.ui.dimmer.find('.'+t.factory.classes.saving+' span').activity();			
-				//t.ui.crop.fadeOut();
+				t.factory.ui.crop.fadeOut();
 				
 				if(t.ui.info) {
 					t.ui.info.fadeOut();
