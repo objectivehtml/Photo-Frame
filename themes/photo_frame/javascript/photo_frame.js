@@ -1642,7 +1642,7 @@ var PhotoFrame = function() {};
 			}
 			
 			if(!cropSize && this.jcrop.tellSelect) {
-				var cropSize = this.jcrop.tellSelect();
+				var cropSize = this.jcrop.tellScalled();
 			}
 			
 			if(this.factory.ui.dimmer.find('.jcrop-tracker').width() == 0) {
