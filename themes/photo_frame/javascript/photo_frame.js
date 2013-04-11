@@ -82,6 +82,12 @@ var PhotoFrame = function() {};
 	PhotoFrame.Factory = PhotoFrame.Class.extend({
 		
 		/**
+		 * Has user cancelled upload?
+		 */	
+		 
+		cancel: false,
+		
+		/**
 		 * The default CSS classes
 		 */		
 		
@@ -336,6 +342,8 @@ var PhotoFrame = function() {};
 			t.progressBar   = new PhotoFrame.ProgressBar(t.ui.progress, {
 				callbacks: {
 					cancel: function() {
+						t.cancel = true;
+						
 						if(t.jqXHR) {
 							t.jqXHR.abort();
 						}
@@ -363,21 +371,26 @@ var PhotoFrame = function() {};
 						t.showProgress(0);
 					},
 					progress: function(e, data) {
-						t.showProgress(parseInt(data.loaded / data.total * 100));
+						t.showProgress(parseInt(data.loaded / data.total * 100) * .75);
 					},
 					singleFileUploads: false,
 					dropZone: t.ui.dropZone,
 					url: t.url,
 					add: function (e, data) {
-						t.ui.dropZone.hide();
-						t.initialized = false;
-						t.showProgress(0);
-						t.startUpload(data.files, function() {
-							t.jqXHR = data.submit();
-						});
+						if(data.files.length > 0) {
+							t.ui.dropZone.hide();
+							t.initialized = false;
+							t.showProgress(0);
+							t.startUpload(data.files, function() {
+								t.jqXHR = data.submit();
+							});
+						}
 					},
 					fail: function (e, data) {
-						t.showErrors(['An unexpected error has occurred. Please try again.']);	
+						if(!t.cancel) {
+							t.showErrors(['An unexpected error has occurred. Please try again.']);	
+						}						
+						t.cancel = false;
 					},
 					done: function (e, data) {
 						var errors = [];
@@ -387,20 +400,22 @@ var PhotoFrame = function() {};
 						}	
 						
 						if(typeof data.result == "object" && data.result.length == 1) {
-							t.hideProgress(function() {
+							t.showProgress(100, function() {
 								t._uploadResponseHandler(data.result[0]);
 							});
 						}
 						else {
 							var count = 1;
 							if(typeof data.result[0].success != "undefined") {
-								$.each(data.result, function(i, result) {
-									t._uploadResponseHandler(result, true, true, function() {
-										if(count == data.result.length) {
-											t.hideProgress();
-											t.hideDimmer();
-										}
-										count++;
+								t.showProgress(100, function() {
+									$.each(data.result, function(i, result) {
+										t._uploadResponseHandler(result, true, true, function() {
+											if(count == data.result.length) {
+												t.hideProgress();
+												t.hideDimmer();
+											}
+											count++;
+										});
 									});
 								});
 							}
@@ -1447,6 +1462,7 @@ var PhotoFrame = function() {};
 				t.hideMeta();
 				t.hideProgress();
 				
+				t.factory.cancel = true;
 				t.factory.hideDimmer();
 				t.factory.resetProgress();
 				
