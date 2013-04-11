@@ -438,9 +438,9 @@ var PhotoFrame = function() {};
 		    	new PhotoFrame.Photo(t, photo, {
 		    		id: photo.id,
 		    		index: x,
-		    		settings: {
+		    		settings: $.extend(true, this.settings, {
 			    		setSelect: [photo.x, photo.y, photo.x2, photo.y2]	
-		    		},
+		    		}),
 			    	$wrapper: t.$wrapper.find('#'+t.classes.photo+'-'+t.fieldId+'-'+x)
 		    	});
 	    	}
