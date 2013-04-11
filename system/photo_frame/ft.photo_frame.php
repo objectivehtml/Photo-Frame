@@ -187,7 +187,9 @@ class Photo_frame_ft extends EE_Fieldtype {
 			'photo_frame_assets'			 => 'false',
 			'photo_frame_button_text'	     => '',
 			'photo_frame_browse_button_text' => '',
-			'photo_frame_drop_zone'			 => 'true'
+			'photo_frame_drop_zone'			 => 'true',
+			'photo_frame_force_crop'		 => 'true',
+			'photo_frame_disable_crop'	     => 'false'
 		);
 	
 		$settings = array_merge($default_settings, $this->settings);
@@ -445,7 +447,9 @@ class Photo_frame_ft extends EE_Fieldtype {
 			resize: '.json_encode($resize).',
 			resizeMax: '.json_encode($resize_max).',
 			sortable: '.$settings['photo_frame_sortable'].',
-			safecracker: '.($this->safecracker ? 'true' : 'false').' 
+			safecracker: '.($this->safecracker ? 'true' : 'false').',
+			forceCrop: '.$settings['photo_frame_force_crop'].',
+			disableCrop: '.$settings['photo_frame_disable_crop'].'
 		}';
 
 		if($this->matrix)
@@ -529,7 +533,8 @@ class Photo_frame_ft extends EE_Fieldtype {
 			'file_browser'	 => $settings['photo_frame_file_browser'] == 'true' ? TRUE : FALSE,
 			'file_upload'	 => $settings['photo_frame_file_upload'] == 'true' ? TRUE : FALSE,
 			'upload_helper'	 => $settings['photo_frame_upload_helper'],
-			'sortable'       => $settings['photo_frame_sortable'] == 'true' ? TRUE : FALSE
+			'sortable'       => $settings['photo_frame_sortable'] == 'true' ? TRUE : FALSE,
+			'disable_crop'   => $settings['photo_frame_disable_crop'] == 'true' ? TRUE : FALSE
 		);
 		
 		if($assets_installed && isset($settings['photo_frame_assets']) && $settings['photo_frame_assets'] == 'true')
@@ -1317,6 +1322,28 @@ class Photo_frame_ft extends EE_Fieldtype {
 					'options' => array(
 						'true'  => 'True',
 						'false' => 'False'
+					)
+				)
+			),
+			'photo_frame_force_crop' => array(
+				'label'       => 'Force Users to Crop Photos?',
+				'description' => 'If you want to force users to crop the photo, or at least always see the crop utility then set this to "True". If you set this to "False" then the photo will be uploaded and the user will have to edit the photo to crop it.',
+				'type'        => 'select',
+				'settings' => array(
+					'options' => array(
+						'true'  => 'True',
+						'false' => 'False'
+					)
+				)
+			),
+			'photo_frame_disable_crop' => array(
+				'label'       => 'Disable Photo Cropping?',
+				'description' => 'If "True", the user will have the ability to manually crop the photo. If you want to disable manual photo cropping set this to option to "False".',
+				'type'        => 'select',
+				'settings' => array(
+					'options' => array(
+						'false' => 'False',
+						'true'  => 'True'
 					)
 				)
 			),

@@ -140,6 +140,18 @@ var PhotoFrame = function() {};
 		cropPhoto: false,
 				 
 		/**
+		 * Force users to crop new photos?
+		 */		
+		 
+		forceCrop: true,
+		 
+		/**
+		 * Disable users from cropping photos?
+		 */		
+		 
+		disableCrop: false,
+		
+		/**
 		 * Icon Classes
 		 */		
 		 
@@ -347,7 +359,7 @@ var PhotoFrame = function() {};
 				t.ui.form.fileupload({
 					//url: '/live/home/index',
 					started: function() {
-						t.ui.dropZone.hide();
+						//t.ui.dropZone.hide();
 						t.showProgress(0);
 					},
 					progress: function(e, data) {
@@ -510,6 +522,10 @@ var PhotoFrame = function() {};
 				var obj 	= t.$wrapper.find('.'+t.classes.dropText);
 				var parent  = obj.parent();
 				
+				console.log('over');
+				
+				t.ui.dropZone.show();
+				
 				obj.position({
 					of: parent,
 					my: 'center',
@@ -584,6 +600,7 @@ var PhotoFrame = function() {};
 		},
 		
 		hideDimmer: function(callback) {
+			this.hideInstructions();
 			this.ui.dimmer.hide(callback);
 			this.progressBar.reset();
 		},
@@ -735,20 +752,30 @@ var PhotoFrame = function() {};
 					settings: this.settings,
 					compression: this.compression,
 					size: this.size,
+					forceCrop: this.forceCrop,
+					disableCrop: this.disableCrop,
 					//resize: this.resize,
 					//resizeMax: this.resizeMax,
-					index: this.photos.length
+					index: this.photos.length,
+					
 				});
 				
 				var photo = new PhotoFrame.Photo(this, response, props);
 				
-				if(!noCrop) {
+				if(!noCrop && photo.forceCrop && !photo.disableCrop) {
 					this.hideProgress(function() {
 						photo.startCrop();
 					});
 				}
 				else {
-					photo._loadFromResponse(response, callback);
+					photo._loadFromResponse(response, function() {
+						photo.factory.hideProgress(function() {
+							photo.factory.hideDimmer();
+							if(typeof callback == "function") {
+								callback();
+							}
+						});
+					});
 				}
 			}
 			else {
@@ -770,6 +797,7 @@ var PhotoFrame = function() {};
 		hideInstructions: function() {
 			if(this.ui.instructions) {
 				this.ui.instructions.hide();
+				this.ui.instructions.remove();
 			}	
 		},
 		
@@ -826,9 +854,12 @@ var PhotoFrame = function() {};
 		 */		
 		 
 		resetProgress: function() {
+			if(typeof show == "undefined") {
+				var show = true;	
+			};
+			
 			this.ui.crop.hide();
-			this.ui.activity.hide();			
-			this.progressBar.show();
+			this.ui.activity.hide();
 			this.progressBar.reset();
 		},
 						
@@ -920,7 +951,13 @@ var PhotoFrame = function() {};
 		 */	
 		 
 		description: '',
+		 	
+		/**
+		 * Disable users from cropping photos?
+		 */		
 		 
+		disableCrop: false,
+		
 		/**
 		 * Is this photo being edit? If false, then a new photo
 		 */	
@@ -932,7 +969,13 @@ var PhotoFrame = function() {};
 		 */	
 		
 		factory: false,
-		
+			 
+		/**
+		 * Force users to crop new photos?
+		 */		
+		 
+		forceCrop: true,
+		 
 		/**
 		 * Photo Index
 		 */	
@@ -1071,7 +1114,7 @@ var PhotoFrame = function() {};
 			    '<li>',
     				'<div class="'+t.factory.classes.photo+'" id="'+t.factory.classes.photo+'-'+t.factory.fieldId+'-'+t.index+'">',			
     					'<div class="'+t.factory.classes.actionBar+'">',
-    						'<a href="#'+t.index+'" class="'+t.factory.classes.editPhoto+'"><span class="'+t.factory.icons.editPhoto+'"></span></a>',
+    						(!t.factory.disableCrop ? '<a href="#'+t.index+'" class="'+t.factory.classes.editPhoto+'"><span class="'+t.factory.icons.editPhoto+'"></span></a>' : ''),
     						'<a href="#'+t.index+'" class="'+t.factory.classes.deletePhoto+'"><span class="'+t.factory.icons.deletePhoto+'"></span></a>',
     					'</div>',
     				'</div>',
@@ -1292,9 +1335,9 @@ var PhotoFrame = function() {};
 				}
 			}	
 			
-            if(t.ui.instructions && t.ui.instructions.css('display') != 'none') {	            
-	            if(t.initialized) {
-	            	t.ui.instructions.fadeOut();
+            if(t.factory.ui.instructions && t.factory.ui.instructions.css('display') != 'none') {	            
+	            if(t.factory.initialized) {
+	            	t.factory.ui.instructions.fadeOut();
 	            }            
             }
             
