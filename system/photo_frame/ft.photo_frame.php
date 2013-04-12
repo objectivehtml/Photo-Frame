@@ -184,12 +184,13 @@ class Photo_frame_ft extends EE_Fieldtype {
 			'photo_frame_file_upload'		 => 'true',
 			'photo_frame_sortable'			 => 'true',
 			'photo_frame_upload_helper'		 => '',
+			'photo_frame_assets_safecracker' => 'true',
 			'photo_frame_assets'			 => 'false',
 			'photo_frame_button_text'	     => '',
 			'photo_frame_browse_button_text' => '',
 			'photo_frame_drop_zone'			 => 'true',
 			'photo_frame_force_crop'		 => 'true',
-			'photo_frame_disable_crop'	     => 'false'
+			'photo_frame_disable_crop'	     => 'false',
 		);
 	
 		$settings = array_merge($default_settings, $this->settings);
@@ -540,6 +541,11 @@ class Photo_frame_ft extends EE_Fieldtype {
 		if($assets_installed && isset($settings['photo_frame_assets']) && $settings['photo_frame_assets'] == 'true')
 		{
 			$vars['assets'] = TRUE;
+			
+			if($this->safecracker && $settings['photo_frame_assets_safecracker'] == 'false')
+			{
+				$vars['file_browser'] = FALSE;
+			}
 		}
 		
 		return $this->EE->load->view('fieldtype', $vars, TRUE);
@@ -942,6 +948,7 @@ class Photo_frame_ft extends EE_Fieldtype {
     		}
 		}
 		
+		/*
 		if(is_array($post))
 		{
 			foreach($post as $index => $photo)
@@ -965,6 +972,7 @@ class Photo_frame_ft extends EE_Fieldtype {
 				}
 			}
 		}
+		*/
 		
 		if(count($new_photos) > 0)
 		{   
@@ -1292,6 +1300,18 @@ class Photo_frame_ft extends EE_Fieldtype {
 			$info_fields['photo_frame_assets'] = array(
 				'label'       => 'Enable Assets Browsing?',
 				'description' => 'If you want have Pixel & Tonic\'s Assets installed, you can use it to browse the existing assets. Photo Frame will make a copy of the asset and use it to create a new framed photo for you to crop.',
+				'type'        => 'select',
+				'settings' => array(
+					'options' => array(
+						'true'  => 'True',
+						'false' => 'False'
+					)
+				)
+			);
+			
+			$info_fields['photo_frame_assets_safecracker'] = array(
+				'label'       => 'Display Assets Browser in Safecracker?',
+				'description' => 'If you want use Pixel & Tonic\'s Assets assets in safecracker, set this option to "True".',
 				'type'        => 'select',
 				'settings' => array(
 					'options' => array(
