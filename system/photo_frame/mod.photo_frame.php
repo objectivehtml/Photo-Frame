@@ -71,10 +71,12 @@ class Photo_frame {
 	public function average_color()
 	{
 		$file  = $this->param('file', $this->EE->TMPL->tagdata);		
-		$color = $this->EE->photo_frame_lib->get_average_color($file);
-		
+		$total = $this->param('total', config_item('photo_frame_save_colors'));
+		$gran  = $this->param('granularity', config_item('photo_frame_save_color_granularity'));
 		$type  = $this->param('type', 'rgb');
-				
+		
+		$color = $this->EE->photo_frame_lib->get_average_color($file, $total, $granularity);
+		
 		if(!$color)
 		{
 			if($this->EE->TMPL->tagdata)
@@ -85,7 +87,7 @@ class Photo_frame {
 			return NULL;
 		}
 		
-		$rgb = $color->r.','.$color->g.','.$color->b;
+		$rgb = 'rgb('.$color->r.','.$color->g.','.$color->b.')';
 		$hex = ImageEditor::rgb2hex($rgb);
 		
 		if($this->EE->TMPL->tagdata && $this->EE->TMPL->tagdata != $file)
