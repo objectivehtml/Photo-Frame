@@ -1102,6 +1102,9 @@ var PhotoFrame = function() {};
 			t.base(options);
 			
 			t.factory     = factory;
+		    t.title       = response.title;
+		    t.description = response.description;
+		    t.keywords    = response.keywords;
 			t.response    = response;
 			t.originalUrl = response.original_url;
 			t.url         = response.file_url;
