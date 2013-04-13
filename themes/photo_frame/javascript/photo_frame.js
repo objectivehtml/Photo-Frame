@@ -27,7 +27,7 @@ var PhotoFrame = function() {};
 			if(typeof options != "object") {
 				var options = {};
 			}
-			this.setOptions($.extend(true, _default, options));
+			this.setOptions($.extend(true, {}, _default, options));
 		},
 		
 		/**
@@ -438,9 +438,9 @@ var PhotoFrame = function() {};
 		    	new PhotoFrame.Photo(t, photo, {
 		    		id: photo.id,
 		    		index: x,
-		    		settings: $.extend(true, this.settings, {
+		    		settings: {
 			    		setSelect: [photo.x, photo.y, photo.x2, photo.y2]	
-		    		}),
+		    		},
 			    	$wrapper: t.$wrapper.find('#'+t.classes.photo+'-'+t.fieldId+'-'+x)
 		    	});
 	    	}
@@ -761,7 +761,7 @@ var PhotoFrame = function() {};
 					this.$wrapper.append('<textarea name="'+this.fieldName+'[][uploaded]" style="display:none">{"field_id": "'+this.fieldId+'", "col_id": "'+this.colId+'", "row_id": "'+this.rowId+'", "path": "'+this.response.file_path+'", "original_path": "'+this.response.original_path+'", "file": "'+this.response.file_name+'"}</textarea>');
 				}
 				
-				var props = $.extend(true, {}, {
+				var props = {
 					settings: this.settings,
 					compression: this.compression,
 					size: this.size,
@@ -770,8 +770,7 @@ var PhotoFrame = function() {};
 					//resize: this.resize,
 					//resizeMax: this.resizeMax,
 					index: this.photos.length,
-					
-				});
+				};
 				
 				var photo = new PhotoFrame.Photo(this, response, props);
 				
@@ -1096,8 +1095,6 @@ var PhotoFrame = function() {};
 		constructor: function(factory, response, options) {	
 			var t = this;
 			
-			t.ui = $.extend(true, {}, t.ui);
-			
 			//t.settings    = factory.settings;
 			
 			t.base(options);
@@ -1402,8 +1399,7 @@ var PhotoFrame = function() {};
 		        t.factory.ui.crop.prepend(t.ui.cropPhoto);         	
 	            t.factory.ui.crop.center();
 	            t.factory.ui.crop.show();
-	        	 
-	        	t.updateInfo();  	
+	        	 	
 	            t.hideMeta();
 	            
 	            if(t.edit === false && t.size !== false) {
@@ -1433,7 +1429,8 @@ var PhotoFrame = function() {};
 	        	}
 	        	
 	            t.initJcrop(callback);
-	            
+	        	t.updateInfo();
+	        	
 	            $(window).resize();	
 			});
 			
