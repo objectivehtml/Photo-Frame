@@ -653,7 +653,6 @@ a.photo-frame-meta-toggle {
 	width: 1em;
 	height: 1em;
 	z-index: 100;
-	display: none;
 }
 a.photo-frame-meta-toggle.active,  a.photo-frame-meta-toggle:hover {
 	color: rgb(47, 143, 216);

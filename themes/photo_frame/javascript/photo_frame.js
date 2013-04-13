@@ -1095,6 +1095,8 @@ var PhotoFrame = function() {};
 		constructor: function(factory, response, options) {	
 			var t = this;
 			
+			t.ui = $.extend(true, {}, t.ui);
+			
 			//t.settings    = factory.settings;
 			
 			t.base(options);
@@ -1399,7 +1401,7 @@ var PhotoFrame = function() {};
 		        t.factory.ui.crop.prepend(t.ui.cropPhoto);         	
 	            t.factory.ui.crop.center();
 	            t.factory.ui.crop.show();
-	        	 	
+	        	   	
 	            t.hideMeta();
 	            
 	            if(t.edit === false && t.size !== false) {
@@ -1430,7 +1432,7 @@ var PhotoFrame = function() {};
 	        	
 	            t.initJcrop(callback);
 	        	t.updateInfo();
-	        	
+	            
 	            $(window).resize();	
 			});
 			
