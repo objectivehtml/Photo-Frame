@@ -635,6 +635,128 @@ class Photo_frame_ft extends EE_Fieldtype {
 		return $return;
 	}
 	
+	public function replace_color_bar($data, $params = array(), $tagdata)
+	{
+		$reserved = array(
+			'total',
+			'granularity',
+			'width',
+			'height',
+			'file'
+		);
+		
+		$default = array(
+			'file'   	  => FALSE,
+			'width'		  => FALSE,
+			'height'      => '14px',
+			'limit'       => FALSE,
+			'offset'      => 0,
+			'total'       => config_item('photo_frame_save_colors'),
+			'granularity' => config_item('photo_frame_save_color_granularity')
+		);
+				
+		$params = array_merge($default, $params);		
+		$photos = $this->_get_photos($this->field_id);
+		
+		if(!$params['limit'])
+		{
+			$params['limit'] = count($photos);
+		}
+		
+		$this->EE->load->library('photo_frame_lib');
+		
+		$count = 0;
+		
+		$return = array();
+		
+		foreach($photos as $index => $photo)
+		{
+			if($count < $params['limit'] && $index >= $params['offset'])
+			{
+				$colors = $this->EE->photo_frame_model->get_colors(array(
+					'where' => array(
+						'photo_id' => $photo['id']
+					)
+				));
+						
+				if($colors->num_rows() > 0)
+				{					
+					$bars = $this->EE->photo_frame_lib->color_bars($colors->result(), $params['width'], $params['height']);
+					
+					if(!isset($params['class']))
+					{
+						$this->EE->TMPL->tagparams['class'] = 'color-bar';
+					}
+					
+					$html_params = array();
+					
+					if(is_array($params))
+					{
+						foreach($params as $param => $value)
+						{
+							if(!in_array($param, $reserved) && !empty($value))
+							{
+								$html_params[] = $param.'="'.$value.'"';
+							}
+						}
+					}
+					
+					$return[] = '<div '.implode(' ', $html_params).'>'.implode('', $bars).'</div>';
+					$count++;
+				}
+			}
+		}
+		
+		return implode('', $return);
+	}
+	
+	public function replace_average_color($data, $params = array(), $tagdata)
+	{		
+		$default = array(
+			'file'   	  => FALSE,
+			'width'		  => FALSE,
+			'height'      => '14px',
+			'limit'       => FALSE,
+			'type'        => 'rgb',
+			'offset'      => 0,
+			'total'       => config_item('photo_frame_save_colors'),
+			'granularity' => config_item('photo_frame_save_color_granularity')
+		);
+		
+		$params = array_merge($default, $params);		
+		$photos = $this->_get_photos($this->field_id);
+		
+		if(!$params['limit'])
+		{
+			$params['limit'] = count($photos);
+		}
+		
+		$this->EE->load->library('photo_frame_lib');
+		
+		$count = 0;
+		
+		$return = array();
+		
+		foreach($photos as $index => $photo)
+		{
+			if($count < $params['limit'] && $index >= $params['offset'])
+			{
+				$file  = $this->EE->photo_frame_model->parse($photo['file']);
+				$color = $this->EE->photo_frame_lib->get_average_color($file, $params['total'], $params['granularity']);
+							
+				$rgb = 'rgb('.$color->r.','.$color->g.','.$color->b.')';
+				$hex = ImageEditor::rgb2hex($rgb);
+			
+				if(isset($$params['type']))
+				{
+					$return[] = $$params['type'];	
+				}	
+			}
+		}
+		
+		return implode('', $return);
+	}
+	
 	public function replace_total_photos($data, $params = array(), $tagdata)
 	{		
 		return count($this->_get_photos($this->field_id));

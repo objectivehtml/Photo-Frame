@@ -340,12 +340,12 @@ class Photo_frame_model extends CI_Model {
 		
 		if(!isset($params['order_by']))
 		{
-			$params['order_by'] = 'order';
+			$params['order_by'] = 'depth';
 		}
 		
 		if(!isset($params['sort']))
 		{
-			$params['sort'] = 'sort';
+			$params['sort'] = 'asc';
 		}
 		
 		return $this->channel_data->get('photo_frame_colors', $params);

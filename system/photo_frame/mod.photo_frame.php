@@ -70,10 +70,10 @@ class Photo_frame {
 	
 	public function average_color()
 	{
-		$file  = $this->param('file', $this->EE->TMPL->tagdata);		
-		$total = $this->param('total', config_item('photo_frame_save_colors'));
-		$gran  = $this->param('granularity', config_item('photo_frame_save_color_granularity'));
-		$type  = $this->param('type', 'rgb');
+		$file        = $this->param('file', $this->EE->TMPL->tagdata);		
+		$total       = $this->param('total', config_item('photo_frame_save_colors'));
+		$type        = $this->param('type', 'rgb');
+		$granularity = $this->param('granularity', config_item('photo_frame_save_color_granularity'));
 		
 		$color = $this->EE->photo_frame_lib->get_average_color($file, $total, $granularity);
 		
