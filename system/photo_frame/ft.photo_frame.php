@@ -902,9 +902,12 @@ class Photo_frame_ft extends EE_Fieldtype {
 	    				$photo['row_id'] = $this->settings['row_id'];
     				}
     				
-    				$colors = $this->EE->photo_frame_lib->get_colors($photo['file'], config_item('photo_frame_save_colors'), config_item('photo_frame_save_color_granularity'));
+    				$average_color = $this->EE->photo_frame_lib->get_average_color($photo['file'], config_item('photo_frame_save_colors'), config_item('photo_frame_save_color_granularity'));
     				
-    				$photo = (array) $this->EE->photo_frame_lib->rename($photo, $settings);
+    				$colors = $this->EE->photo_frame_lib->get_colors($photo['file'], config_item('photo_frame_save_colors'), config_item('photo_frame_save_color_granularity'));    				
+    				$colors = array_merge($colors, array($average_color));
+    				
+    				$photo  = (array) $this->EE->photo_frame_lib->rename($photo, $settings);
     				
     				$photo['colors'] = $colors;
     				

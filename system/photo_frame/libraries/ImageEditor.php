@@ -79,7 +79,57 @@ class ImageEditor extends BaseClass {
 	{
 		return ImageEditor::init($file)->getWidth();
 	}
+	
+	/**
+	 * Convert hex to rgb
+	 *
+	 * @access	public
+	 * @param	string 	Hexcode
+	 * @return	object
+	 */	
+	public static function hex2rgb($hex)
+	{
+		$hex = str_replace("#", "", $hex);
 		
+		if(strlen($hex) == 3) {
+			$r = hexdec(substr($hex,0,1).substr($hex,0,1));
+			$g = hexdec(substr($hex,1,1).substr($hex,1,1));
+			$b = hexdec(substr($hex,2,1).substr($hex,2,1));
+		} else {
+			$r = hexdec(substr($hex,0,2));
+			$g = hexdec(substr($hex,2,2));
+			$b = hexdec(substr($hex,4,2));
+		}
+		
+		$rgb = array($r, $g, $b);
+		
+		return implode(",", $rgb); // returns the rgb values separated by commas
+	}
+	
+	/**
+	 * Convert rgb to hex
+	 *
+	 * @access	public
+	 * @param	string 	Rgb string
+	 * @return	object
+	 */	
+	public static function rgb2hex($rgb)
+	{
+		$spr = str_replace(array(',',' ','.'), ':', $rgb); 
+		$e   = explode(":", $spr); 
+		$out = '#';
+		
+		if(count($e) != 3) return false; 
+		 
+		for($i = 0; $i<3; $i++) 
+			$e[$i] = dechex(($e[$i] <= 0)?0:(($e[$i] >= 255)?255:$e[$i])); 
+		
+		for($i = 0; $i<3; $i++) 
+			$out .= ((strlen($e[$i]) < 2)?'0':'').$e[$i]; 
+		  
+		return strtoupper($out); 
+	}
+	
 	/*---------------------------------------------------------------------------*/
 	
 	/**
@@ -95,13 +145,8 @@ class ImageEditor extends BaseClass {
 	{		
 		parent::__construct($params);
 		
-		$this->filename = $filename;
-		
-		if(!file_exists($filename))
-		{
-			return FALSE;
-		}
-		
+		$this->filename = $filename = trim($filename);
+				
 		$meta = getimagesize($filename);
 		
 		$this->meta = $meta;
@@ -455,18 +500,44 @@ class ImageEditor extends BaseClass {
 		$this->save();
 	}
 	
-	function colorPalette($numColors, $granularity = 5) 
+	function averageColor($numColors = 8, $granularity = 10)
+	{
+		$r = 0;
+		$g = 0;
+		$b = 0;
+		
+		$colors = $this->getColorPalette($numColors, $granularity);
+		$total  = count($colors);
+		
+		foreach($colors as $index => $color)
+		{
+			$r += (int) $color->r;
+			$b += (int) $color->b;
+			$g += (int) $color->g;
+		}
+		
+		$r = (int) ($r / $total);
+		$g = (int) ($g / $total);
+		$b = (int) ($b / $total);
+		
+		return (object) array(
+			'r' => $r,
+			'g' => $g,
+			'b' => $b,
+		);
+	}
+	
+	function getColorPalette($numColors = 8, $granularity = 10) 
 	{ 
+		if($this->image === false) 
+		{ 
+			return false; 
+		} 
+		
 		$imageFile   = $this->filename;
 		$granularity = max(1, abs((int)$granularity)); 
 		$colors      = array(); 
-		$size        = @getimagesize($imageFile); 
-		
-		if($size === false) 
-		{ 
-			user_error("Unable to get image size data"); 
-			return false; 
-		} 
+		$size        = getimagesize($imageFile); 
 		
 		// $img = @imagecreatefromjpeg($imageFile);
 		// Andres mentioned in the comments the above line only loads jpegs, 
@@ -521,3 +592,5 @@ class ImageEditor extends BaseClass {
 		return $return;
 	}
 }
+
+

@@ -27,7 +27,8 @@ $lang	= array(
 	
 	'photo_frame_upload_dir_not_exists'  => 'The following directory does not exist: {directory}',
 	'photo_frame_upload_file_not_exists' => 'The following file does not exist: {file}',
-	'photo_frame_max_size_exceeded' 	=> 'The photo you are trying to upload exceeds the maximum file size of {max_size}.',
+	'photo_frame_max_size_exceeded' 	 => 'The photo you are trying to upload exceeds the maximum file size of {max_size}.',
+	'photo_frame_no_upload'				 => 'The photo cannot be uploaded by the server. Check your server settings or contact your service adminstrator.',
 	
 	//--------------------------------------------
 	'', ''

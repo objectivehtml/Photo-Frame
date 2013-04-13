@@ -395,7 +395,7 @@ var PhotoFrame = function() {};
 					done: function (e, data) {
 						var errors = [];
 										
-						if(typeof data.result[0] == "undefined") {							
+						if(typeof data.result[0] == "undefined" || typeof data.result == "string") {						
 							errors = ['An unexpected error has occurred. Please try again.'];
 						}	
 						
@@ -536,8 +536,6 @@ var PhotoFrame = function() {};
 			t.$wrapper.bind('dragover', function(e) {
 				var obj 	= t.$wrapper.find('.'+t.classes.dropText);
 				var parent  = obj.parent();
-				
-				console.log('over');
 				
 				t.ui.dropZone.show();
 				

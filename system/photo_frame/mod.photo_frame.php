@@ -68,6 +68,120 @@ class Photo_frame {
 		return $this->photos(TRUE)->num_rows();
 	}
 	
+	public function average_color()
+	{
+		$file  = $this->param('file', $this->EE->TMPL->tagdata);		
+		$color = $this->EE->photo_frame_lib->get_average_color($file);
+		
+		$type  = $this->param('type', 'rgb');
+				
+		if(!$color)
+		{
+			if($this->EE->TMPL->tagdata)
+			{
+				return $this->EE->TMPL->no_results();
+			}
+			
+			return NULL;
+		}
+		
+		$rgb = $color->r.','.$color->g.','.$color->b;
+		$hex = ImageEditor::rgb2hex($rgb);
+		
+		if($this->EE->TMPL->tagdata && $this->EE->TMPL->tagdata != $file)
+		{
+			return $this->parse(array($this->EE->channel_data->utility->add_prefix($this->param('prefix', 'color'), array(
+				'rgb' => $rgb,
+				'hex' => $hex
+			))));
+		}
+		else
+		{	
+			if(isset($$type))
+			{
+				return $$type;
+			}
+		}
+	}
+	
+	public function color_bar()
+	{
+		$reserved = array(
+			'total',
+			'granularity',
+			'width',
+			'height',
+			'file'
+		);
+		
+		$file   = $this->param('file', $this->EE->TMPL->tagdata);
+		$colors = $this->EE->photo_frame_lib->get_colors($file, $this->param('total', 8), $this->param('granularity', 10));
+		
+		if(!$colors)
+		{
+			return $this->EE->TMPL->no_results();
+		}
+		
+		$bars = $this->EE->photo_frame_lib->color_bars($colors, $this->param('width'), $this->param('height', '14px'));
+		
+		$params = array();
+		
+		if(!isset($this->EE->TMPL->tagparams['class']))
+		{
+			$this->EE->TMPL->tagparams['class'] = 'color-bar';
+		}
+		
+		if(is_array($this->EE->TMPL->tagparams))
+		{
+			foreach($this->EE->TMPL->tagparams as $param => $value)
+			{
+				if(!in_array($param, $reserved) && !empty($value))
+				{
+					$params[] = $param.'="'.$value.'"';
+				}
+			}
+		}
+		
+		return '<div '.implode(' ', $params).'>'.implode('', $bars).'</div>';
+	}
+	
+	public function extract_colors()
+	{
+		$file   = $this->param('file', $this->EE->TMPL->tagdata);
+		$colors = $this->EE->photo_frame_lib->get_colors($file, $this->param('total', 8), $this->param('granularity', 10));
+		$html   = array();
+		
+		if(!$colors)
+		{
+			return $this->EE->TMPL->no_results();
+		}
+	
+		$limit  = (int) $this->param('limit', count($colors));
+		$offset = $this->param('offset', 0);
+		$return = array();
+		$count  = 0;
+		
+		foreach($colors as $index => $color)
+		{
+			if($count < $limit && $index >= $offset)
+			{
+				$color = (array) $color;
+				$color['rgb'] = $color['r'].','.$color['g'].','.$color['b'];
+				$color['hex'] = ImageEditor::rgb2hex($color['rgb']);
+				
+				$return[] = $color;
+				$count++;
+			}
+		}
+		
+		if(count($return) == 0)
+		{				
+			return $this->EE->TMPL->no_results();	
+		}		
+			
+		return $this->parse($this->EE->channel_data->utility->add_prefix($this->param('prefix', 'color'), $return));
+	}
+	
 	public function colors($return = FALSE)
 	{
 		$where = $this->_where();

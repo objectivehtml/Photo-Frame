@@ -46,11 +46,37 @@ class Photo_frame_lib {
 		return FALSE;
 	}
 	
-	public function get_colors($file, $num_colors = 3, $granularity = 5)
+	public function color_bars($colors, $width = FALSE, $height = '14px')
+	{
+		$bars = array();
+		
+		if(!$width)
+		{
+			$width = 100 / count($colors) . '%';
+		}
+		
+		foreach($colors as $index => $color)
+		{
+			$bars[] = '<div class="color" style="display:inline-block;background:rgb('.($color->r.','.$color->g.','.$color->b).');width:'.$width.';height:'.$height.'"></div>';
+		}
+		
+		return $bars;
+	}
+	
+	public function get_average_color($file, $num_colors = 10, $granularity = 5)
+	{		
+		$file = $this->EE->photo_frame_model->parse($file, 'server_path');
+		
+		return ImageEditor::init($file)->averageColor($num_colors, $granularity);
+	}
+	
+	public function get_colors($file, $num_colors = 10, $granularity = 5)
 	{
 		$file = $this->EE->photo_frame_model->parse($file, 'server_path');
 		
-		return ImageEditor::init($file)->colorPalette($num_colors, $granularity);
+		$return = array();
+		
+		return ImageEditor::init($file)->getColorPalette($num_colors, $granularity);
 	}
 		
 	public function build_size($settings, $index)
@@ -193,9 +219,9 @@ class Photo_frame_lib {
 		
 		$framed_dir_name = config_item('photo_frame_directory_name');
 		
+		$errors     = array();
 		$dir_id     = $this->EE->input->get_post('dir_id');
 		$field_id   = $this->EE->input->get_post('field_id');
-		
 		$settings   = $this->EE->photo_frame_model->get_settings($field_id);
 		$directory  = $this->EE->filemanager->directory($dir_id, FALSE, TRUE);
 		$ie			= $this->EE->input->get_post('ie') == 'true' ? TRUE : FALSE;
@@ -213,7 +239,7 @@ class Photo_frame_lib {
 					'size'     => $files['files']['size'][$x],
 				)
 			);
-			
+									
 			$errors = $this->EE->photo_frame_model->validate_image_size($_FILES['files']['tmp_name'], $settings);
 		
 			if(count($errors) == 0)

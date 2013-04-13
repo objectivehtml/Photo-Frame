@@ -507,13 +507,16 @@ class Photo_frame_model extends CI_Model {
 			$settings = $this->photo_frame_model->get_settings($field_id);		
 		}
 		
+		if(empty($file))
+		{
+			return array(lang('photo_frame_no_upload'));
+		}
+		
 		$image = new ImageEditor($file);
 		
 		if(!$image->getImage())
 		{
-			$errors[] = lang('photo_frame_invalid_format');
-			
-			return $errors;
+			return array(lang('photo_frame_invalid_format'));
 		}
 	
 		$width      = $image->getWidth();
