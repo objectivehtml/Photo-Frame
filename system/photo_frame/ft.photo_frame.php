@@ -642,7 +642,8 @@ class Photo_frame_ft extends EE_Fieldtype {
 			'granularity',
 			'width',
 			'height',
-			'file'
+			'file',
+			'limit'
 		);
 		
 		$default = array(
@@ -712,6 +713,8 @@ class Photo_frame_ft extends EE_Fieldtype {
 	
 	public function replace_average_color($data, $params = array(), $tagdata)
 	{		
+		$this->EE->load->config('photo_frame_config');
+		
 		$default = array(
 			'file'   	  => FALSE,
 			'width'		  => FALSE,
@@ -741,15 +744,36 @@ class Photo_frame_ft extends EE_Fieldtype {
 		{
 			if($count < $params['limit'] && $index >= $params['offset'])
 			{
-				$file  = $this->EE->photo_frame_model->parse($photo['file']);
-				$color = $this->EE->photo_frame_lib->get_average_color($file, $params['total'], $params['granularity']);
-							
-				$rgb = 'rgb('.$color->r.','.$color->g.','.$color->b.')';
-				$hex = ImageEditor::rgb2hex($rgb);
-			
-				if(isset($$params['type']))
+				$colors = $this->EE->photo_frame_model->get_colors(array(
+					'where' => array(
+						'photo_id' => $photo['id'],
+						'average'  => 1
+					)
+				));
+				
+				if($colors->num_rows() == 0)
 				{
-					$return[] = $$params['type'];	
+					$file  = $this->EE->photo_frame_model->parse($photo['file'], 'server_path');
+					
+					if(file_exists($file))
+					{
+						$color = $this->EE->photo_frame_lib->get_average_color($file, $params['total'], $params['granularity']);
+					}					
+				}
+				else
+				{
+					$color = $colors->row();
+				}
+				
+				if(isset($color->r))
+				{				
+					$rgb = 'rgb('.$color->r.','.$color->g.','.$color->b.')';
+					$hex = ImageEditor::rgb2hex($rgb);
+				
+					if(isset($$params['type']))
+					{
+						$return[] = $$params['type'];	
+					}	
 				}	
 			}
 		}
@@ -1024,10 +1048,12 @@ class Photo_frame_ft extends EE_Fieldtype {
 	    				$photo['row_id'] = $this->settings['row_id'];
     				}
     				
-    				$average_color = $this->EE->photo_frame_lib->get_average_color($photo['file'], config_item('photo_frame_save_colors'), config_item('photo_frame_save_color_granularity'));
+    				$average_color = (array) $this->EE->photo_frame_lib->get_average_color($photo['file'], config_item('photo_frame_save_colors'), config_item('photo_frame_save_color_granularity'));
+    				$average_color['average'] = 1;
     				
-    				$colors = $this->EE->photo_frame_lib->get_colors($photo['file'], config_item('photo_frame_save_colors'), config_item('photo_frame_save_color_granularity'));    				
-    				$colors = array_merge($colors, array($average_color));
+    				$colors = $this->EE->photo_frame_lib->get_colors($photo['file'], config_item('photo_frame_save_colors'), config_item('photo_frame_save_color_granularity'));
+    				    				
+    				$colors = array_merge($colors, array((object) $average_color));
     				
     				$photo  = (array) $this->EE->photo_frame_lib->rename($photo, $settings);
     				

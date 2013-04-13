@@ -468,7 +468,8 @@ class Photo_frame_model extends CI_Model {
 						'depth'    => $color_index,
 						'r'		   => $color->r,
 						'g'		   => $color->g,
-						'b'		   => $color->b
+						'b'		   => $color->b,
+						'average'  => isset($color->average) ? $color->average : 0,
 					);
 					
 					if(isset($photo['row_id']))

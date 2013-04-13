@@ -152,6 +152,11 @@ class Photo_frame_upd {
 				'type'				=> 'int',
 				'constraint'		=> 50
 			),
+			'average' => array(
+				'type'				=> 'int',
+				'constraint'		=> 1,
+				'default'		    => 0
+			),
 		)
 	);
 	
@@ -225,7 +230,7 @@ class Photo_frame_upd {
 	
 		$this->EE->data_forge = new Data_forge();
 		$this->EE->data_forge->update_tables($this->tables);
-
+		
 		foreach($this->actions as $action)
 		{
 			$this->EE->db->where(array(

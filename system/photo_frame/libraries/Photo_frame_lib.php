@@ -57,7 +57,7 @@ class Photo_frame_lib {
 		
 		foreach($colors as $index => $color)
 		{
-			$bars[] = '<div class="color" style="display:inline-block;background:rgb('.($color->r.','.$color->g.','.$color->b).');width:'.$width.';height:'.$height.'"></div>';
+			$bars[] = '<div class="color color-'.$index.'" data-r="'.$color->r.'" data-g="'.$color->g.'" data-b="'.$color->b.'"  style="display:inline-block;background:rgb('.($color->r.','.$color->g.','.$color->b).');width:'.$width.';height:'.$height.'"></div>';
 		}
 		
 		return $bars;

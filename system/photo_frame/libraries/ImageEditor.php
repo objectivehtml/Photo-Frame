@@ -506,6 +506,11 @@ class ImageEditor extends BaseClass {
 		$g = 0;
 		$b = 0;
 		
+		if(!$numColors)
+		{
+			$numColors = 8;
+		}
+		
 		$colors = $this->getColorPalette($numColors, $granularity);
 		$total  = count($colors);
 		
@@ -516,9 +521,12 @@ class ImageEditor extends BaseClass {
 			$g += (int) $color->g;
 		}
 		
-		$r = (int) ($r / $total);
-		$g = (int) ($g / $total);
-		$b = (int) ($b / $total);
+		if($total > 0)
+		{
+			$r = (int) ($r / $total);
+			$g = (int) ($g / $total);
+			$b = (int) ($b / $total);
+		}
 		
 		return (object) array(
 			'r' => $r,

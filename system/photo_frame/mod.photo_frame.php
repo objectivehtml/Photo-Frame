@@ -113,7 +113,7 @@ class Photo_frame {
 			'granularity',
 			'width',
 			'height',
-			'file'
+			'file',
 		);
 		
 		$file   = $this->param('file', $this->EE->TMPL->tagdata);
