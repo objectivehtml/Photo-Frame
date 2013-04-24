@@ -146,8 +146,8 @@ class ImageEditor extends BaseClass {
 		parent::__construct($params);
 		
 		$this->filename = $filename = trim($filename);
-				
-		$meta = getimagesize($filename);
+		
+		$meta = @getimagesize($filename);
 		
 		$this->meta = $meta;
 		$this->type = $meta[2];

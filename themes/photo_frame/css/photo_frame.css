@@ -14,6 +14,8 @@
 	speak: none;
 	display: inline-block;
 	text-decoration: inherit;
+	margin: 0;
+	padding: 0;
 }
 
 .photo-frame-icons .icon-info:before {
@@ -645,6 +647,7 @@ p.photo-frame-helper,
 }
 a.photo-frame-meta-toggle {
 	position: fixed;
+	display: none; /* REMOVE at some point */
 	top: 15px;
 	right: 15px;
 	color: white;
