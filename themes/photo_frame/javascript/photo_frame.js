@@ -394,7 +394,9 @@ var PhotoFrame = function() {};
 					},
 					done: function (e, data) {
 						var errors = [];
-										
+							
+						console.log(data.result);
+									
 						if(typeof data.result[0] == "undefined" || typeof data.result == "string") {						
 							errors = ['An unexpected error has occurred. Please try again.'];
 						}	
