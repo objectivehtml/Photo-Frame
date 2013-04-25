@@ -144,7 +144,6 @@ class Photo_frame_ft extends EE_Fieldtype {
 		{
 			$this->safecracker = TRUE;
 		}
-		
 		$this->EE->theme_loader->module_name = 'photo_frame';
 				
 		$this->EE->theme_loader->css('photo_frame');

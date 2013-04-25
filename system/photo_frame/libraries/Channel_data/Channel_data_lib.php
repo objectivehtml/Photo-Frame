@@ -796,6 +796,7 @@ if(!class_exists('Channel_data_lib'))
 			return $this->get_fields(array(
 				'select' 	=> $select,
 				'where'		=> array(
+					'site_id'    => config_item('site_id'),
 					'field_name' => $field_name
 				)
 			));
@@ -1725,12 +1726,13 @@ if(!class_exists('Channel_data_lib'))
 					if($term == 'select')
 					{
 						if(!is_array($param))
+						{
 							$param = array($param);
-
+						}
 
 						foreach($param as $select)
 						{
-							$this->EE->db->select($select);
+							$this->EE->db->select($select, FALSE, TRUE);
 						}
 					}
 					else if($term == 'where')
