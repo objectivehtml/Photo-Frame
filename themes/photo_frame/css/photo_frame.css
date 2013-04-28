@@ -1,7 +1,21 @@
 @font-face {
 	font-family: 'photo-frame';
 	src: url("../font/photo-frame.eot");
-	src: url("../font/photo-frame.eot?#iefix") format('embedded-opentype'), url("../font/photo-frame.woff") format('woff'), url("../font/photo-frame.ttf") format('truetype'), url("../font/photo-frame.svg#photo-frame") format('svg');
+	src: url("../font/photo-frame.eot?#iefix") format('embedded-opentype'),
+	     url("../font/photo-frame.woff") format('woff'), 
+	     url("../font/photo-frame.ttf") format('truetype'), 
+	     url("../font/photo-frame.svg#photo-frame") format('svg');
+	font-weight: normal;
+	font-style: normal;
+}
+
+@font-face {
+	font-family: 'photo-frame-alt';
+	src:url('../font/photo-frame-alt.eot');
+	src:url('../font/photo-frame-alt.eot?#iefix') format('embedded-opentype'),
+		url('../font/photo-frame-alt.woff') format('woff'),
+		url('../font/photo-frame-alt.ttf') format('truetype'),
+		url('../font/photo-frame-alt.svg#photo-frame-alt') format('svg');
 	font-weight: normal;
 	font-style: normal;
 }
@@ -18,36 +32,49 @@
 	padding: 0;
 }
 
-.photo-frame-icons .icon-info:before {
-	content: '\2139';
-} /* 'ℹ' */
-.photo-frame-icons .icon-save:before {
-	content: '\2611';
-} /* '☑' */
-.photo-frame-icons .icon-edit:before {
-	content: '\270d';
-} /* '✍' */
-.photo-frame-icons .icon-cancel:before {
-	content: '\2715';
-} /* '✕' */
-.photo-frame-icons .icon-warning-sign:before {
-	 content: '\26a0';
-} /* '❗' */
-.photo-frame-icons .icon-rotate:before {
-	content: '\27f2';
-} /* '⟲' */
-.photo-frame-icons .icon-trash:before {
-	content: '\e801';
-} /* '' */
-.photo-frame-icons .icon-resize:before {
-	content: '\e744';
-} /* '' */
-.photo-frame-icons .icon-upload:before {
-	content: '\e800';
-} /* '' */
-.photo-frame-icons .icon-search:before {
-	content: '\1f50d';
-} /* '' */
+
+/* Use the following CSS code if you want to have a class per icon */
+/*
+Instead of a list of all class selectors,
+you can use the generic selector below, but it's slower:
+[class*="icon-"] {
+*/
+
+
+.photo-frame-icons .icon-crop:before,  
+.photo-frame-icons .icon-crop:before {
+	font-family: 'photo-frame-alt';
+	font-style: normal;
+	font-weight: normal;
+	speak: none;
+	display: inline-block;
+	text-decoration: inherit;
+	margin: 0;
+	padding: 0;
+}
+
+.photo-frame-icons .icon-crop:before {content: "\e000";} 
+
+.photo-frame-icons .icon-info:before { content: '\2139'; } /* 'ℹ' */
+.photo-frame-icons .icon-contrast:before { content: '\25d1'; } /* '◑' */
+.photo-frame-icons .icon-star:before { content: '\2605'; } /* '★' */
+.photo-frame-icons .icon-star-empty:before { content: '\2606'; } /* '☆' */
+.photo-frame-icons .icon-save:before { content: '\2611'; } /* '☑' */
+.photo-frame-icons .icon-cog:before { content: '\2699'; } /* '⚙' */
+.photo-frame-icons .icon-warning-sign:before { content: '\26a0'; } /* '⚠' */
+.photo-frame-icons .icon-edit:before { content: '\270d'; } /* '✍' */
+.photo-frame-icons .icon-cancel:before { content: '\2715'; } /* '✕' */
+.photo-frame-icons .icon-rotate:before { content: '\27f2'; } /* '⟲' */
+.photo-frame-icons .icon-location:before { content: '\e724'; } /* '' */
+.photo-frame-icons .icon-trash:before { content: '\e801'; } /* '' */
+.photo-frame-icons .icon-resize:before { content: '\e744'; } /* '' */
+.photo-frame-icons .icon-brush:before { content: '\e79a'; } /* '' */
+.photo-frame-icons .icon-picture:before { content: '🌄'; } /* '\1f304' */
+.photo-frame-icons .icon-droplet:before { content: '💧'; } /* '\1f4a7' */
+.photo-frame-icons .icon-upload:before { content: '\e800'; } /* '' */
+.photo-frame-icons .icon-camera:before { content: '📷'; } /* '\1f4f7' */
+.photo-frame-icons .icon-search:before { content: '🔍'; } /* '\1f50d' */
+
 
 .photo-frame-photo-frame-dimmer .photo-frame-dimmer img,
 .photo-frame-wrapper .photo-frame-dimmer img {
@@ -118,7 +145,8 @@
 }
 
 .photo-frame-progress-cancel,
-a.photo-frame-progress-cancel {
+a.photo-frame-progress-cancel,
+a.photo-frame-tool-window-close {
 	background: rgb(220, 220, 220);
 	border-radius: 1000px;
 	-moz-border-radius: 1000px;
@@ -426,7 +454,9 @@ a.photo-frame-progress-cancel {
 	border-top: 1px solid rgb(108, 108, 108);
 	z-index: 1500;
 }
-	.photo-frame-bar-button, .photo-frame-bar-button:hover {
+
+a.photo-frame-bar-button, a.photo-frame-bar-button:hover,
+.photo-frame-bar-button, .photo-frame-bar-button:hover {
 	background: rgb(0,153,255);
 	background: -moz-linear-gradient(top,  rgba(0,153,255,1) 0%, rgba(0,76,255,1) 100%);
 	background: -webkit-gradient(linear, left top, left bottom, color-stop(0%,rgba(0,153,255,1)), color-stop(100%,rgba(0,76,255,1)));
@@ -666,7 +696,8 @@ a.photo-frame-meta-toggle.active,  a.photo-frame-meta-toggle:hover {
 	position: relative;
 }
 
-.photo-frame-wrapper .clearfix:after {
+
+.clearfix:after {
 	content: ".";
 	display: block;
 	clear: both;
@@ -674,13 +705,13 @@ a.photo-frame-meta-toggle.active,  a.photo-frame-meta-toggle:hover {
 	line-height: 0;
 	height: 0;
 }
-.photo-frame-wrapper .clearfix {
+.clearfix {
 	display: block;
 }
-.photo-frame-wrapper html[xmlns] .clearfix {
+html[xmlns] .clearfix {
 	display: block;
 }
-* html .clearfix {
+.clearfix {
 	height: 1%;
 }
 
@@ -735,68 +766,165 @@ a.photo-frame-meta-toggle.active,  a.photo-frame-meta-toggle:hover {
 	background-color:#dfdfdf;
 }
 
-/*
-.photo-frame-button {
-	-moz-border-radius: 3px;
-	-webkit-border-radius: 3px;
-	border-radius: 3px;
-	display: inline-block;
-	font-size: 16px;
-	text-decoration: none !important;
-	text-align: center;
-	cursor: pointer;
-	text-decoration: none;
-	background-color: #78C0A8;
-	padding: 2px 15px 7px 5px;
+.photo-frame-toolbar-tools {
 	color: white;
-	margin: .5em;
-	cursor: pointer;
-	text-decoration: none;
-	text-shadow: none;
-}
-.photo-frame-button:active {
-	background-color: #78C0A8;
-}
-.photo-frame-button:hover {
-	color: #55B092;
-	color: #fff
-}
-
-
-/*
-
-.photo-frame-placeholder {
-
-	border: 3px dashed rgb(86, 88, 89);
-
-	font-size: 18px;
-
-	text-shadow: 0 1px 0 white;
-
-	padding: .5em 0 .75em;
-
-	line-height: .5em;
-
-	position: relative;
-
+	text-shadow: 0 1px 0 black;
+	border-top: 1px solid rgb(85, 85, 85);
+	box-shadow: 0 0 21px rgba(0, 0, 0, .5);
+	border-radius: 7px;
+	position: fixed;
+	left: 50px;
+	top: 100px;
+	background: -moz-linear-gradient(top,  rgba(45,45,45,0.90) 0%, rgba(28,28,28,0.93) 100%); /* FF3.6+ */
+background: -webkit-gradient(linear, left top, left bottom, color-stop(0%,rgba(45,45,45,0.90)), color-stop(100%,rgba(28,28,28,0.93))); /* Chrome,Safari4+ */
+background: -webkit-linear-gradient(top,  rgba(45,45,45,0.90) 0%,rgba(28,28,28,0.93) 100%); /* Chrome10+,Safari5.1+ */
+background: -o-linear-gradient(top,  rgba(45,45,45,0.90) 0%,rgba(28,28,28,0.93) 100%); /* Opera 11.10+ */
+background: -ms-linear-gradient(top,  rgba(45,45,45,0.90) 0%,rgba(28,28,28,0.93) 100%); /* IE10+ */
+background: linear-gradient(to bottom,  rgba(45,45,45,0.90) 0%,rgba(28,28,28,0.93) 100%); /* W3C */
+filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#d12d2d2d', endColorstr='#d91c1c1c',GradientType=0 ); /* IE6-9 */
+	display: none;
 }
 
-
-
-.photo-frame-placeholder p {
-
-	position: absolute;
-
-	top: 45%;
-
-	width: 100%;
-
-	display: block;
-
+.photo-frame-toolbar-tools-title {
 	text-align: center;
-
-	padding: 0;
-
-	margin: 0;
-
+	padding: 7px 0;
+	cursor: move;
 }
+
+.photo-frame-toolbar-tools-list li a {
+	color: rgb(200, 200, 200);
+	text-decoration: none;
+	line-height: 10px;
+	-moz-transition: .25s;
+	-webkit-transition: .25s;
+	transition: .25s;
+	position: absolute;
+	padding-top: 14px;
+	left: 0;
+	width: 100%;
+	height: 100%;
+	text-align: center;
+	-webkit-box-sizing: border-box;
+	-moz-box-sizing: border-box;
+	box-sizing: border-box;
+	text-shadow: 0 1px 0 rgba(0, 0, 0, .6);
+}
+
+.photo-frame-toolbar-tools-list li .photo-frame-active {
+	font-size: 22px;
+	padding-top: 10px;
+	color: white;
+}
+
+.photo-frame-toolbar-tools-list li a:hover {
+	text-decoration: none;
+}
+
+.photo-frame-toolbar-tools-list li {
+	width: 35px;
+	height: 35px;
+	display: inline-block;
+	float: left;
+	border-bottom: 1px solid rgb(45, 45, 45);
+	border-bottom: 1px solid rgba(255, 255, 255, .045);
+	position: relative;
+}
+
+.photo-frame-toolbar-tools-list li:last-child {
+	border-bottom: none;
+}
+
+.photo-frame-toolbar-tools-list li:nth-child(odd) {
+	border-right: 1px solid rgb(45, 45, 45);
+	border-right: 1px solid rgba(255, 255, 255, .045);
+	clear: left;
+}
+
+.photo-frame-tool-window {
+	padding: 10px;
+	display: none;
+	position: fixed;
+}
+
+.photo-frame-tool-window-title {
+	text-align: center;
+	cursor: move;
+	margin-bottom: 12px;
+}
+
+a.photo-frame-tool-window-close {
+	position: absolute;
+	right: 5px;
+	top: 5px;
+	font-size: 8px;
+	padding: 0 4px;
+	text-shadow: none;
+	line-height: 14px
+}
+
+.photo-frame-tool-window-button,
+a.photo-frame-tool-window-button,
+a.photo-frame-tool-window-button:hover {
+	border-radius: 3px;
+	text-shadow: 0 1px 0 white;
+	text-decoration: none;
+	display: inline-block;
+	margin-top: 5px;
+	color: rgb(100, 100, 100);
+	padding: 6px 8px;
+	background: rgb(255,255,255);
+	background: -moz-linear-gradient(top,  rgba(255,255,255,1) 0%, rgba(229,229,229,1) 100%);
+	background: -webkit-gradient(linear, left top, left bottom, color-stop(0%,rgba(255,255,255,1)), color-stop(100%,rgba(229,229,229,1)));
+	background: -webkit-linear-gradient(top,  rgba(255,255,255,1) 0%,rgba(229,229,229,1) 100%);
+	background: -o-linear-gradient(top,  rgba(255,255,255,1) 0%,rgba(229,229,229,1) 100%);
+	background: -ms-linear-gradient(top,  rgba(255,255,255,1) 0%,rgba(229,229,229,1) 100%);
+	background: linear-gradient(to bottom,  rgba(255,255,255,1) 0%,rgba(229,229,229,1) 100%);
+	filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#ffffff', endColorstr='#e5e5e5',GradientType=0 ); 
+}
+
+.photo-frame-tool-window-button:active,
+a.photo-frame-tool-window-button:active {
+	background: rgb(229,229,229);
+	background: -moz-linear-gradient(top,  rgba(229,229,229,1) 0%, rgba(255,255,255,1) 100%);
+	background: -webkit-gradient(linear, left top, left bottom, color-stop(0%,rgba(229,229,229,1)), color-stop(100%,rgba(255,255,255,1)));
+	background: -webkit-linear-gradient(top,  rgba(229,229,229,1) 0%,rgba(255,255,255,1) 100%);
+	background: -o-linear-gradient(top,  rgba(229,229,229,1) 0%,rgba(255,255,255,1) 100%);
+	background: -ms-linear-gradient(top,  rgba(229,229,229,1) 0%,rgba(255,255,255,1) 100%);
+	background: linear-gradient(to bottom,  rgba(229,229,229,1) 0%,rgba(255,255,255,1) 100%);
+	filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#e5e5e5', endColorstr='#ffffff',GradientType=0 );
+}
+
+.photo-frame-inline,
+.photo-frame-grid {
+	margin-top: 1	
+}
+
+.photo-frame-inline label,
+.photo-frame-grid label {
+	float: left;	
+	padding: 5px 10px 5px 5px;
+	border-right: 1px solid rgba(0, 0, 0, .3);
+	margin-right: 10px;
+	box-shadow: -1px 0 rgba(255, 255, 255, 0.1) inset;
+}
+
+.photo-frame-grid label { width: 30px; }
+.photo-frame-grid input { margin-bottom: 5px; }
+
+.photo-frame-inline input,
+.photo-frame-grid input { display: inline-block; }
+
+.photo-frame-inline .photo-frame-small,
+.photo-frame-grid .photo-frame-small { width: 55px; }
+
+.photo-frame-tool-window-save { }
+
+.photo-frame-tool-window-buttons {
+	margin-top: 7px;
+}
+
+.photo-frame-toolbar .photo-frame-tools { position: absolute; top: 9px; left: 15px; }
+
+.photo-frame-toolbar .photo-frame-tools a { color: white; font-size: 34px; text-shadow: 0 -1px 0 black; }
+.photo-frame-toolbar .photo-frame-tools a.photo-frame-active { color: rgb(47, 143, 216); }
+.photo-frame-tool-window-save { float: right; }

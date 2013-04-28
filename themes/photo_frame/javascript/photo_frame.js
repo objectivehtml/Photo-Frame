@@ -31,6 +31,40 @@ var PhotoFrame = function() {};
 		},
 		
 		/**
+		 * Delegates the callback to the defined method
+		 *
+		 * @param	object 	The default options
+		 * @param	object 	The override options
+		 */
+		 
+		callback: function(method) {
+		 	if(typeof method === "function") {
+				var args = [];
+								
+				for(var x = 1; x <= arguments.length; x++) {
+					if(arguments[x]) {
+						args.push(arguments[x]);
+					}
+				}
+				
+				method.apply(this, args);
+			}
+		},
+		 
+		/**
+		 * Log a string into the console if it exists
+		 *
+		 * @param 	string 	The name of the option
+		 * @return	mixed
+		 */		
+		 
+		log: function(str) {
+			if(window.console && console.log) {
+				console.log(str);
+			}
+		},
+		 
+		/**
 		 * Get an single option value. Returns false if option does not exist
 		 *
 		 * @param 	string 	The name of the option
@@ -82,6 +116,12 @@ var PhotoFrame = function() {};
 	PhotoFrame.Factory = PhotoFrame.Class.extend({
 		
 		/**
+		 * The PhotoFrame.ButtonBar object
+		 */	
+		 
+		buttonBar: false,
+		
+		/**
 		 * Has user cancelled upload?
 		 */	
 		 
@@ -99,6 +139,7 @@ var PhotoFrame = function() {};
 			browse: 'photo-frame-browse',
 			button: 'photo-frame-button',
 			cancel: 'photo-frame-cancel',
+			clearfix: 'clearfix',
 			close: 'photo-frame-close',
 			crop: 'photo-frame-crop',
 			cropPhoto: 'photo-frame-crop-photo',
@@ -118,6 +159,7 @@ var PhotoFrame = function() {};
 			invalid: 'photo-frame-invalid',
 			id: 'photo-frame-ie',
 			indicator: 'photo-frame-indicator',
+			infoToggle: 'photo-frame-toggle-info',
 			instructions: 'photo-frame-instructions',
 			infoPanel: 'photo-frame-info-panel',
 			jcropTracker: 'jcrop-tracker',
@@ -136,6 +178,9 @@ var PhotoFrame = function() {};
 			sortable: 'photo-frame-sortable',
 			sortablePlaceholder: 'photo-frame-sortable-placeholder',
 			toolbar: 'photo-frame-toolbar',
+			toolBarTools: 'photo-frame-toolbar-tools',
+			toolBarToggle: 'photo-frame-toolbar-toggle',
+			tools: 'photo-frame-tools',
 			upload: 'photo-frame-upload',
 			wrapper: 'photo-frame-wrapper'
 		},	
@@ -158,6 +203,20 @@ var PhotoFrame = function() {};
 		disableCrop: false,
 		
 		/**
+		 * An object/array events that have been bound to PhotoFrame
+		 */		
+		 
+		events: {
+			/*'initFactory': [],
+			'initPhoto': [],
+			'initButton': [],
+			'initButtonBar': [],*/
+			'jcropOnSelect': [],
+			'jcropOnChange': [],
+			'jcropOnRelease': []
+		},
+		
+		/**
 		 * Icon Classes
 		 */		
 		 
@@ -166,6 +225,8 @@ var PhotoFrame = function() {};
 			editPhoto: 'icon-edit',
 			deletePhoto: 'icon-trash',
 			info: 'icon-info',
+			cog: 'icon-cog',
+			rotate: 'icon-rotate',
 			save: 'icon-save',
 			warningSign: 'icon-warning-sign'
 		},	
@@ -211,8 +272,8 @@ var PhotoFrame = function() {};
 			t.$wrapper = $(obj);
 			t.sortable();	
 			t.base(options);	
-			t.photos = [];
 			
+			t.photos   = [];
 			t.ui = {
 				body: $('body'),
 				browse: t.$wrapper.find('.'+t.classes.browse),
@@ -228,14 +289,13 @@ var PhotoFrame = function() {};
 			
 			var html = [
 				'<form id="'+t.classes.upload+'" class="'+t.classes.form+' '+t.classes.wrapper+' '+t.classes.icons+'" action="'+t.url+(t.IE() ? '&ie=true' : '')+'" method="POST" enctype="multipart/form-data" id="'+t.classes.upload+'-'+t.index+'" '+(t.IE() ? 'target="photo-frame-iframe-'+t.index+'"' : '')+'>',
-					'<h3>Select a file to upload...</h3>',
+					'<h3>'+PhotoFrame.Lang.select_file+'</h3>',
 					'<input type="file" name="files[]" multiple>',
 					'<button type="submit" class="'+t.classes.button+'"><span class="icon-upload"></span>'+t.buttonText+'</button>',
 				'</form>'
 			].join('');
 			
 			t.ui.form = $(html);
-			
 			t.ui.form.submit(function() {
 				if(t.IE()) {
 					t.startUpload();
@@ -264,12 +324,12 @@ var PhotoFrame = function() {};
 						'<p class="'+t.classes.aspect+'"></p>',
 					'</div>',
 					'<div class="'+t.classes.activity+'">',
-						'<span class="'+t.classes.indicator+'"></span> <p>Uploading...</p>',
+						'<span class="'+t.classes.indicator+'"></span> <p>'+PhotoFrame.Lang.uploading+'</p>',
 						'<a class="'+t.classes.button+' '+t.classes.cancel+'"><span class="'+t.icons.cancel+'"></span> Cancel</a>',
 					'</div>',
 					'<div class="'+t.classes.progress+'"></div>',
 					'<div class="'+t.classes.errors+'">',
-						'<h3>Errors</h3>',
+						'<h3>'+PhotoFrame.Lang.errors+'</h3>',
 						'<ul></ul>',
 						'<a class="'+t.classes.button+' '+t.classes.cancel+'"><span class="'+t.icons.cancel+'"></span> Close</a>',
 					'</div>',
@@ -277,32 +337,40 @@ var PhotoFrame = function() {};
 						'<div class="'+t.classes.cropPhoto+'"></div>',
 						'<div class="'+t.classes.meta+'">',
 							'<a href="#" class="'+t.classes.metaClose+' '+t.classes.floatRight+'"><span class="'+t.icons.cancel+'"></span></a>',
-							'<h3>Photo Details</h3>',
+							'<h3>'+PhotoFrame.Lang.photo_details+'</h3>',
 							'<ul>',
 								'<li>',
-									'<label for="title">Title</label>',
+									'<label for="title">'+PhotoFrame.Lang.title+'</label>',
 									'<input type="text" name="title" value="" id="title" />',
 								'</li>',
 								'<!-- <li>',
-									'<label for="keywords">Keywords</label>',
+									'<label for="keywords">'+PhotoFrame.Lang.keywords+'</label>',
 									'<input type="text" name="keywords" value="" id="keywords" />',
 								'</li> -->',
 								'<li>',
-									'<label for="title">Description</label>',
+									'<label for="title">'+PhotoFrame.Lang.description+'</label>',
 									'<textarea name="description" id="description"></textarea>',
 								'</li>',
 							'</ul>',
 						'</div>',
 						'<div class="'+t.classes.toolbar+'">',
-							'<a class="'+t.classes.barButton+' '+t.classes.cancel+' '+t.classes.floatLeft+'"><span class="'+t.icons.cancel+'"></span> Cancel</a>',
-							'<a class="'+t.classes.barButton+' '+t.classes.save+' '+t.classes.floatRight+'"><span class="'+t.icons.save+'"></span> Save</a>',
+							'<div class="'+t.classes.tools+'">',
+								'<a href="#" class="'+t.classes.toolBarToggle+'"><i class="'+t.icons.cog+'"></i></a>',
+								/*'<a class="'+t.classes.infoToggle+'"><i class="'+t.icons.info+'"></i></a>',*/
+							'</div>',
+							'<a href="#"  class="'+t.classes.barButton+' '+t.classes.cancel+' '+t.classes.floatLeft+'"><span class="'+t.icons.cancel+'"></span> '+PhotoFrame.Lang.cancel+'</a>',
+							'<a href="#"  class="'+t.classes.barButton+' '+t.classes.save+' '+t.classes.floatRight+'"><span class="'+t.icons.save+'"></span> '+PhotoFrame.Lang.save+'</a>',
 						'</div>',
 					'</div>',
 				'</div>'
 			].join('');
 			
-			t.ui.dimmer  = $(html);
-			t.ui.toolbar = t.ui.dimmer.find('.'+t.classes.toolbar);
+			t.ui.dimmer        = $(html);
+			t.ui.toolbar       = t.ui.dimmer.find('.'+t.classes.toolbar);
+			t.ui.tools         = t.ui.toolbar.find('.'+t.classes.tools);
+			t.ui.toolBarToggle = t.ui.toolbar.find('.'+t.classes.toolBarToggle);
+			t.ui.infoToggle    = t.ui.toolbar.find('.'+t.classes.infoToggle);
+			
 			t.ui.toolbar.hide();
 			t.ui.body.append(t.ui.dimmer);
 		
@@ -332,6 +400,10 @@ var PhotoFrame = function() {};
 			t.ui.metaDescription = t.ui.meta.find('#description');
 			t.ui.metaKeywords    = t.ui.meta.find('#keywords');
 			t.ui.dropZone        = t.$wrapper.find('.'+t.classes.dropZone);
+			
+			t.buttonBar = new PhotoFrame.ButtonBar(this, ['rotate', 'crop'], {
+				title: PhotoFrame.Lang.tools
+			});
 			
 			$(window).keyup(function(e) {
 				if (e.keyCode == 27) { 
@@ -388,17 +460,15 @@ var PhotoFrame = function() {};
 					},
 					fail: function (e, data) {
 						if(!t.cancel) {
-							t.showErrors(['An unexpected error has occurred. Please try again.']);	
+							t.showErrors([PhotoFrame.Lang.unexpected_error]);	
 						}						
 						t.cancel = false;
 					},
 					done: function (e, data) {
 						var errors = [];
-							
-						console.log(data.result);
 									
 						if(typeof data.result[0] == "undefined" || typeof data.result == "string") {						
-							errors = ['An unexpected error has occurred. Please try again.'];
+							errors = [PhotoFrame.Lang.unexpected_error];
 						}	
 						
 						if(typeof data.result == "object" && data.result.length == 1) {
@@ -518,6 +588,16 @@ var PhotoFrame = function() {};
 				}
 			});
 			
+			t.ui.toolBarToggle.click(function(e) {
+				t.toggleTools();
+				e.preventDefault();
+			});
+			
+			t.ui.infoToggle.click(function(e) {
+		    	t.toggleMeta();
+				e.preventDefault();
+			});
+			
 			if(!t.isAssetsInstalled()) {
 				if(!t.safecracker) {
 					$.ee_filebrowser.add_trigger(t.ui.browse, t.directory.id, {
@@ -615,6 +695,7 @@ var PhotoFrame = function() {};
 		},
 		
 		hideDimmer: function(callback) {
+			this.buttonBar.hide();
 			this.hideInstructions();
 			this.ui.dimmer.hide(callback);
 			this.progressBar.reset();
@@ -935,6 +1016,23 @@ var PhotoFrame = function() {};
 				this.hideMeta();
 			}
 		},
+				
+		toggleTools: function() {
+			if(!this.buttonBar.isVisible()) {
+				this.showTools();
+			}
+			else {
+				this.hideTools();
+			}
+		},
+		
+		showTools: function(callback) {
+			this.buttonBar.show(callback);
+		},
+		
+		hideTools: function(callback) {
+			this.buttonBar.hide(callback);
+		},
 		
 		hideInfo: function(callback) {
 			if(this.ui.info) {
@@ -947,10 +1045,385 @@ var PhotoFrame = function() {};
 				this.ui.info.fadeIn
 				(callback);
 			}
+		},
+		
+		bind: function(event, callback) {
+			if(!this.events[event]) {
+				this.events[event] = [];
+			}
+			
+			if(typeof callback == "function") {
+				this.events[event].push(callback);
+			}
+		},
+		
+		trigger: function(event) {
+			var t = this;
+			var newArgs = arguments;
+			var args = [];
+					
+			for(var x = 1; x <= newArgs.length; x++) {
+				if(newArgs[x]) {
+					args.push(newArgs[x]);
+				}
+			}
+			
+			if(this.events[event]) {
+				$.each(this.events[event], function(i, callback) {
+					callback.apply(this, args);				
+				});
+			}
 		}
 		
 	});
 	
+	PhotoFrame.ButtonBar = PhotoFrame.Class.extend({
+		
+		/**
+		 * The active window (jQuery object)
+		 */	
+		 
+		activeWindow: false,
+		
+		/**
+		 * An array of PhotoFrame.Button objects
+		 */	
+		 
+		buttons: [],
+		
+		/**
+		 * An object of classes
+		 */	
+		 
+		classes: {
+			active: 'photo-frame-active',
+			wrapper: 'photo-frame-toolbar-tools',
+			list: 'photo-frame-toolbar-tools-list',
+			titleBar: 'photo-frame-toolbar-tools-title'
+		},
+		
+		/**
+		 * The parent PhotoFrame.Factory
+		 */	
+		 
+		factory: false,
+
+		/**
+		 * The title of the button bar
+		 */	
+		 
+		title: false,
+				
+		/**
+		 * The child DOM objects
+		 */	
+		 
+		ui: {
+			titleBar: false,
+			list: false
+		},
+		
+		/**
+		 * The wrapping DOM object
+		 */	
+		 
+		$wrapper: false,
+				
+		
+		constructor: function(factory, buttons, options) {
+			this.base(options);
+			this.factory = factory;
+			this._buildButtonBar();
+			this.addButtons(buttons);
+		},
+		
+		addButton: function(button, options) {
+			var button = this.loadButton(button, options);
+			
+			if(button) {
+				var item   = $('<li />').append(button.$obj);
+				
+				this.ui.list.append(item);			
+				this.buttons.push(button);
+			}
+		},				
+		
+		addButtons: function(buttons, options) {
+			var t = this;
+			
+			for(var x in buttons) {
+				var button = buttons[x];
+				
+				this.addButton(button, options);
+			}
+		},
+		
+		unclick: function() {
+			
+		},
+		
+		click: function() {
+			this.ui.list.find('.'+this.classes.active).removeClass(this.classes.active);	
+		},	
+		
+		loadButton: function(type, options) {
+			if(typeof options != "object") {
+				options = {};
+			}
+			
+			if(PhotoFrame.Buttons[type.ucfirst()]) {
+				var button = new PhotoFrame.Buttons[type.ucfirst()](this, $.extend(true, {}, {
+					name: type
+				}, options));
+							
+				return button;
+			}
+			else {
+				this.log('The "'+type.ucfirst()+'" button does not exist.');
+			}
+		},
+		
+		isVisible: function(callback) {
+			return this.$wrapper.css('display') != 'none' ? true : false;
+		},
+		
+		show: function(callback) {
+			this.factory.ui.toolBarToggle.addClass(this.classes.active);
+			this.$wrapper.fadeIn(callback);
+		},
+		
+		hide: function(callback) {
+			var t = this;
+			
+			if(this.activeWindow) {
+				this.activeWindow.fadeOut();
+			}
+			
+			this.$wrapper.find('.'+this.classes.active).removeClass(this.classes.active);			
+			this.$wrapper.fadeOut(function() {
+				t.factory.ui.toolBarToggle.removeClass(t.classes.active);				
+				t.callback(callback);
+			});
+		},
+		
+		_buildButtonBar: function() {
+			this.$wrapper = $([
+				'<div class="'+this.classes.wrapper+'">',
+					'<div class="'+this.classes.titleBar+'">'+this.title+'</div>',
+					'<ul class="'+this.classes.list+'"></ul>',
+				'</div>'
+			].join(''));
+			
+			this.ui.titleBar = this.$wrapper.find('.'+this.classes.titleBar);
+			this.ui.list     = this.$wrapper.find('.'+this.classes.list);
+			
+			this.factory.ui.dimmer.append(this.$wrapper);
+			
+			this.$wrapper.draggable({
+				handle: this.ui.titleBar,
+				containment: 'parent',
+				scroll: false
+			});
+		}
+		
+	});
+	
+	PhotoFrame.Button = PhotoFrame.Class.extend({
+		
+		/**
+		 * The PhotoFrame.ButtonBar object
+		 */	
+		 
+		buttonBar: false,
+		
+		/**
+		 * An object of classes
+		 */	
+		 
+		classes: {
+			close: 'photo-frame-tool-window-close',
+			title: 'photo-frame-tool-window-title',
+			window: 'photo-frame-tool-window',
+			windowContent: 'photo-frame-tool-window-content',
+			windowButtons: 'photo-frame-tool-window-buttons',
+			windowButton: 'photo-frame-tool-window-button',
+			windowSave: 'photo-frame-tool-window-save'
+		},
+		
+		/**
+		 * The class of the icon to use
+		 */	
+		 
+		icon: false,
+		
+		/**
+		 * An object of icon classes
+		 */	
+		 
+		icons: {
+			close: 'icon-cancel'	 
+		},
+		 
+		/**
+		 * The name of the button
+		 */	
+		 
+		name: false,
+		
+		/**
+		 * A description of what the button does
+		 */	
+		 
+		description: false,	
+		
+		/**
+		 * The DOM object
+		 */	
+		 
+		$obj: false,
+		
+		/**
+		 * The children DOM object
+		 */	
+		 
+		ui: {
+			window: false,
+			windowContent: false,
+			windowTitle: false		
+		},
+		
+		/**
+		 * The text that appears on the save button 
+		 */
+		
+		windowButtonText: 'Save',
+		
+		apply: function() {
+			t.hideWindow();
+		},
+		
+		constructor: function(buttonBar, options) {
+			var t = this;					
+			
+			t.ui  = $.extend(true, {}, t.ui);
+			
+			this.base(options);
+			this.buttonBar = buttonBar;
+			
+			this.$obj = $('<a href="#" title="'+this.description.replace('"', '')+'"></a>');
+			this.$obj.append('<i />').addClass('icon-'+(this.icon ? this.icon : this.name.toLowerCase()));
+				
+			this.buildWindow();
+		},	
+		
+		click: function(e) {
+			if(this.$obj.hasClass(this.buttonBar.classes.active)) {
+				this.buttonBar.unclick();
+				this.$obj.removeClass(this.buttonBar.classes.active);
+				this.hideWindow();
+			}
+			else {
+				this.buttonBar.click();
+				this.$obj.addClass(this.buttonBar.classes.active);
+				this.showWindow();
+			}			
+		},
+		
+		hideWindow: function(callback) {
+			this.$obj.removeClass(this.buttonBar.classes.active);
+			this.ui.window.fadeOut(callback)
+		},
+		
+		showWindow: function(callback) {
+			var t = this;
+			
+			function showWindowAction() {				
+				t.ui.window.fadeIn(callback);
+				t.ui.window.css('display', 'inline-block');			
+				t.positionWindow();
+				t.buttonBar.activeWindow = t.ui.window;
+			}
+			
+			if(this.buttonBar.activeWindow) {	
+				this.buttonBar.activeWindow.fadeOut(function() {
+					showWindowAction();
+				});	
+			}
+			else {
+				showWindowAction();
+			}
+		},
+		
+		positionWindow: function() {			
+			var index  = parseInt(this.$obj.parent().index()) + 1;
+			//var top    = parseInt(this.buttonBar.$wrapper.css('top').replace('px', ''));
+			//var height = this.$obj.height();
+					
+			this.ui.window.position({
+				of: this.$obj,
+				my: 'left top',
+				at: 'right top'
+			});				
+			
+			var left;
+			
+			if(index % 2 == 1) {
+				this.shiftWindow('left', this.$obj.width()+1);
+			}		
+			
+			this.shiftWindow('left', 16);	
+		},
+		
+		buildWindow: function() {			
+			var t    = this;					
+			var html = $([
+				'<div class="'+this.buttonBar.classes.wrapper+' '+this.classes.window+'">',
+					'<a href="#" class="'+this.classes.close+'"><i class="'+this.icons.close+'"></i></a>',
+					'<div class="'+this.classes.title+'">'+(this.name ? this.name.ucfirst() : 'N/A')+'</div>',
+					'<div class="'+this.classes.windowContent+'"></div>',
+					'<div class="'+this.classes.windowButtons+' '+this.buttonBar.factory.classes.clearfix+'">',
+						'<a href="#" class="'+this.classes.windowButton+' '+this.classes.windowSave+'">'+this.windowButtonText+'</a>',
+					'</div>',
+				'</div>'
+			].join(''));
+			
+			this.ui.window        = html;
+			this.ui.windowClose   = html.find('.'+this.classes.close);
+			this.ui.windowSave    = html.find('.'+this.classes.windowSave);
+			this.ui.windowContent = html.find('.'+this.classes.windowContent);
+			this.ui.windowTitle   = html.find('.'+this.classes.title);
+			
+			this.ui.window.draggable({
+				handle: this.ui.windowTitle,
+				containment: 'parent',
+				scroll: false
+			});
+			
+			this.$obj.click(function(e) {
+				t.click();
+				e.preventDefault();
+			});
+			
+			this.ui.windowClose.click(function(e) {
+				t.hideWindow();
+				e.preventDefault();
+			});
+			
+			this.ui.windowSave.click(function(e) {
+				t.apply();
+				e.preventDefault();
+			});
+			
+			html.insertAfter(this.buttonBar.$wrapper);
+		},
+		
+		shiftWindow: function(prop, value) {
+			var current = parseInt(this.ui.window.css(prop).replace('px', ''));
+			
+			this.ui.window.css(prop, current+value);
+		}
+		
+	});
 	
 	PhotoFrame.Photo = PhotoFrame.Class.extend({
 			
@@ -1232,15 +1705,17 @@ var PhotoFrame = function() {};
             t.settings.onChange = function() {
             	t.hideInstructions();
 	          	t.updateInfo();
+	            t.factory.trigger('jcropOnChange', this);
             };
             
             t.settings.onRelease = function() {
-	            this.released = true;
-            	
+	            this.released = true;            	
+	            t.factory.trigger('jcropOnRelease', this);
             };
             
             t.settings.onSelect = function() {
-	            this.released = false;
+	            this.released = false;	            
+	            t.factory.trigger('jcropOnSelect', this);
             }
             
 			if(t.settings.setSelect) {
@@ -1465,6 +1940,7 @@ var PhotoFrame = function() {};
 				t.hideProgress();
 				
 				t.factory.cancel = true;
+				t.factory.buttonBar.hide();
 				t.factory.hideDimmer();
 				t.factory.resetProgress();
 				
@@ -1565,7 +2041,7 @@ var PhotoFrame = function() {};
 			else {
 				t.clearNotices();
 				
-				t.ui.saving = $('<div class="'+t.factory.classes.saving+'"><span></span> Saving...</div>');
+				t.ui.saving = $('<div class="'+t.factory.classes.saving+'"><span></span> '+PhotoFrame.Lang.saving+'</div>');
 				
 				t.factory.ui.dimmer.append(t.ui.saving);			
 				t.factory.ui.dimmer.find('.'+t.factory.classes.saving+' span').activity();			
@@ -1575,6 +2051,7 @@ var PhotoFrame = function() {};
 					t.ui.info.fadeOut();
 				}
 				
+				t.factory.buttonBar.hide();
 				t.hideMeta();
 				t.ui.saving.center();
 				
@@ -2070,7 +2547,8 @@ var PhotoFrame = function() {};
 	});
 	
 	PhotoFrame.instances = [];
-	PhotoFrame.matrix = [];
+	PhotoFrame.matrix    = [];
+	PhotoFrame.Buttons   = [];
 	
 }(jQuery));
 
@@ -2144,3 +2622,13 @@ jQuery.fn.center = function () {
     
     return this;
 }
+
+/**
+ * Capitalize the first letter in a string
+ *
+ * @return string
+ */
+ 
+String.prototype.ucfirst = function() {
+	return this.substr(0, 1).toUpperCase() + this.substr(1);
+};

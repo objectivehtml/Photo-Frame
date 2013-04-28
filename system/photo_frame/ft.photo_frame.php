@@ -146,10 +146,14 @@ class Photo_frame_ft extends EE_Fieldtype {
 		}
 		$this->EE->theme_loader->module_name = 'photo_frame';
 				
+		$this->EE->theme_loader->output('PhotoFrame.Lang = '.$this->_lang().';');
+		
 		$this->EE->theme_loader->css('photo_frame');
 		$this->EE->theme_loader->css('jquery.jcrop');
 		$this->EE->theme_loader->javascript('base');
 		$this->EE->theme_loader->javascript('photo_frame');
+		$this->EE->theme_loader->javascript('buttons/rotate');
+		$this->EE->theme_loader->javascript('buttons/crop');
 		$this->EE->theme_loader->javascript('jquery.ui');
 		$this->EE->theme_loader->javascript('jquery.ui.widget');
 		$this->EE->theme_loader->javascript('jquery.iframe-transport');
@@ -157,8 +161,8 @@ class Photo_frame_ft extends EE_Fieldtype {
 		$this->EE->theme_loader->javascript('jquery.activity-indicator');
 		$this->EE->theme_loader->javascript('jquery.load-image');
 		$this->EE->theme_loader->javascript('jquery.jcrop');
-		$this->EE->theme_loader->javascript('jquery.color');		
-		$this->EE->theme_loader->output('PhotoFrame.Lang = '.$this->_lang().';');
+		$this->EE->theme_loader->javascript('jquery.color');
+				
 		
 		$entry_id  = empty($data) && $data !== FALSE ? $data : ($this->EE->input->get_post('entry_id') ? $this->EE->input->get_post('entry_id') : (isset($this->EE->safecracker) ? $this->EE->safecracker->entry('entry_id') : 0));
 			
