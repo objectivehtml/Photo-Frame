@@ -9,6 +9,26 @@ class Photo_frame_model extends CI_Model {
 		$this->load->driver('channel_data');
 	}
 	
+	public function get_actions()
+	{
+		$this->load->helper('addon');
+		
+		$return  = array();		
+		$actions = $this->channel_data->get('actions', array(
+			'select' => 'action_id, method',
+			'where'  => array(
+				'class'  => 'Photo_frame_mcp'
+			)
+		));
+		
+		foreach($actions->result() as $action)
+		{		 
+			$return[$action->method] = base_page(). '?ACT='.$action->action_id;
+		}
+		
+		return $return;
+	}
+	
 	public function get_file_upload_groups()
 	{
 		if(!isset($this->session->cache['photo_frame']['upload_prefs']))

@@ -184,12 +184,7 @@ var PhotoFrame = function() {};
 			upload: 'photo-frame-upload',
 			wrapper: 'photo-frame-wrapper'
 		},	
-		/**
-		 * The object of the photo being cropped
-		 */		
-		 
-		cropPhoto: false,
-				 
+		
 		/**
 		 * Force users to crop new photos?
 		 */		
@@ -288,7 +283,7 @@ var PhotoFrame = function() {};
 			}
 			
 			var html = [
-				'<form id="'+t.classes.upload+'" class="'+t.classes.form+' '+t.classes.wrapper+' '+t.classes.icons+'" action="'+t.url+(t.IE() ? '&ie=true' : '')+'" method="POST" enctype="multipart/form-data" id="'+t.classes.upload+'-'+t.index+'" '+(t.IE() ? 'target="photo-frame-iframe-'+t.index+'"' : '')+'>',
+				'<form id="'+t.classes.upload+'" class="'+t.classes.form+' '+t.classes.wrapper+' '+t.classes.icons+'" action="'+PhotoFrame.Actions.upload_photo+(t.IE() ? '&ie=true' : '')+'" method="POST" enctype="multipart/form-data" id="'+t.classes.upload+'-'+t.index+'" '+(t.IE() ? 'target="photo-frame-iframe-'+t.index+'"' : '')+'>',
 					'<h3>'+PhotoFrame.Lang.select_file+'</h3>',
 					'<input type="file" name="files[]" multiple>',
 					'<button type="submit" class="'+t.classes.button+'"><span class="icon-upload"></span>'+t.buttonText+'</button>',
@@ -447,7 +442,7 @@ var PhotoFrame = function() {};
 					},
 					singleFileUploads: false,
 					dropZone: t.ui.dropZone,
-					url: t.url,
+					url: PhotoFrame.Actions.upload_photo,
 					add: function (e, data) {
 						if(data.files.length > 0) {
 							t.ui.dropZone.hide();
@@ -466,8 +461,8 @@ var PhotoFrame = function() {};
 					},
 					done: function (e, data) {
 						var errors = [];
-									
-						if(typeof data.result[0] == "undefined" || typeof data.result == "string") {						
+						
+						if(typeof data.result[0] == "undefined" || typeof data.result == "string") {
 							errors = [PhotoFrame.Lang.unexpected_error];
 						}	
 						
@@ -528,7 +523,7 @@ var PhotoFrame = function() {};
 				    	if(files.length == 1) {
 				    		t.showProgress(0, function() {
 					    		t._fileBrowserResponseHandler(files[0].url, function(response) {
-					    			t.showProgress(100, function() {
+				    				t.showProgress(100, function() {
 						    			t._uploadResponseHandler(response);
 					    			});	
 					    		});
@@ -898,8 +893,8 @@ var PhotoFrame = function() {};
 		
 		_fileBrowserResponseHandler: function(file, callback) {
 			var t = this;
-			
-			$.get(t.responseUrl, 
+				
+			$.get(PhotoFrame.Actions.photo_response, 
 				{
 					field_id: t.fieldId, 
 					col_id: t.colId,
@@ -2072,9 +2067,7 @@ var PhotoFrame = function() {};
 				callback = response;
 				response = false;
 			}
-			if(!url) {
-				var url = this.factory.cropUrl;
-			}
+			
 			if(!response) {
 				var response = this.response;
 			}
@@ -2100,7 +2093,7 @@ var PhotoFrame = function() {};
     			t.settings.setSelect = [size.x, size.y, size.x2, size.y2];
     		}
     		
-			$.get(t.factory.cropUrl, {
+			$.get(PhotoFrame.Actions.crop_photo, {
 				id: t.factory.directory.id,
 				photo_id: t.id,
 				image: response.file_path,

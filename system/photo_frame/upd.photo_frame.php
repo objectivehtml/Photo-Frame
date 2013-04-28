@@ -162,12 +162,20 @@ class Photo_frame_upd {
 	
 	private $actions = array(
 		array(
-			'class'  => 'Photo_frame',
-			'method' => 'crop_action'
+			'class'  => 'Photo_frame_mcp',
+			'method' => 'crop_photo'
 		),
 		array(
-			'class'  => 'Photo_frame',
-			'method' => 'response_action'
+			'class'  => 'Photo_frame_mcp',
+			'method' => 'photo_response'
+		),
+		array(
+			'class'  => 'Photo_frame_mcp',
+			'method' => 'preview_crop_photo'
+		),
+		array(
+			'class'  => 'Photo_frame_mcp',
+			'method' => 'upload_photo'
 		)
 	);
 		

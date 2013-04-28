@@ -4,7 +4,7 @@
 		
 		name: 'Rotate',
 	
-		description: 'The rotate button allows you to define a degree to be used to rotate the image.',
+		description: 'The rotate an image by the defined degree.',
 		
 		constructor: function(buttonBar) {
 			this.windowButtonText = PhotoFrame.Lang.rotate;	

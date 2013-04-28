@@ -25,6 +25,42 @@ class Photo_frame_mcp {
 		echo 'index';exit();
 	}
 	
+	public function upload_photo()
+	{			
+		$this->EE->lang->loadfile('photo_frame');		
+		$this->EE->load->add_package_path(PATH_THIRD . 'photo_frame');
+		
+		if(count($_FILES) > 0 && count($_POST) == 0)
+		{
+			$this->EE->load->library('photo_frame_lib');
+			$this->EE->photo_frame_lib->upload_action();
+		}	
+	}
+	
+	public function crop_photo()
+	{		
+		$this->EE->load->library('photo_frame_lib');
+		
+		$this->EE->photo_frame_lib->crop_action();
+	}
+	
+	public function photo_response()
+	{		
+		$this->EE->load->library('photo_frame_lib');
+		
+		$this->EE->photo_frame_lib->response_action();
+	}
+	
+	public function preview_crop_photo()
+	{
+		$url = $this->EE->input->get_post('url');
+		
+		header('Content-Type: image/png');
+		readfile($url);
+		exit();
+	}
+	
+	/*
 	public function upload_action()
 	{
 		$this->EE->load->library('filemanager');
@@ -59,6 +95,7 @@ class Photo_frame_mcp {
 			'errors'             => $errors
 		));
 	}
+	*/
 	
 	public function crop_action()
 	{

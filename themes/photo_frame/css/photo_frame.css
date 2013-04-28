@@ -572,14 +572,13 @@ a.photo-frame-bar-button.photo-frame-cancel.photo-frame-float-left {
 
 .photo-frame-photo {
 	max-width: 100%;
-	height: auto;	
 }
 
 .photo-frame-photo img {
 	max-width: none;
 	display: block;
 	width: 100%;
-	height: 100%;
+	height: auto;
 }
 
 .matrix .photo-frame-photo img {
@@ -595,7 +594,8 @@ a.photo-frame-bar-button.photo-frame-cancel.photo-frame-float-left {
 }
 
 .photo-frame-preview ul {
-	margin: 0;	
+	margin: 0;
+	padding: 0;
 }
 
 .photo-frame-preview li {
@@ -696,26 +696,6 @@ a.photo-frame-meta-toggle.active,  a.photo-frame-meta-toggle:hover {
 	position: relative;
 }
 
-
-.clearfix:after {
-	content: ".";
-	display: block;
-	clear: both;
-	visibility: hidden;
-	line-height: 0;
-	height: 0;
-}
-.clearfix {
-	display: block;
-}
-html[xmlns] .clearfix {
-	display: block;
-}
-.clearfix {
-	height: 1%;
-}
-
-
 .photo-frame-button {
 	background: rgb(255,255,255);
 	background: -moz-linear-gradient(top,  rgba(255,255,255,1) 0%, rgba(237,237,237,1) 100%);
@@ -791,6 +771,11 @@ filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#d12d2d2d', e
 	cursor: move;
 }
 
+.photo-frame-toolbar-tools-list {
+	margin: 0;
+	padding: 0;
+}
+
 .photo-frame-toolbar-tools-list li a {
 	color: rgb(200, 200, 200);
 	text-decoration: none;
@@ -841,7 +826,7 @@ filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#d12d2d2d', e
 }
 
 .photo-frame-tool-window {
-	padding: 10px;
+	padding: 5px 10px 10px;
 	display: none;
 	position: fixed;
 }
@@ -928,3 +913,20 @@ a.photo-frame-tool-window-button:active {
 .photo-frame-toolbar .photo-frame-tools a { color: white; font-size: 34px; text-shadow: 0 -1px 0 black; }
 .photo-frame-toolbar .photo-frame-tools a.photo-frame-active { color: rgb(47, 143, 216); }
 .photo-frame-tool-window-save { float: right; }
+
+
+/* -----------------------------------------
+	Clearfix
+----------------------------------------- */
+
+.clearfix:after {
+	content: ".";
+	display: block;
+	clear: both;
+	visibility: hidden;
+	line-height: 0;
+	height: 0;
+}
+.clearfix {
+	display: block;
+}

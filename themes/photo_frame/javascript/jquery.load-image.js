@@ -194,8 +194,7 @@
             }
             return canvas;
         }
-        img.width = width;
-        img.height = height;
+        
         return img;
     };
 

@@ -66,26 +66,10 @@ class Photo_frame_ft extends EE_Fieldtype {
 	{
 		$this->EE =& get_instance();
 		
-		/*
-		if($this->default_params['directory_name'])
-		{
-			$this->default_params['directory_name'] = config_item('photo_frame_directory_name');
-		}
-		*/
-		
 		if(isset($this->EE->safecracker_lib))
 		{
 			$this->safecracker = TRUE;
 		}
-			
-		$this->EE->lang->loadfile('photo_frame');		
-		$this->EE->load->add_package_path(PATH_THIRD . 'photo_frame');
-		
-		if(count($_FILES) > 0 && count($_POST) == 0)
-		{
-			$this->EE->load->library('photo_frame_lib');
-			$this->EE->photo_frame_lib->upload_action();
-		}	
 	}
 	
 	// --------------------------------------------------------------------
@@ -128,47 +112,7 @@ class Photo_frame_ft extends EE_Fieldtype {
 	{			
 		$this->EE->load->config('photo_frame_config');
 		$this->EE->load->library('photo_frame_lib');
-			
-		$assets_installed = $this->EE->photo_frame_lib->assets_installed();
-		
-		// Make sure that Assets is installed
-		if($assets_installed)
-		{
-			require_once PATH_THIRD.'assets/helper.php';
-		
-			$assets_helper = new Assets_helper;
-			$assets_helper->include_sheet_resources();
-		}
-		
-		if(isset($this->EE->safecracker_lib))
-		{
-			$this->safecracker = TRUE;
-		}
-		$this->EE->theme_loader->module_name = 'photo_frame';
 				
-		$this->EE->theme_loader->output('PhotoFrame.Lang = '.$this->_lang().';');
-		
-		$this->EE->theme_loader->css('photo_frame');
-		$this->EE->theme_loader->css('jquery.jcrop');
-		$this->EE->theme_loader->javascript('base');
-		$this->EE->theme_loader->javascript('photo_frame');
-		$this->EE->theme_loader->javascript('buttons/rotate');
-		$this->EE->theme_loader->javascript('buttons/crop');
-		$this->EE->theme_loader->javascript('jquery.ui');
-		$this->EE->theme_loader->javascript('jquery.ui.widget');
-		$this->EE->theme_loader->javascript('jquery.iframe-transport');
-		$this->EE->theme_loader->javascript('jquery.fileupload');
-		$this->EE->theme_loader->javascript('jquery.activity-indicator');
-		$this->EE->theme_loader->javascript('jquery.load-image');
-		$this->EE->theme_loader->javascript('jquery.jcrop');
-		$this->EE->theme_loader->javascript('jquery.color');
-				
-		
-		$entry_id  = empty($data) && $data !== FALSE ? $data : ($this->EE->input->get_post('entry_id') ? $this->EE->input->get_post('entry_id') : (isset($this->EE->safecracker) ? $this->EE->safecracker->entry('entry_id') : 0));
-			
-			
-		$uid  = $this->matrix ? md5($this->cell_name) : $this->field_name.'_wrapper';
-			
 		$default_settings = array(
 			'photo_frame_display_info'       => 'true',
 			'photo_frame_display_meta'       => 'false',
@@ -198,6 +142,48 @@ class Photo_frame_ft extends EE_Fieldtype {
 	
 		$settings = array_merge($default_settings, $this->settings);
 	
+		$assets_installed = $this->EE->photo_frame_lib->assets_installed();
+		
+		// Make sure that Assets is installed
+		if($assets_installed)
+		{
+			require_once PATH_THIRD.'assets/helper.php';
+		
+			$assets_helper = new Assets_helper;
+			$assets_helper->include_sheet_resources();
+		}
+		
+		if(isset($this->EE->safecracker_lib))
+		{
+			$this->safecracker = TRUE;
+		}
+		
+		$this->EE->theme_loader->module_name = 'photo_frame';
+				
+		$this->EE->theme_loader->output('PhotoFrame.Lang    = '.$this->_lang().';');
+		$this->EE->theme_loader->output('PhotoFrame.Actions = '.$this->_actions($settings).';');
+		
+		$this->EE->theme_loader->css('photo_frame');
+		$this->EE->theme_loader->css('jquery.jcrop');
+		$this->EE->theme_loader->javascript('base');
+		$this->EE->theme_loader->javascript('photo_frame');
+		$this->EE->theme_loader->javascript('buttons/rotate');
+		$this->EE->theme_loader->javascript('buttons/crop');
+		$this->EE->theme_loader->javascript('jquery.ui');
+		$this->EE->theme_loader->javascript('jquery.ui.widget');
+		$this->EE->theme_loader->javascript('jquery.iframe-transport');
+		$this->EE->theme_loader->javascript('jquery.fileupload');
+		$this->EE->theme_loader->javascript('jquery.activity-indicator');
+		$this->EE->theme_loader->javascript('jquery.load-image');
+		$this->EE->theme_loader->javascript('jquery.jcrop');
+		$this->EE->theme_loader->javascript('jquery.color');
+				
+		
+		$entry_id  = empty($data) && $data !== FALSE ? $data : ($this->EE->input->get_post('entry_id') ? $this->EE->input->get_post('entry_id') : (isset($this->EE->safecracker) ? $this->EE->safecracker->entry('entry_id') : 0));
+			
+			
+		$uid  = $this->matrix ? md5($this->cell_name) : $this->field_name.'_wrapper';
+		
 		$preview_styles = NULL;
 	
 		$saved_data = array();
@@ -338,33 +324,10 @@ class Photo_frame_ft extends EE_Fieldtype {
 			$saved_data = array();
 		}
 		
-		if(!$this->safecracker)
-		{
-			$url = page_url();
-		}
-		else
-		{
-			$url = page_url(TRUE, TRUE, FALSE);
-		}
-
-		if(!$this->safecracker)
-		{
-			$url = page_url();
-		}
-		else
-		{
-			$url = page_url(TRUE, TRUE, FALSE);
-		}
-		
 		if(!isset($settings['photo_frame_upload_group']))
 		{
 			show_error('You don\'t have a file upload group set');
 		}
-		
-		$url .= (!preg_match('/\?/', $url) ? '?' : '&') . 'dir_id='.$settings['photo_frame_upload_group'].'&field_id='.$this->field_id;
-		
-		$crop_url     = action_url('photo_frame', 'crop_action', FALSE);
-		$response_url = action_url('photo_frame', 'response_action', FALSE);
 		
 		$min_width  = (int) $this->setting('min_width', 0);
 		$min_height = (int) $this->setting('min_height', 0);
@@ -434,9 +397,6 @@ class Photo_frame_ft extends EE_Fieldtype {
 			colId: '.(isset($this->col_id) ? '\'col_id_'.$this->col_id.'\'' : 'false').',
 			rowId: '.(isset($this->row_id) ? '\'row_id_'.$this->row_id.'\'' : 'false').',
 			photos: '.json_encode($saved_data).',
-			url: \''.$url.'\',
-			cropUrl: \''.$crop_url.'\',
-			responseUrl: \''.$response_url.'\',
 			settings: '.json_encode($jcrop_settings).',
 			useAssets: '.$settings['photo_frame_assets'].',
 			directory: '.json_encode($directory).',
@@ -569,6 +529,15 @@ class Photo_frame_ft extends EE_Fieldtype {
 		}
 		
 		return json_encode($lang);
+	}
+	
+	private function _actions($settings)
+	{
+		$actions = $this->EE->photo_frame_model->get_actions();
+		
+		$actions['upload_photo'] .= '&dir_id='.$settings['photo_frame_upload_group'].'&field_id='.$this->field_id;
+		
+		return json_encode($actions);
 	}
 	
 	public function replace_thumb($data, $params = array(), $tagdata)
