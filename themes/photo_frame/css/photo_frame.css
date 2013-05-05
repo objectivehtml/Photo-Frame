@@ -815,6 +815,7 @@ filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#d12d2d2d', e
 	position: relative;
 }
 
+.photo-frame-toolbar-tools-list li:nth-last-child(-n+2),
 .photo-frame-toolbar-tools-list li:last-child {
 	border-bottom: none;
 }

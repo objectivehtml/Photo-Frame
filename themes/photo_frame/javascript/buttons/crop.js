@@ -49,10 +49,10 @@
 		},
 		
 		apply: function() {			
-			var x  = parseInt(this.ui.windowContent.find('#x').val());
-			var y  = parseInt(this.ui.windowContent.find('#y').val());
-			var x2 = parseInt(this.ui.windowContent.find('#x2').val());
-			var y2 = parseInt(this.ui.windowContent.find('#y2').val());
+			var x  = parseInt(this.window.ui.content.find('#x').val());
+			var y  = parseInt(this.window.ui.content.find('#y').val());
+			var x2 = parseInt(this.window.ui.content.find('#x2').val());
+			var y2 = parseInt(this.window.ui.content.find('#y2').val());
 			
 			this.buttonBar.factory.cropPhoto.jcrop.setSelect([x, y, x2, y2]);
 		},
