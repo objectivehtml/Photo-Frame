@@ -166,6 +166,7 @@ class Photo_frame_ft extends EE_Fieldtype {
 		$this->EE->theme_loader->css('photo_frame');
 		$this->EE->theme_loader->css('jquery.jcrop');
 		$this->EE->theme_loader->javascript('base');
+		$this->EE->theme_loader->javascript('localStorageDB');
 		$this->EE->theme_loader->javascript('photo_frame');
 		$this->EE->theme_loader->javascript('buttons/rotate');
 		$this->EE->theme_loader->javascript('buttons/crop');

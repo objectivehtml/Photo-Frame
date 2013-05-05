@@ -2,16 +2,45 @@
 
 	PhotoFrame.Buttons.Crop = PhotoFrame.Button.extend({
 		
+		/**
+		 * An array of button objects
+		 */
+		
+		buttons: [],
+		
+		/**
+		 * The button description 
+		 */
+		
+		description: 'Open the crop panel.',
+		
+		/**
+		 * Name of the button
+		 */
+		
 		name: 'Crop',
 		
-		icon: 'crop',
+		/**
+		 * The JSON object used for Window settings 
+		 */
 		
-		description: 'The Crop button allows you to define a specific size and coordinates to be selected by the crop tool.',
+		windowSettings: {
+			title: false
+		},
 		
 		constructor: function(buttonBar) {
 			var t = this;
 			
-			t.windowButtonText = PhotoFrame.Lang.crop;	
+			this.windowSettings.title = PhotoFrame.Lang.crop;
+			
+			this.buttons = [{
+				text: 'Crop',
+				css: 'photo-frame-tool-window-save',
+				onclick: function(e) {
+					t.apply();
+				}
+			}];
+
 			t.base(buttonBar);
 			
 			t.buttonBar.factory.bind('jcropOnChange', function(a) {
@@ -25,15 +54,11 @@
 			var x2 = parseInt(this.ui.windowContent.find('#x2').val());
 			var y2 = parseInt(this.ui.windowContent.find('#y2').val());
 			
-			console.log([x, y, x2, y2]);
-			
 			this.buttonBar.factory.cropPhoto.jcrop.setSelect([x, y, x2, y2]);
-			
-			console.log(x, y, x2, y2);
 		},
 		
 		buildWindow: function() {
-			this.base();
+			this.base({ buttons: this.buttons });
 			
 			var html = $([
 				/*'<div class="photo-frame-grid">',
@@ -62,7 +87,7 @@
 				'</div>',
 			].join(''));
 			
-			this.ui.windowContent.html(html);
+			this.window.ui.content.html(html);
 		},
 		
 		showWindow: function() {
@@ -70,15 +95,13 @@
 			this.base();
 		},
 		
-		_populateWindow: function() {	
+		_populateWindow: function() {
 			var crop = this.buttonBar.factory.cropPhoto.cropDimensions();
 					
-			//this.ui.windowContent.find('#width').val(crop.w);
-			//this.ui.windowContent.find('#height').val(crop.h);
-			this.ui.windowContent.find('#x').val(crop.x);
-			this.ui.windowContent.find('#y').val(crop.y);
-			this.ui.windowContent.find('#x2').val(crop.x2);
-			this.ui.windowContent.find('#y2').val(crop.y2);
+			this.window.ui.content.find('#x').val(crop.x);
+			this.window.ui.content.find('#y').val(crop.y);
+			this.window.ui.content.find('#x2').val(crop.x2);
+			this.window.ui.content.find('#y2').val(crop.y2);
 		}
 	});
 	

@@ -2,16 +2,43 @@ var PhotoFrame = function() {};
 
 (function($) {
 	
+	/**
+	 * An object of PhotoFrame.Database objects
+	 */
+	 
+	PhotoFrame.Model  = {};	
+	
+	/**
+	 * An array of PhotoFrame.Factory objects
+	 */
+	 
+	PhotoFrame.instances = [];
+	
+	/**
+	 * An array of PhotoFrame.Factory matrix objects
+	 */
+	 
+	PhotoFrame.matrix    = [];
+	
+	/**
+	 * An array of PhotoFrame.Button objects
+	 */
+	 
+	PhotoFrame.Buttons   = [];
+	
+
 	PhotoFrame.Class = Base.extend({
 		
 		/**
 		 * Build Date
 		 */
+		 
 		buildDate: '2013-04-10',
 		
 		/**
 		 * Version
 		 */
+		 
 		version: '0.9.5',
 		
 		/**
@@ -20,6 +47,7 @@ var PhotoFrame = function() {};
 		 * @param	object 	The default options
 		 * @param	object 	The override options
 		 */
+		 
 		constructor: function(_default, options) {
 			if(typeof _default != "object") {
 				var _default = {};
@@ -178,7 +206,7 @@ var PhotoFrame = function() {};
 			sortable: 'photo-frame-sortable',
 			sortablePlaceholder: 'photo-frame-sortable-placeholder',
 			toolbar: 'photo-frame-toolbar',
-			toolBarTools: 'photo-frame-toolbar-tools',
+			//toolBarTools: 'photo-frame-toolbar-tools',
 			toolBarToggle: 'photo-frame-toolbar-toggle',
 			tools: 'photo-frame-tools',
 			upload: 'photo-frame-upload',
@@ -249,6 +277,18 @@ var PhotoFrame = function() {};
 		 */		
 		 
 		ui: {},
+			
+		/**
+		 * An array of PhotoFrame.Window objects.
+		 */		
+		 
+		windows: [],
+			
+		/**
+		 * Global zIndex count.
+		 */		
+		 
+		zIndexCount: 1,
 		
 		/**
 		 * Constructor to set the options and UI events.
@@ -265,6 +305,7 @@ var PhotoFrame = function() {};
 			delete options.photos;
 			
 			t.$wrapper = $(obj);
+			
 			t.sortable();	
 			t.base(options);	
 			
@@ -939,6 +980,12 @@ var PhotoFrame = function() {};
 			this.ui.metaDescription.val('');
 		},
 		
+		hash: function(length, r) {
+			var m = m || length; s = '', r = r ? r : 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+			for (var i=0; i < m; i++) { s += r.charAt(Math.floor(Math.random()*r.length)); }
+			return s;
+		},
+		
 		/**
 		 * Resets the progress bar.
 		 */		
@@ -1114,15 +1161,16 @@ var PhotoFrame = function() {};
 		 */	
 		 
 		ui: {
+			list: false,
 			titleBar: false,
-			list: false
+			wrapper: false
 		},
 		
 		/**
 		 * The wrapping DOM object
 		 */	
 		 
-		$wrapper: false,
+		// $wrapper: false,
 				
 		
 		constructor: function(factory, buttons, options) {
@@ -1136,7 +1184,7 @@ var PhotoFrame = function() {};
 			var button = this.loadButton(button, options);
 			
 			if(button) {
-				var item   = $('<li />').append(button.$obj);
+				var item = $('<li />').append(button.$obj);
 				
 				this.ui.list.append(item);			
 				this.buttons.push(button);
@@ -1158,7 +1206,7 @@ var PhotoFrame = function() {};
 		},
 		
 		click: function() {
-			this.ui.list.find('.'+this.classes.active).removeClass(this.classes.active);	
+			//this.ui.list.find('.'+this.classes.active).removeClass(this.classes.active);	
 		},	
 		
 		loadButton: function(type, options) {
@@ -1179,12 +1227,12 @@ var PhotoFrame = function() {};
 		},
 		
 		isVisible: function(callback) {
-			return this.$wrapper.css('display') != 'none' ? true : false;
+			return this.ui.wrapper.css('display') != 'none' ? true : false;
 		},
 		
 		show: function(callback) {
 			this.factory.ui.toolBarToggle.addClass(this.classes.active);
-			this.$wrapper.fadeIn(callback);
+			this.ui.wrapper.fadeIn(callback);
 		},
 		
 		hide: function(callback) {
@@ -1194,31 +1242,97 @@ var PhotoFrame = function() {};
 				this.activeWindow.fadeOut();
 			}
 			
-			this.$wrapper.find('.'+this.classes.active).removeClass(this.classes.active);			
-			this.$wrapper.fadeOut(function() {
+			this.ui.wrapper.find('.'+this.classes.active).removeClass(this.classes.active);			
+			this.ui.wrapper.fadeOut(function() {
 				t.factory.ui.toolBarToggle.removeClass(t.classes.active);				
 				t.callback(callback);
 			});
+			
+			for(var x in this.factory.windows) {
+				var window = this.factory.windows[x];
+				
+				window.close();
+			}
 		},
 		
+		position: function() {			
+			if(this.hasPosition()) {
+				var pos = this.getPosition();
+				this.ui.wrapper.css({
+					left: pos.x,
+					top: pos.y,
+					position: 'fixed'
+				});
+			}		
+		},
+		
+		savePosition: function() {
+			PhotoFrame.Model.WindowLocations.insertOrUpdate({title: this.title}, {
+				title: this.title,
+				y: this.ui.wrapper.css('top'),
+				x: this.ui.wrapper.css('left')
+			});
+		},
+		
+		bringToFront: function() {
+			this.factory.zIndexCount++;
+			this.ui.wrapper.css('z-index', this.factory.zIndexCount);
+		},
+		
+		hasPosition: function() {
+			return this.getPosition() ? true : false;	
+		},
+		
+		getPosition: function() {
+			var pos = PhotoFrame.Model.WindowLocations.get({title: this.title});
+			
+			if(pos.length == 0) {
+				return false;
+			}
+			
+			return pos[0];
+		},
+		
+		restorePosition: function() {
+			var position = this.getPosition();
+			
+			this.setPosition(position.x, position.y);
+		},
+		
+		setPosition: function(x, y) {
+			this.ui.wrapper.css('left', x).css('top', y);
+		},		
+		
 		_buildButtonBar: function() {
-			this.$wrapper = $([
+			var t = this;
+			
+			this.ui.wrapper = $([
 				'<div class="'+this.classes.wrapper+'">',
 					'<div class="'+this.classes.titleBar+'">'+this.title+'</div>',
 					'<ul class="'+this.classes.list+'"></ul>',
 				'</div>'
-			].join(''));
+			].join(''))
+			.css('z-index', 1);
 			
-			this.ui.titleBar = this.$wrapper.find('.'+this.classes.titleBar);
-			this.ui.list     = this.$wrapper.find('.'+this.classes.list);
+			this.ui.titleBar = this.ui.wrapper.find('.'+this.classes.titleBar);
+			this.ui.list     = this.ui.wrapper.find('.'+this.classes.list);
 			
-			this.factory.ui.dimmer.append(this.$wrapper);
+			this.factory.ui.dimmer.append(this.ui.wrapper);
 			
-			this.$wrapper.draggable({
+			this.ui.wrapper.draggable({
 				handle: this.ui.titleBar,
 				containment: 'parent',
-				scroll: false
+				scroll: false,
+				stop: function(e) {
+					t.savePosition();
+				}
 			});
+			
+			this.ui.titleBar.click(function() {
+				t.bringToFront();
+			});
+			
+			this.position();
 		}
 		
 	});
@@ -1232,33 +1346,11 @@ var PhotoFrame = function() {};
 		buttonBar: false,
 		
 		/**
-		 * An object of classes
-		 */	
-		 
-		classes: {
-			close: 'photo-frame-tool-window-close',
-			title: 'photo-frame-tool-window-title',
-			window: 'photo-frame-tool-window',
-			windowContent: 'photo-frame-tool-window-content',
-			windowButtons: 'photo-frame-tool-window-buttons',
-			windowButton: 'photo-frame-tool-window-button',
-			windowSave: 'photo-frame-tool-window-save'
-		},
-		
-		/**
 		 * The class of the icon to use
 		 */	
 		 
 		icon: false,
 		
-		/**
-		 * An object of icon classes
-		 */	
-		 
-		icons: {
-			close: 'icon-cancel'	 
-		},
-		 
 		/**
 		 * The name of the button
 		 */	
@@ -1276,25 +1368,19 @@ var PhotoFrame = function() {};
 		 */	
 		 
 		$obj: false,
-		
+	
 		/**
-		 * The children DOM object
-		 */	
-		 
-		ui: {
-			window: false,
-			windowContent: false,
-			windowTitle: false		
-		},
-		
-		/**
-		 * The text that appears on the save button 
+		 * The primary PhotoFrame.Window object 
 		 */
 		
-		windowButtonText: 'Save',
+		window: false,
 		
-		apply: function() {
-			t.hideWindow();
+		/**
+		 * The JSON object used for Window settings 
+		 */
+		
+		windowSettings: {
+			title: false
 		},
 		
 		constructor: function(buttonBar, options) {
@@ -1302,125 +1388,362 @@ var PhotoFrame = function() {};
 			
 			t.ui  = $.extend(true, {}, t.ui);
 			
-			this.base(options);
 			this.buttonBar = buttonBar;
+			this.base(options);
 			
 			this.$obj = $('<a href="#" title="'+this.description.replace('"', '')+'"></a>');
 			this.$obj.append('<i />').addClass('icon-'+(this.icon ? this.icon : this.name.toLowerCase()));
-				
+			
+			this.$obj.click(function(e) {
+				t.click(e);
+				e.preventDefault();
+			});
+			
 			this.buildWindow();
 		},	
+		
+		apply: function() {
+			t.hideWindow();
+		},
+		
+		buildWindow: function(options) {
+			if(typeof options == "object") {
+				this.windowSettings = $.extend(true, {}, this.windowSettings, options);
+			}
+			this.window = new PhotoFrame.Window(this.buttonBar.factory, this.$obj, this.windowSettings);
+		},
 		
 		click: function(e) {
 			if(this.$obj.hasClass(this.buttonBar.classes.active)) {
 				this.buttonBar.unclick();
 				this.$obj.removeClass(this.buttonBar.classes.active);
-				this.hideWindow();
+				this.window.close();
 			}
 			else {
 				this.buttonBar.click();
 				this.$obj.addClass(this.buttonBar.classes.active);
-				this.showWindow();
+				this.window.open();
 			}			
 		},
 		
 		hideWindow: function(callback) {
 			this.$obj.removeClass(this.buttonBar.classes.active);
-			this.ui.window.fadeOut(callback)
+			this.window.close();
 		},
 		
 		showWindow: function(callback) {
 			var t = this;
 			
 			function showWindowAction() {				
-				t.ui.window.fadeIn(callback);
-				t.ui.window.css('display', 'inline-block');			
-				t.positionWindow();
-				t.buttonBar.activeWindow = t.ui.window;
+				t.window.open();			
+				t.window.position();
+				t.buttonBar.activeWindow = t.window;
 			}
 			
 			if(this.buttonBar.activeWindow) {	
-				this.buttonBar.activeWindow.fadeOut(function() {
+				this.buttonBar.activeWindow.close(function() {
 					showWindowAction();
 				});	
 			}
 			else {
 				showWindowAction();
 			}
+		}
+		
+	});
+	
+	PhotoFrame.Window = PhotoFrame.Class.extend({
+		
+		/**
+		 * An an array of button objects
+		 */	
+		 
+		buttons: [],
+			
+		/**
+		 * An object of callback functions
+		 */	
+		 
+		callbacks: {
+			ondrag: function() {},
+			ondragstart: function() {},
+			ondragend: function() {},
+			onclose: function() {},
+			onopen: function() {}
 		},
 		
-		positionWindow: function() {			
-			var index  = parseInt(this.$obj.parent().index()) + 1;
-			//var top    = parseInt(this.buttonBar.$wrapper.css('top').replace('px', ''));
-			//var height = this.$obj.height();
-					
-			this.ui.window.position({
-				of: this.$obj,
-				my: 'left top',
-				at: 'right top'
-			});				
+		/**
+		 * An object of classes
+		 */	
+		 
+		classes: {
+			close: 'photo-frame-tool-window-close',
+			title: 'photo-frame-tool-window-title',
+			window: 'photo-frame-tool-window',
+			content: 'photo-frame-tool-window-content',
+			buttons: 'photo-frame-tool-window-buttons',
+			button: 'photo-frame-tool-window-button',
+			save: 'photo-frame-tool-window-save',
+			wrapper: 'photo-frame-toolbar-tools'
+		},
+		
+		/**
+		 * The animation duration
+		 */	
+		 
+		duration: 333,
+		
+		/**
+		 * The easeIn animation
+		 */	
+		 
+		easeIn: 'easeInElastic',
+		
+		/**
+		 * The easeOut animation
+		 */	
+		 
+		easeOut: 'easeOutElastic',
+		
+		/**
+		 * The parent PhotoFrame.Factory object
+		 */	
+		 
+		factory: false,
+		
+		/**
+		 * An object of icon classes
+		 */	
+		 
+		icons: {
+			close: 'icon-cancel'	 
+		},
+		 
+		/**
+		 * The parent jQuery obj used to position the window
+		 */
+		
+		parent: false,
+		 
+		/**
+		 * The window title
+		 */
+		
+		title: false,
 			
-			var left;
+		/**
+		 * The children DOM object
+		 */	
+		 
+		ui: {
+			close: false,
+			content: false,
+			title: false,
+			wrapper: false	
+		},
+		
+		constructor: function(factory, parent, options) {
+			this.ui      = $.extend(true, {}, this.ui);
+			this.factory = factory;
+			this.parent  = parent;		
 			
-			if(index % 2 == 1) {
-				this.shiftWindow('left', this.$obj.width()+1);
-			}		
+			this.base(options);	
 			
-			this.shiftWindow('left', 16);	
+			if(!this.title) {
+				this.title = 'New Window '+this.factory.windows.length;
+			}
+						
+			this.buildWindow();
+				
+			factory.windows.push(this);
+		},
+		
+		buildButtons: function() {
+		
+			var t = this;
+			
+			$.each(this.buttons, function(i, button) {
+				var css  = button.css ? button.css : '';
+				var text = button.text ? button.text : '';
+				var icon = button.icon ? '<i class="'+button.icon+'"></i>' : '';
+				var $btn = $('<a href="#" class="'+css+' '+t.classes.button+'">'+icon+text+'</a>');
+				
+				if(typeof button.onclick === "function") {
+					$btn.click(function(e) {
+						button.onclick(e, t);
+					});
+				}
+				
+				t.ui.buttons.append($btn);
+			});
 		},
 		
 		buildWindow: function() {			
 			var t    = this;					
 			var html = $([
-				'<div class="'+this.buttonBar.classes.wrapper+' '+this.classes.window+'">',
+				'<div class="'+this.classes.wrapper+' '+this.classes.window+'">',
 					'<a href="#" class="'+this.classes.close+'"><i class="'+this.icons.close+'"></i></a>',
-					'<div class="'+this.classes.title+'">'+(this.name ? this.name.ucfirst() : 'N/A')+'</div>',
-					'<div class="'+this.classes.windowContent+'"></div>',
-					'<div class="'+this.classes.windowButtons+' '+this.buttonBar.factory.classes.clearfix+'">',
-						'<a href="#" class="'+this.classes.windowButton+' '+this.classes.windowSave+'">'+this.windowButtonText+'</a>',
-					'</div>',
+					'<div class="'+this.classes.title+'">'+(this.title ? this.title.ucfirst() : 'N/A')+'</div>',
+					'<div class="'+this.classes.content+'"></div>',
+					'<div class="'+this.classes.buttons+' '+this.factory.classes.clearfix+'"></div>',
 				'</div>'
 			].join(''));
 			
-			this.ui.window        = html;
-			this.ui.windowClose   = html.find('.'+this.classes.close);
-			this.ui.windowSave    = html.find('.'+this.classes.windowSave);
-			this.ui.windowContent = html.find('.'+this.classes.windowContent);
-			this.ui.windowTitle   = html.find('.'+this.classes.title);
+			this.ui.window  = html;
+			this.ui.buttons = html.find('.'+this.classes.buttons);
+			this.ui.close   = html.find('.'+this.classes.close);
+			this.ui.content = html.find('.'+this.classes.content);
+			this.ui.title   = html.find('.'+this.classes.title);
 			
 			this.ui.window.draggable({
-				handle: this.ui.windowTitle,
+				handle: this.ui.title,
 				containment: 'parent',
-				scroll: false
+				scroll: false,
+				drag: this.callbacks.ondrag,
+				start: this.callbacks.ondragstart,
+				stop: function(e) {
+					t.savePosition();
+					t.callback(t.callbacks.ondragend, e);
+				}
 			});
 			
-			this.$obj.click(function(e) {
-				t.click();
+			this.ui.window.click(function() {
+				t.bringToFront();
+			})
+			
+			this.ui.close.click(function(e) {
+				t.close();
 				e.preventDefault();
 			});
 			
-			this.ui.windowClose.click(function(e) {
-				t.hideWindow();
-				e.preventDefault();
-			});
-			
-			this.ui.windowSave.click(function(e) {
-				t.apply();
-				e.preventDefault();
-			});
-			
-			html.insertAfter(this.buttonBar.$wrapper);
+			this.buildButtons();
+			this.factory.ui.dimmer.append(html);
 		},
 		
-		shiftWindow: function(prop, value) {
+		close: function(callback) {			
+			this.ui.window.fadeOut({
+				duration: this.duration,
+				//easing: this.easeIn
+			}, function() {
+				t.callback(t.callbacks.onclose);
+				t.callback(callback);
+			})
+			.css('display', 'inline-block')
+			.css('position', 'fixed');
+		},
+		
+		open: function(callback) {
+			var t = this;
+			
+			this.ui.window.fadeIn({
+				duration: this.duration,
+				//easing: this.easeIn
+			}, function() {
+				t.callback(t.callbacks.onopen);
+				t.callback(callback);
+			})
+			.css('display', 'inline-block')
+			.css('position', 'fixed');
+			
+			if(this.ui.window.data('open') != 1) {
+				this.position();
+			}
+			else {
+			}
+			
+			this.bringToFront();	
+			this.ui.window.data('open', 1);
+		},
+		
+		bringToFront: function() {
+			this.factory.zIndexCount++;
+			this.ui.window.css('z-index', this.factory.zIndexCount);
+		},
+		
+		position: function() {			
+			var left, index  = parseInt(this.ui.window.parent().index()) + 1;
+			
+			var pos = this.getPosition();
+			var x   = parseInt(pos.x.replace('px', ''));
+			
+			this.ui.window.position({
+				of: this.parent,
+				my: 'left top',
+				at: 'right top',
+				collision: 'flip'
+			});
+					
+			if(x+this.ui.window.width() > $(window).width()) {
+				pos.x = ($(window).width() - this.ui.window.width()) + 'px';
+			}
+					
+			if(this.hasPosition()) {
+				this.ui.window.css({
+					left: pos.x,
+					top: pos.y
+				})
+				.position('collision', 'fit');
+			}
+			else {	
+				var width = 16;
+				
+				if(index % 2 == 0) {
+					this.shift('left', width);
+				}		
+				
+				this.shift('left', width);
+			}
+
+			this.bringToFront();	
+		},
+		
+		savePosition: function() {
+			PhotoFrame.Model.WindowLocations.insertOrUpdate({title: this.title}, {
+				title: this.title,
+				y: this.ui.window.css('top'),
+				x: this.ui.window.css('left')
+			});
+		},
+		
+		hasPosition: function() {
+			return this.getPosition() ? true : false;	
+		},
+		
+		getPosition: function() {
+			var pos = PhotoFrame.Model.WindowLocations.get({title: this.title});
+			
+			if(pos.length == 0) {
+				return false;
+			}
+			
+			return pos[0];
+		},
+		
+		restorePosition: function() {
+			var position = this.getPosition();
+			
+			this.setPosition(position.x, position.y);
+		},
+		
+		setPosition: function(x, y) {
+			this.ui.window.css('left', x).css('top', y);
+		},
+		
+		shift: function(prop, value) {
 			var current = parseInt(this.ui.window.css(prop).replace('px', ''));
 			
 			this.ui.window.css(prop, current+value);
 		}
-		
+				
 	});
 	
 	PhotoFrame.Photo = PhotoFrame.Class.extend({
+			
+		/**
+		 * The random string used to cache the photo
+		 */			 
+		
+		cache: false,
 			
 		/**
 		 * Image Compression (1-100)
@@ -1483,28 +1806,34 @@ var PhotoFrame = function() {};
 		keywords: '',
 		
 		/**
+		 * Image Manipulations
+		 */
+		 
+		manipulations: [],
+		
+		/**
 		 * Resize (expiremental)
 		 */	
 		 
-		resize: false,
+		// resize: false,
 		 
 		/**
 		 * Resize Max (expiremental)
 		 */	
 		 
-		resizeMax: false,
+		// resizeMax: false,
 		 
 		/**
 		 * Rotate Degrees
 		 */	
 		 
-		rotate: false,
+		// rotate: false,
 		 
 		/**
 		 * Default Crop Size
 		 */
 		 
-		scale: false,
+		// scale: false,
 		 
 		/**
 		 * Default Crop Size
@@ -1565,9 +1894,8 @@ var PhotoFrame = function() {};
 		constructor: function(factory, response, options) {	
 			var t = this;
 			
-			t.ui = $.extend(true, {}, t.ui);
-			
-			//t.settings    = factory.settings;
+			t.ui    = $.extend(true, {}, t.ui);
+			t.cache = factory.hash(12);
 			
 			t.base(options);
 			
@@ -2538,11 +2866,211 @@ var PhotoFrame = function() {};
 			});
 		}
 	});
+		
+	PhotoFrame.Database = PhotoFrame.Class.extend({
+		
+		/**
+		 * The driver used
+		 */	
+		 
+		driver: 'localStorage',
+		
+		/**
+		 * Datatable Fields
+		 */	
+		 
+		fields: [],
+		
+		/**
+		 * The localStorageDB object
+		 */	
+		 
+		model: false,
+		
+		/**
+		 * The name of the datatable
+		 */	
+		 
+		name: false,
+		
+		/**
+		 * If TRUE the datatable will be reset with each page load
+		 */	
+		 
+		reset: false,
+		
+		/**
+		 * Easily istantiate a database using localStorage
+		 *
+		 * @param 	string 	The name of the datatable
+		 * @param 	string 	The storage driver (defaults to localStorage)
+		 * @return	mixed
+		 */		
+		 
+		constructor: function(options) {			
+			this.base(options);
+			this.model = new localStorageDB('PhotoFrame', this.driver);
+			if(this.reset) {
+				this.clear();
+			}
+			this._firstRun();
+		},
+		
+		/**
+		 * Clear the datatable
+		 *
+		 * @return	void
+		 */		
+		 
+		clear: function() {
+			this.model.truncate(this.name);
+			this.model.commit();
+		},
+		
+		/**
+		 * Create the datatable
+		 *
+		 * @return	void
+		 */		
+		 
+		create: function() {
+			this.model.createTable(this.name, this.fields);
+			this.model.commit();
+		},
+		
+		/**
+		 * Drop the datatable
+		 *
+		 * @return	void
+		 */		
+		 
+		drop: function() {
+			this.model.dropTable(this,name);
+			this.model.commit();
+		},
+		
+		/**
+		 * Does the datatable exist?
+		 *
+		 * @return	bool  Returns TRUE if exists
+		 */		
+		 
+		exists: function() {
+			return this.model.tableExists(this.name);
+		},
+		
+		/**
+		 * Get the data from the datatable
+		 *
+		 * @param   object  A data object used filter the results
+		 * @return	bool  Returns TRUE if exists
+		 */		
+		 
+		get: function(data) {
+			return this.model.query(this.name, data);
+		},
+		
+		/**
+		 * Inserts data into the datatable
+		 *
+		 * @param   object  An object of data to insert
+		 * @return	void
+		 */		
+		 
+		insert: function(data) {
+			this.model.insert(this.name, data);
+			this.model.commit();
+		},
+		
+		/**
+		 * Insert if data does not exist
+		 *
+		 * @param   object  An object of data to insert
+		 * @return	void
+		 */		
+		 
+		insertIfNew: function(data) {
+			if(this.model.query(this.name, data).length == 0) {
+				this.model.insert(this.name, data);
+				this.model.commit();
+			}
+		},
+		
+		/**
+		 * Insert or update
+		 *
+		 * @param   object  An object of data to insert
+		 * @return	void
+		 */		
+		 
+		insertOrUpdate: function(query, data) {
+			this.model.insertOrUpdate(this.name, query, data);
+			this.model.commit();
+		},
+		
+		/**
+		 * Update data in the datatable
+		 *
+		 * @param   object  The row ID to update
+		 * @param   object  An object of data to update
+		 * @return	void
+		 */		
+		
+		update: function(id, data) {
+			this.model.update(this.name, {ID: id}, function(row) {
+				return $.extend(true, {}, row, data);
+			});
+			this.model.commit();
+		},
+		
+		/**
+		 * Remove data from the datatable
+		 *
+		 * @param   object  The row ID to update
+		 * @return	void
+		 */	
+		 
+		remove: function(id) {
+			this.model.deleteRows(this.name, {ID: id});
+			this.model.commit();
+		},
+		
+		/**
+		 * The database first run
+		 *
+		 * @return	void
+		 */	
+		
+		_firstRun: function() {
+			if(!this.exists()) {
+				this.create();
+			}
+		}
+		
+	});
 	
-	PhotoFrame.instances = [];
-	PhotoFrame.matrix    = [];
-	PhotoFrame.Buttons   = [];
-	
+	/**
+	 * This datatable stores the locations of the windows
+	 */
+	 
+	PhotoFrame.Model.WindowLocations = new PhotoFrame.Database({
+		
+		/**
+		 * The name of the datatable
+		 */
+		 
+		name: 'windowLocations',
+		
+		/**
+		 * An array of datatable columns
+		 */
+		 
+		fields: ['title', 'x', 'y']
+		
+		// , reset: true
+		
+	});
+		
 }(jQuery));
 
 /**

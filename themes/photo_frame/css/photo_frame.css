@@ -835,6 +835,7 @@ filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#d12d2d2d', e
 	text-align: center;
 	cursor: move;
 	margin-bottom: 12px;
+	padding: 0 20px;
 }
 
 a.photo-frame-tool-window-close {
