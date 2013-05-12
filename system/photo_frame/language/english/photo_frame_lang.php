@@ -24,6 +24,12 @@ $lang	= array(
 	'photo_frame_rotate'	  			 => 'Rotate',
 	'photo_frame_crop'		  			 => 'Crop',
 	'photo_frame_degrees'	  			 => 'Degrees',
+	'photo_frame_resize'	  			 => 'Resize',
+	'photo_frame_brightness' 			 => 'Brightness',
+	'photo_frame_contrast' 			     => 'Contrast',
+	'photo_frame_width' 			     => 'Width',
+	'photo_frame_height' 			     => 'Height',
+	'photo_frame_layers' 			     => 'Layers',
 	
 	'photo_frame_min_photos_error'       => 'You must upload at least {min_photos} {min_photos_name}.',
 	'photo_frame_max_photos_error'       => 'You must upload at least {max_photos} {max_photos_name}.',

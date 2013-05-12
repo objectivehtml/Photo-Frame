@@ -11,7 +11,8 @@
  * @build		20121031
  */
 
-require 'config/photo_frame_config.php';
+require PATH_THIRD . 'photo_frame/config/photo_frame_config.php';
+require PATH_THIRD . 'photo_frame/libraries/PhotoFrameButton.php';
 
 
 class Photo_frame_ft extends EE_Fieldtype {
@@ -170,6 +171,11 @@ class Photo_frame_ft extends EE_Fieldtype {
 		$this->EE->theme_loader->javascript('photo_frame');
 		$this->EE->theme_loader->javascript('buttons/rotate');
 		$this->EE->theme_loader->javascript('buttons/crop');
+		$this->EE->theme_loader->javascript('buttons/brightness');
+		$this->EE->theme_loader->javascript('buttons/contrast');
+		$this->EE->theme_loader->javascript('buttons/resize');
+		$this->EE->theme_loader->javascript('buttons/rgb');
+		$this->EE->theme_loader->javascript('buttons/layers');
 		$this->EE->theme_loader->javascript('jquery.ui');
 		$this->EE->theme_loader->javascript('jquery.ui.widget');
 		$this->EE->theme_loader->javascript('jquery.iframe-transport');
@@ -178,7 +184,67 @@ class Photo_frame_ft extends EE_Fieldtype {
 		$this->EE->theme_loader->javascript('jquery.load-image');
 		$this->EE->theme_loader->javascript('jquery.jcrop');
 		$this->EE->theme_loader->javascript('jquery.color');
+		
+		$buttons = array(
+			'layers',
+			'crop',
+			'rotate',
+			'brightness',
+			'contrast',
+			'resize',
+			'rgb'
+		);
+		
+		$js_directory = $this->EE->theme_loader->js_directory;
 				
+		foreach(directory_map(PATH_THIRD) as $addon_name => $addon)
+		{
+			if(isset($addon['photo_frame']) && is_array($addon['photo_frame']))
+			{
+				foreach($addon['photo_frame'] as $file)
+				{
+					$name  = str_replace('.php', '', $file);
+					$class = ucfirst($name).'Button';
+					
+					if(!class_exists($name))
+					{
+						require_once(PATH_THIRD . $addon_name . '/photo_frame/' . $file);
+					}
+					
+					$obj = new $class();
+					
+					foreach($obj->javascript() as $js)
+					{
+						$this->EE->theme_loader->javascript($js);
+					}
+					
+					foreach($obj->css() as $css)
+					{
+						$this->EE->theme_loader->css($css);
+					}
+				}
+			}
+		}
+		
+		$this->EE->theme_loader->js_directory = '';
+					
+		foreach(directory_map($this->EE->theme_loader->theme_path()) as $addon_name => $addon)
+		{
+			if(isset($addon['photo_frame']) && is_array($addon['photo_frame']))
+			{
+				foreach($addon['photo_frame'] as $file)
+				{
+					$name = str_replace('.js', '', $file);
+					
+					$buttons[] = $name;
+					
+					$this->EE->theme_loader->module_name  = $addon_name;
+					$this->EE->theme_loader->javascript('photo_frame/'.$name);
+				}
+			}
+		}
+		
+		$this->EE->theme_loader->js_directory = $js_directory;
 		
 		$entry_id  = empty($data) && $data !== FALSE ? $data : ($this->EE->input->get_post('entry_id') ? $this->EE->input->get_post('entry_id') : (isset($this->EE->safecracker) ? $this->EE->safecracker->entry('entry_id') : 0));
 			
@@ -391,6 +457,11 @@ class Photo_frame_ft extends EE_Fieldtype {
 		$resize 	= $this->EE->photo_frame_lib->build_size($settings, 'cropped');
 		$resize_max = $this->EE->photo_frame_lib->build_size($settings, 'cropped_max');
 		
+		foreach($saved_data as $index => $data)
+		{
+			$saved_data[$index]->manipulations = json_decode($data->manipulations);
+		}
+		
 		$settings_js 	= '{
 			fieldName: \''.($this->matrix ? $this->cell_name : $this->field_name).'\',
 			fieldId: \''.$this->field_id.'\',
@@ -398,6 +469,7 @@ class Photo_frame_ft extends EE_Fieldtype {
 			colId: '.(isset($this->col_id) ? '\'col_id_'.$this->col_id.'\'' : 'false').',
 			rowId: '.(isset($this->row_id) ? '\'row_id_'.$this->row_id.'\'' : 'false').',
 			photos: '.json_encode($saved_data).',
+			buttons: '.json_encode($buttons).',
 			settings: '.json_encode($jcrop_settings).',
 			useAssets: '.$settings['photo_frame_assets'].',
 			directory: '.json_encode($directory).',
@@ -940,6 +1012,7 @@ class Photo_frame_ft extends EE_Fieldtype {
 					'file_name'     => $matches[2],
 					'title'         => '',
 					'description'   => '',
+					'manipulations' => '',
 					'keywords'      => '',
 					'x'				=> '',
 					'x2'			=> '',
@@ -1010,6 +1083,7 @@ class Photo_frame_ft extends EE_Fieldtype {
     			    $photo['order']      		 = $index;
     				$photo['entry_id']   		 = $this->settings['entry_id'];
     				$photo['channel_id'] 		 = $entry->channel_id;
+    				$photo['manipulations'] 	 = json_encode($photo['manipulations']);
     				
     				if(isset($this->settings['col_id']))
     				{
@@ -1058,6 +1132,8 @@ class Photo_frame_ft extends EE_Fieldtype {
     		    if(isset($photo['edit']) && count($photo['edit']))
     		    {
         		    $photo = json_decode($photo['edit']);
+        		    
+    				$photo->manipulations = json_encode($photo->manipulations);
         		    
 					$photo_names[] = $photo->file_name;
 					

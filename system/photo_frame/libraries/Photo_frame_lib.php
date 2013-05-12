@@ -811,6 +811,7 @@ class Photo_frame_lib {
 				'title' 		=> $this->EE->input->get_post('title', TRUE) ? $this->EE->input->get_post('title', TRUE) : '',
 				'description'   => $this->EE->input->get_post('description', TRUE) ? $this->EE->input->get_post('description', TRUE) : '',
 				'keywords' 		=> $this->EE->input->get_post('keywords', TRUE) ? $this->EE->input->get_post('keywords', TRUE) : '',
+				'manipulations'	=> $this->EE->input->get_post('manipulations', TRUE) ? $this->EE->input->get_post('manipulations', TRUE) : array(),
 			), $save_data))
 		), $save_data));
 	}

@@ -144,6 +144,12 @@ var PhotoFrame = function() {};
 	PhotoFrame.Factory = PhotoFrame.Class.extend({
 		
 		/**
+		 * An array of buttons to use to build the buttonBar
+		 */
+		 
+		buttons: [],
+		 
+		/**
 		 * The PhotoFrame.ButtonBar object
 		 */	
 		 
@@ -252,14 +258,15 @@ var PhotoFrame = function() {};
 			rotate: 'icon-rotate',
 			save: 'icon-save',
 			warningSign: 'icon-warning-sign'
-		},	
-		 
+		},
+		
 		/**
-		 * The wrapping DOM object
+		 * The Layer window object
 		 */		
 		 
-		$wrapper: false,
-				
+		layerWindow: false,
+			
+		 	
 		/**
 		 * Photos Array.
 		 */		
@@ -283,7 +290,13 @@ var PhotoFrame = function() {};
 		 */		
 		 
 		windows: [],
-			
+		
+		/**
+		 * The wrapping DOM object
+		 */		
+		 
+		$wrapper: false,
+				
 		/**
 		 * Global zIndex count.
 		 */		
@@ -437,7 +450,7 @@ var PhotoFrame = function() {};
 			t.ui.metaKeywords    = t.ui.meta.find('#keywords');
 			t.ui.dropZone        = t.$wrapper.find('.'+t.classes.dropZone);
 			
-			t.buttonBar = new PhotoFrame.ButtonBar(this, ['rotate', 'crop'], {
+			t.buttonBar = new PhotoFrame.ButtonBar(t, t.buttons, {
 				title: PhotoFrame.Lang.tools
 			});
 			
@@ -542,6 +555,8 @@ var PhotoFrame = function() {};
 	    	
 	    	for(x in photos) {
 		    	var photo = photos[x];
+		    	
+		    	console.log(photo);
 		    	
 		    	new PhotoFrame.Photo(t, photo, {
 		    		id: photo.id,
@@ -731,7 +746,7 @@ var PhotoFrame = function() {};
 		},
 		
 		hideDimmer: function(callback) {
-			this.buttonBar.hide();
+			this.buttonBar.hide(false);
 			this.hideInstructions();
 			this.ui.dimmer.hide(callback);
 			this.progressBar.reset();
@@ -1122,12 +1137,6 @@ var PhotoFrame = function() {};
 	PhotoFrame.ButtonBar = PhotoFrame.Class.extend({
 		
 		/**
-		 * The active window (jQuery object)
-		 */	
-		 
-		activeWindow: false,
-		
-		/**
 		 * An array of PhotoFrame.Button objects
 		 */	
 		 
@@ -1163,7 +1172,7 @@ var PhotoFrame = function() {};
 		ui: {
 			list: false,
 			titleBar: false,
-			wrapper: false
+			window: false
 		},
 		
 		/**
@@ -1227,82 +1236,89 @@ var PhotoFrame = function() {};
 		},
 		
 		isVisible: function(callback) {
-			return this.ui.wrapper.css('display') != 'none' ? true : false;
+			return this.ui.window.css('display') != 'none' ? true : false;
 		},
 		
-		show: function(callback) {
+		show: function(save, callback) {
+			if(typeof save == "undefined") {
+				save = true;
+			}
+			else if(typeof save == "function") {
+				callback = save;
+				save = true;
+			}
+			
 			this.factory.ui.toolBarToggle.addClass(this.classes.active);
-			this.ui.wrapper.fadeIn(callback);
+			this.ui.window.fadeIn(callback);
+			
+			if(save) {
+				this.setVisibility(true);
+			}
+			
+			this.showWindows();
 		},
 		
-		hide: function(callback) {
+		hide: function(save, callback) {
 			var t = this;
+			
+			if(typeof save == "undefined") {
+				save = true;
+			}
+			else if(typeof save == "function") {
+				callback = save;
+				save = true;
+			}
 			
 			for(var x in this.factory.windows) {
 				var window = this.factory.windows[x];
 				
-				window.close();
+				window.close(false);
 			}
 			
 			this.ui.list.find('.'+this.classes.active).removeClass(this.classes.active);			
 			
-			this.ui.wrapper.fadeOut(function() {
+			this.ui.window.fadeOut(function() {
 				t.factory.ui.toolBarToggle.removeClass(t.factory.classes.active);
-			});	
+			});
+			
+			if(save) {
+				this.setVisibility(false);
+			}	
+		},
+		
+		showWindows: function() {
+			for(var x in this.factory.windows) {
+				var window = this.factory.windows[x];
+				if(window.visible) {
+					window.open();
+				}
+			}
+		},
+		
+		hideWindows: function() {
+			for(var x in this.factory.windows) {
+				var window = this.factory.windows[x];
+				if(!window.visible) {
+					window.close(false);
+				}
+			}
 		},
 		
 		position: function() {			
 			if(this.hasPosition()) {
 				var pos = this.getPosition();
-				this.ui.wrapper.css({
+				this.ui.window.css({
 					left: pos.x,
 					top: pos.y,
 					position: 'fixed'
 				});
 			}		
-		},
-		
-		savePosition: function() {
-			PhotoFrame.Model.WindowLocations.insertOrUpdate({title: this.title}, {
-				title: this.title,
-				y: this.ui.wrapper.css('top'),
-				x: this.ui.wrapper.css('left')
-			});
-		},
-		
-		bringToFront: function() {
-			this.factory.zIndexCount++;
-			this.ui.wrapper.css('z-index', this.factory.zIndexCount);
-		},
-		
-		hasPosition: function() {
-			return this.getPosition() ? true : false;	
-		},
-		
-		getPosition: function() {
-			var pos = PhotoFrame.Model.WindowLocations.get({title: this.title});
-			
-			if(pos.length == 0) {
-				return false;
-			}
-			
-			return pos[0];
-		},
-		
-		restorePosition: function() {
-			var position = this.getPosition();
-			
-			this.setPosition(position.x, position.y);
-		},
-		
-		setPosition: function(x, y) {
-			this.ui.wrapper.css('left', x).css('top', y);
-		},		
+		},	
 		
 		_buildButtonBar: function() {
 			var t = this;
 			
-			this.ui.wrapper = $([
+			this.ui.window = $([
 				'<div class="'+this.classes.wrapper+'">',
 					'<div class="'+this.classes.titleBar+'">'+this.title+'</div>',
 					'<ul class="'+this.classes.list+'"></ul>',
@@ -1310,12 +1326,12 @@ var PhotoFrame = function() {};
 			].join(''))
 			.css('z-index', 1);
 			
-			this.ui.titleBar = this.ui.wrapper.find('.'+this.classes.titleBar);
-			this.ui.list     = this.ui.wrapper.find('.'+this.classes.list);
+			this.ui.titleBar = this.ui.window.find('.'+this.classes.titleBar);
+			this.ui.list     = this.ui.window.find('.'+this.classes.list);
 			
-			this.factory.ui.dimmer.append(this.ui.wrapper);
+			this.factory.ui.dimmer.append(this.ui.window);
 			
-			this.ui.wrapper.draggable({
+			this.ui.window.draggable({
 				handle: this.ui.titleBar,
 				containment: 'parent',
 				scroll: false,
@@ -1379,6 +1395,7 @@ var PhotoFrame = function() {};
 		 */
 		
 		windowSettings: {
+			css: '',
 			title: false
 		},
 		
@@ -1386,12 +1403,12 @@ var PhotoFrame = function() {};
 			var t = this;					
 			
 			t.ui  = $.extend(true, {}, t.ui);
-			
+			 
 			this.buttonBar = buttonBar;
 			this.base(options);
 			
 			this.$obj = $('<a href="#" title="'+this.description.replace('"', '')+'"></a>');
-			this.$obj.append('<i />').addClass('icon-'+(this.icon ? this.icon : this.name.toLowerCase()));
+			this.$obj.append('<i />').find('i').addClass('icon-'+(this.icon ? this.icon : this.name.toLowerCase()));
 			
 			this.$obj.click(function(e) {
 				t.click(e);
@@ -1430,27 +1447,14 @@ var PhotoFrame = function() {};
 			this.window.close();
 		},
 		
-		showWindow: function(callback) {
-			var t = this;
-			
-			function showWindowAction() {				
-				t.window.open();			
-				t.window.position();
-				t.buttonBar.activeWindow = t.window;
-			}
-			
-			if(this.buttonBar.activeWindow) {	
-				this.buttonBar.activeWindow.close(function() {
-					showWindowAction();
-				});	
-			}
-			else {
-				showWindowAction();
-			}
+		showWindow: function(callback) {		
+			this.$obj.addClass(this.buttonBar.classes.active);		
+			this.window.open();			
+			this.window.position();
 		}
 		
 	});
-	
+		
 	PhotoFrame.Window = PhotoFrame.Class.extend({
 		
 		/**
@@ -1459,6 +1463,12 @@ var PhotoFrame = function() {};
 		 
 		buttons: [],
 			
+		/**
+		 * These are CSS classes appended to the window (string)
+		 */
+		
+		css: '',
+		
 		/**
 		 * An object of callback functions
 		 */	
@@ -1538,8 +1548,14 @@ var PhotoFrame = function() {};
 			close: false,
 			content: false,
 			title: false,
-			wrapper: false	
+			window: false	
 		},
+			
+		/**
+		 * The window width (int)
+		 */	
+		 
+		width: false,
 		
 		constructor: function(factory, parent, options) {
 			this.ui      = $.extend(true, {}, this.ui);
@@ -1553,7 +1569,9 @@ var PhotoFrame = function() {};
 			}
 						
 			this.buildWindow();
-				
+			
+			this.visible = this.getVisibility();
+			
 			factory.windows.push(this);
 		},
 		
@@ -1594,6 +1612,8 @@ var PhotoFrame = function() {};
 			this.ui.content = html.find('.'+this.classes.content);
 			this.ui.title   = html.find('.'+this.classes.title);
 			
+			this.ui.window.addClass(this.css);
+			
 			this.ui.window.draggable({
 				handle: this.ui.title,
 				containment: 'parent',
@@ -1609,6 +1629,10 @@ var PhotoFrame = function() {};
 				}
 			});
 			
+			if(this.width) {
+				this.ui.window.width(this.width);
+			}
+			
 			this.ui.window.mousedown(function() {
 				t.bringToFront();
 			})
@@ -1622,19 +1646,42 @@ var PhotoFrame = function() {};
 			this.factory.ui.dimmer.append(html);
 		},
 		
-		close: function(callback) {			
+		close: function(save, callback) {	
+			var t = this;
+			
+			if(typeof save == "undefined") {
+				save = true;
+			}
+			else if(typeof save == "function") {
+				callback = save;
+				save = true;
+			}
+			
+			this.parent.removeClass(this.factory.buttonBar.classes.active);			
 			this.ui.window.fadeOut({
-				duration: this.duration,
-				//easing: this.easeIn
+				duration: this.duration
 			}, function() {
 				t.callback(t.callbacks.onclose);
 				t.callback(callback);
 			});
+			
+			if(save) {
+				this.setVisibility(false);
+			}
 		},
 		
-		open: function(callback) {
+		open: function(save, callback) {
 			var t = this;
 			
+			if(typeof save == "undefined") {
+				save = true;
+			}
+			else if(typeof save == "function") {
+				callback = save;
+				save = true;
+			}
+			
+			this.parent.addClass(this.factory.buttonBar.classes.active);	
 			this.ui.window.fadeIn({
 				duration: this.duration,
 				//easing: this.easeIn
@@ -1648,11 +1695,10 @@ var PhotoFrame = function() {};
 			if(this.ui.window.data('open') != 1) {
 				this.position();
 			}
-			else {
-			}
 			
 			this.bringToFront();	
 			this.ui.window.data('open', 1);
+			this.setVisibility(true);
 		},
 		
 		bringToFront: function() {
@@ -1664,7 +1710,7 @@ var PhotoFrame = function() {};
 			var left, index  = parseInt(this.ui.window.parent().index()) + 1;
 			
 			var pos = this.getPosition();
-			var x   = parseInt(pos.x.replace('px', ''));
+			var x   = pos ? parseInt(pos.x.replace('px', '')) : 0;
 			
 			this.ui.window.position({
 				of: this.parent,
@@ -1696,39 +1742,7 @@ var PhotoFrame = function() {};
 
 			this.bringToFront();	
 		},
-		
-		savePosition: function() {
-			PhotoFrame.Model.WindowLocations.insertOrUpdate({title: this.title}, {
-				title: this.title,
-				y: this.ui.window.css('top'),
-				x: this.ui.window.css('left')
-			});
-		},
-		
-		hasPosition: function() {
-			return this.getPosition() ? true : false;	
-		},
-		
-		getPosition: function() {
-			var pos = PhotoFrame.Model.WindowLocations.get({title: this.title});
-			
-			if(pos.length == 0) {
-				return false;
-			}
-			
-			return pos[0];
-		},
-		
-		restorePosition: function() {
-			var position = this.getPosition();
-			
-			this.setPosition(position.x, position.y);
-		},
-		
-		setPosition: function(x, y) {
-			this.ui.window.css('left', x).css('top', y);
-		},
-		
+				
 		shift: function(prop, value) {
 			var current = parseInt(this.ui.window.css(prop).replace('px', ''));
 			
@@ -1736,7 +1750,7 @@ var PhotoFrame = function() {};
 		}
 				
 	});
-	
+
 	PhotoFrame.Photo = PhotoFrame.Class.extend({
 			
 		/**
@@ -1809,7 +1823,7 @@ var PhotoFrame = function() {};
 		 * Image Manipulations
 		 */
 		 
-		manipulations: [],
+		manipulations: {},
 		
 		/**
 		 * Resize (expiremental)
@@ -2207,6 +2221,10 @@ var PhotoFrame = function() {};
 	        	   	
 	            t.hideMeta();
 	            
+	            if(t.factory.buttonBar.getVisibility()) {
+		            t.factory.showTools();
+	            }
+	            
 	            if(t.edit === false && t.size !== false) {
 	            	var size = t.size.split('x');
 	            	
@@ -2235,7 +2253,7 @@ var PhotoFrame = function() {};
 	        	
 	            t.initJcrop(callback);
 	        	t.updateInfo();
-	            
+	        	
 	            $(window).resize();	
 			});
 			
@@ -2263,7 +2281,7 @@ var PhotoFrame = function() {};
 				t.hideProgress();
 				
 				t.factory.cancel = true;
-				t.factory.buttonBar.hide();
+				t.factory.buttonBar.hide(false);
 				t.factory.hideDimmer();
 				t.factory.resetProgress();
 				
@@ -2374,7 +2392,7 @@ var PhotoFrame = function() {};
 					t.ui.info.fadeOut();
 				}
 				
-				t.factory.buttonBar.hide();
+				t.factory.buttonBar.hide(false);
 				t.hideMeta();
 				t.ui.saving.center();
 				
@@ -2445,6 +2463,7 @@ var PhotoFrame = function() {};
 				description: t.description,
 				keywords: t.keywords,
 				compression: t.compression,
+				manipulations: t.manipulations
 			}, function(cropResponse) {
 				if(typeof callback == "function") {
 					callback(cropResponse);					
@@ -2923,7 +2942,7 @@ var PhotoFrame = function() {};
 		 */		
 		 
 		clear: function() {
-			this.model.truncate(this.name);
+			this.model.dropTable(this.name);
 			this.model.commit();
 		},
 		
@@ -3016,8 +3035,11 @@ var PhotoFrame = function() {};
 		 * @return	void
 		 */		
 		
-		update: function(id, data) {
-			this.model.update(this.name, {ID: id}, function(row) {
+		update: function(query, data) {
+			if(typeof query != "object") {
+				query = {ID: query};
+			}
+			this.model.update(this.name, query, function(row) {
 				return $.extend(true, {}, row, data);
 			});
 			this.model.commit();
@@ -3065,11 +3087,76 @@ var PhotoFrame = function() {};
 		 * An array of datatable columns
 		 */
 		 
-		fields: ['title', 'x', 'y']
-		
-		// , reset: true
+		fields: ['title', 'x', 'y', 'visible']
 		
 	});
+	
+	PhotoFrame.WindowControls = PhotoFrame.Class.extend({
+		
+		/**
+		 * Is the window visible by default?
+		 */	
+		 
+		visible: false,
+		
+		getVisibility: function() {
+			var data = PhotoFrame.Model.WindowLocations.get({title: this.title});
+			
+			return data.length > 0 && data[0].visible ? data[0].visible : false;
+		},
+		
+		setVisibility: function(visible) {
+			visible = visible ? true : false;
+			
+			PhotoFrame.Model.WindowLocations.update({title: this.title}, {
+				visible: visible
+			});	
+			
+			this.visible = visible;
+		},
+		
+		savePosition: function() {
+			PhotoFrame.Model.WindowLocations.insertOrUpdate({title: this.title}, {
+				visible: this.getVisibility(),
+				title: this.title,
+				y: this.ui.window.css('top'),
+				x: this.ui.window.css('left')
+			});	
+		},
+		
+		bringToFront: function() {
+			this.factory.zIndexCount++;
+			this.ui.window.css('z-index', this.factory.zIndexCount);
+		},
+		
+		hasPosition: function() {
+			return this.getPosition() ? true : false;	
+		},
+		
+		getPosition: function() {
+			var pos = PhotoFrame.Model.WindowLocations.get({title: this.title});
+			
+			if(pos.length == 0) {
+				return false;
+			}
+			
+			return pos[0];
+		},
+		
+		restorePosition: function() {
+			var position = this.getPosition();
+			
+			this.setPosition(position.x, position.y);
+		},
+		
+		setPosition: function(x, y) {
+			this.ui.window.css('left', x).css('top', y);
+		}
+		
+	});
+
+	PhotoFrame.Window.implement(PhotoFrame.WindowControls);
+	PhotoFrame.ButtonBar.implement(PhotoFrame.WindowControls);
 		
 }(jQuery));
 

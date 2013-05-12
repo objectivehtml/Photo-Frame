@@ -100,6 +100,9 @@ class Photo_frame_upd {
 			),
 			'sizes'			=> array(
 				'type' 				=> 'text'
+			),
+			'manipulations'	=> array(
+				'type' 				=> 'longtext'
 			)
 		),
 		'photo_frame_colors' => array(
