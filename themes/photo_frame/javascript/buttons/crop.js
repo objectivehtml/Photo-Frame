@@ -12,13 +12,13 @@
 		 * The button description 
 		 */
 		
-		description: 'Open the crop panel.',
+		description: false,
 		
 		/**
 		 * Name of the button
 		 */
 		
-		name: 'Crop',
+		name: false,
 		
 		/**
 		 * The JSON object used for Window settings 
@@ -31,10 +31,12 @@
 		constructor: function(buttonBar) {
 			var t = this;
 			
+			this.name                 = PhotoFrame.Lang.crop;
+			this.description          = PhotoFrame.Lang.crop_desc;
 			this.windowSettings.title = PhotoFrame.Lang.crop;
 			
 			this.buttons = [{
-				text: 'Crop',
+				text: PhotoFrame.Lang.crop,
 				css: 'photo-frame-tool-window-save',
 				onclick: function(e) {
 					t.apply();
@@ -70,19 +72,19 @@
 					'<input type="text" name="height" value="" id="height" class="photo-frame-small" />',
 				'</div>',*/
 				'<div class="photo-frame-grid">',
-					'<label for="x">X</label>',
+					'<label for="x">'+PhotoFrame.Lang.x+'</label>',
 					'<input type="text" name="x" value="" id="x" class="photo-frame-small" />',
 				'</div>',
 				'<div class="photo-frame-grid">',
-					'<label for="y">Y</label>',
+					'<label for="y">'+PhotoFrame.Lang.y+'</label>',
 					'<input type="text" name="y" value="" id="y" class="photo-frame-small" />',
 				'</div>',
 				'<div class="photo-frame-grid">',
-					'<label for="x2">X2</label>',
+					'<label for="x2">'+PhotoFrame.Lang.x2+'</label>',
 					'<input type="text" name="x2" value="" id="x2" class="photo-frame-small" />',
 				'</div>',
 				'<div class="photo-frame-grid">',
-					'<label for="y">Y2</label>',
+					'<label for="y">'+PhotoFrame.Lang.y2+'</label>',
 					'<input type="text" name="y" value="" id="y2" class="photo-frame-small" />',
 				'</div>',
 			].join(''));

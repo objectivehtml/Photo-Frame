@@ -1,6 +1,6 @@
 (function($) {
 	
-	PhotoFrame.Buttons.Rgb = PhotoFrame.Button.extend({
+	PhotoFrame.Buttons.Rgba = PhotoFrame.Button.extend({
 		
 		/**
 		 * An array of button objects
@@ -12,7 +12,7 @@
 		 * The button description 
 		 */
 		
-		description: 'Adjust the rgb colors in the photo.',
+		description: false,
 		
 		/**
 		 * The button icon
@@ -24,7 +24,7 @@
 		 * Name of the button
 		 */
 		
-		name: 'RGB',
+		name: false,
 		
 		/**
 		 * The JSON object used for Window settings 
@@ -32,12 +32,16 @@
 		
 		windowSettings: {
 			css: 'photo-frame-rgb photo-frame-slider-window',
-			title: 'Color Adjustment',
+			title: false,
 			width: 186
 		},
 		
 		constructor: function(buttonBar) {
 			var t = this;
+			
+			this.description          = PhotoFrame.Lang.rgba_desc;
+			this.name                 = PhotoFrame.Lang.rgba;
+			this.windowSettings.title = PhotoFrame.Lang.color_adjustment;
 			
 			this.buttons = [{
 				text: PhotoFrame.Lang.save,

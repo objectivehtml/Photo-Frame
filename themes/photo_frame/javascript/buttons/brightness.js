@@ -12,13 +12,13 @@
 		 * The button description 
 		 */
 		
-		description: 'Adjust the brightness of the photo.',
+		description: false,
 		
 		/**
 		 * Name of the button
 		 */
 		
-		name: 'Brightness',
+		name: false,
 		
 		/**
 		 * Name of the button
@@ -38,6 +38,8 @@
 		constructor: function(buttonBar) {
 			var t = this;
 			
+			this.name				  = PhotoFrame.Lang.brightness;
+			this.description		  = PhotoFrame.Lang.brightness_desc;
 			this.windowSettings.title = PhotoFrame.Lang.brightness;
 			
 			this.buttons = [{

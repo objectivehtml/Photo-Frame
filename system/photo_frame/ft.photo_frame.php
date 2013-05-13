@@ -113,7 +113,9 @@ class Photo_frame_ft extends EE_Fieldtype {
 	{			
 		$this->EE->load->config('photo_frame_config');
 		$this->EE->load->library('photo_frame_lib');
-				
+		
+		$this->EE->cp->add_js_script(array('ui' => array('slider')));		
+
 		$default_settings = array(
 			'photo_frame_display_info'       => 'true',
 			'photo_frame_display_meta'       => 'false',
@@ -174,7 +176,7 @@ class Photo_frame_ft extends EE_Fieldtype {
 		$this->EE->theme_loader->javascript('buttons/brightness');
 		$this->EE->theme_loader->javascript('buttons/contrast');
 		$this->EE->theme_loader->javascript('buttons/resize');
-		$this->EE->theme_loader->javascript('buttons/rgb');
+		$this->EE->theme_loader->javascript('buttons/rgba');
 		$this->EE->theme_loader->javascript('buttons/layers');
 		$this->EE->theme_loader->javascript('jquery.ui');
 		$this->EE->theme_loader->javascript('jquery.ui.widget');
@@ -192,7 +194,7 @@ class Photo_frame_ft extends EE_Fieldtype {
 			'brightness',
 			'contrast',
 			'resize',
-			'rgb'
+			'rgba'
 		);
 		
 		$js_directory = $this->EE->theme_loader->js_directory;

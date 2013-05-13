@@ -12,27 +12,30 @@
 		 * The button description 
 		 */
 		
-		description: 'The rotate an image by the defined degree.',
+		description: false,
 		
 		/**
 		 * Name of the button
 		 */
 		
-		name: 'Rotate',
+		name: false,
 		
 		/**
 		 * The JSON object used for Window settings 
 		 */
 		
 		windowSettings: {
-			title: 'Rotate'
+			title: false
 		},
 		
 		constructor: function(buttonBar) {
 			var t = this;
 			
+			this.name                 = PhotoFrame.Lang.rotate;
+			this.description          = PhotoFrame.Lang.rotate_desc;	
+			this.windowSettings.title = PhotoFrame.Lang.rotate;		
 			this.buttons = [{
-				text: 'Rotate',
+				text: PhotoFrame.Lang.rotate,
 				css: 'photo-frame-tool-window-save',
 				onclick: function(e, button) {
 					t.apply();

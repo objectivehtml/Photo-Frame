@@ -12,13 +12,13 @@
 		 * The button description 
 		 */
 		
-		description: 'Adjust the constrast of the photo.',
+		description: false,
 		
 		/**
 		 * Name of the button
 		 */
 		
-		name: 'Constrast',
+		name: false,
 		
 		/**
 		 * Name of the button
@@ -38,6 +38,8 @@
 		constructor: function(buttonBar) {
 			var t = this;
 			
+			this.name				  = PhotoFrame.Lang.contrast;
+			this.description		  = PhotoFrame.Lang.contrast_desc;
 			this.windowSettings.title = PhotoFrame.Lang.contrast;
 			
 			this.buttons = [{

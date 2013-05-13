@@ -9,10 +9,23 @@
 		buttons: [],
 		
 		/**
+		 * An object of css classes
+		 */
+		
+		classes: {
+			layer: 'photo-frame-layer',
+			layerIcon: 'photo-frame-layer-icon',
+			layerTitle: 'photo-frame-layer-title',
+			layerActions: 'photo-frame-layer-actions',
+			visible: 'photo-frame-toggle-visible',
+			trash: 'photo-frame-trash',			
+		},
+		
+		/**
 		 * The button description 
 		 */
 		
-		description: 'Manage the various layers of manipulations.',
+		description: false,
 		
 		/**
 		 * The button icon
@@ -21,10 +34,20 @@
 		icon: 'layers',
 		
 		/**
+		 * An object of icon classes
+		 */
+		
+		icons: {
+			eye: 'eye',
+			eyeClose: 'eye-off',
+			trash: 'trash'
+		},
+		
+		/**
 		 * Name of the button
 		 */
 		
-		name: 'Layers',
+		name: false,
 		
 		/**
 		 * The JSON object used for Window settings 
@@ -38,48 +61,84 @@
 		constructor: function(buttonBar) {
 			var t = this;
 			
-			this.windowSettings.title = PhotoFrame.Lang.layers;
+			this.buttons = [{
+				text: PhotoFrame.Lang.render,
+				css: 'photo-frame-tool-window-save',
+				onclick: function(e, button) {
+					t.refresh();
+				}
+			}];
 			
+			this.name				  = PhotoFrame.Lang.layers;
+			this.description          = PhotoFrame.Lang.layers_desc;
+			this.windowSettings.title = PhotoFrame.Lang.layers;
+					
 			this.base(buttonBar);
-		},
-		
-		apply: function() {	
-			console.log('click');
-			//var d = parseInt(this.ui.window.find('#photo-frame-rotate').val());	
+			this.buttonBar.factory.layerWindow = this;
 		},
 		
 		buildWindow: function() {	
-			this.base({ buttons: this.buttons });
+			this.base({buttons: this.buttons});
+		},
+		
+		toggleLayer: function(name, manipulation, ui) {
+			manipulation.visible = manipulation.visible ? false : true;
+			this.refresh();
+		},
+		
+		removeLayer: function(name, manipulation, ui) {
+			delete this.buttonBar.factory.cropPhoto.manipulations[name];			
+			this.refresh();
+		},
+		
+		refresh: function(photo) {
+			var t = this, classes = {}, buttons = {}, photo = photo ? photo : this.buttonBar.factory.cropPhoto;
+						
+			this.window.ui.content.html('');
 			
-			var html = $([
-				'<div class="photo-frame-layer">',
-					'<div class="photo-frame-layer-icon"><i class="icon-rotate"></i></div>',
-					'<div class="photo-frame-layer-title">Rotate</div>',
-					'<div class="photo-frame-layer-actions">',
-						'<a href="#"><i class="icon-eye"></i></a>',
-						'<a href="#"><i class="icon-trash"></i></a>',
-					'</div>',
-				'</div>',
-				'<div class="photo-frame-layer">',
-					'<div class="photo-frame-layer-icon"><i class="icon-rotate"></i></div>',
-					'<div class="photo-frame-layer-title">Rotate</div>',
-					'<div class="photo-frame-layer-actions">',
-						'<a href="#"><i class="icon-eye"></i></a>',
-						'<a href="#"><i class="icon-trash"></i></a>',
-					'</div>',
-				'</div>',
-				'<div class="photo-frame-layer">',
-					'<div class="photo-frame-layer-icon"><i class="icon-rotate"></i></div>',
-					'<div class="photo-frame-layer-title">Rotate</div>',
-					'<div class="photo-frame-layer-actions">',
-						'<a href="#"><i class="icon-eye"></i></a>',
-						'<a href="#"><i class="icon-trash"></i></a>',
-					'</div>',
-				'</div>'
-			].join(''));
+			for(var y in this.buttonBar.buttons) {
+				var button = this.buttonBar.buttons[y];				
+				buttons[button.name.toLowerCase()] = button;
+			}
 			
-			this.window.ui.content.html(html);
-			this.buttonBar.factory.layerWindow = this.window;
+			$.each(photo.manipulations, function(x, manipulation) {
+				var manipulation = photo.manipulations[x];
+				var button       = buttons[x];
+				
+				if(button) {
+					var title  		 = button.name.toLowerCase();
+					
+					var visible = $('<a href="#" class="'+t.classes.visible+'"><i class="icon-'+(manipulation.visible ? t.icons.eye : t.icons.eyeClose)+'"></i></a>');
+					var trash   = $('<a href="#" class="'+t.classes.trash+'"><i class="icon-'+t.icons.trash+'"></i></a>');
+					
+					var html = $([
+					'<div class="'+t.classes.layer+' '+t.buttonBar.factory.classes.clearfix+'">',
+						'<div class="'+t.classes.layerIcon+'"><i class="icon-'+(button.icon ? button.icon : title)+'"></i></div>',
+						'<div class="'+t.classes.layerTitle+'">'+button.name+'</div>',
+						'<div class="'+t.classes.layerActions+'"></div>',
+					'</div>'
+					].join(''));
+					
+					html.find('.'+t.classes.layerActions).append(visible);
+					html.find('.'+t.classes.layerActions).append(trash);
+					
+					visible.click(function(e) {
+						t.toggleLayer(x, manipulation, visible);					
+						e.preventDefault();
+					});
+					
+					trash.click(function(e) {
+						t.removeLayer(x, manipulation, trash);
+						e.preventDefault();
+					});
+						
+					t.window.ui.content.append(html);
+				}
+			});
+		},
+		
+		startCrop: function(photo) {			
+			this.refresh(photo);			
 		}
 	});
 

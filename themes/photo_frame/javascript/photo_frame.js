@@ -556,10 +556,9 @@ var PhotoFrame = function() {};
 	    	for(x in photos) {
 		    	var photo = photos[x];
 		    	
-		    	console.log(photo);
-		    	
 		    	new PhotoFrame.Photo(t, photo, {
 		    		id: photo.id,
+		    		manipulations: photo.manipulations,
 		    		index: x,
 		    		settings: {
 			    		setSelect: [photo.x, photo.y, photo.x2, photo.y2]	
@@ -1406,7 +1405,6 @@ var PhotoFrame = function() {};
 			 
 			this.buttonBar = buttonBar;
 			this.base(options);
-			
 			this.$obj = $('<a href="#" title="'+this.description.replace('"', '')+'"></a>');
 			this.$obj.append('<i />').find('i').addClass('icon-'+(this.icon ? this.icon : this.name.toLowerCase()));
 			
@@ -1451,7 +1449,9 @@ var PhotoFrame = function() {};
 			this.$obj.addClass(this.buttonBar.classes.active);		
 			this.window.open();			
 			this.window.position();
-		}
+		},
+		
+		startCrop: function(photo) {}
 		
 	});
 		
@@ -2254,7 +2254,11 @@ var PhotoFrame = function() {};
 	            t.initJcrop(callback);
 	        	t.updateInfo();
 	        	
-	            $(window).resize();	
+	            $(window).resize();
+	            
+	            for(var x in t.factory.buttons) {
+		            t.factory.buttonBar.buttons[x].startCrop(t);
+	            }	
 			});
 			
 			t.factory.ui.save.unbind('click').bind('click', function(e) {

@@ -978,7 +978,25 @@ filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#e2e2e2', end
 	-moz-box-shadow: 0 0 10px rgba(0, 0, 0, .3);
 }
 
-.photo-frame-control-value {
+.photo-frame-layers { width: 230px; clear: left; }
+.photo-frame-layers .photo-frame-layer { clear: left; margin-bottom: 10px; position: relative; }
+.photo-frame-layers .photo-frame-layer-icon { 
+	float: left; 
+	margin-right: 10px; 
+	font-size: 20px; 
+	box-shadow: 0 0 10px rgba(0, 0, 0, 0.8) inset;
+	padding: 10px;
+	border-radius: 5px;
+	border-bottom: 1px solid rgb(65, 65, 65);
+}
+
+.photo-frame-layers .photo-frame-layer-title { font-size: 18px; padding-top: 12px; padding-left: 55px; }
+.photo-frame-layers .photo-frame-layer-actions { position: absolute; right: 0; top: 12px; }
+.photo-frame-layers .photo-frame-layer-actions a { padding-left: 10px; font-size: 15px; color: rgb(160, 160, 160); border-right: 1px solid rgb(71, 71, 69); padding-right: 10px; }
+.photo-frame-layers .photo-frame-layer-actions a:last-child { border-right: none; box-shadow: 1px 0 0 black inset; }
+.photo-frame-layers .photo-frame-layer-actions a:hover { color: white; }
+
+.photo-frame-layers .photo-frame-control-value {
 	background: rgb(220, 221, 221);
 	text-align: center;
 	padding: .5em 1em;
