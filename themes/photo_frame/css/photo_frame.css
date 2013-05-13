@@ -461,14 +461,14 @@ a.photo-frame-tool-window-close {
 }
 
 .photo-frame-crop-photo img {
-	max-width: 100%;
+	max-width: none;
 	display: block;
 }
-
 
 .photo-frame-placeholder {
 	display: none;
 }
+
 .photo-frame-toolbar {
 	position: fixed;
 	bottom: 0;
