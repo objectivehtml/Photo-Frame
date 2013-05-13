@@ -453,6 +453,7 @@ a.photo-frame-tool-window-close {
 	display: none;
 }
 .photo-frame-crop-photo {
+	background: url('../img/canvas-background.jpg') 0 0 repeat;	
 	-webkit-box-shadow: 0 0 20px rgba(0, 0, 0, .7);
 	-moz-box-shadow: 0 0 20px rgba(0, 0, 0, .7);
 	box-shadow: 0 0 20px rgba(0, 0, 0, .7);
