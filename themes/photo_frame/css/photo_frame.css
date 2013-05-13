@@ -390,6 +390,7 @@ a.photo-frame-progress-cancel {
 	display: none;
 }
 .photo-frame-crop-photo {
+	background: url('../img/canvas-background.jpg') 0 0 repeat;
 	-webkit-box-shadow: 0 0 20px rgba(0, 0, 0, .7);
 	-moz-box-shadow: 0 0 20px rgba(0, 0, 0, .7);
 	box-shadow: 0 0 20px rgba(0, 0, 0, .7);
@@ -398,14 +399,10 @@ a.photo-frame-progress-cancel {
 }
 
 .photo-frame-crop-photo img {
-	max-width: 100%;
+	max-width: none;
 	display: block;
 }
 
-
-.photo-frame-placeholder {
-	display: none;
-}
 .photo-frame-toolbar {
 	position: fixed;
 	bottom: 0;
@@ -426,7 +423,12 @@ a.photo-frame-progress-cancel {
 	border-top: 1px solid rgb(108, 108, 108);
 	z-index: 1500;
 }
-	.photo-frame-bar-button, .photo-frame-bar-button:hover {
+
+.photo-frame-placeholder {
+	display: none;
+}
+
+.photo-frame-bar-button, .photo-frame-bar-button:hover {
 	background: rgb(0,153,255);
 	background: -moz-linear-gradient(top,  rgba(0,153,255,1) 0%, rgba(0,76,255,1) 100%);
 	background: -webkit-gradient(linear, left top, left bottom, color-stop(0%,rgba(0,153,255,1)), color-stop(100%,rgba(0,76,255,1)));
