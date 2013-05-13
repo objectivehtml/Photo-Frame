@@ -114,7 +114,7 @@
 					var html = $([
 					'<div class="'+t.classes.layer+' '+t.buttonBar.factory.classes.clearfix+'">',
 						'<div class="'+t.classes.layerIcon+'"><i class="icon-'+(button.icon ? button.icon : title)+'"></i></div>',
-						'<div class="'+t.classes.layerTitle+'">'+button.name+'</div>',
+						'<div class="'+t.classes.layerTitle+'">'+button.window.title+'</div>',
 						'<div class="'+t.classes.layerActions+'"></div>',
 					'</div>'
 					].join(''));

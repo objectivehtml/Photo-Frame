@@ -978,7 +978,7 @@ filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#e2e2e2', end
 	-moz-box-shadow: 0 0 10px rgba(0, 0, 0, .3);
 }
 
-.photo-frame-layers { width: 230px; clear: left; }
+.photo-frame-layers { width: 280px; clear: left; }
 .photo-frame-layers .photo-frame-layer { clear: left; margin-bottom: 10px; position: relative; }
 .photo-frame-layers .photo-frame-layer-icon { 
 	float: left; 
