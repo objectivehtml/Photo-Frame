@@ -1285,6 +1285,18 @@ var PhotoFrame = function() {};
 			}	
 		},
 		
+		startRendering: function(callback) {
+			console.log('start callback for rendering');	
+		},
+		
+		progressRendering: function(callback) {
+			console.log('progress callback for rendering');	
+		},
+		
+		stopRendering: function(callback) {
+			console.log('stop callback for rendering');	
+		},
+		
 		showWindows: function() {
 			for(var x in this.factory.windows) {
 				var window = this.factory.windows[x];
@@ -1416,8 +1428,21 @@ var PhotoFrame = function() {};
 			this.buildWindow();
 		},	
 		
+		addManipulation: function(visible, data) {
+			this.buttonBar.factory.cropPhoto.addManipulation(this.name, visible, data)
+		},
+		
+		removeManipulation: function() {
+			delete this.buttonBar.factory.cropPhoto.manipulations[this.name.toLowerCase()];
+			this.buttonBar.factory.layerWindow.refresh();
+		},
+		
 		apply: function() {
 			t.hideWindow();
+		},
+		
+		bind: function(event, callback) {
+			this.buttonBar.factory.bind(event, callback);
 		},
 		
 		buildWindow: function(options) {
@@ -1451,7 +1476,15 @@ var PhotoFrame = function() {};
 			this.window.position();
 		},
 		
-		startCrop: function(photo) {}
+		getManipulation: function() {
+			return this.buttonBar.factory.cropPhoto.getManipulation(this.name);
+		},
+		
+		startCrop: function(photo) {},
+		
+		toggleLayer: function(visible) {},
+		
+		removeLayer: function() {}
 		
 	});
 		
@@ -1588,6 +1621,7 @@ var PhotoFrame = function() {};
 				if(typeof button.onclick === "function") {
 					$btn.click(function(e) {
 						button.onclick(e, t);
+						e.preventDefault();
 					});
 				}
 				
@@ -1824,30 +1858,12 @@ var PhotoFrame = function() {};
 		 */
 		 
 		manipulations: {},
-		
+				 
 		/**
-		 * Resize (expiremental)
-		 */	
-		 
-		// resize: false,
-		 
-		/**
-		 * Resize Max (expiremental)
-		 */	
-		 
-		// resizeMax: false,
-		 
-		/**
-		 * Rotate Degrees
-		 */	
-		 
-		// rotate: false,
-		 
-		/**
-		 * Default Crop Size
+		 * This is the overflow property of the window when crop is started
 		 */
 		 
-		// scale: false,
+		overflow: false,
 		 
 		/**
 		 * Default Crop Size
@@ -1920,7 +1936,11 @@ var PhotoFrame = function() {};
 			t.response    = response;
 			t.originalUrl = response.original_url;
 			t.url         = response.file_url;
-						
+			
+			if(!t.manipulations) {
+				t.manipulations = {};
+			}
+			
 			if(!t.index) {
 				t.index = t.factory.getTotalPhotos();
 			}
@@ -2018,6 +2038,34 @@ var PhotoFrame = function() {};
 			});
 		},
 		
+		addManipulation: function(name, visibility, data) {
+			var name   = name.toLowerCase(), content = $(this.factory.layerWindow.window.ui.content).get(0);
+			var exists = this.manipulations[name] ? this.manipulations[name] : false;
+			
+			this.manipulations[name] = {
+				visible: visibility,
+				data: data
+			};			
+			
+			this.factory.layerWindow.refresh();
+			
+			if(!exists) {
+				content.scrollTop = content.scrollHeight;
+			}
+		},
+		
+		getManipulation: function(name) {
+			name = name.toLowerCase();
+			if(this.manipulations[name]) {
+				return this.manipulations[name];
+			}	
+			return false;
+		},
+		
+		getManipulations: function() {
+			return this.manipulations;	
+		},
+		
 		showMeta: function() {
 			this.factory.showMeta();	
 		},
@@ -2041,7 +2089,8 @@ var PhotoFrame = function() {};
 			
             t.settings.onChange = function() {
             	t.hideInstructions();
-	          	t.updateInfo();
+	          	t.updateInfo();	
+	            this.released = false;
 	            t.factory.trigger('jcropOnChange', this);
             };
             
@@ -2084,6 +2133,14 @@ var PhotoFrame = function() {};
 			
 			this.jcrop 	     = false;
 			this.initialized = false;
+			
+			$('body').css('overflow', this.overflow);
+		},
+		
+		releaseCrop: function() {
+			this.jcrop.setSelect([0, 0, 0, 0]);
+			this.jcrop.release();
+			this.released = true;
 		},
 			
 		hideProgress: function() {
@@ -2187,6 +2244,10 @@ var PhotoFrame = function() {};
 		startCrop: function(callback) {
 			var t = this;
 			
+			this.overflow = $('body').css('overflow');
+			
+			$('body').css('overflow', 'hidden');
+			
 			t.factory.cropPhoto = t;
 			t.factory.ui.dimmer.fadeIn('fast');
 			
@@ -2257,6 +2318,7 @@ var PhotoFrame = function() {};
 	            $(window).resize();
 	            
 	            for(var x in t.factory.buttons) {
+	            	//console.log(t.factory.buttonBar.buttons[x]);
 		            t.factory.buttonBar.buttons[x].startCrop(t);
 	            }	
 			});
@@ -2298,6 +2360,8 @@ var PhotoFrame = function() {};
 						$(this).remove();
 					});
 				}
+				
+				$('body').css('overflow', t.overflow);
 				
 				e.preventDefault();
 			});

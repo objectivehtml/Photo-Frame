@@ -39,29 +39,79 @@
 				text: PhotoFrame.Lang.crop,
 				css: 'photo-frame-tool-window-save',
 				onclick: function(e) {
-					t.apply();
+					var crop = t.getCrop(true);
+					
+					if(crop.x || crop.y || crop.x2 || crop.y2) {					
+						t.setCrop(crop.x, crop.y, crop.x2, crop.y2);
+					}
 				}
 			}];
 
 			t.base(buttonBar);
+		},
+		
+		setCrop: function(x, y, x2, y2) {
+			this.buttonBar.factory.cropPhoto.jcrop.setSelect([x, y, x2, y2]);
+		},
+		
+		apply: function() {	
+			var crop = this.getCrop(true);			
+			var x    = crop.x;
+			var y    = crop.y;
+			var x2   = crop.x2;
+			var y2   = crop.y2;
 			
-			t.buttonBar.factory.bind('jcropOnChange', function(a) {
-				t._populateWindow();
+			this.addManipulation(true, {
+				x:  x,
+				x2: x2,
+				y:  y,
+				y2: y2
 			});
 		},
 		
-		apply: function() {			
-			var x  = parseInt(this.window.ui.content.find('#x').val());
-			var y  = parseInt(this.window.ui.content.find('#y').val());
-			var x2 = parseInt(this.window.ui.content.find('#x2').val());
-			var y2 = parseInt(this.window.ui.content.find('#y2').val());
+		getCrop: function(formFields) {
+			if(!formFields) {
+				return this.buttonBar.factory.cropPhoto.cropDimensions();
+			}
+			else {
+				return {
+					x:  parseInt(this.window.ui.x.val()),
+					y:  parseInt(this.window.ui.y.val()),
+					x2: parseInt(this.window.ui.x2.val()),
+					y2: parseInt(this.window.ui.y2.val())
+				};
+			}
+		},
+		
+		startCrop: function() {
+			var crop = this.getCrop();
 			
-			this.buttonBar.factory.cropPhoto.jcrop.setSelect([x, y, x2, y2]);
+			if(crop.x || crop.y || crop.x2 || crop.y2) {
+				this.refresh();
+			}
+		},
+		
+		removeLayer: function() {
+			this.buttonBar.factory.cropPhoto.releaseCrop();
+			this.removeManipulation();	
+		},
+		
+		reset: function() {
+			this.window.ui.x.val('');
+			this.window.ui.y.val('');
+			this.window.ui.x2.val('');
+			this.window.ui.y2.val('');
+		},
+		
+		showWindow: function() {
+			this.refresh();
+			this.base();
 		},
 		
 		buildWindow: function() {
 			this.base({ buttons: this.buttons });
 			
+			var t    = this;			
 			var html = $([
 				/*'<div class="photo-frame-grid">',
 					'<label for="width">Width</label>',
@@ -90,20 +140,40 @@
 			].join(''));
 			
 			this.window.ui.content.html(html);
+			
+			this.window.ui.x  = this.window.ui.content.find('#x');
+			this.window.ui.y  = this.window.ui.content.find('#y');
+			this.window.ui.x2 = this.window.ui.content.find('#x2');
+			this.window.ui.y2 = this.window.ui.content.find('#y2');	
+				
+			this.bind('jcropOnChange', function(a) {
+				t.buttonBar.factory.cropPhoto.released = false;
+				t.refresh();
+			});
+			
+			this.bind('jcropOnRelease', function(a) {
+				t.removeManipulation();
+			});
+			
+			this.bind('jcropOnSelect', function(a) {
+				t.buttonBar.factory.cropPhoto.released = false;
+				t.refresh(true);
+				t.apply();
+			});
 		},
 		
-		showWindow: function() {
-			this._populateWindow();
-			this.base();
-		},
-		
-		_populateWindow: function() {
-			var crop = this.buttonBar.factory.cropPhoto.cropDimensions();
-					
-			this.window.ui.content.find('#x').val(crop.x);
-			this.window.ui.content.find('#y').val(crop.y);
-			this.window.ui.content.find('#x2').val(crop.x2);
-			this.window.ui.content.find('#y2').val(crop.y2);
+		refresh: function(formFields) {
+			var crop = this.getCrop(formFields)
+			
+			if(crop.x || crop.y || crop.x2 || crop.y2) {
+				this.window.ui.x.val(crop.x);
+				this.window.ui.y.val(crop.y);
+				this.window.ui.x2.val(crop.x2);
+				this.window.ui.y2.val(crop.y2);
+			}
+			else {
+				this.reset();
+			}			
 		}
 	});
 	

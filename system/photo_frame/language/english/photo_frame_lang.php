@@ -30,7 +30,9 @@ $lang	= array(
 	'photo_frame_width' 			     => 'Width',
 	'photo_frame_height' 			     => 'Height',
 	'photo_frame_layers' 			     => 'Layers',
+	'photo_frame_adjust' 			     => 'Adjust',
 	'photo_frame_render' 			     => 'Render',
+	'photo_frame_rerender' 			     => 'Re-Render',
 	'photo_frame_color_adjustment' 	     => 'Color Adjustment',
 	'photo_frame_rgb'			 	     => 'RGB',
 	'photo_frame_rgba'			 	     => 'RGBA',
@@ -46,6 +48,7 @@ $lang	= array(
 	'photo_frame_rgb_desc'				 => 'Adjust the RGB values in the photo',	
 	'photo_frame_rotate_desc'			 => 'Rotate the photo',
 	'photo_frame_layers_desc'			 => 'Manage the various layers of manipulations',
+	'photo_frame_no_layers'				 => '<i class="icon-warning-sign"></i> There are no image manipulations',
 	
 	'photo_frame_min_photos_error'       => 'You must upload at least {min_photos} {min_photos_name}.',
 	'photo_frame_max_photos_error'       => 'You must upload at least {max_photos} {max_photos_name}.',

@@ -187,6 +187,47 @@ class Photo_frame_ft extends EE_Fieldtype {
 		$this->EE->theme_loader->javascript('jquery.jcrop');
 		$this->EE->theme_loader->javascript('jquery.color');
 		
+		/*
+		$data = array(
+			'rgba' => array(
+				'visible' => TRUE,
+				'data'    => array(
+					'r' => 150,
+					'g' => 225,
+					'b' => 75,
+					'a' => 66
+				)
+			),
+			'resize' => array(
+				'visible' => TRUE,
+				'data' => array(
+					'width'  => 200,
+					'height' => 200
+				)
+			),
+			'brightness' => array(
+				'visible' => TRUE,
+				'data' => array(
+					'value' => -255
+				)
+			),
+			'contrast' => array(
+				'visible' => TRUE,
+				'data' => array(
+					'value' => 255
+				)
+			),
+			'rotate' => array(
+				'visible' => TRUE,
+				'data' => array(
+					'degree' => 45
+				)
+			)
+		);
+		
+		var_dump(json_encode($data));exit();
+		*/
+		
 		$buttons = array(
 			'layers',
 			'crop',

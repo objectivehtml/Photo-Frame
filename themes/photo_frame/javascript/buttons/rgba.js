@@ -54,9 +54,41 @@
 			this.base(buttonBar);
 		},
 		
-		apply: function() {	
-			console.log('click');
-			//var d = parseInt(this.ui.window.find('#photo-frame-rotate').val());	
+		apply: function() {			
+			this.addManipulation(true, {
+				r: this.window.ui.r.slider('value'),
+				g: this.window.ui.g.slider('value'),
+				b: this.window.ui.b.slider('value'),
+				a: this.window.ui.a.slider('value') / 100
+			});
+		},
+		
+		toggleLayer: function(visible) {
+			
+		},
+		
+		removeLayer: function() {
+			this.reset();
+		},
+		
+		startCrop: function() {
+			this.base();
+			
+			var manipulation = this.getManipulation();
+			
+			if(manipulation) {
+				this.window.ui.r.slider('option', 'value', manipulation.data.r);
+				this.window.ui.g.slider('option', 'value', manipulation.data.g);
+				this.window.ui.b.slider('option', 'value', manipulation.data.b);
+				this.window.ui.a.slider('option', 'value', manipulation.data.a);
+			}			
+		},
+		
+		reset: function() {
+			this.window.ui.r.slider('option', 'value', 0);
+			this.window.ui.g.slider('option', 'value', 0);
+			this.window.ui.b.slider('option', 'value', 0);
+			this.window.ui.a.slider('option', 'value', 0);	
 		},
 		
 		buildWindow: function() {	
@@ -67,47 +99,89 @@
 				'<div class="photo-frame-inline photo-frame-margin-bottom">',
 					'<div class="photo-frame-inline-block photo-frame-big-margin-right">R</div>',
 					'<div class="photo-frame-inline-block">',
-						'<div class="photo-frame-slider"></div>',
 					'</div>',
 				'</div>',
 				'<div class="photo-frame-inline photo-frame-margin-bottom">',
 					'<div class="photo-frame-inline-block photo-frame-big-margin-right">G</div>',
 					'<div class="photo-frame-inline-block">',
-						'<div class="photo-frame-slider"></div>',
 					'</div>',
 				'</div>',
 				'<div class="photo-frame-inline photo-frame-margin-bottom">',
 					'<div class="photo-frame-inline-block photo-frame-big-margin-right">B</div>',
 					'<div class="photo-frame-inline-block">',
-						'<div class="photo-frame-slider"></div>',
 					'</div>',
 				'</div>',
 				'<div class="photo-frame-inline photo-frame-margin-bottom">',
 					'<div class="photo-frame-inline-block photo-frame-big-margin-right">A</div>',
 					'<div class="photo-frame-inline-block">',
-						'<div class="photo-frame-slider"></div>',
 					'</div>',
 				'</div>'
 			].join(''));
 			
-			function position(ui) {		
-				t.window.ui.value.html(ui.value);		
-				t.window.ui.value.position({
+			this.window.ui.content.html(html);
+			
+			var classes = 'photo-frame-control-value photo-frame-hidden photo-frame-inline-block photo-frame-fixed';
+			
+			this.window.ui.value = {};
+			
+			this.window.ui.value.r = $('<div class="'+classes+'"></div>');
+			this.window.ui.value.g = $('<div class="'+classes+'"></div>');
+			this.window.ui.value.b = $('<div class="'+classes+'"></div>');
+			this.window.ui.value.a = $('<div class="'+classes+'"></div>');
+			
+			this.window.ui.r = $('<div class="photo-frame-slider" data-type="r"></div>');
+			this.window.ui.g = $('<div class="photo-frame-slider" data-type="g"></div>');
+			this.window.ui.b = $('<div class="photo-frame-slider" data-type="b"></div>');
+			this.window.ui.a = $('<div class="photo-frame-slider" data-type="a"></div>');
+			
+			this.window.ui.content.find('.photo-frame-inline').eq(0).find('div:last-child').append(this.window.ui.r);
+			this.window.ui.content.find('.photo-frame-inline').eq(1).find('div:last-child').append(this.window.ui.g);
+			this.window.ui.content.find('.photo-frame-inline').eq(2).find('div:last-child').append(this.window.ui.b);
+			this.window.ui.content.find('.photo-frame-inline').eq(3).find('div:last-child').append(this.window.ui.a);
+			
+			this.window.ui.content.append(this.window.ui.value.r);
+			this.window.ui.content.append(this.window.ui.value.g);
+			this.window.ui.content.append(this.window.ui.value.b);
+			this.window.ui.content.append(this.window.ui.value.a);
+			
+			function position(type, ui) {				
+				t.window.ui.value[type].html(ui.value);		
+				t.window.ui.value[type].position({
 					of: ui.handle,
 					my: 'center top',
 					at: 'center bottom'
 				});
 				
-				var top = parseInt(t.window.ui.value.css('top').replace('px', ''), 10);
+				var top = parseInt(t.window.ui.value[type].css('top').replace('px', ''), 10);
 				
-				t.window.ui.value.css('top', top+10);
+				t.window.ui.value[type].css('top', top+10);
 			}
 			
-			this.window.ui.slider = html.find('.photo-frame-slider');
-			this.window.ui.content.html(html);
-			//this.window.ui.value = $('<div class="photo-frame-control-value photo-frame-hidden photo-frame-inline-block photo-frame-fixed"></div>');
-			this.window.ui.content.append(this.window.ui.value);
-			this.window.ui.slider.slider();		
+			this.window.ui.slider = this.window.ui.content.find('.photo-frame-slider');
+			this.window.ui.slider.slider({
+				min: 0,
+				max: 255,
+				start: function(e, ui) {
+					var type = $(this).data('type');
+					t.window.ui.value[type].fadeIn('fast');
+					position(type, ui);
+				},
+				create: function(e, ui) {
+					position($(this).data('type'), ui);
+				},
+				slide: function(e, ui) {
+					position($(this).data('type'), ui);
+				},
+				stop: function(e, ui) {
+					var type = $(this).data('type');					
+					position(type, ui);					
+					t.window.ui.value[type].fadeOut('fast');
+				}
+			});	
+			
+			this.window.ui.a.slider('option', 'min', 0);
+			this.window.ui.a.slider('option', 'max', 100);
+			this.window.ui.content.append(this.window.ui.value);		
 		}
 	});
 

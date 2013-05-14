@@ -995,8 +995,10 @@ filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#e2e2e2', end
 .photo-frame-layers .photo-frame-layer-actions a { padding-left: 10px; font-size: 15px; color: rgb(160, 160, 160); border-right: 1px solid rgb(71, 71, 69); padding-right: 10px; }
 .photo-frame-layers .photo-frame-layer-actions a:last-child { border-right: none; box-shadow: 1px 0 0 black inset; }
 .photo-frame-layers .photo-frame-layer-actions a:hover { color: white; }
+.photo-frame-layers .photo-frame-tool-window-content { max-height: 210px; overflow-y: scroll; }
+.photo-frame-layer-empty { text-align: center; font-size: 1.25em; padding: 10px 0; }
 
-.photo-frame-layers .photo-frame-control-value {
+.photo-frame-control-value {
 	background: rgb(220, 221, 221);
 	text-align: center;
 	padding: .5em 1em;
@@ -1009,9 +1011,8 @@ filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#e2e2e2', end
 	-webkit-border-radius: 5px;
 	border-radius: 5px;
 	margin-top: 1em;
+	z-index: 1000;
 }
-
-.photo-frame-hidden { display: none; }
 
 .photo-frame-control-value:after, .photo-frame-control-value:before {
 	bottom: 100%;
@@ -1037,6 +1038,12 @@ filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#e2e2e2', end
 	left: 50%;
 	margin-left: -9px;
 }
+
+/* -----------------------------------------
+	Helper Classes
+----------------------------------------- */
+
+.photo-frame-hidden { display: none; }
 
 .photo-frame-margin-top { margin-top: 10px; }
 .photo-frame-margin-bottom { margin-bottom: 10px; }

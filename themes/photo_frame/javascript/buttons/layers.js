@@ -15,6 +15,7 @@
 		classes: {
 			layer: 'photo-frame-layer',
 			layerIcon: 'photo-frame-layer-icon',
+			layerEmpty: 'photo-frame-layer-empty',
 			layerTitle: 'photo-frame-layer-title',
 			layerActions: 'photo-frame-layer-actions',
 			visible: 'photo-frame-toggle-visible',
@@ -62,7 +63,7 @@
 			var t = this;
 			
 			this.buttons = [{
-				text: PhotoFrame.Lang.render,
+				text: PhotoFrame.Lang.rerender,
 				css: 'photo-frame-tool-window-save',
 				onclick: function(e, button) {
 					t.refresh();
@@ -92,7 +93,7 @@
 		},
 		
 		refresh: function(photo) {
-			var t = this, classes = {}, buttons = {}, photo = photo ? photo : this.buttonBar.factory.cropPhoto;
+			var count = 0, t = this, classes = {}, buttons = {}, photo = photo ? photo : this.buttonBar.factory.cropPhoto;
 						
 			this.window.ui.content.html('');
 			
@@ -106,7 +107,7 @@
 				var button       = buttons[x];
 				
 				if(button) {
-					var title  		 = button.name.toLowerCase();
+					var title = button.name.toLowerCase();
 					
 					var visible = $('<a href="#" class="'+t.classes.visible+'"><i class="icon-'+(manipulation.visible ? t.icons.eye : t.icons.eyeClose)+'"></i></a>');
 					var trash   = $('<a href="#" class="'+t.classes.trash+'"><i class="icon-'+t.icons.trash+'"></i></a>');
@@ -123,18 +124,34 @@
 					html.find('.'+t.classes.layerActions).append(trash);
 					
 					visible.click(function(e) {
-						t.toggleLayer(x, manipulation, visible);					
+						t.toggleLayer(x, manipulation, visible);
+						button.toggleLayer(manipulation.visible);		
 						e.preventDefault();
 					});
 					
 					trash.click(function(e) {
 						t.removeLayer(x, manipulation, trash);
+						button.removeLayer();
 						e.preventDefault();
 					});
 						
+					t.window.ui.buttons.show();
 					t.window.ui.content.append(html);
+					count++;
 				}
-			});
+			});			
+			
+			if(!count) {	
+				var html = $([
+					'<div class="'+t.classes.layer+' '+t.buttonBar.factory.classes.clearfix+'">',
+						'<div class="'+t.classes.layerEmpty+'">'+PhotoFrame.Lang.no_layers+'</div>',
+						'<div class="'+t.classes.layerActions+'"></div>',
+					'</div>'
+				].join(''));
+				
+				t.window.ui.buttons.hide();				
+				t.window.ui.content.append(html);
+			}
 		},
 		
 		startCrop: function(photo) {			

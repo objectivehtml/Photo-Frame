@@ -43,7 +43,7 @@
 			this.windowSettings.title = PhotoFrame.Lang.contrast;
 			
 			this.buttons = [{
-				text: PhotoFrame.Lang.save,
+				text: PhotoFrame.Lang.adjust,
 				css: 'photo-frame-tool-window-save',
 				onclick: function(e, button) {
 					t.apply();
@@ -53,9 +53,30 @@
 			this.base(buttonBar);
 		},
 		
-		apply: function() {	
-			console.log('click');
-			//var d = parseInt(this.ui.window.find('#photo-frame-rotate').val());	
+		apply: function() {
+			this.addManipulation(true, {
+				value: this.getContrast()
+			});
+		},
+		
+		startCrop: function() {
+			var manipulation = this.getManipulation();
+			
+			if(manipulation) {
+				this.window.ui.slider.slider('option', 'value', manipulation.data.value);
+			}
+		},
+		
+		removeLayer: function() {
+			this.reset();		
+		},
+		
+		reset: function() {
+			this.window.ui.slider.slider('option', 'value', 0);	
+		},
+		
+		getContrast: function() {
+			return this.window.ui.slider.slider('option', 'value');	
 		},
 		
 		buildWindow: function() {	
@@ -97,7 +118,10 @@
 				min: -255,
 				max: 255,
 				start: function(e, ui) {
-					t.window.ui.value.fadeIn();
+					t.window.ui.value.fadeIn('fast');
+					position(ui);
+				},
+				create: function(e, ui) {
 					position(ui);
 				},
 				slide: function(e, ui) {
@@ -105,10 +129,7 @@
 				},
 				stop: function(e, ui) {
 					position(ui);
-					
-					setTimeout(function() {
-						t.window.ui.value.fadeOut();
-					}, 750);
+					t.window.ui.value.fadeOut('fast');
 				}
 			});		
 		}
