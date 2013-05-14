@@ -88,11 +88,47 @@
 			
 			if(crop.x || crop.y || crop.x2 || crop.y2) {
 				this.refresh();
+				this.addManipulation(true, {
+					x:  crop.x,
+					y:  crop.y,
+					x2: crop.x2,
+					y2: crop.y2
+				});
 			}
 		},
 		
-		removeLayer: function() {
+		toggleLayer: function(visibility) {
+			var m = this.getManipulation();
+			
+				console.log(m.data);
+					
+			if(!visibility) {
+				this.release();
+				this.disable();
+			}
+			else {
+				this.enable();this.setCrop(m.data.x, m.data.y, m.data.x2, m.data.y2);
+			}
+			
+			this.addManipulation(visibility, m.data);
+		},
+		
+		disable: function() {
+			this.buttonBar.factory.cropPhoto.jcrop.disable();
+			this.window.ui.content.find('input').attr('disabled', 'disabled');
+		},
+		
+		enable: function() {
+			this.buttonBar.factory.cropPhoto.jcrop.enable();	
+			this.window.ui.content.find('input').attr('disabled', false);
+		},
+		
+		release: function() {
 			this.buttonBar.factory.cropPhoto.releaseCrop();
+		},
+		
+		removeLayer: function() {
+			this.release();
 			this.removeManipulation();	
 		},
 		

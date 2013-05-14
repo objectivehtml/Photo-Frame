@@ -65,10 +65,6 @@
 			this.window.ui.input.val(0);	
 		},
 		
-		removeLayer: function() {
-			this.reset();
-		},
-		
 		buildWindow: function() {	
 			this.base({ buttons: this.buttons });
 			

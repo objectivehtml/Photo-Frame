@@ -42,9 +42,35 @@
 			this.base(buttonBar);
 		},
 		
+		getWidth: function() {
+			return parseInt(this.window.ui.width.val());
+		},
+		
+		getHeight: function() {
+			return parseInt(this.window.ui.height.val());
+		},
+		
+		reset: function() {
+			this.window.ui.width.val('');
+			this.window.ui.height.val('');
+		},
+		
+		removeLayer: function() {
+			this.reset();	
+		},
+		
+		startCrop: function() {
+			var manipulation = this.getManipulation();
+			
+			this.window.ui.width.val(manipulation.data.width);
+			this.window.ui.height.val(manipulation.data.height);
+		},
+		
 		apply: function() {	
-			console.log('click');
-			//var d = parseInt(this.ui.window.find('#photo-frame-rotate').val());	
+			this.addManipulation(true, {
+				width: this.getWidth(),
+				height: this.getHeight()
+			});
 		},
 		
 		buildWindow: function() {	
@@ -62,6 +88,8 @@
 			].join(''));
 			
 			this.window.ui.content.html(html);
+			this.window.ui.width  = this.window.ui.content.find('#photo-frame-width');
+			this.window.ui.height = this.window.ui.content.find('#photo-frame-height');			
 		}
 	});
 

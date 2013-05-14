@@ -71,10 +71,6 @@
 			}
 		},
 		
-		removeLayer: function() {
-			this.reset();		
-		},
-		
 		reset: function() {
 			this.window.ui.slider.slider('option', 'value', 0);	
 		},

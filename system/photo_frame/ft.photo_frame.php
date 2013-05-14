@@ -232,9 +232,9 @@ class Photo_frame_ft extends EE_Fieldtype {
 			'layers',
 			'crop',
 			'rotate',
+			'resize',
 			'brightness',
 			'contrast',
-			'resize',
 			'rgba'
 		);
 		

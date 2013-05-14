@@ -1480,12 +1480,15 @@ var PhotoFrame = function() {};
 			return this.buttonBar.factory.cropPhoto.getManipulation(this.name);
 		},
 		
+		removeLayer: function() {
+			this.reset();		
+		},
+		
 		startCrop: function(photo) {},
 		
 		toggleLayer: function(visible) {},
 		
-		removeLayer: function() {}
-		
+		reset: function() {}
 	});
 		
 	PhotoFrame.Window = PhotoFrame.Class.extend({

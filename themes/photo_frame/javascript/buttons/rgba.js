@@ -67,10 +67,6 @@
 			
 		},
 		
-		removeLayer: function() {
-			this.reset();
-		},
-		
 		startCrop: function() {
 			this.base();
 			
