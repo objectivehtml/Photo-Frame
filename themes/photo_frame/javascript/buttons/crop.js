@@ -21,6 +21,12 @@
 		name: false,
 		
 		/**
+		 * Is the crop enabled?
+		 */
+		
+		enabled: true,
+		
+		/**
 		 * The JSON object used for Window settings 
 		 */
 		
@@ -55,18 +61,20 @@
 		},
 		
 		apply: function() {	
-			var crop = this.getCrop(true);			
-			var x    = crop.x;
-			var y    = crop.y;
-			var x2   = crop.x2;
-			var y2   = crop.y2;
-			
-			this.addManipulation(true, {
-				x:  x,
-				x2: x2,
-				y:  y,
-				y2: y2
-			});
+			if(this.enabled) {
+				var crop = this.getCrop(true);			
+				var x    = crop.x;
+				var y    = crop.y;
+				var x2   = crop.x2;
+				var y2   = crop.y2;
+				
+				this.addManipulation(true, {
+					x:  x,
+					x2: x2,
+					y:  y,
+					y2: y2
+				});
+			}
 		},
 		
 		getCrop: function(formFields) {
@@ -100,25 +108,34 @@
 		toggleLayer: function(visibility) {
 			var m = this.getManipulation();
 			
-				console.log(m.data);
-					
 			if(!visibility) {
-				this.release();
-				this.disable();
+				this.hideCrop();
 			}
 			else {
-				this.enable();this.setCrop(m.data.x, m.data.y, m.data.x2, m.data.y2);
+				this.showCrop(m);
 			}
 			
 			this.addManipulation(visibility, m.data);
 		},
 		
+		hideCrop: function() {			
+			this.release();
+			this.disable();	
+		},
+		
+		showCrop: function(m) {			
+			this.enable();
+			this.setCrop(m.data.x, m.data.y, m.data.x2, m.data.y2);
+		},
+		
 		disable: function() {
+			this.enabled = false;
 			this.buttonBar.factory.cropPhoto.jcrop.disable();
 			this.window.ui.content.find('input').attr('disabled', 'disabled');
 		},
 		
 		enable: function() {
+			this.enabled = true;
 			this.buttonBar.factory.cropPhoto.jcrop.enable();	
 			this.window.ui.content.find('input').attr('disabled', false);
 		},
@@ -129,7 +146,8 @@
 		
 		removeLayer: function() {
 			this.release();
-			this.removeManipulation();	
+			this.removeManipulation();
+			this.enable();	
 		},
 		
 		reset: function() {
@@ -181,7 +199,15 @@
 			this.window.ui.y  = this.window.ui.content.find('#y');
 			this.window.ui.x2 = this.window.ui.content.find('#x2');
 			this.window.ui.y2 = this.window.ui.content.find('#y2');	
-				
+			
+			this.bind('startRendering', function() {
+				t.toggleLayer(false);
+			});
+			
+			this.bind('stopRendering', function() {
+				t.toggleLayer(true);
+			});
+			
 			this.bind('jcropOnChange', function(a) {
 				t.buttonBar.factory.cropPhoto.released = false;
 				t.refresh();

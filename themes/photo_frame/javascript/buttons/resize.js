@@ -66,7 +66,17 @@
 			this.window.ui.height.val(manipulation.data.height);
 		},
 		
-		apply: function() {	
+		apply: function() {
+			var t = this;
+			
+			this.startRendering(function() {
+				console.log('test');
+				
+				setTimeout(function() {
+					t.stopRendering();
+				}, 500)	
+			});
+			
 			this.addManipulation(true, {
 				width: this.getWidth(),
 				height: this.getHeight()

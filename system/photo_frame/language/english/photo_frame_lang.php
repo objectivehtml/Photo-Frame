@@ -32,6 +32,7 @@ $lang	= array(
 	'photo_frame_layers' 			     => 'Layers',
 	'photo_frame_adjust' 			     => 'Adjust',
 	'photo_frame_render' 			     => 'Render',
+	'photo_frame_rendering' 			 => 'Rendering...',
 	'photo_frame_rerender' 			     => 'Re-Render',
 	'photo_frame_color_adjustment' 	     => 'Color Adjustment',
 	'photo_frame_rgb'			 	     => 'RGB',

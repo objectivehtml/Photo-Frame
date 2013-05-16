@@ -25,7 +25,6 @@ var PhotoFrame = function() {};
 	 */
 	 
 	PhotoFrame.Buttons   = [];
-	
 
 	PhotoFrame.Class = Base.extend({
 		
@@ -206,6 +205,9 @@ var PhotoFrame = function() {};
 			photo: 'photo-frame-photo',
 			progress: 'photo-frame-progress',
 			preview: 'photo-frame-preview',
+			rendering: 'photo-frame-rendering',
+			renderBg: 'photo-frame-render-bg',
+			renderText: 'photo-frame-render-text',
 			save: 'photo-frame-save',
 			saving: 'photo-frame-saving',
 			size: 'size',
@@ -384,6 +386,7 @@ var PhotoFrame = function() {};
 					'</div>',
 					'<div class="'+t.classes.crop+'">',
 						'<div class="'+t.classes.cropPhoto+'"></div>',
+						'<div class="'+t.classes.renderBg+'"><div class="'+t.classes.renderText+'">'+PhotoFrame.Lang.rendering+'</div></div>',
 						'<div class="'+t.classes.meta+'">',
 							'<a href="#" class="'+t.classes.metaClose+' '+t.classes.floatRight+'"><span class="'+t.icons.cancel+'"></span></a>',
 							'<h3>'+PhotoFrame.Lang.photo_details+'</h3>',
@@ -1285,18 +1288,6 @@ var PhotoFrame = function() {};
 			}	
 		},
 		
-		startRendering: function(callback) {
-			console.log('start callback for rendering');	
-		},
-		
-		progressRendering: function(callback) {
-			console.log('progress callback for rendering');	
-		},
-		
-		stopRendering: function(callback) {
-			console.log('stop callback for rendering');	
-		},
-		
 		showWindows: function() {
 			for(var x in this.factory.windows) {
 				var window = this.factory.windows[x];
@@ -1484,6 +1475,18 @@ var PhotoFrame = function() {};
 			this.reset();		
 		},
 		
+		startRendering: function(callback) {
+			this.buttonBar.factory.cropPhoto.startRendering(callback);	
+		},
+		
+		stopRendering: function(callback) {
+			this.buttonBar.factory.cropPhoto.stopRendering(callback);	
+		},
+		
+		progressRendering: function(callback) {
+			this.buttonBar.factory.cropPhoto.progressRendering(callback);	
+		},
+		
 		startCrop: function(photo) {},
 		
 		toggleLayer: function(visible) {},
@@ -1609,6 +1612,11 @@ var PhotoFrame = function() {};
 			this.visible = this.getVisibility();
 			
 			factory.windows.push(this);
+		},
+		
+		bringToFront: function() {
+			this.factory.zIndexCount++;
+			this.ui.window.css('z-index', this.factory.zIndexCount);
 		},
 		
 		buildButtons: function() {
@@ -1738,11 +1746,6 @@ var PhotoFrame = function() {};
 			this.setVisibility(true);
 		},
 		
-		bringToFront: function() {
-			this.factory.zIndexCount++;
-			this.ui.window.css('z-index', this.factory.zIndexCount);
-		},
-		
 		position: function() {			
 			var left, index  = parseInt(this.ui.window.parent().index()) + 1;
 			
@@ -1784,8 +1787,7 @@ var PhotoFrame = function() {};
 			var current = parseInt(this.ui.window.css(prop).replace('px', ''));
 			
 			this.ui.window.css(prop, current+value);
-		}
-				
+		}		
 	});
 
 	PhotoFrame.Photo = PhotoFrame.Class.extend({
@@ -1896,6 +1898,7 @@ var PhotoFrame = function() {};
 			del: false,
 			image: false,
 			photo: false,
+			rendering: false,
 			saving: false
 		},
 					
@@ -1939,6 +1942,9 @@ var PhotoFrame = function() {};
 			t.response    = response;
 			t.originalUrl = response.original_url;
 			t.url         = response.file_url;
+			
+			t.ui.rendering	   = t.factory.ui.crop.find('.'+t.factory.classes.renderBg);
+			t.ui.renderingTxt  = t.factory.ui.crop.find('.'+t.factory.classes.renderText);
 			
 			if(!t.manipulations) {
 				t.manipulations = {};
@@ -2157,6 +2163,22 @@ var PhotoFrame = function() {};
 		clearNotices: function(callback) {
 			this.factory.clearNotices(callback);
 		}, 
+		
+		progressRendering: function(callback) {
+			console.log('progress callback for rendering');	
+		},
+				
+		startRendering: function(callback) {
+			this.factory.trigger('startRendering');
+			this.factory.ui.dimmer.addClass(this.factory.classes.rendering);
+			this.callback(callback);
+		},
+		
+		stopRendering: function(callback) {
+			this.factory.trigger('stopRendering');
+			this.factory.ui.dimmer.removeClass(this.factory.classes.rendering);
+			this.callback(callback);
+		},
 		
 		tellScaled: function() {
 			if(this.jcrop) {
