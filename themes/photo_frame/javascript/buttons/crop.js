@@ -288,7 +288,7 @@
 				t.resizeObj = obj;
 				
 				if(t.getManipulation()) {
-					t.cropPhoto().releaseCrop();
+					//t.cropPhoto().releaseCrop();
 				}
 			});
 			
@@ -305,19 +305,21 @@
 			});
 			
 			this.bind('resizeRemoveLayer', function() {
-				t.initCrop(true	);
+				t.initCrop(true);
 			});
 			
 			this.bind('rotateRemoveLayer', function(obj) {
-				t.removeManipulation();
+				//t.removeManipulation();
 			});
 			
+			/*
 			this.bind('resizeToggleLayer', function(manipulation) {
 				t.toggleLayerCallback(manipulation);
 			});
+			*/
 			
 			this.bind('rotateToggleLayer', function(manipulation) {
-				t.toggleLayerCallback(manipulation);
+				//t.toggleLayerCallback(manipulation);
 			});
 		},
 		
@@ -345,7 +347,11 @@
 			this.cropPhoto().ui.cropPhoto.append(img);
 			
 			this.cropPhoto().initJcrop();
-				
+			
+			if(!manipulation.visible) {
+				this.cropPhoto().releaseCrop();
+			}
+			
 			if(manipulation.data && !released && !init) {
 				this.cropPhoto().releaseCrop();				
 				this.cropPhoto().jcrop.setSelect([select.x, select.y, select.x2, select.y2])
