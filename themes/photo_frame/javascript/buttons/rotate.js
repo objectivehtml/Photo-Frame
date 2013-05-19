@@ -49,12 +49,17 @@
 			this.addManipulation(true, {
 				degree: this.getDegree()
 			});
+			
+			this.buttonBar.factory.trigger('rotate', this, this.getDegree());
+			this.render();
 		},
 		
 		startCrop: function() {
 			var manipulation = this.getManipulation();	
 			
-			this.window.ui.input.val(manipulation.data.degree);
+			if(manipulation.data && manipulation.data.degree) {
+				this.window.ui.input.val(manipulation.data.degree);
+			}
 		},
 		
 		getDegree: function() {
@@ -62,7 +67,11 @@
 		},
 		
 		reset: function() {
-			this.window.ui.input.val(0);	
+			this.window.ui.input.val('');	
+		},
+		
+		toggleLayer: function(visibility) {
+			this.render();	
 		},
 		
 		buildWindow: function() {	

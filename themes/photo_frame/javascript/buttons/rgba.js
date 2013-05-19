@@ -44,7 +44,7 @@
 			this.windowSettings.title = PhotoFrame.Lang.color_adjustment;
 			
 			this.buttons = [{
-				text: PhotoFrame.Lang.save,
+				text: PhotoFrame.Lang.adjust,
 				css: 'photo-frame-tool-window-save',
 				onclick: function(e, button) {
 					t.apply();
@@ -59,12 +59,14 @@
 				r: this.window.ui.r.slider('value'),
 				g: this.window.ui.g.slider('value'),
 				b: this.window.ui.b.slider('value'),
-				a: this.window.ui.a.slider('value') / 100
+				a: this.window.ui.a.slider('value')
 			});
+			
+			this.render();
 		},
 		
 		toggleLayer: function(visible) {
-			
+			this.render();
 		},
 		
 		startCrop: function() {
@@ -170,13 +172,14 @@
 				},
 				stop: function(e, ui) {
 					var type = $(this).data('type');					
-					position(type, ui);					
+					position(type, ui);				
+					t.apply();	
 					t.window.ui.value[type].fadeOut('fast');
 				}
 			});	
 			
 			this.window.ui.a.slider('option', 'min', 0);
-			this.window.ui.a.slider('option', 'max', 100);
+			this.window.ui.a.slider('option', 'max', 127);
 			this.window.ui.content.append(this.window.ui.value);		
 		}
 	});

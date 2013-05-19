@@ -32,7 +32,7 @@
 			var t = this;
 			
 			this.buttons = [{
-				text: PhotoFrame.Lang.save,
+				text: PhotoFrame.Lang.resize,
 				css: 'photo-frame-tool-window-save',
 				onclick: function(e, button) {
 					t.apply();
@@ -56,37 +56,47 @@
 		},
 		
 		removeLayer: function() {
-			this.reset();	
+			this.reset();
+			//this.buttonBar.factory.trigger('resizeRemoveLayer');
+			//this.cropPhoto().jcrop.release();
 		},
 		
 		startCrop: function() {
 			var manipulation = this.getManipulation();
 			
-			this.window.ui.width.val(manipulation.data.width);
-			this.window.ui.height.val(manipulation.data.height);
+			if(manipulation) {
+				this.window.ui.width.val(manipulation.data.width);
+				this.window.ui.height.val(manipulation.data.height);
+			}
+			else {
+				this.reset();
+			}
 		},
 		
 		apply: function() {
 			var t = this;
 			
-			this.startRendering(function() {
-				console.log('test');
-				
-				setTimeout(function() {
-					t.stopRendering();
-				}, 500)	
-			});
-			
 			this.addManipulation(true, {
 				width: this.getWidth(),
 				height: this.getHeight()
 			});
+			
+			this.buttonBar.factory.trigger('resize', this,this.getWidth(), this.getHeight());
+			this.render();
+		},
+		
+		initCrop: function(manipulation) {
+			this.buttonBar.factory.trigger('resizeInitCrop', this, manipulation);
+		},
+		
+		toggleLayer: function(visibility) {
+			this.render();
 		},
 		
 		buildWindow: function() {	
 			this.base({ buttons: this.buttons });
 			
-			var html = $([
+			var t = this, html = $([
 				'<div class="photo-frame-inline photo-frame-margin-bottom">',
 					'<label for="photo-frame-width" class="photo-frame-small">'+PhotoFrame.Lang.width+'</label>',
 					'<input type="text" name="photo-frame-width" value="" id="photo-frame-width" class="photo-frame-small" />',
@@ -99,7 +109,13 @@
 			
 			this.window.ui.content.html(html);
 			this.window.ui.width  = this.window.ui.content.find('#photo-frame-width');
-			this.window.ui.height = this.window.ui.content.find('#photo-frame-height');			
+			this.window.ui.height = this.window.ui.content.find('#photo-frame-height');	
+			
+			this.buttonBar.factory.bind('render', function() {
+				if(t.getManipulation()) {
+					t.initCrop();
+				}
+			});
 		}
 	});
 

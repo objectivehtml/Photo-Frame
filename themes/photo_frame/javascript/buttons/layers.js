@@ -66,6 +66,9 @@
 				text: PhotoFrame.Lang.rerender,
 				css: 'photo-frame-tool-window-save',
 				onclick: function(e, button) {
+					t.render(function() {
+						t.buttonBar.factory.trigger('layerWindowReRender');
+					});
 					t.refresh();
 				}
 			}];
@@ -75,19 +78,50 @@
 			this.windowSettings.title = PhotoFrame.Lang.layers;
 					
 			this.base(buttonBar);
-			this.buttonBar.factory.layerWindow = this;
+			// this.buttonBar.factory.layerWindow = this;
 		},
 		
 		buildWindow: function() {	
+			var t = this;
+			
 			this.base({buttons: this.buttons});
+			
+			this.buttonBar.factory.bind('startCropEnd', function() {
+				t.refresh();
+			});
+			
+			this.buttonBar.factory.bind('removeManipulation', function() {
+				t.refresh();
+			});
+			
+			this.buttonBar.factory.bind('showManipulation', function() {
+				t.refresh();
+			});
+			
+			this.buttonBar.factory.bind('hideManipulation', function() {
+				t.refresh();
+			});
+			
+			this.buttonBar.factory.bind('addManipulation', function(obj, name, exists) {
+				var content = $(t.window.ui.content).get(0);
+				
+				t.refresh();
+				
+				if(!exists) {
+					content.scrollTop = content.scrollHeight;
+				}
+			});
+			
 		},
 		
 		toggleLayer: function(name, manipulation, ui) {
 			manipulation.visible = manipulation.visible ? false : true;
+			this.buttonBar.factory.trigger(name+'ToggleLayer', manipulation);
 			this.refresh();
 		},
 		
 		removeLayer: function(name, manipulation, ui) {
+			this.buttonBar.factory.trigger(name+'RemoveLayer', manipulation);
 			delete this.buttonBar.factory.cropPhoto.manipulations[name];			
 			this.refresh();
 		},
@@ -132,9 +166,13 @@
 					trash.click(function(e) {
 						t.removeLayer(x, manipulation, trash);
 						button.removeLayer();
+						if(x != 'crop') {
+							// no need to render when removing the crop layer
+							t.render();
+						}
 						e.preventDefault();
 					});
-						
+					
 					t.window.ui.buttons.show();
 					t.window.ui.content.append(html);
 					count++;

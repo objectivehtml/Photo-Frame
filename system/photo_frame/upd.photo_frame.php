@@ -174,7 +174,7 @@ class Photo_frame_upd {
 		),
 		array(
 			'class'  => 'Photo_frame_mcp',
-			'method' => 'preview_crop_photo'
+			'method' => 'render'
 		),
 		array(
 			'class'  => 'Photo_frame_mcp',

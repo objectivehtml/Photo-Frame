@@ -326,17 +326,18 @@ class Photo_frame_lib {
 	
 	public function crop_action()
 	{
-		$height     = $this->EE->input->get_post('height', TRUE);
-		$width      = $this->EE->input->get_post('width', TRUE);
-		$x          = $this->EE->input->get_post('x', TRUE);
-		$x2         = $this->EE->input->get_post('x2', TRUE);
-		$y          = $this->EE->input->get_post('y', TRUE);
-		$y2         = $this->EE->input->get_post('y2', TRUE);
-		$resize     = $this->EE->input->get_post('resize', TRUE);
-		$resize_max = $this->EE->input->get_post('resizeMax', TRUE);
-		
-		$compression = $this->EE->input->get_post('compression', TRUE);
-		$compression = $compression ? $compression : 100;
+		$height        = $this->EE->input->get_post('height', TRUE);
+		$width         = $this->EE->input->get_post('width', TRUE);
+		$x             = $this->EE->input->get_post('x', TRUE);
+		$x2            = $this->EE->input->get_post('x2', TRUE);
+		$y             = $this->EE->input->get_post('y', TRUE);
+		$y2            = $this->EE->input->get_post('y2', TRUE);
+		$resize        = $this->EE->input->get_post('resize', TRUE);
+		$resize_max    = $this->EE->input->get_post('resizeMax', TRUE);
+		$manipulations = $this->EE->input->get_post('manipulations', TRUE);
+		$manipulations = $this->array_to_object($manipulations);
+		$compression   = $this->EE->input->get_post('compression', TRUE);
+		$compression   = $compression ? $compression : 100;
 		
 		if($this->edit)
 		{
@@ -350,6 +351,25 @@ class Photo_frame_lib {
 		if(empty($this->dir))
 		{
 			return $this->crop_json(FALSE);
+		}
+		
+		$buttons = $this->EE->photo_frame_lib->get_buttons(array(
+			'originalPath' => $this->orig,
+			'path'         => $this->img,
+			'originalUrl'  => $this->EE->photo_frame_model->parse($this->orig_file, 'url'),
+			'url' 		   => $this->url,
+			'image'        => $image
+		));
+		
+		foreach($manipulations as $name => $manipulation)
+		{
+			if($manipulation->visible === TRUE || $manipulation->visible == 'true')
+			{
+				if(isset($buttons[$name]))
+				{
+					$buttons[$name]->render($manipulation);
+				}	
+			}
 		}
 		
 		$width  = (int) ($width  ? $width  : $image->get_width());
@@ -402,12 +422,13 @@ class Photo_frame_lib {
 		}
 		
 		return $this->crop_json(TRUE, array(
-			'height'      => $height,
-			'width'       => $width,
-			'x'           => $x,
-			'x2'          => $x2,
-			'y'           => $y,
-			'y2'          => $y2
+			'manipulations' => $manipulations, 
+			'height'        => $height,
+			'width'         => $width,
+			'x'             => $x,
+			'x2'            => $x2,
+			'y'             => $y,
+			'y2'            => $y2
 		));
 	}
 	
@@ -475,6 +496,11 @@ class Photo_frame_lib {
 		}
 		
 		return $parse;
+	}
+	
+	public function extension($string)
+	{
+		return pathinfo($string, PATHINFO_EXTENSION);
 	}
 	
 	public function filename($string, $replace = '')
@@ -658,6 +684,78 @@ class Photo_frame_lib {
 		}
 	}
 	
+	public function load_button($directory, $addon_name, $file, $params = array())
+	{
+		$name  = str_replace('.php', '', $file);
+		$class = ucfirst($name).'Button';
+		
+		if(!class_exists($name))
+		{
+			require_once(PATH_THIRD . $addon_name . '/'.$directory.'/' . $file);
+		}
+		
+		return new $class($params);
+	}
+	
+	public function cache_image($cache, $orig_path)
+	{
+		$filename  = $this->filename($orig_path);
+		$extension = $this->extension($orig_path);
+		$cache_dir = 'cache';
+		
+		$basepath = $this->EE->theme_loader->theme_path() . 'photo_frame/';
+		
+		if(is_writable($basepath))
+		{
+			$basepath .= $cache_dir . '/';
+			
+			if(!is_dir($basepath))
+			{
+				mkdir($basepath, DIR_WRITE_MODE);
+			}
+			
+			$cache_file = $cache.'.'.$extension;
+			$cache_path = $basepath.$cache_file;
+			
+			copy($orig_path, $cache_path);
+			
+			$location = 'photo_frame/' . $cache_dir . '/' . $cache_file;
+			
+			return (object) array(
+				'url'  => $this->EE->theme_loader->theme_url()  . $location,
+				'path' => $this->EE->theme_loader->theme_path() . $location
+			);
+		}
+		
+		return FALSE;
+	}
+	
+	public function get_buttons($params = array())
+	{
+		$return = array();
+				
+		foreach(directory_map(PATH_THIRD) as $addon_name => $addon)
+		{
+			if(isset($addon['photo_frame']) && is_array($addon['photo_frame']))
+			{
+				foreach($addon['photo_frame'] as $file)
+				{					
+					$return[str_replace('.php', '', $file)] = $this->load_button('photo_frame', $addon_name, $file, $params);
+				}
+			}
+			
+			if(isset($addon['buttons']) && is_array($addon['buttons']))
+			{
+				foreach($addon['buttons'] as $file)
+				{					
+					$return[str_replace('.php', '', $file)] = $this->load_button('buttons', $addon_name, $file, $params);
+				}
+			}
+		}
+		
+		return $return;
+	}
+	
 	/*
 	public function resize_photos($field_id, $entry_id, $col_id = FALSE, $row_id = FALSE, $settings = array(), $matrix = FALSE)
 	{		
@@ -784,11 +882,147 @@ class Photo_frame_lib {
 	}
 	*/
 	
+	public function manipulate($photo)
+	{
+		$manipulations = FALSE;
+		
+		$photo->manipulations = json_decode($photo->manipulations);
+		
+		if(isset($photo->id))
+		{
+			$existing = $this->EE->photo_frame_model->get_photo($photo->id);
+		
+			if($existing->num_rows() > 0)
+			{
+				$existing      = $existing->row();
+				$manipulations = json_decode($existing->manipulations); 
+			}
+		}
+		
+		$orig_path = $this->EE->photo_frame_model->parse($photo->original_file, 'server_path');
+		$path      = $this->EE->photo_frame_model->parse($photo->file, 'server_path');
+		
+		$buttons = $this->EE->photo_frame_lib->get_buttons(array(
+			'originalPath' => $orig_path,
+			'path'		   => $path,
+			'originalUrl'  => $this->EE->photo_frame_model->parse($photo->original_file, 'url'),
+			'url'		   => $this->EE->photo_frame_model->parse($photo->file, 'url'),
+			'image'        => new ImageEditor($path)
+		));
+		
+		if($this->needs_manipulation($photo->manipulations, $manipulations))
+		{
+			copy($orig_path, $path);
+			
+			foreach($photo->manipulations as $name => $manipulation)
+			{
+				$has_changed = $this->has_changed($manipulation, isset($manipulations->$name) ? $manipulations->$name : (object) array());
+				if($has_changed)
+				{
+					if(isset($buttons[$name]) && ($manipulation->visible === 'true' || $manipulation->visible === TRUE))
+					{	
+						$buttons[$name]->render($manipulation);					
+					}	
+				}		
+			}
+		}
+				
+        $photo->manipulations = json_encode($photo->manipulations);		    
+	}
+	
+	public function array_to_object($array)
+	{
+		if(is_array($array))
+		{
+			foreach($array as $index => $value)
+			{
+				if(is_array($value))
+				{
+					$array[$index] = $this->array_to_object($value);
+				}
+				else
+				{
+					if($value == 'true')
+					{
+						$array[$index] = true;
+					}
+					else if($value == 'false')
+					{
+						$array[$index] = false;
+					}
+					else if(preg_match('/^\d*$/', $value))
+					{
+						$array[$index] = (float) $value;
+					}
+					else
+					{						
+						$array[$index] = $value;
+					}
+				}
+			}
+			
+			return (object) $array;
+		}
+		
+		return (object) array();
+	}
+	
+	public function needs_manipulation($subject, $compare)
+	{
+		if(is_array($subject))
+		{
+			foreach($subject as $name => $manipulation)
+			{
+				if($this->has_changed($manipulation, isset($compare->$name) ? $compare->$name : (object) array()))
+				{
+					return TRUE;
+				}
+			}
+		}
+		
+		return FALSE;
+	}
+	
+	public function has_changed($subject, $compare)
+	{
+		if(isset($subject->visible) && isset($compare->visible))
+		{
+			$subject_visible = $subject->visible === 'true' || $subject->visible === TRUE ? TRUE : FALSE;
+			$compare_visible = $compare->visible === 'true' || $compare->visible === TRUE ? TRUE : FALSE;	
+			
+			if($compare_visible === $subject_visible && $subject_visible === FALSE)
+			{
+				return FALSE;
+			}
+		}
+		
+		if(isset($subject->data) && isset($compare->data))
+		{
+			foreach($subject->data as $index => $data)
+			{
+				if(isset($subject->data->$index) && isset($compare->data->$index))
+				{
+					if(count(array_diff_assoc((array) $subject->data, (array) $compare->data)) > 0)
+					{
+						return TRUE;
+					}
+				}
+				else
+				{
+					return TRUE;
+				}
+			}
+		}
+		
+		return FALSE;
+	}
+	
 	public function crop_json($success = TRUE, $save_data = array())
 	{
 		$original_file = $this->orig_file;
 		
 		$new_file      = '{filedir_'.$this->id.'}'.config_item('photo_frame_directory_name').'/'.$this->name;
+		$manipulations = $this->EE->input->get_post('manipulations', TRUE);
 		
 		return $this->json(array_merge(array(
 			'id'            => $this->id,
@@ -811,7 +1045,7 @@ class Photo_frame_lib {
 				'title' 		=> $this->EE->input->get_post('title', TRUE) ? $this->EE->input->get_post('title', TRUE) : '',
 				'description'   => $this->EE->input->get_post('description', TRUE) ? $this->EE->input->get_post('description', TRUE) : '',
 				'keywords' 		=> $this->EE->input->get_post('keywords', TRUE) ? $this->EE->input->get_post('keywords', TRUE) : '',
-				'manipulations'	=> $this->EE->input->get_post('manipulations', TRUE) ? $this->EE->input->get_post('manipulations', TRUE) : array(),
+				'manipulations'	=> $manipulations ? $manipulations : array(),
 			), $save_data))
 		), $save_data));
 	}

@@ -51,13 +51,50 @@ class Photo_frame_mcp {
 		$this->EE->photo_frame_lib->response_action();
 	}
 	
-	public function preview_crop_photo()
+	public function render()
 	{
-		$url = $this->EE->input->get_post('url');
+		$this->EE->load->library('photo_frame_lib');
 		
-		header('Content-Type: image/png');
-		readfile($url);
-		exit();
+		//$url           = $this->EE->input->get_post('url');
+		
+		$orig_path     = $this->EE->input->get_post('originalPath');
+		$orig_url      = $this->EE->input->get_post('originalUrl');
+		$file_path	   = $this->EE->input->get_post('path');
+		$file_url 	   = $this->EE->input->get_post('url');
+		$cache  	   = $this->EE->input->get_post('cache');
+		$manipulations = $this->EE->input->get_post('manipulations');
+		$manipulations = $this->EE->photo_frame_lib->array_to_object($manipulations);
+		$cache_path    = $this->EE->photo_frame_lib->cache_image($cache, $orig_path);
+		
+		if(!$cache_path)
+		{
+			return $orig_path;	
+		}
+		
+		$image = new ImageEditor($cache_path->path);
+		
+		$buttons = $this->EE->photo_frame_lib->get_buttons(array(
+			'originalPath' => $orig_path,
+			'path'         => $file_path,
+			'originalUrl'  => $orig_url,
+			'url' 		   => $file_url,
+			'image'        => $image
+		));
+		
+		foreach($manipulations as $name => $manipulation)
+		{
+			if($manipulation->visible === TRUE || $manipulation->visible == 'true')
+			{
+				if(isset($buttons[$name]))
+				{
+					$buttons[$name]->render($manipulation);
+				}	
+			}
+		}
+		
+		return $this->json(array(
+			'url' => $cache_path->url
+		));
 	}
 	
 	/*

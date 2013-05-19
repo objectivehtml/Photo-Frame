@@ -68,12 +68,35 @@
 				var x2   = crop.x2;
 				var y2   = crop.y2;
 				
-				this.addManipulation(true, {
-					x:  x,
-					x2: x2,
-					y:  y,
-					y2: y2
-				});
+				if(!this.resizeToggleLayer && (x || x2 || y || y2)) {
+					this.addManipulation(true, {
+						x:  x,
+						x2: x2,
+						y:  y,
+						y2: y2
+					});
+				}
+				
+				/*
+				if(!this.resizeToggleLayer) {
+					if(x || x2 || y || y2) {
+						this.addManipulation(true, {
+							x:  x,
+							x2: x2,
+							y:  y,
+							y2: y2
+						});
+					}
+					else {
+						//this.showManipulation();
+					}
+				}
+				else {
+					//console.log('insert correct crop size here', this.resizeToggleLayer);
+					//this.addManipulation(false, this.resizeToggleLayer);
+					//this.resizeToggleLayer = false;
+				}
+				*/
 			}
 		},
 		
@@ -124,19 +147,27 @@
 		},
 		
 		showCrop: function(m) {			
-			this.enable();
+			this.enable();	
 			this.setCrop(m.data.x, m.data.y, m.data.x2, m.data.y2);
 		},
 		
-		disable: function() {
+		disable: function(omitJcrop) {
 			this.enabled = false;
-			this.buttonBar.factory.cropPhoto.jcrop.disable();
+			
+			if(!omitJcrop) {
+				this.buttonBar.factory.cropPhoto.jcrop.disable();
+			}
+			
 			this.window.ui.content.find('input').attr('disabled', 'disabled');
 		},
 		
-		enable: function() {
+		enable: function(omitJcrop) {
 			this.enabled = true;
-			this.buttonBar.factory.cropPhoto.jcrop.enable();	
+			
+			if(!omitJcrop) {
+				this.buttonBar.factory.cropPhoto.jcrop.enable();	
+			}
+			
 			this.window.ui.content.find('input').attr('disabled', false);
 		},
 		
@@ -145,8 +176,9 @@
 		},
 		
 		removeLayer: function() {
-			this.release();
+			this.resizeToggleLayer = false;
 			this.removeManipulation();
+			this.release();
 			this.enable();	
 		},
 		
@@ -200,28 +232,122 @@
 			this.window.ui.x2 = this.window.ui.content.find('#x2');
 			this.window.ui.y2 = this.window.ui.content.find('#y2');	
 			
-			this.bind('startRendering', function() {
-				t.toggleLayer(false);
+			var visibility;
+			var resizeVisibility;
+			var started;			
+			
+			this.bind('startCropBegin', function() {
+				started = false;
 			});
 			
-			this.bind('stopRendering', function() {
-				t.toggleLayer(true);
+			this.bind('startCropEnd', function() {			
+				started = true;
 			});
 			
 			this.bind('jcropOnChange', function(a) {
-				t.buttonBar.factory.cropPhoto.released = false;
-				t.refresh();
+				if(!this.resizeToggleLayer) {
+					t.enable(true);
+					t.buttonBar.factory.cropPhoto.released = false;
+					t.refresh();
+				}			
 			});
 			
 			this.bind('jcropOnRelease', function(a) {
-				t.removeManipulation();
+				if(started && t.getManipulation().visible) {
+					if(!t.resizeToggleLayer) {
+						t.removeManipulation();
+					}
+					t.resizeToggleLayer = false;
+				}
 			});
-			
+						
 			this.bind('jcropOnSelect', function(a) {
 				t.buttonBar.factory.cropPhoto.released = false;
 				t.refresh(true);
 				t.apply();
 			});
+			
+			this.bind('startRendering', function() {
+				visibility = t.getManipulation().visible ? true : false;
+				
+				if(visibility) {
+					t.showManipulation();	
+				}
+				else {
+					t.hideManipulation();
+				}
+			});
+			
+			this.bind('stopRendering', function() {
+				if(t.getManipulation() && t.getManipulation().visible) {
+					t.toggleLayer(visibility);
+				}
+			});
+			
+			this.bind('resize', function(obj, width, height) {
+				t.resizeObj = obj;
+				
+				if(t.getManipulation()) {
+					t.cropPhoto().releaseCrop();
+				}
+			});
+			
+			this.bind('rotate', function(obj) {
+				t.cropPhoto().releaseCrop();
+			});
+			
+			this.resizeToggleLayer = false;
+			
+			this.bind('resizeInitCrop', function(obj, manipulation) {
+				if(t.cropPhoto().totalManipulations() > 0) {
+					t.initCrop(t.getManipulation() ? true : false);
+				}
+			});
+			
+			this.bind('rotateRemoveLayer', function(obj) {
+				t.removeManipulation();
+			});
+			
+			this.bind('resizeToggleLayer', function(manipulation) {
+				t.toggleLayerCallback(manipulation);
+			});
+			
+			this.bind('rotateToggleLayer', function(manipulation) {
+				t.toggleLayerCallback(manipulation);
+			});
+		},
+		
+		toggleLayerCallback: function(manipulation) {
+			resizeVisibility = manipulation.visible;
+				
+			var visible = manipulation.visible && this.getManipulation().visible ? true : false;
+			
+			if(!manipulation.visible) {
+				this.resizeToggleLayer = this.getManipulation().data;
+				
+				this.toggleLayer(visible);
+			}	
+		},
+		
+		initCrop: function(init) {	
+			var manipulation = this.getManipulation();
+			var released 	 = this.cropPhoto().released;
+			var select   	 = this.cropPhoto().jcrop.tellSelect();
+			var img      	 = this.cropPhoto().ui.cropPhoto.find('img');
+			
+			this.cropPhoto().destroyJcrop();				
+			this.cropPhoto().ui.cropPhoto = $('<div class="'+this.buttonBar.factory.classes.cropPhoto+'"></div>');
+			this.buttonBar.factory.ui.crop.append(this.buttonBar.factory.cropPhoto.ui.cropPhoto);				
+			this.cropPhoto().ui.cropPhoto.append(img);
+			
+			this.cropPhoto().initJcrop();
+				
+			if(manipulation.data && !released && !init) {
+				this.cropPhoto().releaseCrop();				
+				this.cropPhoto().jcrop.setSelect([select.x, select.y, select.x2, select.y2])
+			}
+			
+			this.buttonBar.factory.ui.crop.center();	
 		},
 		
 		refresh: function(formFields) {

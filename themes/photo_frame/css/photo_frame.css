@@ -110,6 +110,9 @@ you can use the generic selector below, but it's slower:
 .photo-frame-icons .icon-circle-empty:before { content: '\f10c'; } /* '' */
 .photo-frame-icons .icon-circle:before { content: '\f111'; } /* '' */
 .photo-frame-icons .icon-layers:before { content: '\e79d'; } /* '' */
+.photo-frame-icons .icon-leaf:before { content: '\e807'; }
+.photo-frame-icons .icon-tag:before { content: '\e806'; }
+.photo-frame-icons .icon-arrows-cw:before { content: '\e805'; } /* '' */
 
 .photo-frame-photo-frame-dimmer .photo-frame-dimmer img,
 .photo-frame-wrapper .photo-frame-dimmer img {
@@ -996,7 +999,7 @@ a.photo-frame-tool-window-button:active {
 
 .photo-frame-toolbar .photo-frame-tools { position: absolute; top: 9px; left: 15px; }
 
-.photo-frame-toolbar .photo-frame-tools a { color: white; font-size: 34px; text-shadow: 0 -1px 0 black; }
+.photo-frame-toolbar .photo-frame-tools a { color: white; font-size: 24px; text-shadow: 0 -1px 0 black; position: absolute; top: 6px; }
 .photo-frame-toolbar .photo-frame-tools a.photo-frame-active { color: rgb(47, 143, 216); }
 .photo-frame-tool-window-save { float: right; }
 
@@ -1038,7 +1041,7 @@ filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#e2e2e2', end
 
 .photo-frame-layers .photo-frame-layer-title { font-size: 18px; padding-top: 12px; padding-left: 55px; }
 .photo-frame-layers .photo-frame-layer-actions { position: absolute; right: 0; top: 12px; }
-.photo-frame-layers .photo-frame-layer-actions a { padding-left: 10px; font-size: 15px; color: rgb(160, 160, 160); border-right: 1px solid rgb(71, 71, 69); padding-right: 10px; }
+.photo-frame-layers .photo-frame-layer-actions a { font-size: 15px; color: rgb(160, 160, 160); border-right: 1px solid rgb(71, 71, 69); padding: 5px 10px; }
 .photo-frame-layers .photo-frame-layer-actions a:last-child { border-right: none; box-shadow: 1px 0 0 black inset; }
 .photo-frame-layers .photo-frame-layer-actions a:hover { color: white; }
 .photo-frame-layers .photo-frame-tool-window-content { max-height: 210px; overflow-y: scroll; }
@@ -1090,6 +1093,12 @@ filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#e2e2e2', end
 ----------------------------------------- */
 
 .photo-frame-hidden { display: none; }
+.photo-frame-block { display: block; }
+
+.photo-frame-small-margin-top { margin-top: 5px; }
+.photo-frame-small-margin-bottom { margin-bottom: 5px; }
+.photo-frame-small-margin-left { margin-left: 5px; }
+.photo-frame-small-margin-right { margin-right: 5px; }
 
 .photo-frame-margin-top { margin-top: 10px; }
 .photo-frame-margin-bottom { margin-bottom: 10px; }

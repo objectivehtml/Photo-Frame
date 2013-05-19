@@ -61,6 +61,11 @@
 			this.addManipulation(true, {
 				value: this.getBrightness()
 			});
+			this.render();
+		},
+		
+		toggleLayer: function(visibility) {
+			this.render();	
 		},
 		
 		startCrop: function() {
@@ -126,6 +131,7 @@
 				stop: function(e, ui) {
 					position(ui);
 					t.window.ui.value.hide();
+					t.apply();
 				}
 			});		
 		}

@@ -339,7 +339,9 @@ class ImageEditor extends BaseClass {
 	 */
 	public function rotate($angle = 0, $ignore_transparent = 0)
 	{
-		imagerotate($this->image, $angle , $this->bgd_color, $ignore_transparent);
+		$this->image = imagerotate($this->image, $angle, $this->bgd_color, $ignore_transparent);
+		
+		$this->save();
 	}
 	
 	
@@ -598,6 +600,149 @@ class ImageEditor extends BaseClass {
 		}
 		
 		return $return;
+	}
+	
+	public function rgba($r, $g, $b, $a)
+	{
+		imagefilter($this->image, IMG_FILTER_COLORIZE, $r, $g, $b, $a);
+		
+		$this->save();
+	}
+	
+	public function contrast($level)
+	{
+		imagefilter($this->image, IMG_FILTER_CONTRAST, $level);
+		
+		$this->save();
+	}
+	
+	public function brightness($level)
+	{
+		imagefilter($this->image, IMG_FILTER_BRIGHTNESS, $level);
+		
+		$this->save();
+	}
+	
+	public function smooth($level)
+	{
+		imagefilter($this->image, IMG_FILTER_SMOOTH, $level);
+		
+		$this->save();
+	}
+	
+	public function pixelate($level, $advanced = FALSE)
+	{
+		imagefilter($this->image, IMG_FILTER_PIXELATE, $level, $advanced);
+		
+		$this->save();
+	}
+	
+	public function grayscale()
+	{		
+		imagefilter($this->image, IMG_FILTER_GRAYSCALE);
+		
+		$this->save();
+	}
+	
+	public function negative()
+	{		
+		imagefilter($this->image, IMG_FILTER_NEGATE);
+		
+		$this->save();
+	}
+	
+	public function edge_detect()
+	{		
+		imagefilter($this->image, IMG_FILTER_EDGEDETECT);
+		
+		$this->save();
+	}
+	
+	public function simple_emboss()
+	{		
+		imagefilter($this->image, IMG_FILTER_EMBOSS);
+		
+		$this->save();
+	}
+	
+	public function simple_blur($type = 'gaussian')
+	{		
+		if($type == 'selective')
+		{
+			$type = IMG_FILTER_SELECTIVE_BLUR;	
+		}
+		else
+		{
+			$type = IMG_FILTER_GAUSSIAN_BLUR;
+		}
+		
+		imagefilter($this->image, $type);
+		
+		$this->save();
+	}
+	
+	public function sketch()
+	{		
+		imagefilter($this->image, IMG_FILTER_MEAN_REMOVAL);
+		
+		$this->save();
+	}
+	
+	public function flip($dir)
+	{
+		if(function_exists('imageflip'))
+		{
+			imageflip($this->image, 'IMG_FLIP_'.strtoupper($dir));
+		}
+		else
+		{
+			$this->_imageflip($dir);
+		}
+		
+		$this->save();
+	}
+	
+	/**
+	 * Flip the image (fallback for PHP < 5.5)
+	 *
+	 * @access	private
+	 * @param	string  The direction of the flip (horizon|vertical|both)
+	 * @return	void
+	 */
+	private function _imageflip($mode)
+	{
+		$width      = $this->getWidth();
+	    $height     = $this->getHeight();
+	    $src_x      = 0;
+	    $src_y      = 0;
+	    $src_width  = $width;
+	    $src_height = $height;
+			
+	    switch ($mode)
+	    {
+	        case 'vertical': //vertical
+	            $src_y      = $height -1;
+	            $src_height = -$height;
+	        break;
+	
+	        case 'horizontal': //horizontal
+	            $src_x      = $width -1;
+	            $src_width  = -$width;
+	        break;
+	
+	        case 'both': //both
+	            $src_x      = $width -1;
+	            $src_y      = $height -1;
+	            $src_width  = -$width;
+	            $src_height = -$height;
+	        break;
+	    }
+	    
+	    $imgdest = imagecreatetruecolor($width, $height);
+	
+	    imagecopyresampled($imgdest, $this->image, 0, 0, $src_x, $src_y , $width, $height, $src_width, $src_height);
+	    
+	    $this->image = $imgdest;
 	}
 }
 

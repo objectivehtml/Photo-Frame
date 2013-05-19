@@ -178,6 +178,8 @@ class Photo_frame_ft extends EE_Fieldtype {
 		$this->EE->theme_loader->javascript('buttons/resize');
 		$this->EE->theme_loader->javascript('buttons/rgba');
 		$this->EE->theme_loader->javascript('buttons/layers');
+		$this->EE->theme_loader->javascript('buttons/flip');
+		$this->EE->theme_loader->javascript('buttons/smoothness');
 		$this->EE->theme_loader->javascript('jquery.ui');
 		$this->EE->theme_loader->javascript('jquery.ui.widget');
 		$this->EE->theme_loader->javascript('jquery.iframe-transport');
@@ -235,39 +237,25 @@ class Photo_frame_ft extends EE_Fieldtype {
 			'resize',
 			'brightness',
 			'contrast',
-			'rgba'
+			'rgba',
+			'flip',
+			'smoothness'
 		);
 		
 		$js_directory = $this->EE->theme_loader->js_directory;
-				
-		foreach(directory_map(PATH_THIRD) as $addon_name => $addon)
+			
+		foreach($this->EE->photo_frame_lib->get_buttons() as $obj)
 		{
-			if(isset($addon['photo_frame']) && is_array($addon['photo_frame']))
+			foreach($obj->javascript() as $js)
 			{
-				foreach($addon['photo_frame'] as $file)
-				{
-					$name  = str_replace('.php', '', $file);
-					$class = ucfirst($name).'Button';
-					
-					if(!class_exists($name))
-					{
-						require_once(PATH_THIRD . $addon_name . '/photo_frame/' . $file);
-					}
-					
-					$obj = new $class();
-					
-					foreach($obj->javascript() as $js)
-					{
-						$this->EE->theme_loader->javascript($js);
-					}
-					
-					foreach($obj->css() as $css)
-					{
-						$this->EE->theme_loader->css($css);
-					}
-				}
+				$this->EE->theme_loader->javascript($js);
 			}
-		}
+			
+			foreach($obj->css() as $css)
+			{
+				$this->EE->theme_loader->css($css);
+			}
+		}	
 		
 		$this->EE->theme_loader->js_directory = '';
 					
@@ -1175,18 +1163,25 @@ class Photo_frame_ft extends EE_Fieldtype {
     		    if(isset($photo['edit']) && count($photo['edit']))
     		    {
         		    $photo = json_decode($photo['edit']);
-        		    
-    				$photo->manipulations = json_encode($photo->manipulations);
-        		    
-					$photo_names[] = $photo->file_name;
-					
-        		    if($this->matrix)
-        		    {
-	        		    $photo->col_id = $this->settings['col_id'];
+        		   	
+        		   	if(is_object($photo))
+        		   	{        		    
+	        		    if(!is_string($photo->manipulations))
+	        		    {        		
+	    					$photo->manipulations = json_encode($photo->manipulations);
+	        		    }
+	        		    
+						$photo_names[] = $photo->file_name;
+						
+	        		    if($this->matrix)
+	        		    {
+		        		    $photo->col_id = $this->settings['col_id'];
+	        		    }
+	        		    
+	        		    $photo->order  = $index;  
+	        		    
+	        		    $edit_photos[] = $photo;
         		    }
-        		    
-        		    $photo->order  = $index;        		    
-        		    $edit_photos[] = $photo;
     		    }
     		}
 		}

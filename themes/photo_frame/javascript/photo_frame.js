@@ -259,6 +259,7 @@ var PhotoFrame = function() {};
 			cog: 'icon-cog',
 			rotate: 'icon-rotate',
 			save: 'icon-save',
+			tools: 'icon-tools',
 			warningSign: 'icon-warning-sign'
 		},
 		
@@ -266,7 +267,7 @@ var PhotoFrame = function() {};
 		 * The Layer window object
 		 */		
 		 
-		layerWindow: false,
+		// layerWindow: false,
 			
 		 	
 		/**
@@ -407,7 +408,7 @@ var PhotoFrame = function() {};
 						'</div>',
 						'<div class="'+t.classes.toolbar+'">',
 							'<div class="'+t.classes.tools+'">',
-								'<a href="#" class="'+t.classes.toolBarToggle+'"><i class="'+t.icons.cog+'"></i></a>',
+								'<a href="#" class="'+t.classes.toolBarToggle+'"><i class="'+t.icons.tools+'"></i></a>',
 								/*'<a class="'+t.classes.infoToggle+'"><i class="'+t.icons.info+'"></i></a>',*/
 							'</div>',
 							'<a href="#"  class="'+t.classes.barButton+' '+t.classes.cancel+' '+t.classes.floatLeft+'"><span class="'+t.icons.cancel+'"></span> '+PhotoFrame.Lang.cancel+'</a>',
@@ -903,6 +904,7 @@ var PhotoFrame = function() {};
 					size: this.size,
 					forceCrop: this.forceCrop,
 					disableCrop: this.disableCrop,
+					manipulations: {},
 					//resize: this.resize,
 					//resizeMax: this.resizeMax,
 					index: this.photos.length,
@@ -1419,13 +1421,29 @@ var PhotoFrame = function() {};
 			this.buildWindow();
 		},	
 		
+		showManipulation: function() {
+			this.cropPhoto().showManipulation(this.name);
+		},
+		
+		hideManipulation: function() {
+			this.cropPhoto().hideManipulation(this.name);
+		},
+		
 		addManipulation: function(visible, data) {
-			this.buttonBar.factory.cropPhoto.addManipulation(this.name, visible, data)
+			this.cropPhoto().addManipulation(this.name, visible, data);
+		},
+		
+		cropPhoto: function() {
+			return this.buttonBar.factory.cropPhoto;
+		},
+		
+		render: function(callback) {
+			this.cropPhoto().render(callback);	
 		},
 		
 		removeManipulation: function() {
 			delete this.buttonBar.factory.cropPhoto.manipulations[this.name.toLowerCase()];
-			this.buttonBar.factory.layerWindow.refresh();
+			this.buttonBar.factory.trigger('removeManipulation', this);
 		},
 		
 		apply: function() {
@@ -1468,7 +1486,7 @@ var PhotoFrame = function() {};
 		},
 		
 		getManipulation: function() {
-			return this.buttonBar.factory.cropPhoto.getManipulation(this.name);
+			return this.cropPhoto().getManipulation(this.name);
 		},
 		
 		removeLayer: function() {
@@ -1476,15 +1494,15 @@ var PhotoFrame = function() {};
 		},
 		
 		startRendering: function(callback) {
-			this.buttonBar.factory.cropPhoto.startRendering(callback);	
+			this.cropPhoto().startRendering(callback);	
 		},
 		
 		stopRendering: function(callback) {
-			this.buttonBar.factory.cropPhoto.stopRendering(callback);	
+			this.cropPhoto().stopRendering(callback);	
 		},
 		
 		progressRendering: function(callback) {
-			this.buttonBar.factory.cropPhoto.progressRendering(callback);	
+			this.cropPhoto().progressRendering(callback);	
 		},
 		
 		startCrop: function(photo) {},
@@ -1799,6 +1817,12 @@ var PhotoFrame = function() {};
 		cache: false,
 			
 		/**
+		 * The cached photo URL. This property is set in the render() callback
+		 */			 
+		
+		cacheUrl: false,
+			
+		/**
 		 * Image Compression (1-100)
 		 */	
 		 
@@ -1841,6 +1865,12 @@ var PhotoFrame = function() {};
 		index: false,
 		
 		/**
+		 * Has the photo cropping been initialized?
+		 */	
+		 
+		initialized: false,
+		
+		/**
 		 * Photo ID
 		 */	
 		 
@@ -1869,6 +1899,30 @@ var PhotoFrame = function() {};
 		 */
 		 
 		overflow: false,
+		 
+		/**
+		 * The original file path
+		 */
+		 
+		originalPath: false,
+		 
+		/**
+		 * The original file URL
+		 */
+		 
+		originalUrl: false,
+		 
+		/**
+		 * The framed file path
+		 */
+		 
+		path: false,
+		 
+		/**
+		 * The framed file path
+		 */
+		 
+		rendering: false,
 		 
 		/**
 		 * Default Crop Size
@@ -1907,7 +1961,13 @@ var PhotoFrame = function() {};
 		 */
 		 
 		url: false,
-					
+		
+		/**
+		 * use the cache image?
+		 */
+		 
+		useCache: false,
+		 			
 		/**
 		 * Has the crop utility been released?
 		 */
@@ -1935,13 +1995,15 @@ var PhotoFrame = function() {};
 			
 			t.base(options);
 			
-			t.factory     = factory;
-		    t.title       = response.title;
-		    t.description = response.description;
-		    t.keywords    = response.keywords;
-			t.response    = response;
-			t.originalUrl = response.original_url;
-			t.url         = response.file_url;
+			t.factory      = factory;
+		    t.title        = response.title;
+		    t.description  = response.description;
+		    t.keywords     = response.keywords;
+			t.response     = response;
+			t.originalPath = response.original_path;
+			t.originalUrl  = response.original_url;
+			t.url          = response.file_url;
+			t.path         = response.file_path;
 			
 			t.ui.rendering	   = t.factory.ui.crop.find('.'+t.factory.classes.renderBg);
 			t.ui.renderingTxt  = t.factory.ui.crop.find('.'+t.factory.classes.renderText);
@@ -2047,20 +2109,36 @@ var PhotoFrame = function() {};
 			});
 		},
 		
-		addManipulation: function(name, visibility, data) {
-			var name   = name.toLowerCase(), content = $(this.factory.layerWindow.window.ui.content).get(0);
+		hideManipulation: function(title) {			
+			var name = title.toLowerCase();
+			var exists = this.manipulations[name] ? this.manipulations[name] : false;
+			if(this.manipulations[name]) {
+				this.manipulations[name].visible = false;
+			}
+			this.factory.trigger('hideManipulation', this, name, exists);
+		},
+		
+		showManipulation: function(title) {			
+			var name = title.toLowerCase();
+			var exists = this.manipulations[name] ? this.manipulations[name] : false;
+			if(this.manipulations[name]) {
+				this.manipulations[name].visible = true;
+			}
+			this.factory.trigger('showManipulation', this, name, exists);
+		},
+		
+		addManipulation: function(title, visibility, data) {
+			var name   = title.toLowerCase();
 			var exists = this.manipulations[name] ? this.manipulations[name] : false;
 			
-			this.manipulations[name] = {
-				visible: visibility,
-				data: data
-			};			
+			if(data) {
+				this.manipulations[name] = {
+					visible: visibility,
+					data: data
+				};		
+			}	
 			
-			this.factory.layerWindow.refresh();
-			
-			if(!exists) {
-				content.scrollTop = content.scrollHeight;
-			}
+			this.factory.trigger('addManipulation', this, name, exists);
 		},
 		
 		getManipulation: function(name) {
@@ -2087,7 +2165,7 @@ var PhotoFrame = function() {};
 			this.factory.hideInstructions();
 		},
 		
-		initJcrop: function(callback) {
+		initJcrop: function(callback, debug) {
 			var t = this;
 			
 			t.factory.ui.toolbar.show();
@@ -2164,17 +2242,67 @@ var PhotoFrame = function() {};
 			this.factory.clearNotices(callback);
 		}, 
 		
-		progressRendering: function(callback) {
-			console.log('progress callback for rendering');	
-		},
+		render: function(callback) {
+			var t = this;
+			
+			
+			// if(this.totalManipulations() > 0) {
+				this.startRendering();
+				this.useCache = true;
 				
+				$.post(PhotoFrame.Actions.render, 
+					{
+						path: this.path,
+						url: this.url,
+						originalPath: this.originalPath,
+						originalUrl: this.originalUrl,
+						cache: this.cache,
+						manipulations: t.getManipulations()
+					}, function(data) {
+						t.cacheUrl = data.url;
+										
+						t.load(data.url, function(img) {			
+							t.ui.cropPhoto.html(img); 
+							t.stopRendering();
+							t.callback(callback, data);
+							t.factory.trigger('render');
+						});
+					}
+				);
+			//}
+		},
+		
+		totalManipulations: function() {
+			var count = 0;
+			
+			for(var x in this.manipulations) {
+				count++;
+			}
+			
+			return count;
+		},
+		
+		needsRendered: function() {
+			var total = this.totalManipulations();
+			
+			if(!total || total == 1 && this.manipulations['crop']) {
+				return false;
+			}
+			
+			if(total > 0) {
+				return true;
+			}
+		},
+		
 		startRendering: function(callback) {
+			this.rendering = true;
 			this.factory.trigger('startRendering');
 			this.factory.ui.dimmer.addClass(this.factory.classes.rendering);
 			this.callback(callback);
 		},
 		
 		stopRendering: function(callback) {
+			this.rendering = false;
 			this.factory.trigger('stopRendering');
 			this.factory.ui.dimmer.removeClass(this.factory.classes.rendering);
 			this.callback(callback);
@@ -2266,6 +2394,10 @@ var PhotoFrame = function() {};
 			});	
 		},
 		
+		photoUrl: function() {			
+			return !this.useCache ? this.originalUrl : this.cacheUrl;	
+		},
+		
 		startCrop: function(callback) {
 			var t = this;
 			
@@ -2273,6 +2405,11 @@ var PhotoFrame = function() {};
 			
 			$('body').css('overflow', 'hidden');
 			
+			$.each(t.factory.buttonBar.buttons, function(i, button) {
+				button.reset();	
+			});
+			
+	        t.factory.trigger('startCropBegin', t);    	
 			t.factory.cropPhoto = t;
 			t.factory.ui.dimmer.fadeIn('fast');
 			
@@ -2282,7 +2419,7 @@ var PhotoFrame = function() {};
 			
 			t.factory.resetMeta();
 			
-			t.load(t.originalUrl, function(img) {
+			t.load(t.photoUrl(), function(img) {
 			
 				t.factory.hideProgress();
 				
@@ -2343,9 +2480,17 @@ var PhotoFrame = function() {};
 	            $(window).resize();
 	            
 	            for(var x in t.factory.buttons) {
-	            	//console.log(t.factory.buttonBar.buttons[x]);
 		            t.factory.buttonBar.buttons[x].startCrop(t);
-	            }	
+	            }
+	            
+	            if(t.needsRendered()) {
+		            t.render(function() {
+		            	t.factory.trigger('startCropEnd', t);
+		            });
+	            }
+	            else {
+		           t.factory.trigger('startCropEnd', t);
+	            }
 			});
 			
 			t.factory.ui.save.unbind('click').bind('click', function(e) {
@@ -2386,8 +2531,10 @@ var PhotoFrame = function() {};
 					});
 				}
 				
-				$('body').css('overflow', t.overflow);
+				t.factory.trigger('cancel', t);
 				
+				$('body').css('overflow', t.overflow);
+								
 				e.preventDefault();
 			});
 		},
@@ -2467,6 +2614,8 @@ var PhotoFrame = function() {};
 		saveCrop: function() {
 			var t    = this;
 			
+			this.factory.trigger('saveCropStart', t);
+			
 			var errors = t.validate();
 			  
 			if(errors.length > 0) {
@@ -2497,6 +2646,7 @@ var PhotoFrame = function() {};
 					t.factory.cropPhoto = false;
 					t.destroyJcrop();		
 					t.save(cropResponse.save_data);	
+					t.factory.trigger('saveCropStop', t, cropResponse);
 				});
 			}
 		},
@@ -2533,10 +2683,13 @@ var PhotoFrame = function() {};
     		}
     		
 			$.get(PhotoFrame.Actions.crop_photo, {
+				cache: t.cache,
+				useCache: t.useCache,
 				id: t.factory.directory.id,
 				photo_id: t.id,
 				image: response.file_path,
 				name: response.file_name,
+				manipulations: t.manipulations,
 				directory: t.factory.directory.server_path,
 				original: response.original_path,
 				original_file: response.original_file,
@@ -2555,8 +2708,7 @@ var PhotoFrame = function() {};
 				title: t.title,
 				description: t.description,
 				keywords: t.keywords,
-				compression: t.compression,
-				manipulations: t.manipulations
+				compression: t.compression
 			}, function(cropResponse) {
 				if(typeof callback == "function") {
 					callback(cropResponse);					
