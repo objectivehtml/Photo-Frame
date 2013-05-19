@@ -304,6 +304,10 @@
 				}
 			});
 			
+			this.bind('resizeRemoveLayer', function() {
+				t.initCrop(true	);
+			});
+			
 			this.bind('rotateRemoveLayer', function(obj) {
 				t.removeManipulation();
 			});

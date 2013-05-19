@@ -57,8 +57,8 @@
 		
 		removeLayer: function() {
 			this.reset();
-			//this.buttonBar.factory.trigger('resizeRemoveLayer');
 			//this.cropPhoto().jcrop.release();
+			this.buttonBar.factory.trigger('resizeRemoveLayer');
 		},
 		
 		startCrop: function() {

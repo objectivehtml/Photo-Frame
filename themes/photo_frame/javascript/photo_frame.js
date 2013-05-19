@@ -2250,6 +2250,8 @@ var PhotoFrame = function() {};
 				this.startRendering();
 				this.useCache = true;
 				
+						console.log(t.getManipulations());
+									
 				$.post(PhotoFrame.Actions.render, 
 					{
 						path: this.path,
@@ -2260,7 +2262,7 @@ var PhotoFrame = function() {};
 						manipulations: t.getManipulations()
 					}, function(data) {
 						t.cacheUrl = data.url;
-										
+							
 						t.load(data.url, function(img) {			
 							t.ui.cropPhoto.html(img); 
 							t.stopRendering();
@@ -2710,6 +2712,7 @@ var PhotoFrame = function() {};
 				keywords: t.keywords,
 				compression: t.compression
 			}, function(cropResponse) {
+					console.log(cropResponse);
 				if(typeof callback == "function") {
 					callback(cropResponse);					
 				}
