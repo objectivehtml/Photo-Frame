@@ -65,7 +65,7 @@
 		},
 		
 		toggleLayer: function(visibility) {
-			this.render();	
+			this.base(visibility);	
 		},
 		
 		startCrop: function() {
@@ -73,7 +73,16 @@
 			
 			if(manipulation) {
 				this.window.ui.slider.slider('option', 'value', manipulation.data.value);
+				this.base();
 			}
+		},
+		
+		enable: function() {
+			this.window.ui.slider.slider('option', 'disabled', false);
+		},
+		
+		disable: function() {
+			this.window.ui.slider.slider('option', 'disabled', true);
 		},
 		
 		reset: function() {

@@ -107,7 +107,7 @@
 				
 				t.refresh();
 				
-				if(!exists) {
+				if(!exists && name != 'crop') {
 					content.scrollTop = content.scrollHeight;
 				}
 			});
@@ -148,7 +148,7 @@
 					
 					var html = $([
 					'<div class="'+t.classes.layer+' '+t.buttonBar.factory.classes.clearfix+'">',
-						'<div class="'+t.classes.layerIcon+'"><i class="icon-'+(button.icon ? button.icon : title)+'"></i></div>',
+						'<div class="'+t.classes.layerIcon+'"><a href="#"><i class="icon-'+(button.icon ? button.icon : title)+'"></i></a></div>',
 						'<div class="'+t.classes.layerTitle+'">'+button.window.title+'</div>',
 						'<div class="'+t.classes.layerActions+'"></div>',
 					'</div>'
@@ -156,6 +156,11 @@
 					
 					html.find('.'+t.classes.layerActions).append(visible);
 					html.find('.'+t.classes.layerActions).append(trash);
+					
+					html.find('.'+t.classes.layerIcon+' > a').click(function(e) {
+						button.window.toggle();
+						e.preventDefault();
+					});
 					
 					visible.click(function(e) {
 						t.toggleLayer(x, manipulation, visible);

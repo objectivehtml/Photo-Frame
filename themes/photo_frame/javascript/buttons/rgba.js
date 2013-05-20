@@ -65,13 +65,11 @@
 			this.render();
 		},
 		
-		toggleLayer: function(visible) {
-			this.render();
+		toggleLayer: function(visibility) {
+			this.base(visibility);
 		},
 		
 		startCrop: function() {
-			this.base();
-			
 			var manipulation = this.getManipulation();
 			
 			if(manipulation) {
@@ -79,7 +77,22 @@
 				this.window.ui.g.slider('option', 'value', manipulation.data.g);
 				this.window.ui.b.slider('option', 'value', manipulation.data.b);
 				this.window.ui.a.slider('option', 'value', manipulation.data.a);
+				this.base();
 			}			
+		},
+		
+		enable: function() {
+			this.window.ui.r.slider('option', 'disabled', false);
+			this.window.ui.g.slider('option', 'disabled', false);
+			this.window.ui.b.slider('option', 'disabled', false);
+			this.window.ui.a.slider('option', 'disabled', false);
+		},
+		
+		disable: function() {
+			this.window.ui.r.slider('option', 'disabled', true);
+			this.window.ui.g.slider('option', 'disabled', true);
+			this.window.ui.b.slider('option', 'disabled', true);
+			this.window.ui.a.slider('option', 'disabled', true);
 		},
 		
 		reset: function() {

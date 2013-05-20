@@ -55,6 +55,16 @@
 			this.window.ui.height.val('');
 		},
 		
+		enable: function() {
+			this.window.ui.width.attr('disabled', false);
+			this.window.ui.height.attr('disabled', false);	
+		},
+		
+		disable: function() {
+			this.window.ui.width.attr('disabled', true);
+			this.window.ui.height.attr('disabled', true);	
+		},
+		
 		removeLayer: function() {
 			this.reset();
 			//this.cropPhoto().jcrop.release();
@@ -67,6 +77,7 @@
 			if(manipulation) {
 				this.window.ui.width.val(manipulation.data.width);
 				this.window.ui.height.val(manipulation.data.height);
+				this.base();
 			}
 			else {
 				this.reset();
@@ -90,7 +101,7 @@
 		},
 		
 		toggleLayer: function(visibility) {
-			this.render();
+			this.base(visibility);
 		},
 		
 		buildWindow: function() {	

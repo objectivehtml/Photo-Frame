@@ -118,13 +118,15 @@
 			var crop = this.getCrop();
 			
 			if(crop.x || crop.y || crop.x2 || crop.y2) {
-				this.refresh();
 				this.addManipulation(true, {
 					x:  crop.x,
 					y:  crop.y,
 					x2: crop.x2,
 					y2: crop.y2
 				});
+			}
+			else {
+				this.disable();
 			}
 		},
 		
@@ -158,12 +160,12 @@
 				this.buttonBar.factory.cropPhoto.jcrop.disable();
 			}
 			
-			this.window.ui.content.find('input').attr('disabled', 'disabled');
+			this.window.ui.content.find('input').attr('disabled', true);
 		},
 		
 		enable: function(omitJcrop) {
 			this.enabled = true;
-			
+		
 			if(!omitJcrop) {
 				this.buttonBar.factory.cropPhoto.jcrop.enable();	
 			}
@@ -236,6 +238,8 @@
 			var resizeVisibility;
 			var started;			
 			
+			this.resizeToggleLayer = false;
+			
 			this.bind('startCropBegin', function() {
 				started = false;
 			});
@@ -246,7 +250,10 @@
 			
 			this.bind('jcropOnChange', function(a) {
 				if(!this.resizeToggleLayer) {
-					t.enable(true);
+					var m = t.getManipulation();
+					if(m && m.visible) {
+						t.enable(true);
+					}
 					t.buttonBar.factory.cropPhoto.released = false;
 					t.refresh();
 				}			
@@ -284,6 +291,19 @@
 				}
 			});
 			
+			this.bind('resizeInitCrop', function(obj, manipulation) {
+				if(t.cropPhoto().totalManipulations() > 0) {
+					var m = t.getManipulation();
+					
+					t.initCrop(m && !m.visible ? true : false);
+				}
+			});
+			
+			this.bind('resizeRemoveLayer', function() {
+				t.initCrop(true);
+			});
+			
+			/*
 			this.bind('resize', function(obj, width, height) {
 				t.resizeObj = obj;
 				
@@ -293,38 +313,25 @@
 			});
 			
 			this.bind('rotate', function(obj) {
-				t.cropPhoto().releaseCrop();
-			});
-			
-			this.resizeToggleLayer = false;
-			
-			this.bind('resizeInitCrop', function(obj, manipulation) {
-				if(t.cropPhoto().totalManipulations() > 0) {
-					t.initCrop(t.getManipulation() ? true : false);
-				}
-			});
-			
-			this.bind('resizeRemoveLayer', function() {
-				t.initCrop(true);
+				//t.cropPhoto().releaseCrop();
 			});
 			
 			this.bind('rotateRemoveLayer', function(obj) {
 				//t.removeManipulation();
 			});
 			
-			/*
 			this.bind('resizeToggleLayer', function(manipulation) {
-				t.toggleLayerCallback(manipulation);
+				//t.toggleLayerCallback(manipulation);
 			});
-			*/
 			
 			this.bind('rotateToggleLayer', function(manipulation) {
 				//t.toggleLayerCallback(manipulation);
 			});
+			*/
 		},
 		
 		toggleLayerCallback: function(manipulation) {
-			resizeVisibility = manipulation.visible;
+			// resizeVisibility = manipulation.visible;
 				
 			var visible = manipulation.visible && this.getManipulation().visible ? true : false;
 			

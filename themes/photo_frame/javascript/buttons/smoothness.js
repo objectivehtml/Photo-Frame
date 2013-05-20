@@ -65,19 +65,30 @@
 		},
 		
 		toggleLayer: function(visibility) {
-			this.render();	
+			this.base(visibility);	
 		},
 		
 		startCrop: function() {
 			var manipulation = this.getManipulation();
 			
 			if(manipulation) {
-				this.window.ui.slider.slider('option', 'value', manipulation.data.value);
+				if(manipulation.data) {
+					this.window.ui.slider.slider('option', 'value', manipulation.data.value);
+				}
+				this.base();
 			}
 		},
 		
 		reset: function() {
 			this.window.ui.slider.slider('option', 'value', 0);	
+		},
+		
+		enable: function() {
+			this.window.ui.slider.slider('option', 'disabled', false);
+		},
+		
+		disable: function() {
+			this.window.ui.slider.slider('option', 'disabled', true);
 		},
 		
 		buildWindow: function() {	

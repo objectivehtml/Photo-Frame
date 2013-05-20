@@ -55,10 +55,11 @@
 		},
 		
 		startCrop: function() {
-			var manipulation = this.getManipulation();	
+			var m = this.getManipulation();	
 			
-			if(manipulation.data && manipulation.data.degree) {
-				this.window.ui.input.val(manipulation.data.degree);
+			if(m.data && m.data.degree) {
+				this.window.ui.input.val(m.data.degree);
+				this.base();
 			}
 		},
 		
@@ -71,7 +72,15 @@
 		},
 		
 		toggleLayer: function(visibility) {
-			this.render();	
+			this.base(visibility);
+		},
+		
+		enable: function() {
+			this.window.ui.input.attr('disabled', false);	
+		},
+		
+		disable: function() {
+			this.window.ui.input.attr('disabled', true);	
 		},
 		
 		buildWindow: function() {	

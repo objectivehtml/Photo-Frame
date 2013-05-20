@@ -65,6 +65,7 @@
 			
 			if(manipulation) {
 				this.window.ui.slider.slider('option', 'value', manipulation.data.value);
+				this.base();
 			}
 		},
 		
@@ -80,8 +81,16 @@
 			return this.window.ui.slider.slider('option', 'value');	
 		},
 		
-		toggleLayer: function() {
-			this.render();	
+		toggleLayer: function(visibility) {			
+			this.base(visibility);	
+		},
+		
+		enable: function() {
+			this.window.ui.slider.slider('option', 'disabled', false);
+		},
+		
+		disable: function() {
+			this.window.ui.slider.slider('option', 'disabled', true);
 		},
 		
 		buildWindow: function() {	

@@ -56,6 +56,20 @@
 			this.base(buttonBar);
 		},
 		
+		startCrop: function() {
+			var m = this.getManipulation();
+			
+			if(m) {
+				if(m.data.direction == 'horizontal' || m.data.direction == 'both') {
+					this.window.ui.h.attr('checked', 'checked'); 
+				}
+				if(m.data.direction == 'vertical' || m.data.direction == 'both') {
+					this.window.ui.v.attr('checked', 'checked'); 
+				}
+				this.base();
+			}
+		},
+		
 		apply: function() {
 			this.addManipulation(true, {
 				direction: this.getDirection()
@@ -64,7 +78,17 @@
 		},
 		
 		toggleLayer: function(visibility) {
-			this.render();	
+			this.base(visibility);
+		},
+		
+		enable: function() {
+			this.window.ui.h.attr('disabled', false);
+			this.window.ui.v.attr('disabled', false);	
+		},
+		
+		disable: function() {
+			this.window.ui.h.attr('disabled', true);
+			this.window.ui.v.attr('disabled', true);	
 		},
 		
 		reset: function() {
