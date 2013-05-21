@@ -63,6 +63,21 @@
 			var t = this;
 			
 			this.buttons = [{
+				text: PhotoFrame.Lang.hide_all,
+				onclick: function(e, button) {
+					var $target = $(e.target);
+					
+					if($target.html() == PhotoFrame.Lang.hide_all) {
+						$target.html(PhotoFrame.Lang.show_all);
+						t.hideAll();
+					}
+					else {
+						$target.html(PhotoFrame.Lang.hide_all);
+						t.showAll();
+					}
+					e.preventDefault();
+				}
+			},{
 				text: PhotoFrame.Lang.rerender,
 				css: 'photo-frame-tool-window-save',
 				onclick: function(e, button) {
@@ -79,6 +94,39 @@
 					
 			this.base(buttonBar);
 			// this.buttonBar.factory.layerWindow = this;
+		},
+		
+		totalHidden: function() {
+			var count = 0;		
+			$.each(this.cropPhoto().getManipulations(), function(i, m) {
+				if(!m.visible) {
+					count++;
+				}
+			});
+			return count;
+		},
+		
+		allHidden: function() {
+			if(this.cropPhoto().totalManipulations() == this.totalHidden()) {
+				return true;
+			}
+			return false;
+		},
+		
+		hideAll: function() {
+			$.each(this.buttonBar.buttons, function(i, button) {
+				if(button.name != 'Layers') { 
+					button.toggleLayer(false);
+				}
+			});
+		},
+		
+		showAll: function() {			
+			$.each(this.buttonBar.buttons, function(i, button) {
+				if(button.name != 'Layers') { 
+					button.toggleLayer(true);
+				}
+			});
 		},
 		
 		buildWindow: function() {	
@@ -202,6 +250,13 @@
 		},
 		
 		startCrop: function(photo) {			
+			var obj = this.window.buttons[0].ui.button;
+			if(this.allHidden()) {
+				obj.html(PhotoFrame.Lang.show_all);
+			}
+			else {
+				obj.html(PhotoFrame.Lang.hide_all);
+			}			
 			this.refresh(photo);			
 		}
 	});

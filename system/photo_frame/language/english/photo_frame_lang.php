@@ -43,6 +43,12 @@ $lang	= array(
 	'photo_frame_y2'			 	     => 'Y2',
 	'photo_frame_flip'			 	     => 'Flip',
 	'photo_frame_smoothness'     	     => 'Smoothness',
+	'photo_frame_original'     	         => 'Original',
+	'photo_frame_revert'     	         => 'Revert',
+	'photo_frame_revert_orig'            => 'Revert to Original',
+	'photo_frame_back_orig'              => 'Back to Original',
+	'photo_frame_hide_all' 	     		 => 'Hide All',
+	'photo_frame_show_all'	     		 => 'Show All',
 	
 	'photo_frame_flip_desc'		 	     => 'Flip the photo vertically and/or horizontally',
 	'photo_frame_crop_desc'  		 	 => 'View the crop panel',

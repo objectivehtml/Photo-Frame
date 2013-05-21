@@ -126,7 +126,11 @@
 				});
 			}
 			else {
-				this.disable();
+				var m = this.getManipulation();
+				
+				if(m && !m.visible) {
+					this.disable();
+				}
 			}
 		},
 		

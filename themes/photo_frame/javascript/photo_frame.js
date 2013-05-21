@@ -268,7 +268,12 @@ var PhotoFrame = function() {};
 		 */		
 		 
 		// layerWindow: false,
-			
+		
+		/**
+		 * This is the overflow property of the window when crop is started
+		 */
+		 
+		overflow: false,	
 		 	
 		/**
 		 * Photos Array.
@@ -723,6 +728,18 @@ var PhotoFrame = function() {};
 						
 				e.preventDefault();
 			});
+			
+			t.bind('startCropBegin', function() {
+				t.hideOverflow();
+			});
+			
+			t.bind('saveEnd', function() {
+				t.resetOverflow();
+			});
+			
+			t.bind('cancel', function() {
+				t.resetOverflow();
+			});
 		},
 		
 		showError: function(error) {
@@ -850,6 +867,15 @@ var PhotoFrame = function() {};
 			});
 			
 			return count;	
+		},
+		
+		hideOverflow: function() {
+			this.overflow = $('body').css('overflow');
+			$('body').css('overflow', 'hidden');	
+		},
+		
+		resetOverflow: function() {
+			$('body').css('overflow', this.overflow);
 		},
 		
 		_assetResponseHandler: function(response, progress, callback) {
@@ -1505,9 +1531,32 @@ var PhotoFrame = function() {};
 			this.cropPhoto().progressRendering(callback);	
 		},
 		
-		startCrop: function(photo) {},
+		startCrop: function(photo) {
+			var m = this.getManipulation();	
+			
+			if(m) {
+				if(m.visible) {
+					this.enable();
+				}
+				else {
+					this.disable();
+				}
+			}
+		},
 		
-		toggleLayer: function(visible) {},
+		toggleLayer: function(visibility) {			
+			if(!visibility) {
+				this.disable();	
+			}
+			else {
+				this.enable();
+			}
+			this.render();
+		},
+		
+		enable: function() {},
+		
+		disable: function() {},
 		
 		reset: function() {}
 	});
@@ -1646,6 +1695,10 @@ var PhotoFrame = function() {};
 				var text = button.text ? button.text : '';
 				var icon = button.icon ? '<i class="'+button.icon+'"></i>' : '';
 				var $btn = $('<a href="#" class="'+css+' '+t.classes.button+'">'+icon+text+'</a>');
+				
+				button.ui = {
+					button: $btn
+				}
 				
 				if(typeof button.onclick === "function") {
 					$btn.click(function(e) {
@@ -1805,7 +1858,20 @@ var PhotoFrame = function() {};
 			var current = parseInt(this.ui.window.css(prop).replace('px', ''));
 			
 			this.ui.window.css(prop, current+value);
-		}		
+		},
+		
+		isOpen: function() {
+			return this.ui.window.css('display') == 'none' ? false : true;
+		},
+		
+		toggle: function() {
+			if(this.isOpen()) {
+				this.close();
+			}
+			else {
+				this.open();
+			}
+		}	
 	});
 
 	PhotoFrame.Photo = PhotoFrame.Class.extend({
@@ -1893,12 +1959,6 @@ var PhotoFrame = function() {};
 		 */
 		 
 		manipulations: {},
-				 
-		/**
-		 * This is the overflow property of the window when crop is started
-		 */
-		 
-		overflow: false,
 		 
 		/**
 		 * The original file path
@@ -1987,40 +2047,40 @@ var PhotoFrame = function() {};
 		 * @param object  An array of options to be set
 		 */	
 		 	
-		constructor: function(factory, response, options) {	
+		constructor: function(factory, response, options) {
 			var t = this;
+				
+			this.ui    = $.extend(true, {}, this.ui);
+			this.cache = factory.hash(12);
 			
-			t.ui    = $.extend(true, {}, t.ui);
-			t.cache = factory.hash(12);
+			this.base(options);
 			
-			t.base(options);
+			this.factory      = factory;
+		    this.title        = response.title;
+		    this.description  = response.description;
+		    this.keywords     = response.keywords;
+			this.response     = response;
+			this.originalPath = response.original_path;
+			this.originalUrl  = response.original_url;
+			this.url          = response.file_url;
+			this.path         = response.file_path;
 			
-			t.factory      = factory;
-		    t.title        = response.title;
-		    t.description  = response.description;
-		    t.keywords     = response.keywords;
-			t.response     = response;
-			t.originalPath = response.original_path;
-			t.originalUrl  = response.original_url;
-			t.url          = response.file_url;
-			t.path         = response.file_path;
+			this.ui.rendering	  = this.factory.ui.crop.find('.'+this.factory.classes.renderBg);
+			this.ui.renderingTxt  = this.factory.ui.crop.find('.'+this.factory.classes.renderText);
 			
-			t.ui.rendering	   = t.factory.ui.crop.find('.'+t.factory.classes.renderBg);
-			t.ui.renderingTxt  = t.factory.ui.crop.find('.'+t.factory.classes.renderText);
-			
-			if(!t.manipulations) {
-				t.manipulations = {};
+			if(!this.manipulations) {
+				this.manipulations = {};
 			}
 			
-			if(!t.index) {
-				t.index = t.factory.getTotalPhotos();
+			if(!this.index) {
+				this.index = this.factory.getTotalPhotos();
 			}
 			
-			if(t.$wrapper) {
-				t._loadFromObj(t.$wrapper);
+			if(this.$wrapper) {
+				this._loadFromObj(this.$wrapper);
 			}
 			else {
-				t._bindClickEvents();
+				this._bindClickEvents();
 			}
 			
 			factory.photos.push(t);
@@ -2220,8 +2280,6 @@ var PhotoFrame = function() {};
 			
 			this.jcrop 	     = false;
 			this.initialized = false;
-			
-			$('body').css('overflow', this.overflow);
 		},
 		
 		releaseCrop: function() {
@@ -2250,8 +2308,6 @@ var PhotoFrame = function() {};
 				this.startRendering();
 				this.useCache = true;
 				
-						console.log(t.getManipulations());
-									
 				$.post(PhotoFrame.Actions.render, 
 					{
 						path: this.path,
@@ -2403,9 +2459,9 @@ var PhotoFrame = function() {};
 		startCrop: function(callback) {
 			var t = this;
 			
-			this.overflow = $('body').css('overflow');
+			//this.factory.overflow = $('body').css('overflow');
 			
-			$('body').css('overflow', 'hidden');
+			//$('body').css('overflow', 'hidden');
 			
 			$.each(t.factory.buttonBar.buttons, function(i, button) {
 				button.reset();	
@@ -2534,8 +2590,6 @@ var PhotoFrame = function() {};
 				}
 				
 				t.factory.trigger('cancel', t);
-				
-				$('body').css('overflow', t.overflow);
 								
 				e.preventDefault();
 			});
@@ -2546,6 +2600,7 @@ var PhotoFrame = function() {};
 			var date = new Date();
 			var edit = t.edit;
 			
+			this.factory.trigger('saveBegin', this);
 			
 			if(!edit) {			
 				t._createPhoto(saveData);
@@ -2572,6 +2627,8 @@ var PhotoFrame = function() {};
 				
 				t.hideProgress();
 				t.hideDimmer();
+				
+				t.factory.trigger('saveEnd', t);
 			});
 		},
 		
@@ -2712,7 +2769,6 @@ var PhotoFrame = function() {};
 				keywords: t.keywords,
 				compression: t.compression
 			}, function(cropResponse) {
-					console.log(cropResponse);
 				if(typeof callback == "function") {
 					callback(cropResponse);					
 				}

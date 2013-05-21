@@ -490,7 +490,10 @@ class Photo_frame_ft extends EE_Fieldtype {
 		
 		foreach($saved_data as $index => $data)
 		{
-			$saved_data[$index]->manipulations = json_decode($data->manipulations);
+			if(is_string($data->manipulations))
+			{
+				$saved_data[$index]->manipulations = json_decode($data->manipulations);
+			}
 		}
 		
 		$settings_js 	= '{
