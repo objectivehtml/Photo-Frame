@@ -139,15 +139,16 @@ class Photo_frame_lib {
 		$framed_dir_name = config_item('photo_frame_directory_name');
 		
 		$errors        = array();	
-		$field_id      = $this->EE->input->get_post('field_id');
-		$col_id        = $this->EE->input->get_post('col_id');
+		$field_id      = $this->EE->input->get_post('fieldId');
+		$var_id        = $this->EE->input->get_post('varId');
+		$col_id        = $this->EE->input->get_post('colId');
 		$col_id		   = $col_id != 'false' ? preg_replace('/^col_id_/', '', $col_id) : FALSE;
 		$original_url  = $this->EE->input->get_post('url');	
-		$original_path = $this->EE->input->get_post('file');	
+		$original_path = $this->EE->input->get_post('file');
 		
-		$file_name 	   = $this->EE->photo_frame_lib->filename($original_path);
-		$settings  	   = $this->EE->photo_frame_model->get_settings($field_id, $col_id);	
-
+		$file_name 	   = $this->EE->photo_frame_lib->filename($original_path);		
+		$settings 	   = $this->EE->photo_frame_model->get_settings($field_id, $col_id, $var_id);
+	
 		$dir_id        = $settings['photo_frame_upload_group'];	
 		$directory     = $this->EE->filemanager->directory($dir_id, FALSE, TRUE);		
 		$framed_dir    = $directory['server_path'] . $framed_dir_name . '/';	
@@ -222,7 +223,9 @@ class Photo_frame_lib {
 		$errors     = array();
 		$dir_id     = $this->EE->input->get_post('dir_id');
 		$field_id   = $this->EE->input->get_post('field_id');
-		$settings   = $this->EE->photo_frame_model->get_settings($field_id);
+		$var_id     = $this->EE->input->get_post('var_id');
+		$settings   = $this->EE->photo_frame_model->get_settings($field_id, FALSE, $var_id);
+		
 		$directory  = $this->EE->filemanager->directory($dir_id, FALSE, TRUE);
 		$ie			= $this->EE->input->get_post('ie') == 'true' ? TRUE : FALSE;
 		
@@ -582,7 +585,7 @@ class Photo_frame_lib {
 		return $photo;		
 	}
 	
-	public function resize_photos($field_id, $entry_id, $col_id = FALSE, $row_id = FALSE, $settings = array(), $matrix = FALSE)
+	public function resize_photos($field_id, $entry_id, $col_id = FALSE, $row_id = FALSE, $var_id = FALSE, $settings = array(), $matrix = FALSE)
 	{
 		if(isset($settings['photo_frame_cropped_sizes']))
 		{
@@ -599,6 +602,11 @@ class Photo_frame_lib {
 			if($row_id)
 			{
 				$where['row_id'] = $row_id;	
+			}
+			
+			if($var_id)
+			{
+				$where['var_id'] = $var_id;
 			}
 			
 			$entry  = $this->EE->photo_frame_model->get_entry($entry_id);

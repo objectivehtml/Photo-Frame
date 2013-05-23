@@ -525,6 +525,8 @@ var PhotoFrame = function() {};
 					done: function (e, data) {
 						var errors = [];
 						
+						console.log(data.result);
+						
 						if(typeof data.result[0] == "undefined" || typeof data.result == "string") {
 							errors = [PhotoFrame.Lang.unexpected_error];
 						}	
@@ -982,8 +984,9 @@ var PhotoFrame = function() {};
 				
 			$.get(PhotoFrame.Actions.photo_response, 
 				{
-					field_id: t.fieldId, 
-					col_id: t.colId,
+					fieldId: t.fieldId,
+					varId: t.varId, 
+					colId: t.colId,
 					file: file
 				}, function(response) {
 					if(typeof callback == "function") {
@@ -2152,7 +2155,7 @@ var PhotoFrame = function() {};
 			t.ui.field.remove();
 			
 			if(t.id !== false) {
-				t.factory.$wrapper.append('<input type="hidden" name="photo_frame_delete_photos['+t.factory.fieldId+'][]" value="'+t.id+'" />');
+				t.factory.$wrapper.append('<input type="hidden" name="photo_frame_delete_photos['+t.factory.delId+'][]" value="'+t.id+'" />');
 			}
 					
 			t.ui.parent.fadeOut(function() {
@@ -3220,7 +3223,7 @@ var PhotoFrame = function() {};
 		 * If TRUE the datatable will be reset with each page load
 		 */	
 		 
-		reset: false,
+		reset: true,
 		
 		/**
 		 * Easily istantiate a database using localStorage

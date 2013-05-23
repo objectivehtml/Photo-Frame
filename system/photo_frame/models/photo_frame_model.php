@@ -9,6 +9,20 @@ class Photo_frame_model extends CI_Model {
 		$this->load->driver('channel_data');
 	}
 	
+	public function get_variable($var_id)
+	{
+		return $this->channel_data->get('low_variables', array(
+			'where' => array(
+				'variable_id' => $var_id
+			)
+		));
+	}
+	
+	public function get_variable_settings($var_id)
+	{
+		return unserialize(base64_decode($this->get_variable($var_id)->row('variable_settings')));
+	}
+	
 	public function get_actions()
 	{
 		$this->load->helper('addon');
@@ -257,19 +271,23 @@ class Photo_frame_model extends CI_Model {
 		}
 	}
 	
-	public function get_settings($field_id, $col_id = FALSE)
+	public function get_settings($field_id = FALSE, $col_id = FALSE, $var_id = FALSE)
 	{
-		$this->db->where('field_id', $field_id);
-		
-		if(!$col_id)
+		if($var_id)
 		{
-			$settings = $this->db->get('channel_fields');
-			$settings = unserialize(base64_decode($settings->row('field_settings')));
+			$settings = $this->get_variable_settings($var_id);
 		}
-		else
-		{				
+		else if($col_id)
+		{		
+			$this->db->where('field_id', $field_id);				
 			$settings = $this->db->get('matrix_cols');
 			$settings = unserialize(base64_decode($settings->row('col_settings')));
+		}
+		else
+		{
+			$this->db->where('field_id', $field_id);		
+			$settings = $this->db->get('channel_fields');
+			$settings = unserialize(base64_decode($settings->row('field_settings')));
 		}
 		
 		return $settings;

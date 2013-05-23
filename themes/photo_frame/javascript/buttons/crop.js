@@ -132,6 +132,8 @@
 					this.disable();
 				}
 			}
+			
+			this.refresh();
 		},
 		
 		toggleLayer: function(visibility) {
