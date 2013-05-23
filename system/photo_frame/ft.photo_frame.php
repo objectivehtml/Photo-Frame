@@ -26,6 +26,7 @@ class Photo_frame_ft extends EE_Fieldtype {
 	public $low_variables		= FALSE;
 	public $has_array_data 		= TRUE;
 	public $safecracker			= FALSE;
+	public $zenbu_data			= array();
 	public $upload_prefs;
 	
 	private $default_settings	= array(
@@ -117,6 +118,125 @@ class Photo_frame_ft extends EE_Fieldtype {
 		$this->EE->load->add_package_path(PATH_THIRD . 'photo_frame');
 		
 		return $this->display_field($data);
+	}
+	
+	
+	public function zenbu_field_extra_settings($table_col, $channel_id, $extra_options)
+	{
+		$this->EE->load->add_package_path(PATH_THIRD . 'photo_frame');
+		
+		if(!isset($this->EE->theme_loader))
+		{
+			$this->EE->load->library('theme_loader');
+		}
+		
+		$this->EE->theme_loader->module_name = 'photo_frame';
+		$this->EE->theme_loader->css('photo_frame');
+		
+		if(!class_exists('InterfaceBuilder'))
+		{
+				require_once(PATH_THIRD . 'photo_frame/libraries/InterfaceBuilder/InterfaceBuilder.php');
+		}
+		
+		$fields = array(
+			'min_proximity' => array(
+				'label'       => 'Min Color Proximity',
+				'description' => 'This is the minimum color proximity. The color proximity is the value used to determine if a particular color is in the same proximity of the color being searched. The smaller the number the closer to an exact match the colors must be. Increase the number to make the search less strict. The default value is <b>0</b>.<br><br>Use the following equation to figure out the best threshold for you.<br><b>(R - Ri)^2 + (G - Gi)^2 + (B - Bi)^2</b>',
+			),	
+			'max_proximity' => array(
+				'label'       => 'Maximum Color Proximity',
+				'description' => 'This is the maximum color proxmity. The color proximity is the value used to determine if a particular color is in the same proximity of the color being searched. The smaller the number the closer to an exact match the colors must be. Increase the number to make the search less strict. The default value is <b>12,000</b>.<br><br>Use the following equation to figure out the best threshold for you.<br><b>(R - Ri)^2 + (G - Gi)^2 + (B - Bi)^2</b>',
+			),	
+			'min_color_depth' => array(
+				'label'       => 'Minimum Color Depth',
+				'description' => 'The color depth allows you to choose how many colors to search. This settings allows you to define the minimum depth to search. The default is <b>0</b>.',
+			),	
+			'max_color_depth' => array(
+				'label'       => 'Maximum Color Depth',
+				'description' => 'The color depth allows you to choose how many colors to search. For instance, by default Photo Frame indexes the 8 most used colors in a photo. This settings allows you to define the maximum depth to search. The default is <b>3</b>.',
+			)	
+		);
+		
+		$data  = array();
+		$count = 1;
+		
+		foreach($fields as $field_name => $field)
+		{
+			$field_name = 'settings['.$channel_id.']['.$table_col.'][photo_frame ' . $field_name . ']';
+			
+			$vars = array(
+				'label'       => $field['label'],
+				'description' => $field['description'],
+				'field'       => InterfaceBuilder::field($field_name, $field, $extra_options)->display_field(),
+				'last_row'    => count($fields) == $count ? TRUE : FALSE
+			);
+			
+			$data[$field_name] = $this->EE->load->view('zenbu_settings', $vars, TRUE);
+			
+			$count++;
+		}
+		
+		return $data;
+	}
+	
+	public function zenbu_get_table_data($entry_ids, $field_ids, $channel_id, $output_upload_prefs, $settings, $rel_array)
+	{
+		$this->EE->load->add_package_path(PATH_THIRD . 'photo_frame');
+		$this->EE->load->library('photo_frame_lib');
+		
+		$new_entry_ids = array();
+		
+		foreach($entry_ids as $index => $entry_id)
+		{
+			$new_entry_ids[] = 'or '.$entry_id;	
+		}
+		
+		$new_field_ids = array();
+		
+		foreach($field_ids as $index => $field_id)
+		{
+			$new_field_ids[] = 'or '.$field_id;	
+		}
+				
+		$photos = $this->EE->photo_frame_model->get_zenbu_photos($new_entry_ids, $new_field_ids)->result();
+		
+		foreach($photos as $index => $photo)
+		{
+			$photo = (array) $photo;
+			
+			$photo['url']          = $this->EE->photo_frame_model->parse($photo['file'], 'url');
+			$photo['thumb_url']    = $this->EE->photo_frame_model->parse($this->EE->photo_frame_lib->swap_filename($photo['original_file_name'], $photo['original_file'], '_thumbs/'), 'url');
+			$photo['original_url'] = $this->EE->photo_frame_model->parse($photo['original_file'], 'url');
+			
+			$photo = (object) $photo;
+			
+			$photos[$index] = $photo;
+			
+			$this->zenbu_data[$photo->entry_id][$photo->field_id][] = $photo;
+		}
+		
+		if(!isset($this->EE->theme_loader))
+		{
+			$this->EE->load->library('theme_loader');
+		}
+		
+		$this->EE->theme_loader->module_name = 'photo_frame';
+		$this->EE->theme_loader->css('photo_frame');
+		
+		$this->EE->session->set_cache('photo_frame', 'zenbu_data', $this->zenbu_data);
+	}
+	
+	function zenbu_display($entry_id, $channel_id, $data, $table_data, $field_id, $settings, $rules, $upload_prefs, $installed_addons)
+	{		
+		$this->zenbu_data = $this->EE->session->cache['photo_frame']['zenbu_data'];
+		
+		$photos = isset($this->zenbu_data[$entry_id][$field_id]) ? $this->zenbu_data[$entry_id][$field_id] : array();
+		
+		$vars   = array(
+			'photos' => $photos
+		);
+		
+		return $this->EE->load->view('zenbu_display', $vars, TRUE);	
 	}
 	
 	function display_field($data)
@@ -559,17 +679,19 @@ class Photo_frame_ft extends EE_Fieldtype {
 				PhotoFrame.matrix[\'col_id_'.$this->col_id.'\'] = '.$settings_js.';
 				
 				Matrix.bind(\'photo_frame\', \'display\', function(cell) {
-					if(cell.row.isNew) {
+					//if(cell.row.isNew) {
 						var settings = PhotoFrame.matrix[cell.col.id];
 						
 						settings.fieldName = cell.field.id+"["+cell.row.id+"]["+cell.col.id+"]";
 				
 						new PhotoFrame.Factory(cell.dom.$td, settings);
-					}
+					//}
 				});
 			
 				$(document).ready(function() { 
+					/*
 					new PhotoFrame.Factory($("#'.$uid.'"), 	'.$settings_js.')
+					*/
 				});'
 			);
 		}
@@ -1101,6 +1223,8 @@ class Photo_frame_ft extends EE_Fieldtype {
 	{
 		$this->matrix = TRUE;
 		
+		$this->EE->load->add_package_path(PATH_THIRD . 'photo_frame');
+		
 		$this->save($data);
 		
 		//unset($this->EE);
@@ -1382,6 +1506,11 @@ class Photo_frame_ft extends EE_Fieldtype {
 		if(!isset($row_id))
 		{
 			$row_id = NULL;
+		}	
+		
+		if(!isset($var_id))
+		{
+			$var_id = NULL;
 		}
 		
 		$this->EE->photo_frame_lib->resize_photos($this->field_id, $this->settings['entry_id'], $col_id, $row_id, $var_id, $var_id, $settings, $this->matrix);
@@ -1392,6 +1521,8 @@ class Photo_frame_ft extends EE_Fieldtype {
 	public function validate_cell($data)
 	{		
 		$this->matrix = TRUE;
+		
+		$this->EE->load->add_package_path(PATH_THIRD . 'photo_frame');
 		
 		return $this->validate($data);
 	}

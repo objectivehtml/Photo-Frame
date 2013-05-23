@@ -101,6 +101,8 @@
 		},
 		
 		getCrop: function(formFields) {
+			console.log(this.buttonBar.factory);
+			
 			if(!formFields) {
 				return this.buttonBar.factory.cropPhoto.cropDimensions();
 			}

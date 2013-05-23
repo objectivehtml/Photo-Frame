@@ -680,6 +680,10 @@ a.photo-frame-bar-button.photo-frame-cancel.photo-frame-float-left {
 	border-right: 1px solid rgb(39, 39, 39);
 }
 
+.photo-frame-zenbu-photo img { width: 55px; height: 55px; }
+
+.photo-frame-zenbu-setting-field input[type="text"] { width: 100%;}
+
 p.photo-frame-helper,
 .photo-frame-helper {
 	margin: 10px 0 0 0;

@@ -273,7 +273,7 @@ class Photo_frame_model extends CI_Model {
 	
 	public function get_settings($field_id = FALSE, $col_id = FALSE, $var_id = FALSE)
 	{
-		if($var_id)
+		if($var_id && $var_id != 'false')
 		{
 			$settings = $this->get_variable_settings($var_id);
 		}
@@ -326,6 +326,28 @@ class Photo_frame_model extends CI_Model {
 		
 		$params = array(
 			'where'    => $where,
+			'limit'    => $limit,
+			'offset'   => $offset,
+			'order_by' => $order_by,
+			'sort'     => $sort
+		);
+		
+		return $this->get_photos($params);
+	}
+		
+	public function get_zenbu_photos($entry_id, $field_id, $site_id = FALSE, $limit = FALSE, $offset = 0, $order_by = 'field_id ASC, order ASC', $sort = '')
+	{
+		if(!$site_id)
+		{
+			$site_id = config_item('site_id');	
+		}
+		
+		$params = array(
+			'where' => array(
+				'entry_id' => $entry_id,
+				'field_id' => $field_id,
+				'site_id'  => $site_id
+			),
 			'limit'    => $limit,
 			'offset'   => $offset,
 			'order_by' => $order_by,

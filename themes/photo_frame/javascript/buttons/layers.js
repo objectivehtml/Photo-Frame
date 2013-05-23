@@ -107,6 +107,8 @@
 		},
 		
 		allHidden: function() {
+			console.log(this);
+			
 			if(this.cropPhoto().totalManipulations() == this.totalHidden()) {
 				return true;
 			}
@@ -251,12 +253,7 @@
 		
 		startCrop: function(photo) {			
 			var obj = this.window.buttons[0].ui.button;
-			if(this.allHidden()) {
-				obj.html(PhotoFrame.Lang.show_all);
-			}
-			else {
-				obj.html(PhotoFrame.Lang.hide_all);
-			}			
+						
 			this.refresh(photo);			
 		}
 	});
