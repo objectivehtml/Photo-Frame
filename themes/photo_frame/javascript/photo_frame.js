@@ -3223,7 +3223,7 @@ var PhotoFrame = function() {};
 		 * If TRUE the datatable will be reset with each page load
 		 */	
 		 
-		reset: true,
+		reset: false,
 		
 		/**
 		 * Easily istantiate a database using localStorage

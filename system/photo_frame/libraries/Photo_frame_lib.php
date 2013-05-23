@@ -741,7 +741,12 @@ class Photo_frame_lib {
 	public function get_buttons($params = array())
 	{
 		$return = array();
-				
+			
+		if(!class_exists('PhotoFrameButton'))
+		{
+			require_once PATH_THIRD . 'photo_frame/libraries/PhotoFrameButton.php';
+		}
+			
 		foreach(directory_map(PATH_THIRD) as $addon_name => $addon)
 		{
 			if(isset($addon['photo_frame']) && is_array($addon['photo_frame']))
