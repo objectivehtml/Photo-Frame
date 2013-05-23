@@ -73,6 +73,15 @@ class Photo_frame_ft extends EE_Fieldtype {
 		{
 			$this->safecracker = TRUE;
 		}
+		
+		
+		if(!isset($this->EE->theme_loader))
+		{
+			$this->EE->load->library('theme_loader');
+		}
+		
+		$this->EE->theme_loader->module_name = 'photo_frame';
+		$this->EE->theme_loader->css('photo_frame');
 	}
 	
 	// --------------------------------------------------------------------
@@ -120,18 +129,9 @@ class Photo_frame_ft extends EE_Fieldtype {
 		return $this->display_field($data);
 	}
 	
-	
 	public function zenbu_field_extra_settings($table_col, $channel_id, $extra_options)
 	{
 		$this->EE->load->add_package_path(PATH_THIRD . 'photo_frame');
-		
-		if(!isset($this->EE->theme_loader))
-		{
-			$this->EE->load->library('theme_loader');
-		}
-		
-		$this->EE->theme_loader->module_name = 'photo_frame';
-		$this->EE->theme_loader->css('photo_frame');
 		
 		if(!class_exists('InterfaceBuilder'))
 		{
@@ -168,6 +168,7 @@ class Photo_frame_ft extends EE_Fieldtype {
 				'label'       => $field['label'],
 				'description' => $field['description'],
 				'field'       => InterfaceBuilder::field($field_name, $field, $extra_options)->display_field(),
+				'first_row'   => count($fields) == 1 ? TRUE : FALSE,
 				'last_row'    => count($fields) == $count ? TRUE : FALSE
 			);
 			
@@ -214,14 +215,6 @@ class Photo_frame_ft extends EE_Fieldtype {
 			
 			$this->zenbu_data[$photo->entry_id][$photo->field_id][] = $photo;
 		}
-		
-		if(!isset($this->EE->theme_loader))
-		{
-			$this->EE->load->library('theme_loader');
-		}
-		
-		$this->EE->theme_loader->module_name = 'photo_frame';
-		$this->EE->theme_loader->css('photo_frame');
 		
 		$this->EE->session->set_cache('photo_frame', 'zenbu_data', $this->zenbu_data);
 	}
