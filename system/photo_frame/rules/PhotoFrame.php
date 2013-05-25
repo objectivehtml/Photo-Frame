@@ -75,6 +75,7 @@ class PhotoFrame_channel_search_rule extends Base_rule {
 		
 		$this->EE->load->add_package_path(PATH_THIRD . 'photo_frame');
 		$this->EE->load->library('photo_frame_lib');
+		$this->EE->load->library('photo_frame_sql');
 		$this->EE->load->config('photo_frame_color_index');
 		
 		parent::__construct($properties);
@@ -97,58 +98,30 @@ class PhotoFrame_channel_search_rule extends Base_rule {
 		}
 		
 		$vars = array(
-			'photo_ids' 	  => implode('|', $photos),
+			'photo_ids' => implode('|', $photos),
 		);	
 		
 		return parent::get_vars_row($vars);
 	}
 	
 	public function get_select()
-	{
-		$color_sql = NULL;
-		$settings  = $this->get_settings();
-		$rules     = $settings->rules;
+	{	
+		$settings = $this->get_settings();
+		$rules    = $settings->rules
+		$color    = strtolower($this->input($rules->form_field));
+		$color    = $this->_get_color($color, $rules);
 		
-		$color = strtolower($this->input($rules->form_field));
-		$color = $this->_get_color($color, $rules);
-		
-		if($color)
-		{
-			$color = explode(',', $color);
-			
-			$r = $color[0];
-			$g = $color[1];
-			$b = $color[2];
-			
-			$color_sql = ', (POW('.$r.' - exp_photo_frame_colors.r, 2) + POW('.$g.' - exp_photo_frame_colors.g, 2) + POW('.$b.' - exp_photo_frame_colors.b, 2)) as \'color_proximity\'';
-		}
-		
-		return '
-		concat_ws(\',\', exp_photo_frame_colors.r, exp_photo_frame_colors.b, exp_photo_frame_colors.g) as \'color_rgb\',
-		exp_photo_frame_colors.photo_id,
-		exp_photo_frame_colors.r, 
-		exp_photo_frame_colors.g, 
-		exp_photo_frame_colors.b, 
-		exp_photo_frame_colors.depth as \'color_depth\''.$color_sql;
+		return $this->EE->photo_frame_sql->get_select($color);
 	}
 	
 	public function get_join()
-	{
-		return 'LEFT JOIN (
-			SELECT 
-				exp_photo_frame.*, 
-				exp_photo_frame_colors.photo_id, 
-				exp_photo_frame_colors.depth, 
-				exp_photo_frame_colors.r, 
-				exp_photo_frame_colors.g, 
-				exp_photo_frame_colors.b, 
-				(POW(255 - r, 2) + POW(0 - g, 2) + POW(0 - b, 2)) as \'color_proximity\' 
-			FROM 
-				exp_photo_frame_colors 
-			LEFT JOIN 
-				exp_photo_frame USING (entry_id) 
-			ORDER BY color_proximity ASC, depth ASC
-		) as exp_photo_frame_colors  USING (entry_id)';
+	{	
+		$settings = $this->get_settings();
+		$rules    = $settings->rules
+		$color    = strtolower($this->input($rules->form_field));
+		$color    = $this->_get_color($color, $rules);
+
+		return $this->EE->photo_frame_sql->get_join($color);
 	}
 	
 	public function get_group_by()
@@ -166,34 +139,12 @@ class PhotoFrame_channel_search_rule extends Base_rule {
 		
 		if($color)
 		{
-			if(empty($rules->min_proximity))
-			{
-				$rules->min_proximity = 0;
-			}
-			
-			if(empty($rules->max_proximity))
-			{
-				$rules->max_proximity = 8000;
-			}
-			
-			if(empty($rules->min_color_depth))
-			{
-				$rules->min_color_depth = 0;
-			}
-						
-			if(empty($rules->max_color_depth))
-			{
-				$rules->max_color_depth = 3;
-			}
-			
-			$having = array(
-				'color_proximity >= '.$rules->min_proximity,
-				'color_proximity <= '.$rules->max_proximity,
-				'color_depth >= '.$rules->min_color_depth,
-				'color_depth <= '.$rules->max_color_depth
+			return $this->EE->photo_frame_sql->get_having(
+				$rules->min_proximity,
+				$rules->max_proximity,
+				$rules->min_color_depth,
+				$rules->max_color_depth
 			);
-			
-			return implode(' AND ', $having);
 		}	
 	}
 	

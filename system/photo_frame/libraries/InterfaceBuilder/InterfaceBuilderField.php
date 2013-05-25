@@ -183,7 +183,7 @@ if(!class_exists('InterfaceBuilderField'))
 		 * @return	string	
 		*/
 		
-		public function form_prep($str = '', $field_name = '')
+		public function formPrep($str = '', $field_name = '')
 		{
 			$prepped_fields = array();
 	

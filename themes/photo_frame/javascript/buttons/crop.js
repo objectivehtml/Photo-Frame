@@ -101,8 +101,6 @@
 		},
 		
 		getCrop: function(formFields) {
-			console.log(this.buttonBar.factory);
-			
 			if(!formFields) {
 				return this.buttonBar.factory.cropPhoto.cropDimensions();
 			}
@@ -138,7 +136,7 @@
 			this.refresh();
 		},
 		
-		toggleLayer: function(visibility) {
+		toggleLayer: function(visibility, render) {
 			var m = this.getManipulation();
 			
 			if(!visibility) {

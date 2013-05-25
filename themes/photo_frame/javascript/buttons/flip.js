@@ -77,8 +77,8 @@
 			this.render();
 		},
 		
-		toggleLayer: function(visibility) {
-			this.base(visibility);
+		toggleLayer: function(visibility, render) {
+			this.base(visibility, render);
 		},
 		
 		enable: function() {

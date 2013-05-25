@@ -100,8 +100,8 @@
 			this.buttonBar.factory.trigger('resizeInitCrop', this, manipulation);
 		},
 		
-		toggleLayer: function(visibility) {
-			this.base(visibility);
+		toggleLayer: function(visibility, render) {
+			this.base(visibility, render);
 		},
 		
 		buildWindow: function() {	

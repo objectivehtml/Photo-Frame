@@ -525,8 +525,6 @@ var PhotoFrame = function() {};
 					done: function (e, data) {
 						var errors = [];
 						
-						console.log(data.result);
-						
 						if(typeof data.result[0] == "undefined" || typeof data.result == "string") {
 							errors = [PhotoFrame.Lang.unexpected_error];
 						}	
@@ -1518,6 +1516,11 @@ var PhotoFrame = function() {};
 			return this.cropPhoto().getManipulation(this.name);
 		},
 		
+		setManipulation: function(visibility) {
+			var m = this.getManipulation();
+			m.visible = visibility;
+		},
+		
 		removeLayer: function() {
 			this.reset();		
 		},
@@ -1547,14 +1550,19 @@ var PhotoFrame = function() {};
 			}
 		},
 		
-		toggleLayer: function(visibility) {			
+		toggleLayer: function(visibility, render) {			
 			if(!visibility) {
 				this.disable();	
 			}
 			else {
 				this.enable();
 			}
-			this.render();
+			
+			this.setManipulation(visibility);
+			
+			if(typeof render == "undefined" || render === true) {
+				this.render();
+			}
 		},
 		
 		enable: function() {},
@@ -1705,7 +1713,7 @@ var PhotoFrame = function() {};
 				
 				if(typeof button.onclick === "function") {
 					$btn.click(function(e) {
-						button.onclick(e, t);
+						button.onclick(e, button);
 						e.preventDefault();
 					});
 				}
@@ -2353,6 +2361,14 @@ var PhotoFrame = function() {};
 			if(total > 0) {
 				return true;
 			}
+		},
+		
+		needsRendering: function() {
+			return this.needsRendered();	
+		},
+		
+		isRendering: function() {
+			return this.rendering;	
 		},
 		
 		startRendering: function(callback) {

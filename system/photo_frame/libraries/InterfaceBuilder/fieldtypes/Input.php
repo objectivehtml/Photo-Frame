@@ -6,7 +6,7 @@ class Input_IBFieldType extends InterfaceBuilderField {
 
 	public function displayField($data = FALSE)
 	{
-		if($data)
+		if($data !== FALSE)
 		{
 			$this->data = $data;	
 		}
@@ -18,6 +18,6 @@ class Input_IBFieldType extends InterfaceBuilderField {
 			$input_type = $this->settings['type'];
 		}
 		
-		return '<input type="'.$input_type.'" name="'.$this->getName().'" value="'.$this->form_prep($this->getData()).'" id="'.$this->getId().'" />';
+		return '<input type="'.$input_type.'" name="'.$this->getName().'" value="'.$this->formPrep($this->getData()).'" id="'.$this->getId().'" />';
 	}
 }

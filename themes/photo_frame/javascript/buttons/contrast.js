@@ -81,8 +81,8 @@
 			return this.window.ui.slider.slider('option', 'value');	
 		},
 		
-		toggleLayer: function(visibility) {			
-			this.base(visibility);	
+		toggleLayer: function(visibility, render) {			
+			this.base(visibility, render);	
 		},
 		
 		enable: function() {

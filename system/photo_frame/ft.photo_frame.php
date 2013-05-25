@@ -74,6 +74,7 @@ class Photo_frame_ft extends EE_Fieldtype {
 			$this->safecracker = TRUE;
 		}
 		
+		$this->EE->load->add_package_path(PATH_THIRD . 'photo_frame');
 		
 		if(!isset($this->EE->theme_loader))
 		{
@@ -129,6 +130,46 @@ class Photo_frame_ft extends EE_Fieldtype {
 		return $this->display_field($data);
 	}
 	
+	public function zenbu_result_query($rules, $field_id, $fieldtypes, $already_queried, $installed_addons, $extra_options)
+	{
+		$this->EE->load->library('photo_frame_colors');
+		$this->EE->load->library('photo_frame_sql');
+		
+		$color     = FALSE;
+		$mix_prox  = NULL;
+		$max_prox  = NULL;
+		$min_color = NULL;
+		$max_color = NULL;
+		
+		foreach($rules as $rule)
+		{
+			if($rule['field'] == 'field_'.$field_id)
+			{
+				$color = $rule['val'];
+				
+			}
+		}
+		
+		$min_prox  = $extra_options['min_proximity'];
+		$max_prox  = $extra_options['max_proximity'];
+		$min_color = $extra_options['min_color_depth'];
+		$max_color = $extra_options['max_color_depth'];
+		
+		$having = $this->EE->photo_frame_sql->get_having($min_prox, $max_prox, $min_color, $max_color);
+		$color  = $this->EE->photo_frame_colors->color_index($color);
+		
+		if($color)
+		{
+			$this->EE->db->select($this->EE->photo_frame_sql->get_select($color), FALSE);
+			// $this->EE->db->select('GROUP_CONCAT(DISTINCT exp_photo_frame_colors.photo_id) as \'photo_ids\'');
+			// $this->EE->db->having($having, FALSE);
+		}		
+		
+		$this->EE->db->join('photo_framex', 'channel_titles.entry_id = photo_frame.entry_id');
+		$this->EE->db->join($this->EE->photo_frame_sql->get_join($color, $having), 'photo_frame.id = photo_frame_colors.photo_id', 'LEFT');
+		
+	}
+	
 	public function zenbu_field_extra_settings($table_col, $channel_id, $extra_options)
 	{
 		$this->EE->load->add_package_path(PATH_THIRD . 'photo_frame');
@@ -145,7 +186,7 @@ class Photo_frame_ft extends EE_Fieldtype {
 			),	
 			'max_proximity' => array(
 				'label'       => 'Maximum Color Proximity',
-				'description' => 'This is the maximum color proxmity. The color proximity is the value used to determine if a particular color is in the same proximity of the color being searched. The smaller the number the closer to an exact match the colors must be. Increase the number to make the search less strict. The default value is <b>12,000</b>.<br><br>Use the following equation to figure out the best threshold for you.<br><b>(R - Ri)^2 + (G - Gi)^2 + (B - Bi)^2</b>',
+				'description' => 'This is the maximum color proxmity. The color proximity is the value used to determine if a particular color is in the same proximity of the color being searched. The smaller the number the closer to an exact match the colors must be. Increase the number to make the search less strict. The default value is <b>12000</b>.<br><br>Use the following equation to figure out the best threshold for you.<br><b>(R - Ri)^2 + (G - Gi)^2 + (B - Bi)^2</b>',
 			),	
 			'min_color_depth' => array(
 				'label'       => 'Minimum Color Depth',
@@ -160,19 +201,31 @@ class Photo_frame_ft extends EE_Fieldtype {
 		$data  = array();
 		$count = 1;
 		
+		if(!empty($extra_options))
+		{
+			$options = array();
+			
+			foreach($extra_options as $name => $option)
+			{
+				$options[$name] = $option;
+			}
+		}
+		
 		foreach($fields as $field_name => $field)
 		{
-			$field_name = 'settings['.$channel_id.']['.$table_col.'][photo_frame ' . $field_name . ']';
+			$orig_name  = $field_name;
+					//	  'settings['.$channel_id.']['.$table_col.'][matrix_option_1]'
+			$field_name = 'settings['.$channel_id.']['.$table_col.'][' . $field_name . ']';
 			
 			$vars = array(
 				'label'       => $field['label'],
 				'description' => $field['description'],
-				'field'       => InterfaceBuilder::field($field_name, $field, $extra_options)->display_field(),
+				'field'       => InterfaceBuilder::field($field_name, $field)->display_field(isset($extra_options[$orig_name]) ? $extra_options[$orig_name] : FALSE),
 				'first_row'   => count($fields) == 1 ? TRUE : FALSE,
 				'last_row'    => count($fields) == $count ? TRUE : FALSE
 			);
 			
-			$data[$field_name] = $this->EE->load->view('zenbu_settings', $vars, TRUE);
+			$data[$orig_name] = $this->EE->load->view('zenbu_settings', $vars, TRUE);
 			
 			$count++;
 		}
