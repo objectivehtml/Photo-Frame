@@ -53,30 +53,25 @@
 			this.base(buttonBar);
 		},
 		
-		getBrightness: function() {
-			//return this.window.ui.slider.slider('option', 'value');
+		getValue: function() {
+			return this.window.ui.slider.slider('option', 'value');
 		},
 		
 		apply: function() {
 			this.addManipulation(true, {
-				value: this.getBrightness()
+				value: this.getValue()
 			});
 			this.render();
-		},
-		
-		toggleLayer: function(visibility, render) {
-			//this.base(visibility);	
 		},
 		
 		startCrop: function() {
 			var manipulation = this.getManipulation();
 			
-			if(manipulation) {
-				if(manipulation.data) {
-					this.window.ui.slider.slider('option', 'value', manipulation.data.value);
-				}
-				this.base();
+			if(manipulation && manipulation.data) {
+				this.window.ui.slider.slider('option', 'value', manipulation.data.value);
 			}
+			
+			this.base();
 		},
 		
 		reset: function() {

@@ -29,6 +29,11 @@ abstract class PhotoFrameButton extends BaseClass {
 	
 	public function render($manipulation = array()) {}
 	
+	public function startCrop($data = array())
+	{ 
+		return array(); 
+	}
+	
 	public function css()
 	{
 		return array();

@@ -2,9 +2,8 @@
 
 class Photo_frame_sql {
 	
-	public function get_select($color)
+	public function get_select($color, $group_concat = TRUE)
 	{		
-		/*
 		$color_sql = NULL;
 		
 		if($color)
@@ -20,7 +19,6 @@ class Photo_frame_sql {
 			
 			$color_sql = ', (POW('.$r.' - exp_photo_frame_colors.r, 2) + POW('.$g.' - exp_photo_frame_colors.g, 2) + POW('.$b.' - exp_photo_frame_colors.b, 2)) as \'color_proximity\'';
 		}
-		*/
 		
 		return trim('
 		concat_ws(\',\', exp_photo_frame_colors.r, exp_photo_frame_colors.b, exp_photo_frame_colors.g) as \'color_rgb\',
@@ -28,12 +26,12 @@ class Photo_frame_sql {
 		exp_photo_frame_colors.r, 
 		exp_photo_frame_colors.g, 
 		exp_photo_frame_colors.b, 
-		exp_photo_frame_colors.depth as \'color_depth\''.$color_sql).',
+		exp_photo_frame_colors.depth as \'color_depth\',
 		exp_photo_frame_colors.color_proximity,
-		exp_photo_frame_colors.photo_ids';
+		'.($group_concat ? 'GROUP_CONCAT(DISTINCT exp_photo_frame_colors.photo_id) as \'photo_ids\'' : ''));
 	}
 	
-	public function get_join($color, $having = FALSE)
+	public function get_join($color)
 	{
 		$r = 0;
 		$g = 0;
@@ -51,31 +49,19 @@ class Photo_frame_sql {
 			$b = isset($color['green']) ? $color['green'] :  $color[2];
 		}
 		
-		$having_sql = FALSE;
-		
-		if($having)
-		{
-			$having_sql = 'HAVING '.$having;
-		}
-		
 		return trim('(
 			SELECT 
 				exp_photo_frame.*, 
 				exp_photo_frame_colors.photo_id, 
 				exp_photo_frame_colors.depth, 
-				exp_photo_frame_colors.depth as \'color_depth\', 
 				exp_photo_frame_colors.r, 
 				exp_photo_frame_colors.g, 
 				exp_photo_frame_colors.b, 
-				(POW('.$r.' - r, 2) + POW('.$g.' - g, 2) + POW('.$b.' - b, 2)) as \'color_proximity\', 
-				GROUP_CONCAT(DISTINCT exp_photo_frame.id) as \'photo_ids\'
+				(POW('.$r.' - r, 2) + POW('.$g.' - g, 2) + POW('.$b.' - b, 2)) as \'color_proximity\' 
 			FROM 
-				exp_photo_frame_colors
-			JOIN 
-				exp_photo_frame USING (entry_id)
-			WHERE
-				exp_photo_frame.entry_id != \'\'
-			'.$having_sql.'
+				exp_photo_frame_colors 
+			LEFT JOIN 
+				exp_photo_frame USING (entry_id) 
 			ORDER BY color_proximity ASC, depth ASC
 		) as exp_photo_frame_colors');
 	}

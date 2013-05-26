@@ -137,6 +137,17 @@ var PhotoFrame = function() {};
   			for(key in options) {
 	  			this.setOption(key, options[key]);
   			}
+		},
+		
+		removeIndex: function(array, index) {
+			 for(var i=0; i<array.length; i++) {
+		        if(array[i] == index) {
+		            array.splice(i, 1);
+		            break;
+		        }
+		    }
+		    
+		    return array;
 		}
 	});
 	
@@ -1972,6 +1983,12 @@ var PhotoFrame = function() {};
 		manipulations: {},
 		 
 		/**
+		 * Original Image Manipulation
+		 */
+		 
+		originalManipulations: {},
+		 
+		/**
 		 * The original file path
 		 */
 		 
@@ -2314,8 +2331,7 @@ var PhotoFrame = function() {};
 		render: function(callback) {
 			var t = this;
 			
-			
-			// if(this.totalManipulations() > 0) {
+			if(!this.isRendering()) {
 				this.startRendering();
 				this.useCache = true;
 				
@@ -2328,8 +2344,8 @@ var PhotoFrame = function() {};
 						cache: this.cache,
 						manipulations: t.getManipulations()
 					}, function(data) {
+						console.log(data);
 						t.cacheUrl = data.url;
-							
 						t.load(data.url, function(img) {			
 							t.ui.cropPhoto.html(img); 
 							t.stopRendering();
@@ -2338,7 +2354,7 @@ var PhotoFrame = function() {};
 						});
 					}
 				);
-			//}
+			}
 		},
 		
 		totalManipulations: function() {
@@ -2476,7 +2492,21 @@ var PhotoFrame = function() {};
 		},
 		
 		startCrop: function(callback) {
-			var t = this;
+			var t   = this;
+			var obj = {
+				cache: this.cache,
+				url: this.originalUrl,
+				path: this.factory.directory.server_path,
+				manipulations: this.manipulations
+			};
+			
+			t.originalManipulations = $.extend(true, {}, t.manipulations);
+			
+			$.post(PhotoFrame.Actions.start_crop, obj,
+				function(data) {
+					t.factory.trigger('startCropCallback', t, obj, data);
+				}
+			);
 			
 			//this.factory.overflow = $('body').css('overflow');
 			
@@ -2593,7 +2623,9 @@ var PhotoFrame = function() {};
 				t.hideMeta();
 				t.hideProgress();
 				
+				t.manipulations  = $.extend(true, {}, t.originalManipulations);
 				t.factory.cancel = true;
+				t.render();
 				t.factory.buttonBar.hide(false);
 				t.factory.hideDimmer();
 				t.factory.resetProgress();
@@ -2905,6 +2937,14 @@ var PhotoFrame = function() {};
 		    return top + '/' + bot;
 		},
 		
+		width: function() {
+			return this.ui.cropPhoto.find('img').width();
+		},
+		
+		height: function() {
+			return this.ui.cropPhoto.find('img').height();
+		},
+		
 		validate: function(json) {
 			var t = this;
 			
@@ -2926,8 +2966,8 @@ var PhotoFrame = function() {};
 			var height      = cropSize.h;
 			var width       = cropSize.w;
 			var errors      = [];
-			var imgWidth    = Math.ceil(t.ui.cropPhoto.find('img').width());
-			var imgHeight   = Math.ceil(t.ui.cropPhoto.find('img').height());
+			var imgWidth    = Math.ceil(this.width());
+			var imgHeight   = Math.ceil(this.height());
 			
 			var response    = {
 				validWidth: true,

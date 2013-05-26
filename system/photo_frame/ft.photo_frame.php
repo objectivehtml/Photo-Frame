@@ -158,15 +158,16 @@ class Photo_frame_ft extends EE_Fieldtype {
 		$having = $this->EE->photo_frame_sql->get_having($min_prox, $max_prox, $min_color, $max_color);
 		$color  = $this->EE->photo_frame_colors->color_index($color);
 		
+		$this->EE->session->set_cache('photo_frame', 'color', $color);
+		
 		if($color)
 		{
 			$this->EE->db->select($this->EE->photo_frame_sql->get_select($color), FALSE);
-			// $this->EE->db->select('GROUP_CONCAT(DISTINCT exp_photo_frame_colors.photo_id) as \'photo_ids\'');
-			// $this->EE->db->having($having, FALSE);
+			$this->EE->db->having($having, FALSE);
 		}		
 		
-		$this->EE->db->join('photo_framex', 'channel_titles.entry_id = photo_frame.entry_id');
-		$this->EE->db->join($this->EE->photo_frame_sql->get_join($color, $having), 'photo_frame.id = photo_frame_colors.photo_id', 'LEFT');
+		$this->EE->db->join('photo_frame', 'channel_titles.entry_id = photo_frame.entry_id');
+		$this->EE->db->join($this->EE->photo_frame_sql->get_join($color, $having), 'photo_frame.id = photo_frame_colors.photo_id');
 		
 	}
 	
@@ -251,8 +252,12 @@ class Photo_frame_ft extends EE_Fieldtype {
 		{
 			$new_field_ids[] = 'or '.$field_id;	
 		}
-				
-		$photos = $this->EE->photo_frame_model->get_zenbu_photos($new_entry_ids, $new_field_ids)->result();
+		
+		$color         = $this->EE->session->cache('photo_frame', 'color');
+		$settings      = $this->EE->session->cache('zenbu', 'settings');
+		$extra_options = $settings['setting'][$channel_id]['extra_options']['field_'.$field_id];
+		
+		$photos = $this->EE->photo_frame_model->get_zenbu_photos($new_entry_ids, $new_field_ids, $color, $extra_options)->result();
 		
 		foreach($photos as $index => $photo)
 		{
@@ -356,6 +361,11 @@ class Photo_frame_ft extends EE_Fieldtype {
 		$this->EE->theme_loader->javascript('buttons/layers');
 		$this->EE->theme_loader->javascript('buttons/flip');
 		$this->EE->theme_loader->javascript('buttons/smoothness');
+		$this->EE->theme_loader->javascript('buttons/blur');
+		$this->EE->theme_loader->javascript('buttons/vignette');
+		$this->EE->theme_loader->javascript('buttons/pixelate');
+		$this->EE->theme_loader->javascript('buttons/effects');
+		$this->EE->theme_loader->javascript('buttons/sharpness');
 		$this->EE->theme_loader->javascript('jquery.ui');
 		$this->EE->theme_loader->javascript('jquery.ui.widget');
 		$this->EE->theme_loader->javascript('jquery.iframe-transport');
@@ -364,47 +374,6 @@ class Photo_frame_ft extends EE_Fieldtype {
 		$this->EE->theme_loader->javascript('jquery.load-image');
 		$this->EE->theme_loader->javascript('jquery.jcrop');
 		$this->EE->theme_loader->javascript('jquery.color');
-		
-		/*
-		$data = array(
-			'rgba' => array(
-				'visible' => TRUE,
-				'data'    => array(
-					'r' => 150,
-					'g' => 225,
-					'b' => 75,
-					'a' => 66
-				)
-			),
-			'resize' => array(
-				'visible' => TRUE,
-				'data' => array(
-					'width'  => 200,
-					'height' => 200
-				)
-			),
-			'brightness' => array(
-				'visible' => TRUE,
-				'data' => array(
-					'value' => -255
-				)
-			),
-			'contrast' => array(
-				'visible' => TRUE,
-				'data' => array(
-					'value' => 255
-				)
-			),
-			'rotate' => array(
-				'visible' => TRUE,
-				'data' => array(
-					'degree' => 45
-				)
-			)
-		);
-		
-		var_dump(json_encode($data));exit();
-		*/
 		
 		$buttons = array(
 			'layers',
@@ -415,7 +384,12 @@ class Photo_frame_ft extends EE_Fieldtype {
 			'contrast',
 			'rgba',
 			'flip',
-			'smoothness'
+			'smoothness',
+			'sharpness',
+			'blur',
+			'vignette',
+			'pixelate',
+			'effects',
 		);
 		
 		$js_directory = $this->EE->theme_loader->js_directory;
@@ -846,6 +820,7 @@ class Photo_frame_ft extends EE_Fieldtype {
 		$actions = $this->EE->photo_frame_model->get_actions();
 		
 		$actions['upload_photo'] .= '&dir_id='.$settings['photo_frame_upload_group'].(isset($this->var_id) ? '&var_id=' . $this->var_id : '&field_id='.$this->field_id);
+		$actions['effects']       = $this->EE->theme_loader->theme_url() . 'photo_frame/img/effects/';
 		
 		return json_encode($actions);
 	}

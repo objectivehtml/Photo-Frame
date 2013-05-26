@@ -1,6 +1,6 @@
 (function($) {
 	
-	PhotoFrame.Buttons.Brightness = PhotoFrame.Button.extend({
+	PhotoFrame.Buttons.Blur = PhotoFrame.Button.extend({
 		
 		/**
 		 * An array of button objects
@@ -24,7 +24,7 @@
 		 * Name of the button
 		 */
 		
-		icon: 'brightness',
+		icon: 'droplet',
 		
 		/**
 		 * The JSON object used for Window settings 
@@ -38,9 +38,9 @@
 		constructor: function(buttonBar) {
 			var t = this;
 			
-			this.name				  = PhotoFrame.Lang.brightness;
-			this.description		  = PhotoFrame.Lang.brightness_desc;
-			this.windowSettings.title = PhotoFrame.Lang.brightness;
+			this.name				  = PhotoFrame.Lang.blur;
+			this.description		  = PhotoFrame.Lang.blur_desc;
+			this.windowSettings.title = PhotoFrame.Lang.blur;
 			
 			this.buttons = [{
 				text: PhotoFrame.Lang.adjust,
@@ -53,19 +53,15 @@
 			this.base(buttonBar);
 		},
 		
-		getBrightness: function() {
+		getValue: function() {
 			return this.window.ui.slider.slider('option', 'value');
 		},
 		
 		apply: function() {
 			this.addManipulation(true, {
-				value: this.getBrightness()
+				value: this.getValue()
 			});
 			this.render();
-		},
-		
-		toggleLayer: function(visibility, render) {
-			this.base(visibility, render);	
 		},
 		
 		startCrop: function() {
@@ -78,16 +74,16 @@
 			this.base();
 		},
 		
+		reset: function() {
+			this.window.ui.slider.slider('option', 'value', 0);	
+		},
+		
 		enable: function() {
 			this.window.ui.slider.slider('option', 'disabled', false);
 		},
 		
 		disable: function() {
 			this.window.ui.slider.slider('option', 'disabled', true);
-		},
-		
-		reset: function() {
-			this.window.ui.slider.slider('option', 'value', 0);	
 		},
 		
 		buildWindow: function() {	
@@ -97,13 +93,13 @@
 			var html = $([
 				'<div class="photo-frame-inline">',
 					'<div class="photo-frame-inline-block photo-frame-med-margin-right">',
-						'<i class="icon-light-down"></i>',
+						'<i class="icon-minus"></i>',
 					'</div>',
 					'<div class="photo-frame-inline-block">',
 						'<div class="photo-frame-slider"></div>',
 					'</div>',
 					'<div class="photo-frame-inline-block photo-frame-med-margin-left">',
-						'<i class="icon-light-up"></i>',
+						'<i class="icon-plus"></i>',
 					'</div>',
 				'</div>'
 			].join(''));
@@ -126,8 +122,8 @@
 			this.window.ui.value = $('<div class="photo-frame-control-value photo-frame-hidden photo-frame-inline-block photo-frame-fixed"></div>');
 			this.window.ui.content.append(this.window.ui.value);
 			this.window.ui.slider.slider({
-				min: -255,
-				max: 255,
+				min: 0,
+				max: 100,
 				start: function(e, ui) {
 					t.window.ui.value.fadeIn();
 					position(ui);

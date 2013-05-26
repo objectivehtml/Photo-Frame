@@ -183,6 +183,10 @@ class Photo_frame_upd {
 		array(
 			'class'  => 'Photo_frame_mcp',
 			'method' => 'upload_photo'
+		),
+		array(
+			'class'  => 'Photo_frame_mcp',
+			'method' => 'start_crop'
 		)
 	);
 		

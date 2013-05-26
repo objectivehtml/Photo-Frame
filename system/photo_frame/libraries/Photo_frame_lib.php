@@ -1080,7 +1080,7 @@ class Photo_frame_lib {
 		return $data;
 	}
 	
-	private function json($data, $ie = FALSE)
+	public function json($data, $ie = FALSE)
 	{
 		if(!$ie)
 		{

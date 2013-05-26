@@ -63,10 +63,11 @@
 		startCrop: function() {
 			var manipulation = this.getManipulation();
 			
-			if(manipulation) {
+			if(manipulation && manipulation.data) {
 				this.window.ui.slider.slider('option', 'value', manipulation.data.value);
-				this.base();
 			}
+			
+			this.base();
 		},
 		
 		removeLayer: function() {

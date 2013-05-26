@@ -602,6 +602,13 @@ class ImageEditor extends BaseClass {
 		return $return;
 	}
 	
+	public function filter($type)
+	{
+		imagefilter($this->image, $type);
+		
+		$this->save();
+	}
+	
 	public function rgba($r, $g, $b, $a)
 	{
 		imagefilter($this->image, IMG_FILTER_COLORIZE, $r, $g, $b, $a);
@@ -623,11 +630,22 @@ class ImageEditor extends BaseClass {
 		$this->save();
 	}
 	
-	public function smooth($level)
+	public function smoothness($level)
 	{
 		imagefilter($this->image, IMG_FILTER_SMOOTH, $level);
 		
 		$this->save();
+	}
+	
+	public function sharpness($level = FALSE, $offset = 0)
+	{	
+		$sharpen = array(
+			array(0.0, -1.0, 0.0),
+			array(-1.0, 5.0, -1.0),
+			array(0.0, -1.0, 0.0)
+		);
+		
+		$this->convolution($sharpen, $level, $offset);
 	}
 	
 	public function pixelate($level, $advanced = FALSE)
@@ -644,6 +662,15 @@ class ImageEditor extends BaseClass {
 		$this->save();
 	}
 	
+	public function sepia()
+	{
+		imagefilter($this->image, IMG_FILTER_GRAYSCALE);
+		imagefilter($this->image, IMG_FILTER_BRIGHTNESS,-30);
+		imagefilter($this->image, IMG_FILTER_COLORIZE, 90, 55, 30);
+		
+	    $this->save();
+	}
+	
 	public function negative()
 	{		
 		imagefilter($this->image, IMG_FILTER_NEGATE);
@@ -651,21 +678,21 @@ class ImageEditor extends BaseClass {
 		$this->save();
 	}
 	
-	public function edge_detect()
+	public function detectEdge()
 	{		
 		imagefilter($this->image, IMG_FILTER_EDGEDETECT);
 		
 		$this->save();
 	}
 	
-	public function simple_emboss()
+	public function emboss()
 	{		
 		imagefilter($this->image, IMG_FILTER_EMBOSS);
 		
 		$this->save();
 	}
 	
-	public function simple_blur($type = 'gaussian')
+	public function simpleBlur($type = 'gaussian')
 	{		
 		if($type == 'selective')
 		{
@@ -681,7 +708,7 @@ class ImageEditor extends BaseClass {
 		$this->save();
 	}
 	
-	public function sketch()
+	public function removeMean()
 	{		
 		imagefilter($this->image, IMG_FILTER_MEAN_REMOVAL);
 		
@@ -701,6 +728,51 @@ class ImageEditor extends BaseClass {
 		
 		$this->save();
 	}
+	
+	public function convolution($matrix, $divisor = FALSE, $offset = 0)
+	{
+		if($divisor === FALSE)
+		{
+			$divisor = array_sum(array_map('array_sum', $matrix));
+		}
+		
+		imageconvolution($this->image, $matrix, $divisor, $offset);
+		
+		$this->save();
+	}
+	
+	public function vignette($sharp = .4, $level = .7)
+	{
+	    $width  = imagesx($this->image);
+	    $height = imagesy($this->image);
+		
+	    for($x = 0; $x < $width; $x++){
+	        for($y = 0; $y < $height; $y++){   
+	            $index = imagecolorat($this->image, $x, $y);
+	            $rgb   = imagecolorsforindex($this->image, $index);
+	            $rgb   = $this->_vignette_effect($sharp, $level, $x, $y, $rgb);
+	            $color = imagecolorallocate($this->image, $rgb['red'], $rgb['green'], $rgb['blue']);
+	            imagesetpixel($this->image, $x, $y, $color);   
+	        }
+	    }
+	    
+	    $this->save();
+	}
+	
+	private function _vignette_effect($sharp, $level, $x, $y, $rgb)
+	{
+	    $width  = imagesx($this->image);
+	    $height = imagesy($this->image);
+        $l      = sin(M_PI / $width * $x) * sin(M_PI / $height * $y);
+        $l      = pow($l, $sharp);
+        $l      = 1 - $level * (1 - $l);
+        
+        $rgb['red']   *= $l;
+        $rgb['green'] *= $l;
+        $rgb['blue']  *= $l;
+        
+        return $rgb;
+    }
 	
 	/**
 	 * Flip the image (fallback for PHP < 5.5)

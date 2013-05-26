@@ -25,6 +25,42 @@ class Photo_frame_mcp {
 		echo 'index';exit();
 	}
 	
+	public function start_crop()
+	{
+		$this->EE->load->library('photo_frame_lib');
+		
+		if(!isset($this->EE->theme_loader))
+		{
+			$this->EE->load->library('theme_loader');
+		}
+		
+		$this->EE->theme_loader->module_name = 'photo_frame';
+		
+		$manipulations = $this->EE->input->post('manipulations', TRUE);
+		$cache 		   = $this->EE->input->post('cache', TRUE);
+		$url 		   = $this->EE->input->post('url', TRUE);
+		$path 		   = $this->EE->input->post('path', TRUE);
+		$buttons 	   = $this->EE->photo_frame_lib->get_buttons();
+		
+		$return = array();
+		
+		foreach($buttons as $button)
+		{
+			$name = strtolower($button->name);			
+			$data = array(
+				'url'          => $url,
+				'cachePath'    => $this->EE->theme_loader->theme_path() . 'photo_frame/',
+				'cache'        => $cache,
+				'path'		   => $path,
+				'manipulation' => isset($manipulations[$name]) ? $manipulations[$name] : array() 
+			);
+			
+			$return[$name] = $button->startCrop($data);
+		}
+		
+		$this->EE->photo_frame_lib->json($return);
+	}
+	
 	public function upload_photo()
 	{			
 		$this->EE->lang->loadfile('photo_frame');		

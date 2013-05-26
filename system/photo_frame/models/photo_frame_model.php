@@ -335,19 +335,34 @@ class Photo_frame_model extends CI_Model {
 		return $this->get_photos($params);
 	}
 		
-	public function get_zenbu_photos($entry_id, $field_id, $site_id = FALSE, $limit = FALSE, $offset = 0, $order_by = 'field_id ASC, order ASC', $sort = '')
+	public function get_zenbu_photos($entry_id, $field_id, $color = FALSE, $extra_options = array(), $site_id = FALSE, $limit = FALSE, $offset = 0, $order_by = 'exp_photo_frame.field_id ASC, color_proximity ASC', $sort = '')
 	{
+		$this->load->library('photo_frame_sql');
+		
 		if(!$site_id)
 		{
 			$site_id = config_item('site_id');	
 		}
 		
+		$having = $this->photo_frame_sql->get_having($extra_options['min_proximity'], $extra_options['max_proximity'], $extra_options['min_color_depth'], $extra_options['max_color_depth']);
+		
+		if($color)
+		{
+			$this->db->join($this->photo_frame_sql->get_join($color, $having), 'photo_frame.id = photo_frame_colors.photo_id');
+			$this->db->having($having);
+		}
+		
 		$params = array(
-			'where' => array(
-				'entry_id' => $entry_id,
-				'field_id' => $field_id,
-				'site_id'  => $site_id
+			'select' => array(
+				'exp_photo_frame.*',
+				$color ? $this->photo_frame_sql->get_select($color, FALSE) : '\'0\' as \'color_proximity\'',
 			),
+			'where'  => array(
+				'exp_photo_frame.entry_id' => $entry_id,
+				'exp_photo_frame.field_id' => $field_id,
+				'exp_photo_frame.site_id'  => $site_id
+			),
+			'group_by' => $color ? 'id' : false,
 			'limit'    => $limit,
 			'offset'   => $offset,
 			'order_by' => $order_by,
