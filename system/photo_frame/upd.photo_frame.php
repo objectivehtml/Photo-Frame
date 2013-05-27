@@ -206,6 +206,9 @@ class Photo_frame_upd {
 	public function install()
 	{	
 		$this->EE->load->library('data_forge');
+		$this->EE->load->library('photo_frame_buttons');
+		
+		$this->tables = $this->EE->photo_frame_buttons->modify_tables($this->tables);
 		
 		$this->EE->data_forge->update_tables($this->tables);
 				
@@ -245,10 +248,17 @@ class Photo_frame_upd {
 	
 	public function update($current = '')
 	{
+		$this->EE->load->library('photo_frame_buttons');
+		
 		require_once 'libraries/Data_forge.php';
 	
 		$this->EE->data_forge = new Data_forge();
+		
+		$this->tables = $this->EE->photo_frame_buttons->modify_tables($this->tables);
+		
 		$this->EE->data_forge->update_tables($this->tables);
+		
+		$this->EE->photo_frame_buttons->update();
 		
 		foreach($this->actions as $action)
 		{
@@ -299,6 +309,8 @@ class Photo_frame_upd {
 	{
 		$this->EE->load->dbforge();
 		
+		$this->EE->load->library('photo_frame_buttons');
+		
 		$this->EE->db->delete('modules', array('module_name' => $this->mod_name));
 		$this->EE->db->delete('extensions', array('class' => $this->ext_name));		
 		$this->EE->db->delete('actions', array('class' => $this->mod_name));
@@ -310,6 +322,8 @@ class Photo_frame_upd {
 		{
 			$this->EE->dbforge->drop_table($table);
 		}
+		
+		$this->EE->photo_frame_buttons->uninstall();
 			
 		return TRUE;
 	}

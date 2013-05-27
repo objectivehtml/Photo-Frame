@@ -1351,6 +1351,8 @@ class Photo_frame_ft extends EE_Fieldtype {
 		
     	$post = $this->_get_post();
 		
+		$buttons = $this->EE->photo_frame_lib->get_buttons();
+		
 		if(is_array($post))
 		{
     		foreach($post as $index => $photo)
@@ -1424,6 +1426,11 @@ class Photo_frame_ft extends EE_Fieldtype {
     					unset($photo[$var]);
     				}
     				
+    				foreach($buttons as $button)
+    				{
+	    				$photo = (array) $button->postSave((array) $photo);
+    				}
+    				
     				$new_photos[] = $photo;
     		    }
     		    
@@ -1447,6 +1454,11 @@ class Photo_frame_ft extends EE_Fieldtype {
 	        		    
 	        		    $photo->order  = $index;  
 	        		    
+	    				foreach($buttons as $button)
+	    				{
+		    				$photo = (object) $button->postSave((array) $photo);
+	    				}
+	    				
 	        		    $edit_photos[] = $photo;
         		    }
     		    }

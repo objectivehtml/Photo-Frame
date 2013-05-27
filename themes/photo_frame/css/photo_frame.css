@@ -866,6 +866,8 @@ filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#d12d2d2d', e
 	position: fixed;
 }
 
+.photo-frame-tool-window hr { border: 1px solid rgba(0, 0, 0, .3); border-top-color: rgba(255, 255, 255, 0.1); margin-bottom: 20px; }
+
 .photo-frame-tool-window-title {
 	text-align: center;
 	cursor: move;
@@ -944,7 +946,7 @@ a.photo-frame-tool-window-button:active {
 
 .photo-frame-tool-window-save { }
 
-.photo-frame-tool-window-buttons { margin-top: 7px; }
+.photo-frame-tool-window-buttons { margin-top: 7px; clear: left; }
 
 .photo-frame-toolbar .photo-frame-tools { position: absolute; top: 9px; left: 15px; }
 
@@ -1050,6 +1052,12 @@ filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#e2e2e2', end
 .photo-frame-effects .photo-frame-loading { font-size: 16px; padding: 5px 0 0; text-align: center;  }
 .photo-frame-effects .photo-frame-loading span { display: inline-block; width: 30px; position: relative; bottom: 6px; right: 1px; }
 
+.photo-frame-geolocation .photo-frame-input { float: left; }
+.photo-frame-geolocation p { padding: 0 0 15px; text-align: center; }
+.photo-frame-geolocation .photo-frame-tool-window-button { float: right; margin-right: 6px; }
+.photo-frame-geolocation-form.photo-frame-grid label { width: 47px; }
+.photo-frame-geolocation #photo-frame-map { width: 240px; height: 202px; }
+
 /* -----------------------------------------
 	Helper Classes
 ----------------------------------------- */
@@ -1082,6 +1090,9 @@ filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#e2e2e2', end
 .photo-frame-block-grid li:last-child,
 .photo-frame-block-grid.three-up li:nth-last-child(-n+3) { margin-bottom: 0; }
 
+.photo-frame-column { float: left; display: block; margin-right: 15px; }
+.photo-frame-column:last-child { margin-right: 0; }
+.two-columns .photo-frame-column { width: 47.5%; margin-right: 2.5%;}
 
 /* -----------------------------------------
 	Clearfix

@@ -27,7 +27,20 @@ abstract class PhotoFrameButton extends BaseClass {
 		parent::__construct($params);
 	}
 	
+	public function install() { }
+	
+	public function update($current = '') { }
+	
+	public function uninstall() { }
+	
+	public function modifyTables($table = array()) { return $table; }
+	
 	public function render($manipulation = array()) {}
+	
+	public function postSave($photo)
+	{
+		return $photo;
+	}
 	
 	public function startCrop($data = array())
 	{ 

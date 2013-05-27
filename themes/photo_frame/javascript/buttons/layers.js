@@ -173,12 +173,6 @@
 				t.toggleDisplayButton();
 			});
 			
-			/*
-			this.buttonBar.factory.bind('stopRendering', function() {
-				console.log('stop');
-			});
-			*/
-			
 			this.buttonBar.factory.bind('addManipulation', function(obj, name, exists) {
 				var content = $(t.window.ui.content).get(0);
 				

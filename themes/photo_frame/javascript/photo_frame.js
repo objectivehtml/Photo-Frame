@@ -1524,7 +1524,10 @@ var PhotoFrame = function() {};
 		},
 		
 		getManipulation: function() {
-			return this.cropPhoto().getManipulation(this.name);
+			if(this.cropPhoto()) {
+				return this.cropPhoto().getManipulation(this.name);
+			}
+			return false;
 		},
 		
 		setManipulation: function(visibility) {
@@ -1811,6 +1814,8 @@ var PhotoFrame = function() {};
 		open: function(save, callback) {
 			var t = this;
 			
+			this.factory.trigger('windowOpenBegin', this);
+			
 			if(typeof save == "undefined") {
 				save = true;
 			}
@@ -1819,16 +1824,20 @@ var PhotoFrame = function() {};
 				save = true;
 			}
 			
-			this.parent.addClass(this.factory.buttonBar.classes.active);	
+			this.parent.addClass(this.factory.buttonBar.classes.active);
+			
 			this.ui.window.fadeIn({
 				duration: this.duration,
 				//easing: this.easeIn
-			}, function() {
-				t.callback(t.callbacks.onopen);
-				t.callback(callback);
 			})
 			.css('display', 'inline-block')
 			.css('position', 'fixed');
+			
+			setTimeout(function() {
+				t.callback(t.callbacks.onopen);
+				t.callback(callback);
+				t.factory.trigger('windowOpenEnd', t);
+			}, this.duration);
 			
 			if(this.ui.window.data('open') != 1) {
 				this.position();
@@ -1836,7 +1845,7 @@ var PhotoFrame = function() {};
 			
 			this.bringToFront();	
 			this.ui.window.data('open', 1);
-			this.setVisibility(true);
+			this.setVisibility(true);			
 		},
 		
 		position: function() {			

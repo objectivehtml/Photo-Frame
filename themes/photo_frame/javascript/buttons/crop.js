@@ -76,27 +76,6 @@
 						y2: y2
 					});
 				}
-				
-				/*
-				if(!this.resizeToggleLayer) {
-					if(x || x2 || y || y2) {
-						this.addManipulation(true, {
-							x:  x,
-							x2: x2,
-							y:  y,
-							y2: y2
-						});
-					}
-					else {
-						//this.showManipulation();
-					}
-				}
-				else {
-					//console.log('insert correct crop size here', this.resizeToggleLayer);
-					//this.addManipulation(false, this.resizeToggleLayer);
-					//this.resizeToggleLayer = false;
-				}
-				*/
 			}
 		},
 		
