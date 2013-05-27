@@ -71,10 +71,20 @@
 			this.base(visibility, render);	
 		},
 		
+		removeLayer: function() {
+			this.effects = [];
+			this.reset();	
+		},
+		
 		startCrop: function() {
-			var manipulation = this.getManipulation();
+			var t = this, m = this.getManipulation();
 			
-			if(manipulation) {
+			if(m) {
+				t.effects = [];
+				
+				$.each(m.data.effects, function(i, effect) {
+					t.effects.push(effect);
+				});
 			}
 			
 			this.base();
@@ -132,10 +142,19 @@
 				var count = 0;
 				 
 				$.each(data.effects, function(i, obj) {
+					
 					var effect = obj.method;
+					var active = false;
+					
+					$.each(t.effects, function(i, subject) {
+						if(subject == effect) {
+							active = true;
+						}
+					});
+					
 					var item   = $([
 						'<li>',
-							'<a href="#" class="clearfix" data-effect="'+effect+'">',
+							'<a href="#" class="clearfix '+(active ? 'active' : '')+'" data-effect="'+effect+'">',
 								'<span class="info">'+obj.name+'</span>',
 							'</a>',
 						'</li>'
@@ -155,24 +174,27 @@
 				});
 				
 				html.find('a').click(function(e) {
-					var $t = $(this), effect = $t.data('effect');
+					var $t = $(this), effect = $t.data('effect'), m = t.getManipulation();
 					
-					if($t.hasClass('active')) {
-						$t.removeClass('active');
-						
-						if(t.effects.length > 1) {
-							t.effects = t.removeIndex(t.effects, effect);
+					if(!m || m.visible) {
+						if($t.hasClass('active')) {
+							$t.removeClass('active');
+							
+							if(t.effects.length > 1) {
+								t.effects = t.removeIndex(t.effects, effect);
+							}
+							else {
+								t.effects = [];
+							}
 						}
 						else {
-							t.effects = [];
+							$t.addClass('active');
+							t.effects.push(effect);
 						}
+						
+						t.refresh();	
 					}
-					else {
-						$t.addClass('active');
-						t.effects.push(effect);
-					}
-					
-					t.refresh();				
+								
 					e.preventDefault();
 				});				
 			});

@@ -77,7 +77,6 @@
 						$target.html(PhotoFrame.Lang.hide_all);
 						t.showAll();
 					}
-					e.preventDefault();
 				}
 			},{
 				text: PhotoFrame.Lang.rerender,
@@ -127,10 +126,13 @@
 		
 		toggleLayers: function(visible, render) {	
 			if(this.cropPhoto() && !this.cropPhoto().isRendering()) {
+				var m = this.cropPhoto().getManipulations();
 				for(var i in this.buttonBar.buttons) {
 					var button = this.buttonBar.buttons[i];
 					
-					button.toggleLayer(visible, false);
+					if(m[button.name.toLowerCase()]) {
+						button.toggleLayer(visible, false);
+					}
 				}
 			}
 			

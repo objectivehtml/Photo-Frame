@@ -1729,6 +1729,7 @@ var PhotoFrame = function() {};
 					$btn.click(function(e) {
 						button.onclick(e, button);
 						e.preventDefault();
+						return false;
 					});
 				}
 				
@@ -1845,7 +1846,8 @@ var PhotoFrame = function() {};
 			
 			this.bringToFront();	
 			this.ui.window.data('open', 1);
-			this.setVisibility(true);			
+			this.setVisibility(true);
+			this.savePosition();			
 		},
 		
 		position: function() {			
@@ -1882,7 +1884,8 @@ var PhotoFrame = function() {};
 				this.shift('left', width);
 			}
 
-			this.bringToFront();	
+			this.bringToFront();
+			this.savePosition();	
 		},
 				
 		shift: function(prop, value) {
@@ -2353,7 +2356,6 @@ var PhotoFrame = function() {};
 						cache: this.cache,
 						manipulations: t.getManipulations()
 					}, function(data) {
-						console.log(data);
 						t.cacheUrl = data.url;
 						t.load(data.url, function(img) {			
 							t.ui.cropPhoto.html(img); 
