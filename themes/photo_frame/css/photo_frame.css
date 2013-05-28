@@ -21,8 +21,18 @@
 }
 
 
-.photo-frame-photo-frame-dimmer *,
-.photo-frame-wrapper * { box-sizing: border-box; }
+.photo-frame-dimmer,
+.photo-frame-wrapper {
+	font-size: 16px;
+}
+
+.photo-frame-dimmer *,
+.photo-frame-wrapper * { 
+	-moz-box-sizing: border-box;
+	-webkit-box-sizing: border-box;
+	box-sizing: border-box;
+	font-family: Helvetica;
+}
 
 .photo-frame-icons [class^="icon-"]:before,  
 .photo-frame-icons [class*=" icon-"]:before {
@@ -458,6 +468,7 @@ a.photo-frame-bar-button, a.photo-frame-bar-button:hover,
 	-webkit-border-radius: 3px;
 	border-radius: 3px;
 	text-decoration: none;
+	font-size: 0.75em;
 }
 a.photo-frame-bar-button.photo-frame-save.photo-frame-float-right {
 	margin-right: 40%
@@ -642,6 +653,7 @@ p.photo-frame-helper,
 	font-size: 24px;
 	color: white;
 	text-shadow: 0 1px 0 black, 0 0 10px black;
+	z-index: 9999;
 }
 .photo-frame-saving {
 	position: absolute;
@@ -799,6 +811,7 @@ filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#d12d2d2d', e
 	display: none;
 }
 
+
 .photo-frame-toolbar-tools-title {
 	text-align: center;
 	padding: 7px 0;
@@ -873,6 +886,7 @@ filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#d12d2d2d', e
 	cursor: move;
 	margin-bottom: 12px;
 	padding: 0 20px;
+	font-size: 12px;
 }
 
 a.photo-frame-tool-window-close {
@@ -890,6 +904,7 @@ a.photo-frame-tool-window-close {
 a.photo-frame-tool-window-button,
 a.photo-frame-tool-window-button:hover {
 	border-radius: 3px;
+	font-size: 12px;
 	text-shadow: 0 1px 0 white;
 	text-decoration: none;
 	display: inline-block;
@@ -920,7 +935,7 @@ a.photo-frame-tool-window-button:active {
 
 .photo-frame-inline,
 .photo-frame-grid {
-	margin-top: 1	
+	margin-top: 5px;	
 }
 
 .photo-frame-inline label,
@@ -932,8 +947,8 @@ a.photo-frame-tool-window-button:active {
 	box-shadow: -1px 0 rgba(255, 255, 255, 0.1) inset;
 }
 
-.photo-frame-grid label { width: 30px; }
-.photo-frame-grid input { margin-bottom: 5px; }
+.photo-frame-grid label { width: 30px; font-size: 14px; }
+.photo-frame-grid input { margin-bottom: 5px; width: 100%; }
 
 .photo-frame-inline input,
 .photo-frame-grid input { display: inline-block; }
@@ -988,6 +1003,8 @@ filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#e2e2e2', end
 	padding: 10px;
 	border-radius: 5px;
 	border-bottom: 1px solid rgb(65, 65, 65);
+	min-width: 19px;
+	text-align: center;
 }
 
 .photo-frame-layers .photo-frame-layer-icon a { color: white; }
@@ -998,7 +1015,7 @@ filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#e2e2e2', end
 .photo-frame-layers .photo-frame-layer-actions a:last-child { border-right: none; box-shadow: 1px 0 0 black inset; }
 .photo-frame-layers .photo-frame-layer-actions a:hover { color: white; }
 .photo-frame-layers .photo-frame-tool-window-content { max-height: 210px; overflow-y: scroll; }
-.photo-frame-layer-empty { text-align: center; font-size: 1.25em; padding: 10px 0; }
+.photo-frame-layer-empty { text-align: center; font-size: 1em; padding: 10px 0; }
 
 .photo-frame-control-value {
 	background: rgb(220, 221, 221);
@@ -1044,15 +1061,15 @@ filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#e2e2e2', end
 .photo-frame-effects li { margin-bottom: 5px; }
 .photo-frame-effects li a { position: relative; overflow: hidden; border: 3px solid transparent; margin-right: 5px; }
 .photo-frame-effects li:nth-child(3n) a { margin-right: 0; } 
-.photo-frame-effects li img { display: block; width: 80px; }
+.photo-frame-effects li img { display: block; width: 73px; }
 .photo-frame-effects li a.active { border: 3px solid white; }
 .photo-frame-effects .info { width: 100%; height: 100%; color: white; background: black; background: rgba(0, 0, 0, .65); position: absolute; top: 100%; left: 0; text-align: center; padding: 10px 0; }
 .photo-frame-effects li a:hover .info { display: block; top: 0; font-weight: bold; }
-.photo-frame-effects ul { max-height: 256px; overflow-y: auto; }
+.photo-frame-effects ul { max-height: 256px; overflow-y: auto; padding: 0; margin: 0; }
 .photo-frame-effects .photo-frame-loading { font-size: 16px; padding: 5px 0 0; text-align: center;  }
 .photo-frame-effects .photo-frame-loading span { display: inline-block; width: 30px; position: relative; bottom: 6px; right: 1px; }
 
-.photo-frame-geolocation .photo-frame-input { float: left; }
+.photo-frame-geolocation .photo-frame-input { float: left; w }
 .photo-frame-geolocation p { padding: 0 0 15px; text-align: center; }
 .photo-frame-geolocation .photo-frame-tool-window-button { float: right; margin-right: 6px; }
 .photo-frame-geolocation-form.photo-frame-grid label { width: 47px; }
