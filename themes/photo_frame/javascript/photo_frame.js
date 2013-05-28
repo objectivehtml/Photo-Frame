@@ -1,4 +1,4 @@
-var PhotoFrame = function() {};
+var PhotoFrame = {};
 
 (function($) {
 	
@@ -252,10 +252,10 @@ var PhotoFrame = function() {};
 			/*'initFactory': [],
 			'initPhoto': [],
 			'initButton': [],
-			'initButtonBar': [],*/
+			'initButtonBar': [],
 			'jcropOnSelect': [],
 			'jcropOnChange': [],
-			'jcropOnRelease': []
+			'jcropOnRelease': []*/
 		},
 		
 		/**
@@ -333,8 +333,13 @@ var PhotoFrame = function() {};
 			
 			var t      = this;
 			var photos = options.photos;
+					
+			t.events = {};
+			t.index  = PhotoFrame.instances.length;
 			
 			delete options.photos;
+			
+			PhotoFrame.instances.push(t)
 			
 			t.$wrapper = $(obj);
 			
@@ -356,7 +361,7 @@ var PhotoFrame = function() {};
 			}
 			
 			var html = [
-				'<form id="'+t.classes.upload+'" class="'+t.classes.form+' '+t.classes.wrapper+' '+t.classes.icons+'" action="'+PhotoFrame.Actions.upload_photo+(t.IE() ? '&ie=true' : '')+'" method="POST" enctype="multipart/form-data" id="'+t.classes.upload+'-'+t.index+'" '+(t.IE() ? 'target="photo-frame-iframe-'+t.index+'"' : '')+'>',
+				'<form id="'+t.classes.upload+'" class="'+t.classes.form+' '+t.classes.wrapper+' '+t.classes.icons+'" action="'+PhotoFrame.Actions.upload_photo+(t.IE() ? '&ie=true' : '')+'&index='+t.index+'" method="POST" enctype="multipart/form-data" id="'+t.classes.upload+'-'+t.index+'" '+(t.IE() ? 'target="photo-frame-iframe-'+t.index+'"' : '')+'>',
 					'<h3>'+PhotoFrame.Lang.select_file+'</h3>',
 					'<input type="file" name="files[]" multiple>',
 					'<button type="submit" class="'+t.classes.button+'"><span class="icon-upload"></span>'+t.buttonText+'</button>',
@@ -366,7 +371,10 @@ var PhotoFrame = function() {};
 			t.ui.form = $(html);
 			t.ui.form.submit(function() {
 				if(t.IE()) {
-					t.startUpload();
+					t.ui.form.hide();
+					t.showProgress(0, function() {
+						t.startUpload();
+					});
 				}
 			});
 			
@@ -469,7 +477,7 @@ var PhotoFrame = function() {};
 			t.ui.metaDescription = t.ui.meta.find('#description');
 			t.ui.metaKeywords    = t.ui.meta.find('#keywords');
 			t.ui.dropZone        = t.$wrapper.find('.'+t.classes.dropZone);
-			
+						
 			t.buttonBar = new PhotoFrame.ButtonBar(t, t.buttons, {
 				title: PhotoFrame.Lang.tools
 			});
@@ -569,7 +577,7 @@ var PhotoFrame = function() {};
 		    	});
 	    	}
 	    	else {
-		    	t.ui.iframe = $('<iframe name="photo-frame-iframe-'+t.index+'" id="photo-frame-iframe-'+t.index+'" src="#" style="display:none;width:0;height:0"></iframe>');
+		    	t.ui.iframe = $('<iframe name="photo-frame-iframe-'+t.index+'" id="photo-frame-iframe-'+t.index+'" src="" style="display:none;width:0;height:0"></iframe>');
 		    	t.ui.body.append(t.ui.iframe);
 	    	}
 	    	
@@ -770,6 +778,7 @@ var PhotoFrame = function() {};
 			t.ui.errors.hide();
 			t.ui.activity.hide();
 			t.ui.crop.hide();
+			t.ui.form.hide();
 			
 			$.each(errors, function(i, error) {
 				t.showError(error);
@@ -777,9 +786,14 @@ var PhotoFrame = function() {};
 		},
 		
 		hideDimmer: function(callback) {
-			this.buttonBar.hide(false);
+			if(this.buttonBar) {
+				this.buttonBar.hide(false);
+			}
+			
 			this.hideInstructions();
 			this.ui.dimmer.hide(callback);
+			this.ui.form.hide();
+			this.ui.errors.fadeOut();
 			this.progressBar.reset();
 		},
 		
@@ -978,7 +992,7 @@ var PhotoFrame = function() {};
 		 */		
 		 
 		IE: function() {
-			return this.$wrapper.children().hasClass(this.classes.ie);
+			return true; //this.$wrapper.children().hasClass(this.classes.ie);
 		},
 		
 		hideInstructions: function() {
@@ -1081,10 +1095,11 @@ var PhotoFrame = function() {};
 			if(t.IE()) {
 				t.ui.form.hide();
 			}
-			
-			if(files.length == 1) {
-				t.ui.errors.hide();
-				t.ui.crop.hide();
+			else {
+				if(files.length == 1) {
+					t.ui.errors.hide();
+					t.ui.crop.hide();
+				}
 			}
 			
 			t.ui.crop.hide();
@@ -1117,20 +1132,26 @@ var PhotoFrame = function() {};
 		},
 				
 		toggleTools: function() {
-			if(!this.buttonBar.isVisible()) {
-				this.showTools();
-			}
-			else {
-				this.hideTools();
+			if(this.buttonBar) {
+				if(!this.buttonBar.isVisible()) {
+					this.showTools();
+				}
+				else {
+					this.hideTools();
+				}
 			}
 		},
 		
 		showTools: function(callback) {
-			this.buttonBar.show(callback);
+			if(this.buttonsBar) {
+				this.buttonBar.show(callback);
+			}
 		},
 		
 		hideTools: function(callback) {
-			this.buttonBar.hide(callback);
+			if(this.buttonsBar) {
+				this.buttonBar.hide(callback);
+			}
 		},
 		
 		hideInfo: function(callback) {
@@ -1225,6 +1246,7 @@ var PhotoFrame = function() {};
 				
 		
 		constructor: function(factory, buttons, options) {
+			this.buttons  = [];
 			this.base(options);
 			this.factory = factory;
 			this._buildButtonBar();
@@ -1274,7 +1296,7 @@ var PhotoFrame = function() {};
 			}
 			else {
 				this.log('The "'+type.ucfirst()+'" button does not exist.');
-			}
+			}			
 		},
 		
 		isVisible: function(callback) {
@@ -1441,8 +1463,12 @@ var PhotoFrame = function() {};
 			title: false
 		},
 		
-		constructor: function(buttonBar, options) {
+		constructor: function(buttonBar, options, buildWindow) {
 			var t = this;					
+			
+			if(typeof buildWindow === "undefined") {
+				buildWindow = true;
+			}
 			
 			t.ui  = $.extend(true, {}, t.ui);
 			 
@@ -1456,7 +1482,9 @@ var PhotoFrame = function() {};
 				e.preventDefault();
 			});
 			
-			this.buildWindow();
+			if(buildWindow === true) {
+				this.buildWindow();
+			}
 		},	
 		
 		showManipulation: function() {
@@ -1691,7 +1719,7 @@ var PhotoFrame = function() {};
 		constructor: function(factory, parent, options) {
 			this.ui      = $.extend(true, {}, this.ui);
 			this.factory = factory;
-			this.parent  = parent;		
+			this.parent  = parent;
 			
 			this.base(options);	
 			
@@ -2278,17 +2306,18 @@ var PhotoFrame = function() {};
             	t.hideInstructions();
 	          	t.updateInfo();	
 	            this.released = false;
-	            t.factory.trigger('jcropOnChange', this);
+	            
+	            //t.factory.trigger('jcropOnChange', this);
             };
             
             t.settings.onRelease = function() {
 	            this.released = true;            	
-	            t.factory.trigger('jcropOnRelease', this);
+	           // t.factory.trigger('jcropOnRelease', this);
             };
             
             t.settings.onSelect = function() {
 	            this.released = false;	            
-	            t.factory.trigger('jcropOnSelect', this);
+	            //t.factory.trigger('jcropOnSelect', this);
             }
             
 			if(t.settings.setSelect) {
@@ -2503,6 +2532,9 @@ var PhotoFrame = function() {};
 		},
 		
 		startCrop: function(callback) {
+		    	
+			this.factory.cropPhoto = this;
+			
 			var t   = this;
 			var obj = {
 				cache: this.cache,
@@ -2513,22 +2545,18 @@ var PhotoFrame = function() {};
 			
 			t.originalManipulations = $.extend(true, {}, t.manipulations);
 			
-			$.post(PhotoFrame.Actions.start_crop, obj,
-				function(data) {
-					t.factory.trigger('startCropCallback', t, obj, data);
-				}
-			);
-			
 			//this.factory.overflow = $('body').css('overflow');
 			
 			//$('body').css('overflow', 'hidden');
 			
-			$.each(t.factory.buttonBar.buttons, function(i, button) {
-				button.reset();	
-			});
+			if(t.factory.buttonBar) {
+				$.each(t.factory.buttonBar.buttons, function(i, button) {
+					button.reset();	
+				});
+			}
 			
-	        t.factory.trigger('startCropBegin', t);    	
-			t.factory.cropPhoto = t;
+	        t.factory.trigger('startCropBegin', t);
+	        
 			t.factory.ui.dimmer.fadeIn('fast');
 			
 			if(!t.initialized) {
@@ -2536,6 +2564,10 @@ var PhotoFrame = function() {};
 			}
 			
 			t.factory.resetMeta();
+		
+			$.post(PhotoFrame.Actions.start_crop, obj, function(data) {			
+				t.factory.trigger('startCropCallback', t, obj, data);
+			});
 			
 			t.load(t.photoUrl(), function(img) {
 			
@@ -2562,7 +2594,7 @@ var PhotoFrame = function() {};
 	        	   	
 	            t.hideMeta();
 	            
-	            if(t.factory.buttonBar.getVisibility()) {
+	            if(t.factory.buttonBar && t.factory.buttonBar.getVisibility()) {
 		            t.factory.showTools();
 	            }
 	            
@@ -2597,8 +2629,10 @@ var PhotoFrame = function() {};
 	        	
 	            $(window).resize();
 	            
-	            for(var x in t.factory.buttons) {
-		            t.factory.buttonBar.buttons[x].startCrop(t);
+	            if(t.factory.buttonBar) {
+		            for(var x in t.factory.buttons) {
+			            t.factory.buttonBar.buttons[x].startCrop(t);
+		            }
 	            }
 	            
 	            if(t.needsRendered()) {
@@ -2637,7 +2671,11 @@ var PhotoFrame = function() {};
 				t.manipulations  = $.extend(true, {}, t.originalManipulations);
 				t.factory.cancel = true;
 				t.render();
-				t.factory.buttonBar.hide(false);
+				
+				if(t.factory.buttonBar) {
+					t.factory.buttonBar.hide(false);
+				}
+				
 				t.factory.hideDimmer();
 				t.factory.resetProgress();
 				
@@ -2755,7 +2793,10 @@ var PhotoFrame = function() {};
 					t.ui.info.fadeOut();
 				}
 				
-				t.factory.buttonBar.hide(false);
+				if(t.factory.buttonBar) {
+					t.factory.buttonBar.hide(false);
+				}
+				
 				t.hideMeta();
 				t.ui.saving.center();
 				
@@ -2803,10 +2844,11 @@ var PhotoFrame = function() {};
     			t.settings.setSelect = [size.x, size.y, size.x2, size.y2];
     		}
     		
-			$.get(PhotoFrame.Actions.crop_photo, {
+			$.post(PhotoFrame.Actions.crop_photo, {
 				cache: t.cache,
 				useCache: t.useCache,
 				id: t.factory.directory.id,
+				index: t.factory.index,
 				photo_id: t.id,
 				image: response.file_path,
 				name: response.file_name,
@@ -2831,6 +2873,8 @@ var PhotoFrame = function() {};
 				keywords: t.keywords,
 				compression: t.compression
 			}, function(cropResponse) {
+				console.log(cropResponse);
+				
 				if(typeof callback == "function") {
 					callback(cropResponse);					
 				}
