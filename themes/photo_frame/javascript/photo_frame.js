@@ -201,7 +201,7 @@ var PhotoFrame = function() {};
 			helper: 'photo-frame-helper',
 			icons: 'photo-frame-icons',
 			invalid: 'photo-frame-invalid',
-			id: 'photo-frame-ie',
+			ie: 'photo-frame-ie',
 			indicator: 'photo-frame-indicator',
 			infoToggle: 'photo-frame-toggle-info',
 			instructions: 'photo-frame-instructions',
