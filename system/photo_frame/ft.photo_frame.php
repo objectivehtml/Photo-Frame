@@ -405,7 +405,7 @@ class Photo_frame_ft extends EE_Fieldtype {
 		else {
 			$buttons = array();
 		}
-	
+		
 		$js_directory = $this->EE->theme_loader->js_directory;
 			
 		foreach($this->EE->photo_frame_lib->get_buttons() as $obj)

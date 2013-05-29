@@ -2317,18 +2317,17 @@ var PhotoFrame = {};
             	t.hideInstructions();
 	          	t.updateInfo();	
 	            this.released = false;
-	            
-	            //t.factory.trigger('jcropOnChange', this);
+	            t.factory.trigger('jcropOnChange', this);
             };
             
             t.settings.onRelease = function() {
 	            this.released = true;            	
-	           // t.factory.trigger('jcropOnRelease', this);
+	            t.factory.trigger('jcropOnRelease', this);
             };
             
             t.settings.onSelect = function() {
 	            this.released = false;	            
-	            //t.factory.trigger('jcropOnSelect', this);
+	            t.factory.trigger('jcropOnSelect', this);
             }
             
 			if(t.settings.setSelect) {
