@@ -22,7 +22,7 @@
 .jcrop-hline.bottom{bottom:0;}
 
 /* Handle style - size is set by Jcrop handleSize option (currently) */
-.jcrop-handle{background-color:#333;border:1px #eee solid;font-size:1px;}
+.jcrop-handle{background-color:#333;border:1px #eee solid;font-size:1px;height:10px;width:10px;}
 
 /* This style is used for invisible click targets */
 .jcrop-tracker

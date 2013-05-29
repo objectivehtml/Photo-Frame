@@ -127,11 +127,11 @@
 			
 			var t = this, html = $([
 				'<div class="photo-frame-inline photo-frame-margin-bottom">',
-					'<label for="photo-frame-width" class="photo-frame-small">'+PhotoFrame.Lang.width+'</label>',
+					'<label for="photo-frame-width" class="photo-frame-small photo-frame-margin-right">'+PhotoFrame.Lang.width+'</label>',
 					'<input type="text" name="photo-frame-width" value="" id="photo-frame-width" class="photo-frame-small" />',
 				'</div>',
 				'<div class="photo-frame-inline">',
-					'<label for="photo-frame-height" class="photo-frame-small">'+PhotoFrame.Lang.height+'</label>',
+					'<label for="photo-frame-height" class="photo-frame-small photo-frame-margin-right">'+PhotoFrame.Lang.height+'</label>',
 					'<input type="text" name="photo-frame-height" value="" id="photo-frame-height" class="photo-frame-small" />',
 				'</div>',
 				'<div class="photo-frame-margin-top">',

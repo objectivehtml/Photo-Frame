@@ -33,7 +33,7 @@
 		windowSettings: {
 			css: 'photo-frame-rgb photo-frame-slider-window',
 			title: false,
-			width: 186
+			width: 220
 		},
 		
 		constructor: function(buttonBar) {

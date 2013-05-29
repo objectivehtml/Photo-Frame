@@ -151,7 +151,7 @@
 		enable: function(omitJcrop) {
 			this.enabled = true;
 		
-			if(!omitJcrop) {
+			if(!omitJcrop) {			
 				this.buttonBar.factory.cropPhoto.jcrop.enable();	
 			}
 			
@@ -222,6 +222,7 @@
 			var visibility;
 			var resizeVisibility;
 			var started;			
+			var cancelled = true;
 			
 			this.resizeToggleLayer = false;
 			
@@ -272,7 +273,9 @@
 			
 			this.bind('stopRendering', function() {
 				if(t.getManipulation() && t.getManipulation().visible) {
-					t.toggleLayer(visibility);
+					if(!t.buttonBar.factory.cancel) {
+						t.toggleLayer(visibility);
+					}
 				}
 			});
 			

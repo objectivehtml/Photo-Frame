@@ -90,7 +90,7 @@
 			
 			var html = $([
 				'<div class="photo-frame-inline">',
-					'<label for="photo-frame-rotate">'+PhotoFrame.Lang.degrees+'</label>',
+					'<label for="photo-frame-rotate photo-frame-margin-right">'+PhotoFrame.Lang.degrees+'</label>',
 				'</div>'
 			].join(''));
 			

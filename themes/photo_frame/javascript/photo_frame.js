@@ -477,11 +477,11 @@ var PhotoFrame = {};
 			t.ui.metaDescription = t.ui.meta.find('#description');
 			t.ui.metaKeywords    = t.ui.meta.find('#keywords');
 			t.ui.dropZone        = t.$wrapper.find('.'+t.classes.dropZone);
-						
+					
 			t.buttonBar = new PhotoFrame.ButtonBar(t, t.buttons, {
 				title: PhotoFrame.Lang.tools
 			});
-			
+				
 			$(window).keyup(function(e) {
 				if (e.keyCode == 27) { 
 					t.ui.cancel.click();
@@ -581,7 +581,7 @@ var PhotoFrame = {};
 		    	t.ui.body.append(t.ui.iframe);
 	    	}
 	    	
-	    	for(x in photos) {
+	    	for(var x in photos) {
 		    	var photo = photos[x];
 		    	
 		    	new PhotoFrame.Photo(t, photo, {
@@ -806,7 +806,7 @@ var PhotoFrame = {};
 		},
 		
 		clearNotices: function(callback) {
-			for(x in this.notices) {
+			for(var x in this.notices) {
 				this.notices[x].clear(callback);
 			}			
 		},
@@ -992,7 +992,7 @@ var PhotoFrame = {};
 		 */		
 		 
 		IE: function() {
-			return true; //this.$wrapper.children().hasClass(this.classes.ie);
+			return this.$wrapper.children().hasClass(this.classes.ie);
 		},
 		
 		hideInstructions: function() {
@@ -1143,13 +1143,13 @@ var PhotoFrame = {};
 		},
 		
 		showTools: function(callback) {
-			if(this.buttonsBar) {
+			if(this.buttonBar) {
 				this.buttonBar.show(callback);
 			}
 		},
 		
 		hideTools: function(callback) {
-			if(this.buttonsBar) {
+			if(this.buttonBar) {
 				this.buttonBar.hide(callback);
 			}
 		},
@@ -1246,11 +1246,16 @@ var PhotoFrame = {};
 				
 		
 		constructor: function(factory, buttons, options) {
-			this.buttons  = [];
+			this.ui 	 = {};			
+			this.buttons = [];
 			this.base(options);
 			this.factory = factory;
 			this._buildButtonBar();
 			this.addButtons(buttons);
+			
+			if(this.buttons.length === 0) {
+				this.factory.ui.tools.hide();
+			}
 		},
 		
 		addButton: function(button, options) {
@@ -1312,14 +1317,17 @@ var PhotoFrame = {};
 				save = true;
 			}
 			
-			this.factory.ui.toolBarToggle.addClass(this.classes.active);
-			this.ui.window.fadeIn(callback);
-			
-			if(save) {
-				this.setVisibility(true);
+			if(this.buttons.length > 0) {
+				this.factory.ui.toolBarToggle.addClass(this.classes.active);
+				this.ui.window.fadeIn(callback);
+				
+				if(save) {
+					this.setVisibility(true);
+				}			
+				this.showWindows();
+				
+				this.savePosition();
 			}
-			
-			this.showWindows();
 		},
 		
 		hide: function(save, callback) {
@@ -1348,6 +1356,8 @@ var PhotoFrame = {};
 			if(save) {
 				this.setVisibility(false);
 			}	
+			
+			this.savePosition();
 		},
 		
 		showWindows: function() {
@@ -1376,6 +1386,7 @@ var PhotoFrame = {};
 					top: pos.y,
 					position: 'fixed'
 				});
+				this.savePosition();
 			}		
 		},	
 		
@@ -1470,7 +1481,7 @@ var PhotoFrame = {};
 				buildWindow = true;
 			}
 			
-			t.ui  = $.extend(true, {}, t.ui);
+			t.ui  = {};
 			 
 			this.buttonBar = buttonBar;
 			this.base(options);
@@ -1717,7 +1728,7 @@ var PhotoFrame = {};
 		width: false,
 		
 		constructor: function(factory, parent, options) {
-			this.ui      = $.extend(true, {}, this.ui);
+			this.ui      = {};
 			this.factory = factory;
 			this.parent  = parent;
 			
@@ -2118,7 +2129,7 @@ var PhotoFrame = {};
 		constructor: function(factory, response, options) {
 			var t = this;
 				
-			this.ui    = $.extend(true, {}, this.ui);
+			this.ui    = {};
 			this.cache = factory.hash(12);
 			
 			this.base(options);
@@ -2323,7 +2334,7 @@ var PhotoFrame = {};
 			if(t.settings.setSelect) {
 				var size = 0;
 				
-				for(x in t.settings.setSelect) {
+				for(var x in t.settings.setSelect) {
 					size += t.settings.setSelect[x];
 				}
 				
@@ -2532,7 +2543,7 @@ var PhotoFrame = {};
 		},
 		
 		startCrop: function(callback) {
-		    	
+		    			    	
 			this.factory.cropPhoto = this;
 			
 			var t   = this;
@@ -2544,10 +2555,6 @@ var PhotoFrame = {};
 			};
 			
 			t.originalManipulations = $.extend(true, {}, t.manipulations);
-			
-			//this.factory.overflow = $('body').css('overflow');
-			
-			//$('body').css('overflow', 'hidden');
 			
 			if(t.factory.buttonBar) {
 				$.each(t.factory.buttonBar.buttons, function(i, button) {
@@ -2663,7 +2670,8 @@ var PhotoFrame = {};
 		    	}
 			});
 			
-			t.factory.ui.cancel.unbind('click').bind('click', function(e) {
+			t.factory.ui.cancel.unbind('click').click(function(e) {
+				
 				t.clearNotices();				
 				t.hideMeta();
 				t.hideProgress();
@@ -2690,7 +2698,7 @@ var PhotoFrame = {};
 				}
 				
 				t.factory.trigger('cancel', t);
-								
+												
 				e.preventDefault();
 			});
 		},
@@ -2873,8 +2881,6 @@ var PhotoFrame = {};
 				keywords: t.keywords,
 				compression: t.compression
 			}, function(cropResponse) {
-				console.log(cropResponse);
-				
 				if(typeof callback == "function") {
 					callback(cropResponse);					
 				}
@@ -2993,11 +2999,11 @@ var PhotoFrame = {};
 		},
 		
 		width: function() {
-			return this.ui.cropPhoto.find('img').width();
+			return this.ui.cropPhoto ? this.ui.cropPhoto.find('img').width() : 0;
 		},
 		
 		height: function() {
-			return this.ui.cropPhoto.find('img').height();
+			return this.ui.cropPhoto ? this.ui.cropPhoto.find('img').height() : 0;
 		},
 		
 		validate: function(json) {
@@ -3080,25 +3086,25 @@ var PhotoFrame = {};
 	});
 	
 	PhotoFrame.ProgressBar = PhotoFrame.Class.extend({
-		
-		/**
-		 * The wrapping DOM object.
-		 */		
-		 
-		$wrapper: false,
-				
-		/**
-		 * An object of UI elements.
-		 */		
-		 
-		ui: {},
 				
 		/**
 		 * The progress percentage.
 		 */		
 		 
 		progress: 0,				
+			
+		/**
+		 * An object of UI elements.
+		 */		
+		 
+		ui: {},
 		
+		/**
+		 * The wrapping DOM object.
+		 */		
+		 
+		$wrapper: false,
+			
 		/**
 		 * Constructor to set the options and UI events.
 		 *
@@ -3108,7 +3114,9 @@ var PhotoFrame = {};
 		 
 		constructor: function(obj, progress, options) {	
 			var t = this;
-					
+			
+			t.progress = 0;
+			t.ui 	   = {};
 			t.$wrapper = $(obj);
 						
 			if(typeof progress == "object") {

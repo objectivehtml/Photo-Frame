@@ -75,14 +75,6 @@ class Photo_frame_ft extends EE_Fieldtype {
 		}
 		
 		$this->EE->load->add_package_path(PATH_THIRD . 'photo_frame');
-		
-		if(!isset($this->EE->theme_loader))
-		{
-			$this->EE->load->library('theme_loader');
-		}
-		
-		$this->EE->theme_loader->module_name = 'photo_frame';
-		$this->EE->theme_loader->css('photo_frame');
 	}
 	
 	// --------------------------------------------------------------------
@@ -292,9 +284,17 @@ class Photo_frame_ft extends EE_Fieldtype {
 	
 	function display_field($data)
 	{			
+		if(!isset($this->EE->theme_loader))
+		{
+			$this->EE->load->library('theme_loader');
+		}
+		
+		$this->EE->theme_loader->module_name = 'photo_frame';
+		$this->EE->theme_loader->css('photo_frame');
+		
 		$this->EE->load->config('photo_frame_config');
 		$this->EE->load->library('photo_frame_lib');
-		
+				
 		$this->EE->cp->add_js_script(array('ui' => array('slider', 'draggable')));		
 
 		$default_settings = array(
@@ -322,6 +322,10 @@ class Photo_frame_ft extends EE_Fieldtype {
 			'photo_frame_drop_zone'			 => 'true',
 			'photo_frame_force_crop'		 => 'true',
 			'photo_frame_disable_crop'	     => 'false',
+			'photo_frame_show_editor_cp'     => 'true',
+			'photo_frame_show_editor_sc'     => 'true',
+			// 'photo_frame_show_editor_lv'     => 'true',
+			'photo_frame_show_editor_mx'     => 'true'
 		);
 	
 		$settings = array_merge($default_settings, $this->settings);
@@ -348,6 +352,7 @@ class Photo_frame_ft extends EE_Fieldtype {
 		$this->EE->theme_loader->output('PhotoFrame.Actions = '.$this->_actions($settings).';');
 		
 		$this->EE->theme_loader->css('photo_frame');
+		$this->EE->theme_loader->css('smoothness/jquery-ui-1.10.3.custom.css');
 		$this->EE->theme_loader->css('jquery.jcrop');
 		$this->EE->theme_loader->javascript('base');
 		$this->EE->theme_loader->javascript('localStorageDB');
@@ -375,23 +380,32 @@ class Photo_frame_ft extends EE_Fieldtype {
 		$this->EE->theme_loader->javascript('jquery.jcrop');
 		$this->EE->theme_loader->javascript('jquery.color');
 		
-		$buttons = array(
-			'layers',
-			'crop',
-			'rotate',
-			'resize',
-			'brightness',
-			'contrast',
-			'rgba',
-			'flip',
-			'smoothness',
-			'sharpness',
-			'blur',
-			'vignette',
-			'pixelate',
-			'effects',
-		);
-		
+		if($settings['photo_frame_show_editor_cp'] == 'true' && !$this->safecracker ||
+		   $settings['photo_frame_show_editor_sc'] == 'true' && $this->safecracker ||
+//$settings['photo_frame_show_editor_lv'] && $this->low_variables ||
+		   $settings['photo_frame_show_editor_mx'] == 'true' && $this->matrix)
+		{
+			$buttons = array(
+				'layers',
+				'crop',
+				'rotate',
+				'resize',
+				'brightness',
+				'contrast',
+				'rgba',
+				'flip',
+				'smoothness',
+				'sharpness',
+				'blur',
+				'vignette',
+				'pixelate',
+				'effects',
+			);
+		}
+		else {
+			$buttons = array();
+		}
+	
 		$js_directory = $this->EE->theme_loader->js_directory;
 			
 		foreach($this->EE->photo_frame_lib->get_buttons() as $obj)
@@ -1920,6 +1934,39 @@ class Photo_frame_ft extends EE_Fieldtype {
 					'options' => array(
 						'false' => 'False',
 						'true'  => 'True'
+					)
+				)
+			),
+			'photo_frame_show_editor_cp' => array(
+				'label'       => 'Use editor in Control Panel?',
+				'description' => 'If "True", users will be able to use the photo editor in the control panel.',
+				'type'        => 'select',
+				'settings' => array(
+					'options' => array(
+						'true'  => 'True',
+						'false' => 'False',
+					)
+				)
+			),
+			'photo_frame_show_editor_sc' => array(
+				'label'       => 'Use editor in Safecracker?',
+				'description' => 'If "True", users will be able to use the photo editor on the front-end (using Safecracker).',
+				'type'        => 'select',
+				'settings' => array(
+					'options' => array(
+						'true'  => 'True',
+						'false' => 'False',
+					)
+				)
+			),
+			'photo_frame_show_editor_mx' => array(
+				'label'       => 'Use editor in Matrix?',
+				'description' => 'If "True", users will be able to use the photo editor within Matrix fields.',
+				'type'        => 'select',
+				'settings' => array(
+					'options' => array(
+						'true'  => 'True',
+						'false' => 'False',
 					)
 				)
 			),

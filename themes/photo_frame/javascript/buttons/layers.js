@@ -82,7 +82,7 @@
 				text: PhotoFrame.Lang.rerender,
 				css: 'photo-frame-tool-window-save',
 				onclick: function(e, button) {
-					if(this.cropPhoto() && !this.cropPhoto().isRendering()) {
+					if(t.cropPhoto() && !t.cropPhoto().isRendering()) {
 						t.render(function() {
 							t.buttonBar.factory.trigger('layerWindowReRender');
 						});
@@ -200,8 +200,8 @@
 		},
 		
 		refresh: function(photo) {
-			var count = 0, t = this, classes = {}, buttons = {}, photo = photo ? photo : this.buttonBar.factory.cropPhoto;
-						
+			var count = 0, t = this, classes = {}, buttons = {}, photo = photo ? photo : this.cropPhoto();
+			
 			this.window.ui.content.html('');
 			
 			for(var y in this.buttonBar.buttons) {
@@ -278,8 +278,8 @@
 		
 		startCrop: function(photo) {			
 			var obj = this.window.buttons[0].ui.button;
-						
-			this.refresh(photo);			
+			
+			this.refresh();			
 		}
 	});
 

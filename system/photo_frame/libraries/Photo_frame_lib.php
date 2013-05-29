@@ -222,6 +222,7 @@ class Photo_frame_lib {
 		
 		$errors     = array();
 		$dir_id     = $this->EE->input->get_post('dir_id');
+		$index	    = $this->EE->input->get_post('index');
 		$field_id   = $this->EE->input->get_post('field_id');
 		$var_id     = $this->EE->input->get_post('var_id');
 		$settings   = $this->EE->photo_frame_model->get_settings($field_id, FALSE, $var_id);
@@ -277,6 +278,7 @@ class Photo_frame_lib {
 			$return[] = array(
 				'success'            => count($errors) == 0 ? TRUE : FALSE,
 				'directory'          => $directory,
+				'index'				 => $index,
 				'file_name'          => isset($file_name) ? $file_name : NULL,
 				'file_url'           => isset($file_url) ? $file_url : NULL,
 				'file_path'          => isset($file_path) ? $file_path : NULL,
@@ -329,6 +331,7 @@ class Photo_frame_lib {
 	
 	public function crop_action()
 	{
+		$index         = $this->EE->input->get_post('index', TRUE);
 		$height        = $this->EE->input->get_post('height', TRUE);
 		$width         = $this->EE->input->get_post('width', TRUE);
 		$x             = $this->EE->input->get_post('x', TRUE);
@@ -342,10 +345,10 @@ class Photo_frame_lib {
 		$compression   = $this->EE->input->get_post('compression', TRUE);
 		$compression   = $compression ? $compression : 100;
 		
-		if($this->edit)
-		{
+		//if($this->edit)
+		//{
 			copy($this->orig, $this->img);
-		}
+		//}
 		
 		$image = new ImageEditor($this->img, array(
 			'compression' => $compression
@@ -1052,7 +1055,30 @@ class Photo_frame_lib {
 		}
 		else
 		{
-			echo '<script type="text/javascript">window.top.PhotoFrame.instances[0].callback('.json_encode($data).');</script>';
+			echo '<script type="text/javascript">
+			var progress, t, count = 1, data = '.json_encode($data).';
+			
+			for(var i in data) {				
+				var response = data[i];
+				t = window.top.PhotoFrame.instances[parseInt(response.index, 10)];
+				
+				if(data.length == 1) {
+					if(response.success) {
+						t.showProgress(100, function() {
+							t._uploadResponseHandler(response);				    	
+						});
+					}
+					else {
+						t.showErrors(response.errors);
+					}
+				} else {
+					progress = parseInt(count / data.length * 100);
+					t._assetResponseHandler(response, progress);
+					count++;
+				}
+			};
+			
+			</script>';
 			exit();
 		}
 	}

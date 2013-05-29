@@ -32,7 +32,8 @@
 		
 		windowSettings: {
 			css: 'photo-frame-vignette photo-frame-slider-window',
-			title: false
+			title: false,
+			width: 240
 		},
 		
 		constructor: function(buttonBar) {
