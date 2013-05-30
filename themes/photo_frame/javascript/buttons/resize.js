@@ -144,6 +144,13 @@
 			this.window.ui.height = this.window.ui.content.find('#photo-frame-height');
 			this.window.ui.aspect = this.window.ui.content.find('#photo-frame-maintain-ratio');	
 			
+			this.window.ui.content.find('input').keypress(function(e) {
+				if(e.keyCode == 13) {
+					t.apply();
+					e.preventDefault();
+				}
+			});
+			
 			this.buttonBar.factory.bind('render', function() {
 				if(t.getManipulation()) {
 					t.initCrop();

@@ -214,6 +214,13 @@
 			
 			this.window.ui.content.html(html);
 			
+			this.window.ui.content.find('input').keypress(function(e) {
+				if(e.keyCode == 13) {
+					t.apply();
+					e.preventDefault();
+				}
+			});
+			
 			this.window.ui.x  = this.window.ui.content.find('#x');
 			this.window.ui.y  = this.window.ui.content.find('#y');
 			this.window.ui.x2 = this.window.ui.content.find('#x2');

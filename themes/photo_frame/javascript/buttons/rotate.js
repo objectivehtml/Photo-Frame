@@ -88,7 +88,7 @@
 			
 			this.window.ui.input = $('<input type="text" name="photo-frame-rotate" value="" id="photo-frame-rotate" class="photo-frame-small" />');
 			
-			var html = $([
+			var t = this, html = $([
 				'<div class="photo-frame-inline">',
 					'<label for="photo-frame-rotate photo-frame-margin-right">'+PhotoFrame.Lang.degrees+'</label>',
 				'</div>'
@@ -96,7 +96,13 @@
 			
 			html.append(this.window.ui.input);
 			
-			this.window.ui.content.html(html);
+			this.window.ui.content.html(html);			
+			this.window.ui.content.find('input').keypress(function(e) {
+				if(e.keyCode == 13) {
+					t.apply();
+					e.preventDefault();
+				}
+			});
 		}
 	});
 

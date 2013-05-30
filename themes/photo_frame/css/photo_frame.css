@@ -1081,10 +1081,14 @@ filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#e2e2e2', end
 .photo-frame-tool-window-content label { color: white; text-shadow: 0 1px black; }
 .photo-frame-tool-window-content input,
 .photo-frame-tool-window-content input:focus,
-.photo-frame-tool-window-content input[type="text"]:focus { border: none; background: white; padding: 3px; margin: 0; line-height: 1em; height: auto; }
+.photo-frame-tool-window-content input[type="text"]:focus { border: none; background: white; padding: 6px 4px; margin: 0; line-height: 1em; height: auto; }
 
+.photo-frame-geolocation label { display: block; }
+.photo-frame-geolocation-form.photo-frame-grid .photo-frame-location label { width: 100%; border: none; padding-left: 0; box-shadow: none; margin: 0; }
+.photo-frame-geolocation-form.photo-frame-grid .photo-frame-location .photo-frame-tool-window-button { margin: 0; padding: 7px 8px 8px; }
 
 .photo-frame-vignette .photo-frame-big-margin-right { width: 40px; }
+
 /* -----------------------------------------
 	Helper Classes
 ----------------------------------------- */
