@@ -165,7 +165,7 @@
 						val   *= aspect;
 					}
 					
-					$(target).val(t.cropPhoto().round(val, 1));
+					t.window.ui.content.find(target).val(t.cropPhoto().round(val, 1));
 				}
 			});
 		}
