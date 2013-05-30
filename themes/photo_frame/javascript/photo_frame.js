@@ -33,13 +33,13 @@ var PhotoFrame = {};
 		 * Build Date
 		 */
 		 
-		buildDate: '2013-04-10',
+		buildDate: '2013-05-30',
 		
 		/**
 		 * Version
 		 */
 		 
-		version: '0.9.5',
+		version: '0.9.509',
 		
 		/**
 		 * Sets the default options
