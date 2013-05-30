@@ -26,6 +26,7 @@ var PhotoFrame = {};
 	 
 	PhotoFrame.Buttons   = [];
 
+
 	PhotoFrame.Class = Base.extend({
 		
 		/**
@@ -248,15 +249,7 @@ var PhotoFrame = {};
 		 * An object/array events that have been bound to PhotoFrame
 		 */		
 		 
-		events: {
-			/*'initFactory': [],
-			'initPhoto': [],
-			'initButton': [],
-			'initButtonBar': [],
-			'jcropOnSelect': [],
-			'jcropOnChange': [],
-			'jcropOnRelease': []*/
-		},
+		events: {},
 		
 		/**
 		 * Icon Classes
@@ -334,8 +327,10 @@ var PhotoFrame = {};
 			var t      = this;
 			var photos = options.photos;
 					
-			t.events = {};
-			t.index  = PhotoFrame.instances.length;
+			t.events  = {};
+			t.windows = [];
+			t.photos  = [];
+			t.index   = PhotoFrame.instances.length;
 			
 			delete options.photos;
 			
@@ -346,7 +341,6 @@ var PhotoFrame = {};
 			t.sortable();	
 			t.base(options);	
 			
-			t.photos   = [];
 			t.ui = {
 				body: $('body'),
 				browse: t.$wrapper.find('.'+t.classes.browse),
@@ -1342,9 +1336,7 @@ var PhotoFrame = {};
 			}
 			
 			for(var x in this.factory.windows) {
-				var window = this.factory.windows[x];
-				
-				window.close(false);
+				this.factory.windows[x].close(false);
 			}
 			
 			this.ui.list.find('.'+this.classes.active).removeClass(this.classes.active);			
@@ -1481,8 +1473,7 @@ var PhotoFrame = {};
 				buildWindow = true;
 			}
 			
-			t.ui  = {};
-			 
+			this.ui  	   = {};
 			this.buttonBar = buttonBar;
 			this.base(options);
 			this.$obj = $('<a href="#" title="'+this.description.replace('"', '')+'"></a>');
@@ -2678,11 +2669,6 @@ var PhotoFrame = {};
 				t.manipulations  = $.extend(true, {}, t.originalManipulations);
 				t.factory.cancel = true;
 				t.render();
-				
-				if(t.factory.buttonBar) {
-					t.factory.buttonBar.hide(false);
-				}
-				
 				t.factory.hideDimmer();
 				t.factory.resetProgress();
 				
@@ -2798,10 +2784,6 @@ var PhotoFrame = {};
 				
 				if(t.ui.info) {
 					t.ui.info.fadeOut();
-				}
-				
-				if(t.factory.buttonBar) {
-					t.factory.buttonBar.hide(false);
 				}
 				
 				t.hideMeta();
