@@ -39,7 +39,7 @@ var PhotoFrame = {};
 		 * Version
 		 */
 		 
-		version: '0.9.509',
+		version: '0.9.510',
 		
 		/**
 		 * Sets the default options
