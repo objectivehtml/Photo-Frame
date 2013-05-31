@@ -695,17 +695,17 @@ class Photo_frame_lib {
 		}
 	}
 	
-	public function cache_image($cache, $orig_path)
+	public function cache_image($cache, $orig_path, $cache_path, $cache_url)
 	{
 		$filename  = $this->filename($orig_path);
 		$extension = $this->extension($orig_path);
-		$cache_dir = 'cache';
+		$basepath  = $cache_path;
 		
-		$basepath = $this->EE->theme_loader->theme_path() . 'photo_frame/';
-		
-		if(is_writable($basepath))
+		if(is_writable($basepath . '../'))
 		{
-			$basepath .= $cache_dir . '/';
+			$cache_basepath = config_item('photo_frame_cache_directory') . '/';
+			
+			$basepath .= $cache_basepath;
 			
 			if(!is_dir($basepath))
 			{
@@ -714,14 +714,13 @@ class Photo_frame_lib {
 			
 			$cache_file = $cache.'.'.$extension;
 			$cache_path = $basepath.$cache_file;
+			$cache_url .= $cache_basepath.$cache_file;
 			
 			copy($orig_path, $cache_path);
 			
-			$location = 'photo_frame/' . $cache_dir . '/' . $cache_file;
-			
 			return (object) array(
-				'url'  => $this->EE->theme_loader->theme_url()  . $location,
-				'path' => $this->EE->theme_loader->theme_path() . $location
+				'url'  => $cache_url,
+				'path' => $cache_path
 			);
 		}
 		

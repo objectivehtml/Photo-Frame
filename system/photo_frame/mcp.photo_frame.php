@@ -37,6 +37,7 @@ class Photo_frame_mcp {
 		$this->EE->theme_loader->module_name = 'photo_frame';
 		
 		$manipulations = $this->EE->input->post('manipulations', TRUE);
+		$directory	   = $this->EE->input->post('directory', TRUE);
 		$cache 		   = $this->EE->input->post('cache', TRUE);
 		$url 		   = $this->EE->input->post('url', TRUE);
 		$path 		   = $this->EE->input->post('path', TRUE);
@@ -44,7 +45,6 @@ class Photo_frame_mcp {
 		
 		$return      = array();
 		$success     = TRUE;
-		$valid       = TRUE;
 		$return_path = FALSE;
 		
 		foreach($buttons as $button)
@@ -55,7 +55,8 @@ class Photo_frame_mcp {
 				'cachePath'    => $this->EE->theme_loader->theme_path() . 'photo_frame/',
 				'cache'        => $cache,
 				'path'		   => $path,
-				'manipulation' => isset($manipulations[$name]) ? $manipulations[$name] : array() 
+				'manipulation' => isset($manipulations[$name]) ? $manipulations[$name] : array(),
+				'directory'    => $directory
 			);
 			
 			$response = $button->startCrop($data);
@@ -67,16 +68,15 @@ class Photo_frame_mcp {
 			else
 			{
 				$return_path = $response;
-				$valid       = FALSE;
 				$success     = FALSE;
 			}
 		}
-			
+		
 		$this->EE->photo_frame_lib->json(array(
 			'success'    => $success,
-			'validPath'  => $valid,
 			'path'		 => $path,
-			'data'       => $return
+			'data'       => $return,
+			'validPath'  => $return_path
 		));
 	}
 	
@@ -117,9 +117,10 @@ class Photo_frame_mcp {
 		$file_path	   = $this->EE->input->get_post('path');
 		$file_url 	   = $this->EE->input->get_post('url');
 		$cache  	   = $this->EE->input->get_post('cache');
+		$directory 	   = $this->EE->input->get_post('directory');
 		$manipulations = $this->EE->input->get_post('manipulations');
 		$manipulations = $this->EE->photo_frame_lib->array_to_object($manipulations);
-		$cache_path    = $this->EE->photo_frame_lib->cache_image($cache, $orig_path);
+		$cache_path    = $this->EE->photo_frame_lib->cache_image($cache, $orig_path, $directory['server_path'], $directory['url']);
 		
 		if(!$cache_path)
 		{

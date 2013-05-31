@@ -2384,7 +2384,8 @@ var PhotoFrame = {};
 						originalPath: this.originalPath,
 						originalUrl: this.originalUrl,
 						cache: this.cache,
-						manipulations: t.getManipulations()
+						manipulations: t.getManipulations(),
+						directory: this.factory.directory
 					}, function(data) {
 						t.cacheUrl = data.url;
 						t.load(data.url, function(img) {			
@@ -2541,7 +2542,8 @@ var PhotoFrame = {};
 				cache: this.cache,
 				url: this.originalUrl,
 				path: this.factory.directory.server_path,
-				manipulations: this.manipulations
+				manipulations: this.manipulations,
+				directory: this.factory.directory
 			};
 			
 			t.originalManipulations = $.extend(true, {}, t.manipulations);
@@ -2572,7 +2574,7 @@ var PhotoFrame = {};
 			});
 			
 			t.load(t.photoUrl(), function(img) {
-			
+				
 				t.factory.hideProgress();
 				
 				t.ui.cropPhoto = $('<div class="'+t.factory.classes.cropPhoto+'"></div>');

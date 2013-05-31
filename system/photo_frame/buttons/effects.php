@@ -20,7 +20,7 @@ class EffectsButton extends PhotoFrameButton {
 		
 		$filename = basename($data['url']);
 		$path     = rtrim($data['path'], '/') . '/_thumbs/' . $filename;
-	
+		
 		if(!file_exists($path))
 		{
 			return $path;
@@ -30,8 +30,8 @@ class EffectsButton extends PhotoFrameButton {
 		
 		foreach($effects as $method => $name)
 		{
-			$obj = $ee->photo_frame_lib->cache_image(random_string(), $path);
-		
+			$obj = $ee->photo_frame_lib->cache_image(random_string(), $path, $data['directory']['server_path'], $data['directory']['url']);
+			
 			ImageEditor::init($obj->path)->$method();
 			
 			$return[] = (object) array(
