@@ -2562,8 +2562,13 @@ var PhotoFrame = {};
 			
 			t.factory.resetMeta();
 		
-			$.post(PhotoFrame.Actions.start_crop, obj, function(data) {			
-				t.factory.trigger('startCropCallback', t, obj, data);
+			$.post(PhotoFrame.Actions.start_crop, obj, function(response) {
+				if(response.success) {
+					t.factory.trigger('startCropCallback', t, obj, response.data);
+				}
+				else {
+					t.factory.trigger('startCropCallbackFailed', t, obj, response);
+				}
 			});
 			
 			t.load(t.photoUrl(), function(img) {

@@ -22,6 +22,8 @@
 }
 
 
+.photo-frame-error { text-align: center; font-size: 14px !important; }
+
 .photo-frame-dimmer,
 .photo-frame-wrapper {
 	font-size: 16px;

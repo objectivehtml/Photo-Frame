@@ -6,14 +6,6 @@ class EffectsButton extends PhotoFrameButton {
 	
 	public function startCrop($data = array())
 	{
-		/*
-		$m         = $data['manipulation'];
-		$cache     = $data['cache'];
-		$cachePath = $data['cachePath'];
-		$url       = $data['url'];
-		$path      = $data['path'];
-		*/
-		
 		$ee =& get_instance();
 		
 		$ee->load->helper('string');
@@ -26,13 +18,18 @@ class EffectsButton extends PhotoFrameButton {
 			require_once(PATH_THIRD . 'libraries/ImageEditor.php');
 		}
 		
+		$filename = basename($data['url']);
+		$path     = rtrim($data['path'], '/') . '/_thumbs/' . $filename;
+	
+		if(!file_exists($path))
+		{
+			return $path;
+		}		
+		
 		$return = array();
 		
 		foreach($effects as $method => $name)
 		{
-			$filename = basename($data['url']);
-			$path     = rtrim($data['path'], '/') . '/_thumbs/' . $filename;
-			
 			$obj = $ee->photo_frame_lib->cache_image(random_string(), $path);
 		
 			ImageEditor::init($obj->path)->$method();

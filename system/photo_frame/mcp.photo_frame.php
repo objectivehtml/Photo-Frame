@@ -42,7 +42,10 @@ class Photo_frame_mcp {
 		$path 		   = $this->EE->input->post('path', TRUE);
 		$buttons 	   = $this->EE->photo_frame_lib->get_buttons();
 		
-		$return = array();
+		$return      = array();
+		$success     = TRUE;
+		$valid       = TRUE;
+		$return_path = FALSE;
 		
 		foreach($buttons as $button)
 		{
@@ -55,10 +58,26 @@ class Photo_frame_mcp {
 				'manipulation' => isset($manipulations[$name]) ? $manipulations[$name] : array() 
 			);
 			
-			$return[$name] = $button->startCrop($data);
+			$response = $button->startCrop($data);
+			
+			if(!is_string($response))
+			{	
+				$return[$name] = $response;
+			}
+			else
+			{
+				$return_path = $response;
+				$valid       = FALSE;
+				$success     = FALSE;
+			}
 		}
-		
-		$this->EE->photo_frame_lib->json($return);
+			
+		$this->EE->photo_frame_lib->json(array(
+			'success'    => $success,
+			'validPath'  => $valid,
+			'path'		 => $path,
+			'data'       => $return
+		));
 	}
 	
 	public function upload_photo()

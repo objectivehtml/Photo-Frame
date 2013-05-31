@@ -136,6 +136,20 @@
 				});	
 			});
 			
+			this.bind('startCropCallbackFailed', function(photo, obj, data) {
+				var error = PhotoFrame.Lang.effects_error;
+				
+				if(data.validPath === false) {
+					error = PhotoFrame.Lang.invalid_thumbnail;			
+					t.log('Invalid thumbnail: '+data.path);
+				}
+				else {
+					t.log(data);
+				}
+				
+				t.window.ui.content.html('<p class="photo-frame-error">'+error+'</p>');			
+			});
+			
 			this.bind('startCropCallback', function(photo, obj, data) {
 			
 				var html  = $('<ul class="photo-frame-block-grid three-up" />');

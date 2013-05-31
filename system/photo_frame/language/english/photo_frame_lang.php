@@ -87,6 +87,8 @@ $lang	= array(
 	'photo_frame_rotate_desc'			 => 'Rotate the photo',
 	'photo_frame_layers_desc'			 => 'Manage the various layers of manipulations',
 	'photo_frame_no_layers'				 => '<i class="icon-warning-sign"></i> This photo has no layers.',
+	'photo_frame_effects_error'			 => 'An error occurred when trying to render the preview.',
+	'photo_frame_invalid_thumbnail' 	 => 'The thumbnail used to generate the effects preview does not exists.',
 	
 	'photo_frame_min_photos_error'       => 'You must upload at least {min_photos} {min_photos_name}.',
 	'photo_frame_max_photos_error'       => 'You must upload at least {max_photos} {max_photos_name}.',

@@ -74,9 +74,26 @@ class Photo_frame_ft extends EE_Fieldtype {
 			$this->safecracker = TRUE;
 		}
 		
-		$this->EE->load->add_package_path(PATH_THIRD . 'photo_frame');
+		if(isset($this->EE->cp))
+		{
+			$this->EE->load->add_package_path(PATH_THIRD . 'photo_frame');
+		}
 	}
 	
+	public function zenbu_js()
+	{
+		$this->EE->theme_loader->js_directory = 'javascript';
+		
+		return array('https://maps.google.com/maps/api/js?sensor=true&amp;key=&amp;language=en');
+	}
+	
+	public function zenbu_css()
+	{
+		$this->EE->theme_loader->css_directory = 'css';
+		
+		return array('photo_frame');
+	}
+		
 	// --------------------------------------------------------------------
 	
 	/**
@@ -122,8 +139,10 @@ class Photo_frame_ft extends EE_Fieldtype {
 		return $this->display_field($data);
 	}
 	
-	public function zenbu_result_query($rules, $field_id, $fieldtypes, $already_queried, $installed_addons, $extra_options)
+	public function zenbu_result_query($rules, $field_id, $fieldtypes, $already_queried, $installed_addons, $settings)
 	{
+		$extra_options = $settings['extra_options']['field_'.$field_id];
+										
 		$this->EE->load->library('photo_frame_colors');
 		$this->EE->load->library('photo_frame_sql');
 		
@@ -1147,6 +1166,8 @@ class Photo_frame_ft extends EE_Fieldtype {
 	
 	public function replace_tag($data, $params = array(), $tagdata)
 	{		
+		return ;
+		
 		$this->EE->load->library('photo_frame_lib');
 		
 		$this->EE->load->config('photo_frame_config');
@@ -1692,6 +1713,8 @@ class Photo_frame_ft extends EE_Fieldtype {
 	
 	public function display_settings($data)
 	{
+		return ;
+		
 		$this->EE->load->config('photo_frame_config');
 		$this->EE->load->library('photo_frame_lib');
 		
