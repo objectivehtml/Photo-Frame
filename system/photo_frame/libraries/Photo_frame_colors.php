@@ -25,6 +25,25 @@ class Photo_frame_colors {
 		{
 			if(!isset($this->config_colors[$color]))
 			{
+				if(preg_match('/(^rgb\\((.*)\\)$)/u', $color, $matches))
+				{
+					$color = explode(',', $matches[2]);
+					
+					return $this->trim_array($color);
+				}
+				
+				if(preg_match("/^#.{6}$/u", $color))
+				{
+					$color = $this->hex2rgb($color);
+					
+					return $color['red'].','.$color['green'].','.$color['blue'];
+				}
+				
+				if(preg_match('/\\d*,(\\s|)|\\d*$/u', $color))
+				{					
+					return $this->trim_array(explode(',', $color));
+				}
+				
 				return FALSE;
 			}
 			
@@ -32,6 +51,16 @@ class Photo_frame_colors {
 		}	
 		
 		return FALSE;
+	}
+	
+	public function trim_array($array)
+	{		
+		foreach($array as $index => $value)
+		{
+			$array[$index] = trim($value);
+		}
+	
+		return $array;		
 	}
 	
 	public function rgb2hex($rgb)
