@@ -140,6 +140,10 @@ class Photo_frame_upd {
 				'type'				=> 'int',
 				'constraint'		=> 50
 			),
+			'var_id'	=> array(
+				'type'				=> 'int',
+				'constraint'		=> 50
+			),
 			'date' 	=> array(
 				'type'				=> 'timestamp',
 			),
