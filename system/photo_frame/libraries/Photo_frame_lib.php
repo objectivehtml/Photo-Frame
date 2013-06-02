@@ -910,21 +910,23 @@ class Photo_frame_lib {
 	
 	public function object_to_array($object)
 	{
+		$return = array();
+		
 		if(is_object($object))
 		{
 			foreach($object as $index => $value)
 			{
 				if(is_object($value))
 				{
-					$object->$index = $this->object_to_array($value);
+					$return[$index] = $this->object_to_array($value);
 				}
 				else
 				{
-					$object->$index = $value;
+					$return[$index] = $value;
 				}
 			}
 			
-			return (array) $object;
+			return (array) $return;
 		}
 		
 		return array();
@@ -1014,9 +1016,22 @@ class Photo_frame_lib {
 			{
 				if(isset($subject->data->$index) && isset($compare->data->$index))
 				{
-					if(count(array_diff_assoc($this->object_to_array($subject->data), $this->object_to_array($compare->data))) > 0)
+					$subject_data = $this->object_to_array($subject->data);
+					$compare_data = $this->object_to_array($compare->data);
+					
+					if(is_array($subject_data[$index]) && is_array($compare_data[$index]))
 					{
-						return TRUE;
+						if(count(array_diff($subject_data[$index], $compare_data[$index])) > 0 || count($subject_data[$index]) != count($compare_data[$index]))
+						{
+							return TRUE;
+						}
+					}
+					else
+					{
+						if(count(array_diff_assoc($subject_data, $compare_data)) > 0)
+						{
+							return TRUE;
+						}
 					}
 				}
 				else
@@ -1028,6 +1043,28 @@ class Photo_frame_lib {
 		
 		return FALSE;
 	}
+	
+	public function compare($subject, $compare)
+	{
+		$diff = FALSE;
+		
+		foreach($subject as $index => $value)
+		{
+			if(is_array($value))
+			{
+				var_dump($subject);exit();
+				
+				$this->compare($value, isset($compare[$index]) ? $compare[$index] : array());
+			}
+			else
+			{
+				var_dump($value);exit();
+			}
+		}	
+		
+		exit('stop comp');
+	}
+	
 	
 	public function crop_json($success = TRUE, $save_data = array())
 	{

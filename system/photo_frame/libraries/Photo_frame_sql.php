@@ -12,7 +12,6 @@ class Photo_frame_sql {
 			{
 				$color = explode(',', $color);
 			}
-			
 			$r = isset($color['red']) ? $color['red'] : $color[0];
 			$g = isset($color['blue']) ? $color['blue'] : $color[1];
 			$b = isset($color['green']) ? $color['green'] :  $color[2];

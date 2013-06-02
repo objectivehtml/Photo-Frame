@@ -171,7 +171,6 @@ class Photo_frame_ft extends EE_Fieldtype {
 			if($rule['field'] == 'field_'.$field_id)
 			{
 				$color = $rule['val'];
-				
 			}
 		}
 		
@@ -180,7 +179,7 @@ class Photo_frame_ft extends EE_Fieldtype {
 		$min_color = $extra_options['min_color_depth'];
 		$max_color = $extra_options['max_color_depth'];
 		
-		$having = $this->EE->photo_frame_sql->get_having($min_prox, $max_prox, $min_color, $max_color);
+		$having = $this->EE->photo_frame_sql->get_having($min_prox, $max_prox, $min_color, $max_color);		
 		$color  = $this->EE->photo_frame_colors->color_index($color);
 		
 		$this->EE->session->set_cache('photo_frame', 'color', $color);
@@ -1498,8 +1497,10 @@ class Photo_frame_ft extends EE_Fieldtype {
         		   		
         		   		$compare = $photo->manipulations;
         		   		$compare = is_string($photo->manipulations) ? json_decode($photo->manipulations) : $photo->manipulations;
+        		   			
+        		   		// var_dump($this->EE->photo_frame_lib->needs_manipulation($compare, $existing_manip));exit();
         		   		
-        		   		if($this->EE->photo_frame_lib->needs_manipulation($existing_manip, $compare))
+        		   		if($this->EE->photo_frame_lib->needs_manipulation($compare, $existing_manip))
         		   		{	
 		    				$average_color = (array) $this->EE->photo_frame_lib->get_average_color($photo->file, config_item('photo_frame_save_colors'), config_item('photo_frame_save_color_granularity'));
 		    				$average_color['average'] = 1;

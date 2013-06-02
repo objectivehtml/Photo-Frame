@@ -15,6 +15,13 @@ class Photo_frame_colors {
 	
 	public function color_index($color)
 	{
+		if(empty($color))
+		{
+			return FALSE;	
+		}
+		
+		$color = trim($color);
+	
 		$photo_frame_colors = config_item('photo_frame_color_index');
 			
 		if(isset($photo_frame_colors[$color]))
@@ -39,11 +46,11 @@ class Photo_frame_colors {
 					return $color['red'].','.$color['green'].','.$color['blue'];
 				}
 				
-				if(preg_match('/\\d*,(\\s|)|\\d*$/u', $color))
+				if(preg_match("/(\\d*,(|\\s)){2}\\d*$/u", $color, $matches))
 				{					
 					return $this->trim_array(explode(',', $color));
 				}
-				
+								
 				return FALSE;
 			}
 			
