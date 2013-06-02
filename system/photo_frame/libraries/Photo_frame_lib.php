@@ -908,6 +908,28 @@ class Photo_frame_lib {
         $photo->manipulations = json_encode($photo->manipulations);		    
 	}
 	
+	public function object_to_array($object)
+	{
+		if(is_object($object))
+		{
+			foreach($object as $index => $value)
+			{
+				if(is_object($value))
+				{
+					$object->$index = $this->object_to_array($value);
+				}
+				else
+				{
+					$object->$index = $value;
+				}
+			}
+			
+			return (array) $object;
+		}
+		
+		return array();
+	}
+	
 	public function array_to_object($array)
 	{
 		if(is_array($array))
@@ -947,8 +969,13 @@ class Photo_frame_lib {
 	
 	public function needs_manipulation($subject, $compare)
 	{
-		if(is_array($subject))
-		{
+		if(is_array($subject) || is_object($subject))
+		{	
+			if (!count(get_object_vars($subject)) && count(get_object_vars($compare)) > 0)
+			{
+				return TRUE;
+			}
+			
 			foreach($subject as $name => $manipulation)
 			{
 				if($this->has_changed($manipulation, isset($compare->$name) ? $compare->$name : (object) array()))
@@ -956,13 +983,20 @@ class Photo_frame_lib {
 					return TRUE;
 				}
 			}
-		}
+		}		
 		
 		return FALSE;
 	}
 	
 	public function has_changed($subject, $compare)
 	{
+		if (!count(get_object_vars($subject)) && count(get_object_vars($compare)) > 0 ||
+		   	!count(get_object_vars($compare)) && count(get_object_vars($subject)) > 0 
+		   )
+		{
+			return TRUE;
+		}
+	
 		if(isset($subject->visible) && isset($compare->visible))
 		{
 			$subject_visible = $subject->visible === 'true' || $subject->visible === TRUE ? TRUE : FALSE;
@@ -980,7 +1014,7 @@ class Photo_frame_lib {
 			{
 				if(isset($subject->data->$index) && isset($compare->data->$index))
 				{
-					if(count(array_diff_assoc((array) $subject->data, (array) $compare->data)) > 0)
+					if(count(array_diff_assoc($this->object_to_array($subject->data), $this->object_to_array($compare->data))) > 0)
 					{
 						return TRUE;
 					}
