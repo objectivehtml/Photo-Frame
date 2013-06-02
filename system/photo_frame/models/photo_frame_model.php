@@ -521,47 +521,46 @@ class Photo_frame_model extends CI_Model {
 			foreach($data as $index => $photo)
 			{
 				$photo['date'] = date('Y-m-d H:i:s', time());
-				$colors = $photo['colors'];
 				
 				unset($photo['colors']);
 				unset($photo['id']);
 				
 				$this->db->insert('photo_frame', $photo);
 				
-				$photo_id = $this->db->insert_id();
-				
-				foreach($colors as $color_index => $color)
-				{
-					$color_data = array(
-						'photo_id' => $photo_id,
-						'site_id'  => $photo['site_id'],
-						'field_id' => $photo['field_id'],
-						'entry_id' => $photo['entry_id'],
-						'row_id'   => 0,
-						'col_id'   => 0,
-						'date'     => $photo['date'],
-						'depth'    => $color_index,
-						'r'		   => $color->r,
-						'g'		   => $color->g,
-						'b'		   => $color->b,
-						'average'  => isset($color->average) ? $color->average : 0,
-					);
-					
-					if(isset($photo['row_id']))
-					{
-						$color_data['row_id'] = $photo['row_id'];
-					}
-					
-					if(isset($photo['col_id']))
-					{
-						$color_data['col_id'] = $photo['col_id'];
-					}
-					
-					$this->db->insert('photo_frame_colors', $color_data);
-				}
+				$this->insert_colors($photo['colors'], $this->db->insert_id(), $photo);
 			}
 		}
-	}		
+	}
+	
+	public function insert_colors($colors, $photo_id, $photo)
+	{
+		$photo = (array) $photo;
+		
+		$this->db->delete('photo_frame_colors', array(
+			'photo_id' => $photo_id
+		));
+		
+		foreach($colors as $color_index => $color)
+		{
+			$color_data = array(
+				'photo_id' => $photo_id,
+				'site_id'  => $photo['site_id'],
+				'field_id' => $photo['field_id'],
+				'entry_id' => $photo['entry_id'],
+				'row_id'   => isset($photo['row_id']) ? $photo['row_id'] : 0,
+				'col_id'   => isset($photo['col_id']) ? $photo['col_id'] : 0,
+				'var_id'   => isset($photo['var_id']) ? $photo['var_id'] : 0,
+				'date'     => $photo['date'],
+				'depth'    => $color_index,
+				'r'		   => $color->r,
+				'g'		   => $color->g,
+				'b'		   => $color->b,
+				'average'  => isset($color->average) ? $color->average : 0,
+			);
+			
+			$this->db->insert('photo_frame_colors', $color_data);
+		}
+	}
 			
 	public function upload_options($index_field = 'id', $name_field = 'name')
 	{
