@@ -1544,33 +1544,7 @@ class Photo_frame_ft extends EE_Fieldtype {
     		    }
     		}
 		}
-		
-		/*
-		if(is_array($post))
-		{
-			foreach($post as $index => $photo)
-			{
-				if(isset($photo['uploaded']))
-				{
-					$photo = json_decode($photo['uploaded']);
-	        						
-	        		if(!in_array($photo->file, $photo_names))
-	        		{
-						if(file_exists($photo->original_path))
-						{
-							unlink($photo->original_path);
-						}
-						
-						if(file_exists($photo->path))
-						{
-							unlink($photo->path);
-						}
-	        		}
-				}
-			}
-		}
-		*/
-		
+				
 		if(count($new_photos) > 0)
 		{   
 			$this->EE->photo_frame_model->save($new_photos);
