@@ -74,12 +74,25 @@ class Photo_frame_ft extends EE_Fieldtype {
 			$this->safecracker = TRUE;
 		}
 		
-		if(isset($this->EE->cp))
+		/* -----------------------------------------
+			Load assets for Zenbu results
+		----------------------------------------- */
+		
+		if(isset($this->EE->zenbu_get))
 		{
 			$this->EE->load->add_package_path(PATH_THIRD . 'photo_frame');
+			
+			if(!isset($this->EE->theme_loader))
+			{
+				$this->EE->load->library('theme_loader');
+			}
+			
+			$this->EE->theme_loader->module_name = 'photo_frame';
+			$this->EE->theme_loader->css('photo_frame');
 		}
 	}
 	
+	/*
 	public function zenbu_js()
 	{
 		$this->EE->theme_loader->js_directory = 'javascript';
@@ -93,6 +106,7 @@ class Photo_frame_ft extends EE_Fieldtype {
 		
 		return array('photo_frame');
 	}
+	*/
 		
 	// --------------------------------------------------------------------
 	
@@ -943,6 +957,11 @@ class Photo_frame_ft extends EE_Fieldtype {
 	
 	public function replace_color_bar($data, $params = array(), $tagdata)
 	{
+		if(!$params)
+		{
+			$params = array();
+		}
+		
 		$reserved = array(
 			'total',
 			'granularity',
@@ -961,7 +980,7 @@ class Photo_frame_ft extends EE_Fieldtype {
 			'total'       => config_item('photo_frame_save_colors'),
 			'granularity' => config_item('photo_frame_save_color_granularity')
 		);
-				
+		
 		$params = array_merge($default, $params);		
 		$photos = $this->_get_photos($this->field_id);
 		
@@ -1434,9 +1453,8 @@ class Photo_frame_ft extends EE_Fieldtype {
     				$average_color['average'] = 1;
     				
     				$colors = $this->EE->photo_frame_lib->get_colors($photo['file'], config_item('photo_frame_save_colors'), config_item('photo_frame_save_color_granularity'));
-    				    				
-    				$colors = array_merge($colors, array((object) $average_color));
-    				
+    							
+    				$colors = array_merge($colors, array((object) $average_color));    				
     				$photo  = (array) $this->EE->photo_frame_lib->rename($photo, $settings);
     				
     				$photo['colors'] = $colors;
@@ -1474,12 +1492,38 @@ class Photo_frame_ft extends EE_Fieldtype {
         		    $photo = json_decode($photo['edit']);
         		   	
         		   	if(is_object($photo))
-        		   	{        		    
+        		   	{    
+        		   		$existing_photo = $this->EE->photo_frame_model->get_photo($photo->id)->row();
+        		   		$existing_manip = json_decode($existing_photo->manipulations);
+        		   		
+        		   		$compare = $photo->manipulations;
+        		   		$compare = is_string($photo->manipulations) ? json_decode($photo->manipulations) : $photo->manipulations;
+        		   		
+        		   		if($this->EE->photo_frame_lib->needs_manipulation($existing_manip, $compare))
+        		   		{	
+		    				$average_color = (array) $this->EE->photo_frame_lib->get_average_color($photo->file, config_item('photo_frame_save_colors'), config_item('photo_frame_save_color_granularity'));
+		    				$average_color['average'] = 1;
+		    				
+		    				$colors = $this->EE->photo_frame_lib->get_colors($photo->file, config_item('photo_frame_save_colors'), config_item('photo_frame_save_color_granularity'));
+		    							
+		    				$colors = array_merge($colors, array((object) $average_color));    
+		    				
+		    				$this->EE->photo_frame_model->insert_colors($colors, $photo->id, array(
+		    					'site_id'  => config_item('site_id'),
+		    					'field_id' => $this->field_id,
+		    					'entry_id' => $this->settings['entry_id'],
+		    					'date'	   => date('Y-m-d H:i:s', time()),
+		    					'row_id'   => isset($this->settings['row_id']) ? $this->settings['row_id'] : '',
+		    					'col_id'   => isset($this->settings['col_id']) ? $this->settings['col_id'] : '',
+		    					'var_id'   => isset($this->var_id) ? $this->var_id : ''
+		    				));
+        		   		}
+        		   		
 	        		    if(!is_string($photo->manipulations))
 	        		    {        		
 	    					$photo->manipulations = json_encode($photo->manipulations);
 	        		    }
-	        		    
+	        		     
 						$photo_names[] = $photo->file_name;
 						
 	        		    if($this->matrix)
