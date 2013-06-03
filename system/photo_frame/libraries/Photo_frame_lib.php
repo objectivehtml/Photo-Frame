@@ -1043,29 +1043,7 @@ class Photo_frame_lib {
 		
 		return FALSE;
 	}
-	
-	public function compare($subject, $compare)
-	{
-		$diff = FALSE;
 		
-		foreach($subject as $index => $value)
-		{
-			if(is_array($value))
-			{
-				var_dump($subject);exit();
-				
-				$this->compare($value, isset($compare[$index]) ? $compare[$index] : array());
-			}
-			else
-			{
-				var_dump($value);exit();
-			}
-		}	
-		
-		exit('stop comp');
-	}
-	
-	
 	public function crop_json($success = TRUE, $save_data = array())
 	{
 		$original_file = $this->orig_file;

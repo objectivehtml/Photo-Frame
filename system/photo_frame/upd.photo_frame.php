@@ -59,6 +59,12 @@ class Photo_frame_upd {
 				'type'				=> 'int',
 				'constraint'		=> 50
 			),
+			'is_draft'	=> array(
+				'type'				=> 'tinyint',
+				'constraint'		=> 1,
+				'unsigned' 			=> TRUE,
+				'default'			=> 0
+			),
 			'height' 	=> array(
 				'type'				=> 'float'
 			),

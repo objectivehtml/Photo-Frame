@@ -181,7 +181,7 @@ class Photo_frame_model extends CI_Model {
 			)
 		));
 	}
-	
+		
 	public function delete_files($original_path, $delete_raw_files = TRUE)
 	{		
 		$files = $this->channel_data->get('files', array(
@@ -207,7 +207,7 @@ class Photo_frame_model extends CI_Model {
 		return $file_ids;
 	}
 	
-	public function delete($photos, $settings = FALSE)
+	public function delete($photos, $settings = FALSE, $is_draft = FALSE)
 	{	
 		if(!is_array($settings))
 		{		
@@ -222,7 +222,7 @@ class Photo_frame_model extends CI_Model {
 			
 			foreach($photos as $photo_id)
 			{
-				$photo = $this->get_photo($photo_id);
+				$photo = $this->get_photo($photo_id, $is_draft);
 				
 				if($photo->num_rows() > 0)
 				{
@@ -293,12 +293,19 @@ class Photo_frame_model extends CI_Model {
 		return $settings;
 	}
 	
-	public function get_photo($id)
+	public function get_photo($id, $is_draft = FALSE)
 	{
+		$where = array(
+			'id' => $id,
+		);
+		
+		if($is_draft !== FALSE)
+		{
+			$where['is_draft'] = $is_draft ? 1 : 0; 
+		}
+		
 		return $this->get_photos(array(
-			'where' => array(
-				'id' => $id
-			)
+			'where' => $where
 		));
 	}
 	
@@ -426,6 +433,48 @@ class Photo_frame_model extends CI_Model {
 		return $this->channel_data->get('photo_frame_colors', $params);
 	}
 	
+	public function get_photo_colors($photo_id)
+	{
+		return $this->get_colors(array(
+			'where' => array(
+				'photo_id' => $photo_id
+			)
+		));
+	}
+	
+	public function duplicate_photo_colors($orig_photo_id, $new_photo_id)
+	{
+		$colors = $this->get_photo_colors($orig_photo_id);
+		
+		foreach($colors->result_array() as $color)
+		{
+			$color['photo_id'] = $new_photo_id;
+			
+			unset($color['id']);
+			unset($color['color_rgb']);
+			
+			$this->db->insert('photo_frame_colors', $color);
+		}
+	}
+	
+	public function update_draft_data($entry_id, $field_id)
+	{
+		$draft_data = $this->channel_data->get('ep_entry_drafts', array(
+			'where' => array(
+				'entry_id' => $entry_id
+			)
+		));
+		
+		if($draft_data->num_rows() == 1)
+		{
+			$draft_data = unserialize($draft_data->row('draft_data'));
+			$draft_data['field_id_'.$field_id] = $entry_id;
+			
+			$this->db->where('entry_id', $entry_id);
+			$this->db->update('ep_entry_drafts', array('draft_data' => serialize($draft_data)));
+		}
+	}
+	
 	public function update_entry($entry_id, $data)
 	{
 		$this->db->where('entry_id', $entry_id);
@@ -522,14 +571,25 @@ class Photo_frame_model extends CI_Model {
 			{
 				$photo['date'] = date('Y-m-d H:i:s', time());
 				
+				$colors = $photo['colors'];
+				
 				unset($photo['colors']);
 				unset($photo['id']);
 				
-				$this->db->insert('photo_frame', $photo);
+				$photo_id = $this->insert($photo);
 				
-				$this->insert_colors($photo['colors'], $this->db->insert_id(), $photo);
+				$this->insert_colors($colors, $photo_id, $photo);
 			}
 		}
+	}
+	
+	public function insert($photo)
+	{
+		unset($photo['id']);
+		
+		$this->db->insert('photo_frame', $photo);
+		
+		return $this->db->insert_id();	
 	}
 	
 	public function insert_colors($colors, $photo_id, $photo)
@@ -560,6 +620,40 @@ class Photo_frame_model extends CI_Model {
 			
 			$this->db->insert('photo_frame_colors', $color_data);
 		}
+	}
+	
+	public function has_draft($id, $settings = array())
+	{
+		$where = array(
+			'is_draft' => 1
+		);
+		
+		if(isset($settings['entry_id']))
+		{
+			$where['entry_id'] = $settings['entry_id'];
+		}
+		
+		if(isset($settings['field_id']))
+		{
+			$where['field_id'] = $settings['field_id'];
+		}
+		
+		if(isset($settings['row_id']))
+		{
+			$where['row_id'] = $settings['row_id'];
+		}
+		
+		if(isset($settings['col_id']))
+		{
+			$where['col_id'] = $settings['col_id'];
+		}
+				
+		if(isset($settings['site_id']))
+		{
+			$where['site_id'] = $settings['site_id'];
+		}
+		
+		return $this->get_photos(array('where' => $where))->num_rows() == 0 ? false : true;
 	}
 			
 	public function upload_options($index_field = 'id', $name_field = 'name')
