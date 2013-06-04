@@ -1456,7 +1456,7 @@ class Photo_frame_ft extends EE_Fieldtype {
 		
 		$this->field_id = $this->settings['field_id'];
 		
-		$post      = $this->EE->input->post('field_id_'.$this->field_id);
+		$post = $this->EE->input->post('field_id_'.$this->field_id);
 		
 		/*
 		$post_data = array();
@@ -1472,10 +1472,11 @@ class Photo_frame_ft extends EE_Fieldtype {
 		}
 		*/
 		
-		$orig_data = $data;
-		
-		foreach($data as $index => $photo)
-		{
+		$orig_data   = $data;		
+		$invalid_ids = array();
+				
+		foreach($post as $index => $photo)
+		{	
 			if(isset($photo['edit']))
 			{
 				$photo = (array) json_decode($photo['edit']);
@@ -1483,15 +1484,15 @@ class Photo_frame_ft extends EE_Fieldtype {
 				if(!$this->EE->photo_frame_model->has_draft($photo['id'], $this->settings))
 				{	
 					$photo_row = $this->EE->photo_frame_model->get_photo($photo['id'])->row_array();
-					$settings  = $this->EE->photo_frame_model->get_settings($this->field_id, $this->col_id);	
-					$manipulations = $photo_row['manipulations'];
 					
+					$settings  = $this->EE->photo_frame_model->get_settings($this->field_id, $this->col_id);
+						
 					$photo['is_draft'] = 1;
 					$photo['live_id']  = $photo_row['id'];
 						
 					$photo_row = array_merge($photo_row, $photo);
 					
-					$photo_row['manipulations'] = $manipulations;
+					$photo_row['manipulations'] = is_object($photo['manipulations']) ? json_encode($photo['manipulations']) : $photo['manipulations'];
 					
 					//$directory  = str_replace($photo_row['file_name'], '', $photo_row['file']);			
 					//$filename   = random_string();
@@ -1506,11 +1507,14 @@ class Photo_frame_ft extends EE_Fieldtype {
 					$photo_row['file'] 		= str_replace($photo_row['file_name'], $new_filename, $photo_row['file']);
 					$photo_row['file_name'] = str_replace($photo_row['file_name'], $new_filename, $photo_row['file_name']);
 					
-					$draft_path   = $this->EE->photo_frame_model->parse($photo_row['file'], 'server_path');;		
+					$draft_path   = $this->EE->photo_frame_model->parse($photo_row['file'], 'server_path');		
 					$draft_url    = $this->EE->photo_frame_model->parse($photo_row['file'], 'url');
 					
-					copy($live_path, $draft_path);
-
+					copy(isset($photo_row['cachePath']) ? $photo_row['cachePath'] : $live_path, $draft_path);
+					
+					unset($photo_row['cacheUrl']);
+					unset($photo_row['cachePath']);
+					
 					$photo_id = $this->EE->photo_frame_model->insert($photo_row);
 					
 					$photo_row['id'] = $photo_id;
@@ -1519,7 +1523,24 @@ class Photo_frame_ft extends EE_Fieldtype {
 					
 					$this->EE->photo_frame_model->duplicate_photo_colors($photo['id'], $photo_id);
 				}
+				
+				$invalid_ids[] = isset($photo_row['id']) ? $photo_row['id'] : $photo['id'];
 			}
+		}
+		
+		if(isset($_POST['photo_frame_delete_photos']))
+		{						
+			foreach($_POST['photo_frame_delete_photos'][$this->field_id] as $index => $value)
+			{
+				$photo_row = $this->EE->photo_frame_model->get_photo($value)->row_array();
+						
+				if(in_array($value, $invalid_ids) || !$photo_row['is_draft'])
+				{
+					unset($_POST['photo_frame_delete_photos'][$this->field_id][$index]);
+				}
+			}
+			
+			$this->_delete_photos(true);
 		}
 		
 		$this->post_save($data);
@@ -1578,7 +1599,13 @@ class Photo_frame_ft extends EE_Fieldtype {
     		    if(isset($photo['new']))
     		    {
         		    $photo = (array) json_decode($photo['new']);
-        		   		
+        		   	$path  = $this->EE->photo_frame_model->parse($photo['file'], 'server_path');
+        		   	
+        		   	if(isset($photo['cachePath']))
+        		   	{
+        		   		copy($photo['cachePath'], $path);
+        		   	}
+        		   	
         		   	if(isset($this->settings['entry_id']))
         		   	{			
 						$entry = $this->EE->channel_data->get_entry($this->settings['entry_id'])->row();
@@ -1626,6 +1653,8 @@ class Photo_frame_ft extends EE_Fieldtype {
     				
     				$unset = array(
     					'channel_id' => FALSE,
+    					'cachePath'  => FALSE,
+    					'cacheUrl'   => FALSE,
     					'directory'  => FALSE,
     					'new'        => FALSE,
     					'id'
@@ -1670,6 +1699,16 @@ class Photo_frame_ft extends EE_Fieldtype {
         		   		
         		   		$compare = $photo->manipulations;
         		   		$compare = is_string($photo->manipulations) ? json_decode($photo->manipulations) : $photo->manipulations;
+        		   		
+        		   		if(isset($photo->cachePath))
+        		   		{
+	        		   		$path = $this->EE->photo_frame_model->parse($photo->file, 'server_path');
+	        		   		
+	        		   		copy($photo->cachePath, $path);
+	        		   		
+	        		   		unset($photo->cachePath);
+	        		   		unset($photo->cacheUrl);
+        		   		}
         		   		
         		   		// var_dump($this->EE->photo_frame_lib->needs_manipulation($compare, $existing_manip));exit();
         		   		
@@ -1783,6 +1822,16 @@ class Photo_frame_ft extends EE_Fieldtype {
 			
 		if(isset($this->EE->session->cache['ep_better_workflow']['is_publish']) && $this->EE->session->cache['ep_better_workflow']['is_publish'] == TRUE)
 		{
+			$live_photos = $this->EE->photo_frame_model->get_photos(array(
+				'select' => 'photo_frame.id', 
+				'where'  => array(
+					'entry_id' => $this->settings['entry_id'],
+					'field_id' => $this->field_id,
+					'is_draft' => 0
+				)
+			))->result_array();
+			$live_photos = $this->EE->channel_data->utility->reindex('id', $live_photos);
+			
 			$draft_photos = $this->EE->photo_frame_model->get_photos(array(
 				'where' => array(
 					'entry_id' => $this->settings['entry_id'],
@@ -1797,6 +1846,8 @@ class Photo_frame_ft extends EE_Fieldtype {
 			{
 				$orig_id = array($photo['id']);
 				$id      = $photo['live_id'];
+				
+				unset($live_photos[$id]);
 				
 				$photo['is_draft'] = 0;
 				$photo['live_id']  = NULL;
@@ -1813,7 +1864,16 @@ class Photo_frame_ft extends EE_Fieldtype {
 				}
 				
 				$this->EE->photo_frame_model->delete($orig_id, $this->settings);					
-			}	
+			}
+			
+			$delete_photos = array();
+			
+			foreach($live_photos as $photo)
+			{
+				$delete_photos[] = $photo['id'];
+			}
+			
+			$this->EE->photo_frame_model->delete($delete_photos, $this->settings);
 		}
 		
 		return $this->low_variables ? $this->var_id : $this->settings['entry_id'];
@@ -1905,23 +1965,36 @@ class Photo_frame_ft extends EE_Fieldtype {
 		return TRUE;
 	}
 	
-	private function _delete_photos()
-	{
+	private function _delete_photos($force_delete = FALSE)
+	{	
 		$post_photos = $this->EE->input->post('photo_frame_delete_photos', TRUE);
 		
 		$id = $this->low_variables ? $this->var_id : $this->settings['field_id'];
 		
-		if(isset($post_photos[$id]))
-		{
-			$delete_photos = $post_photos[$id];
+		if(!$this->EE->input->post('epBwfDraft_create_draft') && !$this->EE->input->post('epBwfDraft_update_draft') || $force_delete)
+		{		
+			if(isset($post_photos[$id]))
+			{
+				$delete_photos = $post_photos[$id];
+					
+				unset($post_photos[$id]);
+							
+				// $total_photos  = $total_photos - count($delete_photos);
 				
-			unset($post_photos[$id]);
-						
-			// $total_photos  = $total_photos - count($delete_photos);
-			
-			$this->EE->photo_frame_model->delete($delete_photos, $this->settings, $this->is_draft);
-			
-			$_POST['photo_frame_delete_photos'] = $post_photos;
+				$this->EE->photo_frame_model->delete($delete_photos, $this->settings, $this->is_draft);
+				
+				$_POST['photo_frame_delete_photos'] = $post_photos;
+			}
+		}
+		else
+		{
+			if(isset($post_photos[$id]))
+			{
+				foreach($post_photos[$id] as $photo_id)
+				{
+					$_POST[$this->field_name][]['delete'] = $photo_id;
+				}
+			}
 		}
 	}
 	

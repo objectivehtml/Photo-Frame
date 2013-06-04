@@ -65,6 +65,10 @@ class Photo_frame_upd {
 				'unsigned' 			=> TRUE,
 				'default'			=> 0
 			),
+			'live_id' 	=> array(
+				'type'				=> 'int',
+				'constraint'		=> 10
+			),
 			'height' 	=> array(
 				'type'				=> 'float'
 			),
@@ -113,7 +117,7 @@ class Photo_frame_upd {
 			),
 			'manipulations'	=> array(
 				'type' 				=> 'longtext'
-			)
+			),
 		),
 		'photo_frame_colors' => array(
 			'id' => array(

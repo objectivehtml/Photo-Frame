@@ -127,6 +127,8 @@ class Photo_frame_mcp {
 			return $orig_path;	
 		}
 		
+		copy($orig_path, $cache_path->path);
+		
 		$image = new ImageEditor($cache_path->path);
 		
 		$buttons = $this->EE->photo_frame_lib->get_buttons(array(

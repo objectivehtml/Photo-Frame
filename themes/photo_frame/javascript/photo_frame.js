@@ -2132,7 +2132,7 @@ var PhotoFrame = {};
 			this.response     = response;
 			this.originalPath = response.original_path;
 			this.originalUrl  = response.original_url;
-			this.url          = response.file_url;
+			this.url          = response.url;
 			this.path         = response.file_path;
 			
 			this.ui.rendering	  = this.factory.ui.crop.find('.'+this.factory.classes.renderBg);
@@ -2530,7 +2530,7 @@ var PhotoFrame = {};
 		},
 		
 		photoUrl: function() {			
-			return !this.useCache ? this.originalUrl : this.cacheUrl;	
+			return this.originalUrl; //!this.useCache ? this.originalUrl : this.cacheUrl;	
 		},
 		
 		startCrop: function(callback) {
@@ -2708,8 +2708,8 @@ var PhotoFrame = {};
 			else {				
 				t._updatePhoto(saveData);	
 			}
-				
-			t.load(function(img) {
+			
+			t.load(t.cropResponse.url, function(img) {
 				if(t.factory.maxPhotos > 0 && (t.factory.maxPhotos <= t.factory.getTotalPhotos())) {
 					t.factory.hideUpload();
 				}	
@@ -2801,6 +2801,7 @@ var PhotoFrame = {};
 				t.keywords    = t.factory.ui.metaKeywords.val();
 				
 				t._sendCropRequest(function(cropResponse) {
+					t.cropResponse      = cropResponse;
 					t.factory.cropPhoto = false;
 					t.destroyJcrop();		
 					t.save(cropResponse.save_data);	
@@ -2849,10 +2850,10 @@ var PhotoFrame = {};
 				image: response.file_path,
 				name: response.file_name,
 				manipulations: t.manipulations,
-				directory: t.factory.directory.server_path,
+				directory: t.factory.directory,
 				original: response.original_path,
 				original_file: response.original_file,
-				url: response.file_url,
+				url: response.url,
 				edit: t.edit !== false ? true : false,
 				height: size.h,
 				width: size.w,

@@ -58,6 +58,5 @@ if(!class_exists('PhotoFrameButton'))
 		{
 			return array();
 		}
-		
 	}
 }

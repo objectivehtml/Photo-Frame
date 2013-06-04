@@ -331,6 +331,8 @@ class Photo_frame_lib {
 	
 	public function crop_action()
 	{
+		$cache 		   = $this->EE->input->get_post('cache', TRUE);
+		$directory     = $this->EE->input->get_post('directory', TRUE);
 		$index         = $this->EE->input->get_post('index', TRUE);
 		$height        = $this->EE->input->get_post('height', TRUE);
 		$width         = $this->EE->input->get_post('width', TRUE);
@@ -344,6 +346,11 @@ class Photo_frame_lib {
 		$manipulations = $this->array_to_object($manipulations);
 		$compression   = $this->EE->input->get_post('compression', TRUE);
 		$compression   = $compression ? $compression : 100;
+		
+		$cache_image   = $this->EE->photo_frame_lib->cache_image($cache, $this->orig, $directory['server_path'], $directory['url']);
+	
+		$this->img = $cache_image->path;
+		$this->url = $cache_image->url;
 		
 		//if($this->edit)
 		//{
@@ -1057,7 +1064,7 @@ class Photo_frame_lib {
 			'photo_id'      => $this->photo_id,
 			// 'file_path'     => $this->dir,
 			'file_name'     => $this->name,
-			'file_url'      => $this->url,
+			'url'     		=> $this->url,
 			'file_path'     => $this->EE->photo_frame_model->parse($new_file, 'server_path'),
 			'original_file' => $original_file,
 			'original_file_name' => $this->name,
@@ -1067,6 +1074,8 @@ class Photo_frame_lib {
 			'save_data' 	=> json_encode(array_merge(array(
 				'original_file' => $original_file,
 				'file'          => $new_file,
+				'cachePath'		=> $this->img,
+				'cacheUrl'		=> $this->url,
 				'id'      		=> $this->photo_id,
 				'file_name'		=> $this->name,
 				'title' 		=> $this->EE->input->get_post('title', TRUE) ? $this->EE->input->get_post('title', TRUE) : '',
