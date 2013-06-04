@@ -708,7 +708,7 @@ class Photo_frame_lib {
 		$extension = $this->extension($orig_path);
 		$basepath  = $cache_path;
 		
-		if(is_writable($basepath . '../'))
+		if(is_writable($basepath))
 		{
 			$cache_basepath = config_item('photo_frame_cache_directory') . '/';
 			
