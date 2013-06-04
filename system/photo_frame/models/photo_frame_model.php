@@ -625,7 +625,8 @@ class Photo_frame_model extends CI_Model {
 	public function has_draft($id, $settings = array())
 	{
 		$where = array(
-			'is_draft' => 1
+			'is_draft' => 1,
+			'id'       => $id
 		);
 		
 		if(isset($settings['entry_id']))
