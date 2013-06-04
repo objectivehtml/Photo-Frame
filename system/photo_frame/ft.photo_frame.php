@@ -11,9 +11,16 @@
  * @build		20121031
  */
 
-require PATH_THIRD . 'photo_frame/config/photo_frame_config.php';
-require PATH_THIRD . 'photo_frame/libraries/PhotoFrameButton.php';
+if(!defined('PHOTO_FRAME_VERSION'))
+{
+	require PATH_THIRD . 'photo_frame/config/photo_frame_config.php';
+}
 
+if(!class_exists('PhotoFrameButton'))
+{
+	require_once PATH_THIRD . 'photo_frame/libraries/PhotoFrameButton.php';
+}
+			
 
 class Photo_frame_ft extends EE_Fieldtype {
 
@@ -1243,8 +1250,6 @@ class Photo_frame_ft extends EE_Fieldtype {
 		
 		$photos = $this->_get_photos($this->field_id);
 		
-		var_dump($photos);exit();
-		
 		$return = array();
 		
 		$total_photos = 0;
@@ -1421,6 +1426,25 @@ class Photo_frame_ft extends EE_Fieldtype {
 	{
 		$this->EE->session->set_cache('ep_better_workflow', 'is_publish', TRUE);
 	}
+	
+	public function draft_discard()
+	{
+		$this->EE->load->add_package_path(PATH_THIRD . 'photo_frame');
+		$this->EE->load->model('photo_frame_model');
+		
+		$photos = $this->EE->photo_frame_model->get_photos(array(
+			'where' => array(
+				'field_id' => $this->settings['field_id'],
+				'entry_id' => $this->settings['entry_id'],
+				'is_draft' => 1
+			)
+		));
+		
+		foreach($photos->result() as $photo)
+		{
+			$this->EE->photo_frame_model->delete($photo->id, $this->settings);
+		}
+	}
 
 	public function draft_save($data, $draft_action)
 	{
@@ -1432,6 +1456,24 @@ class Photo_frame_ft extends EE_Fieldtype {
 		
 		$this->field_id = $this->settings['field_id'];
 		
+		$post      = $this->EE->input->post('field_id_'.$this->field_id);
+		
+		/*
+		$post_data = array();
+		$new_data  = array();
+		
+		foreach($post as $index => $data)
+		{
+			foreach($data as $type => $value)
+			{
+				$value = json_decode($value);
+				$post_data[$value->id] = $value;
+			}
+		}
+		*/
+		
+		$orig_data = $data;
+		
 		foreach($data as $index => $photo)
 		{
 			if(isset($photo['edit']))
@@ -1439,7 +1481,7 @@ class Photo_frame_ft extends EE_Fieldtype {
 				$photo = (array) json_decode($photo['edit']);
 				
 				if(!$this->EE->photo_frame_model->has_draft($photo['id'], $this->settings))
-				{
+				{	
 					$photo_row = $this->EE->photo_frame_model->get_photo($photo['id'])->row_array();
 					$settings  = $this->EE->photo_frame_model->get_settings($this->field_id, $this->col_id);	
 					$manipulations = $photo_row['manipulations'];
@@ -1458,8 +1500,7 @@ class Photo_frame_ft extends EE_Fieldtype {
 					$live_path = $this->EE->photo_frame_model->parse($photo_row['file'], 'server_path');
 					$live_url  = $this->EE->photo_frame_model->parse($photo_row['file'], 'url');	
 									
-					$rename_photo = $this->EE->photo_frame_lib->rename($photo_row, $settings, TRUE);	
-					
+					$rename_photo = $this->EE->photo_frame_lib->rename($photo_row, $settings, TRUE);				
 					$new_filename = $this->EE->photo_frame_lib->parse($rename_photo, $settings['photo_frame_name_format']);
 					
 					$photo_row['file'] 		= str_replace($photo_row['file_name'], $new_filename, $photo_row['file']);
@@ -1469,8 +1510,12 @@ class Photo_frame_ft extends EE_Fieldtype {
 					$draft_url    = $this->EE->photo_frame_model->parse($photo_row['file'], 'url');
 					
 					copy($live_path, $draft_path);
-					
+
 					$photo_id = $this->EE->photo_frame_model->insert($photo_row);
+					
+					$photo_row['id'] = $photo_id;
+					
+					$data[$index]['edit'] = json_encode($photo_row);					
 					
 					$this->EE->photo_frame_model->duplicate_photo_colors($photo['id'], $photo_id);
 				}
@@ -1758,10 +1803,16 @@ class Photo_frame_ft extends EE_Fieldtype {
 				
 				unset($photo['id']);
 				
-				var_dump($photo);exit();
-					
-				$this->EE->photo_frame_model->update($id, $photo);
-				$this->EE->photo_frame_model->delete($orig_id, $this->settings);
+				if(!empty($id))
+				{
+					$this->EE->photo_frame_model->update_photo($id, $photo);
+				}
+				else
+				{
+					$this->EE->photo_frame_model->insert($photo);
+				}
+				
+				$this->EE->photo_frame_model->delete($orig_id, $this->settings);					
 			}	
 		}
 		
