@@ -52,7 +52,7 @@ class Photo_frame_mcp {
 			$name = strtolower($button->name);			
 			$data = array(
 				'url'          => $url,
-				'cachePath'    => $this->EE->theme_loader->theme_path() . 'photo_frame/',
+				'cachePath'    => $directory['server_path'] . config_item('photo_frame_cache_directory') . '/',
 				'cache'        => $cache,
 				'path'		   => $path,
 				'manipulation' => isset($manipulations[$name]) ? $manipulations[$name] : array(),
@@ -202,6 +202,7 @@ class Photo_frame_mcp {
 		$dir    = $this->EE->input->get('directory', TRUE);
 		$url    = $this->EE->input->get('url', TRUE);
 		
+		/*
 		$file_type = '';
 		
 		if(preg_match('/(jpeg)|(jpg)$/', $dir))
@@ -251,6 +252,7 @@ class Photo_frame_mcp {
 		{
 			$image = imagegif($image_p, $dir);
 		}
+		*/
 				
 		$id   = $this->EE->input->get('id', TRUE);
 		$name = $this->EE->input->get('name', TRUE);
