@@ -609,7 +609,7 @@ class ImageEditor extends BaseClass {
 		$this->save();
 	}
 	
-	public function rgba($r, $g, $b, $a)
+	public function rgba($r, $g, $b, $a = 1)
 	{
 		imagefilter($this->image, IMG_FILTER_COLORIZE, $r, $g, $b, $a);
 		
@@ -664,11 +664,9 @@ class ImageEditor extends BaseClass {
 	
 	public function sepia()
 	{
-		imagefilter($this->image, IMG_FILTER_GRAYSCALE);
-		imagefilter($this->image, IMG_FILTER_BRIGHTNESS,-30);
-		imagefilter($this->image, IMG_FILTER_COLORIZE, 90, 55, 30);
-		
-	    $this->save();
+		$this->grayscale();
+		$this->brightness(-30);
+		$this->rgba(90, 55, 30);
 	}
 	
 	public function negative()
@@ -743,11 +741,13 @@ class ImageEditor extends BaseClass {
 	
 	public function vignette($sharp = .4, $level = .7)
 	{
-	    $width  = imagesx($this->image);
-	    $height = imagesy($this->image);
+	    $width  = $this->getWidth();
+	    $height = $this->getHeight();
 		
-	    for($x = 0; $x < $width; $x++){
-	        for($y = 0; $y < $height; $y++){   
+	    for($x = 0; $x < $width; $x++)
+	    {
+	        for($y = 0; $y < $height; $y++)
+	        {   
 	            $index = imagecolorat($this->image, $x, $y);
 	            $rgb   = imagecolorsforindex($this->image, $index);
 	            $rgb   = $this->_vignette_effect($sharp, $level, $x, $y, $rgb);
@@ -759,10 +759,122 @@ class ImageEditor extends BaseClass {
 	    $this->save();
 	}
 	
+	public function border($thickness = 1, $r = 0, $g = 0, $b = 0, $usePixels = FALSE)
+	{
+		$color     = imagecolorallocate($this->image, $r, $g, $b);
+		$x         = 0; 
+	    $y         = 0; 
+	    $x2        = $this->getWidth() - 1; 
+	    $y2        = $this->getHeight() - 1;
+	    
+	    if(!$usePixels)
+	    {
+	    	$thickness = $this->getWidth() * ($thickness / 100);
+	    }
+	    
+	    for($i = 0; $i < $thickness; $i++) 
+	    { 
+	        imagerectangle($this->image, $x++, $y++, $x2--, $y2--, $color); 
+	    }
+	    
+	    $this->save();
+	}
+	
+	public function storybook()
+	{
+	    $this->contrast(-15); 
+	    $this->rgba(20, 0, 0);
+	    $this->rgba(50, 50, 0); 
+	    $this->rgba(0, 0, 30); 
+	    $this->brightness(-25); 
+	    $this->sharpness(.5); 
+	}
+	
+	public function vintage()
+	{
+	    $this->contrast(-15);
+	    $this->brightness(-15); 
+	    $this->rgba(28, 0, 0);
+	    $this->rgba(20, 10, 0);
+	    $this->vignette(.5, .4);
+	    $this->rgba(0, 0, 45);
+	    $this->rgba(15, 15, 0);
+	    $this->contrast(-15);
+	}
+	
+	public function gamma($input = 1.0, $output = 1.0)
+	{
+		imagegammacorrect($this->image, $input, $output);
+		
+		$this->save();
+	}
+	
+	public function noise($level = 42, $r = 200, $g = 200, $b = 200, $a = 90)
+	{
+		$width  = $this->getWidth();
+	    $height = $this->getHeight();
+		
+	    for($x = 0; $x < $width; $x++)
+	    {
+	        for($y = 0; $y < $height; $y++)
+	        {   
+	            if(rand(0, 100) <= $level)
+	            {
+	            	$color = imagecolorallocatealpha($this->image, $r, $g, $b, $a);
+	            	
+	            	imagesetpixel($this->image, $x, $y, $color);   
+	            }
+	        }
+	    }
+	    
+	    $this->save();
+	}
+	
+	public function newspaper()
+	{
+		$this->grayscale();
+		$this->contrast(-110);
+	}
+	
+	public function highlightColor($r, $g, $b, $level = 9500)
+	{
+		$width  = $this->getWidth();
+	    $height = $this->getHeight();
+		
+	    for($x = 0; $x < $width; $x++)
+	    {
+	        for($y = 0; $y < $height; $y++)
+	        {  
+            	$rgb   = imagecolorsforindex($this->image, imagecolorat($this->image, $x, $y));
+            	$diff  = pow($r - $rgb['red'], 2) + pow($g - $rgb['green'], 2) + pow($b - $rgb['blue'], 2);
+            	
+            	if($diff <= $level)
+            	{
+            		$color = imagecolorallocate($this->image, $rgb['red'], $rgb['green'], $rgb['blue']);
+            	}
+            	else
+            	{
+            		$color = $this->_yiq($rgb['red'], $rgb['green'], $rgb['blue']);		            	
+            	}
+            	
+            	imagesetpixel($this->image, $x, $y, $color); 
+	        }
+	    }
+	    
+	    $this->save();
+	}
+	
+	public function agedPaper()
+	{
+		$this->grayscale();
+		$this->rgba(15, 7, 0);
+		$this->contrast(-110);
+	}
+	
 	private function _vignette_effect($sharp, $level, $x, $y, $rgb)
 	{
-	    $width  = imagesx($this->image);
-	    $height = imagesy($this->image);
+	    $width  = $this->getWidth();
+	    $height = $this->getHeight();
         $l      = sin(M_PI / $width * $x) * sin(M_PI / $height * $y);
         $l      = pow($l, $sharp);
         $l      = 1 - $level * (1 - $l);
@@ -773,6 +885,13 @@ class ImageEditor extends BaseClass {
         
         return $rgb;
     }
+	
+	private function _yiq($r, $g, $b) 
+	{ 	
+		$c = (max($r, $g, $b) + min($r, $g, $b)) / 2;
+		
+		return imagecolorallocate($this->image, $c, $c, $c);
+	} 
 	
 	/**
 	 * Flip the image (fallback for PHP < 5.5)

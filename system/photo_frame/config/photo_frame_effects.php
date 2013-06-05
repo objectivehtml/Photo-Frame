@@ -7,4 +7,8 @@ $config['photo_frame_effects'] = array(
 	'removeMean' => lang('photo_frame_remove_mean'),
 	'detectEdge' => lang('photo_frame_edge_detect'),
 	'negative'	 => lang('photo_frame_negative'),
+	'storybook'	 => lang('photo_frame_storybook'),
+	'vintage'	 => lang('photo_frame_vintage'),
+	'newspaper'	 => lang('photo_frame_newspaper'),
+	'agedPaper'  => lang('photo_frame_aged_paper'),
 );
