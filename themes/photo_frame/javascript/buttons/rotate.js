@@ -45,13 +45,18 @@
 			this.base(buttonBar);
 		},
 		
-		apply: function() {				
+		apply: function() {	
+			var t = this;
+						
 			this.addManipulation(true, {
 				degree: this.getDegree()
 			});
 			
 			this.buttonBar.factory.trigger('rotate', this, this.getDegree());
-			this.render();
+			
+			this.render(function() {				
+				t.buttonBar.factory.trigger('rotateInitCrop', t, t.getDegree());			
+			});
 		},
 		
 		startCrop: function() {
@@ -71,7 +76,7 @@
 			this.window.ui.input.val('');	
 		},
 		
-		toggleLayer: function(visibility, render) {
+		toggleLayer: function(visibility, render) {			
 			this.base(visibility, render);
 		},
 		
@@ -102,6 +107,10 @@
 					t.apply();
 					e.preventDefault();
 				}
+			});
+			
+			this.bind('stopRendering', function() {
+				t.buttonBar.factory.trigger('rotateInitCrop', t, t.getDegree());				
 			});
 		}
 	});

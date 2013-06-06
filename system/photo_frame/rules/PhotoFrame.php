@@ -107,7 +107,7 @@ class PhotoFrame_channel_search_rule extends Base_rule {
 	public function get_select()
 	{	
 		$settings = $this->get_settings();
-		$rules    = $settings->rules
+		$rules    = $settings->rules;
 		$color    = strtolower($this->input($rules->form_field));
 		$color    = $this->_get_color($color, $rules);
 		
@@ -117,7 +117,7 @@ class PhotoFrame_channel_search_rule extends Base_rule {
 	public function get_join()
 	{	
 		$settings = $this->get_settings();
-		$rules    = $settings->rules
+		$rules    = $settings->rules;
 		$color    = strtolower($this->input($rules->form_field));
 		$color    = $this->_get_color($color, $rules);
 

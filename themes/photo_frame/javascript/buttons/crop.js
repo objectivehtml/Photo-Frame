@@ -298,6 +298,16 @@
 				t.initCrop(true);
 			});
 			
+			this.bind('rotateInitCrop', function(obj) {
+				console.log('rotate');
+				
+				t.initCrop();
+			});
+			
+			this.bind('r', function(manipulation) {
+				t.initCrop();
+			});
+			
 			/*
 			this.bind('resize', function(obj, width, height) {
 				t.resizeObj = obj;
@@ -305,10 +315,6 @@
 				if(t.getManipulation()) {
 					//t.cropPhoto().releaseCrop();
 				}
-			});
-			
-			this.bind('rotate', function(obj) {
-				//t.cropPhoto().releaseCrop();
 			});
 			
 			this.bind('rotateRemoveLayer', function(obj) {

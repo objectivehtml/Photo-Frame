@@ -110,8 +110,11 @@
 				height: this.getHeight()
 			});
 			
-			this.buttonBar.factory.trigger('resize', this,this.getWidth(), this.getHeight());
-			this.render();
+			this.buttonBar.factory.trigger('resize', this, this.getWidth(), this.getHeight());
+			
+			this.render(function() {
+				t.buttonBar.factory.trigger('resizeRenderCallback', t, t.getWidth(), t.getHeight());
+			});
 		},
 		
 		initCrop: function(manipulation) {
