@@ -779,44 +779,7 @@ class ImageEditor extends BaseClass {
 	    
 	    $this->save();
 	}
-
-	public function storybook()
-	{
-	    $this->contrast(-15); 
-	    $this->rgba(20, 0, 0);
-	    $this->rgba(50, 50, 0); 
-	    $this->rgba(0, 0, 30); 
-	    $this->brightness(-25); 
-	    $this->sharpness(.5); 
-	}
-	
-	private function _desaturate($rgb, $level = .10)
-	{
-		$alpha = isset($rgb['alpha']) ? $rgb['alpha'] : 0;
 		
-		$gray = (max($rgb['red'], $rgb['green'], $rgb['blue']) + min($rgb['red'], $rgb['green'], $rgb['blue'])) / 2;
-		 
-		 foreach($rgb as $color => $value)
-		 {
-		 	$offset = $value >= $gray ? $value * $level : $value / $level;
-		 	
-			 $rgb[$color] = $value >= $gray ? $value - $offset : $value + $offset;//abs($gray - $value);// * ($level * 1);
-		 }
-		 
-		 $rgb['alpha'] = $alpha;
-		 
-		 return $rgb;
-	}
-	
-	
-	public function midnight()
-	{
-		$this->rgba(34, 43, 109);
-		$this->gamma(1, .30);
-		$this->brightness(30);
-		$this->contrast(-20);
-	}
-	
 	public function gamma($input = 1.0, $output = 1.0)
 	{
 		imagegammacorrect($this->image, $input, $output);
@@ -845,12 +808,6 @@ class ImageEditor extends BaseClass {
 	    $this->save();
 	}
 	
-	public function newspaper()
-	{
-		$this->grayscale();
-		$this->contrast(-110);
-	}
-	
 	public function highlightColor($r, $g, $b, $level = 9500)
 	{
 		$width  = $this->getWidth();
@@ -877,13 +834,6 @@ class ImageEditor extends BaseClass {
 	    }
 	    
 	    $this->save();
-	}
-	
-	public function agedPaper()
-	{
-		$this->grayscale();
-		$this->rgba(15, 7, 0);
-		$this->contrast(-110);
 	}
 	
 	private function _vignette_effect($sharp, $level, $x, $y, $rgb)

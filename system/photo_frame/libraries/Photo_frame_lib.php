@@ -741,6 +741,13 @@ class Photo_frame_lib {
 		return $this->EE->photo_frame_buttons->get($params);
 	}
 	
+	public function get_effects($params = array())
+	{
+		$this->EE->load->library('photo_frame_effects');
+		
+		return $this->EE->photo_frame_effects->get($params);
+	}
+	
 	/*
 	public function resize_photos($field_id, $entry_id, $col_id = FALSE, $row_id = FALSE, $settings = array(), $matrix = FALSE)
 	{		

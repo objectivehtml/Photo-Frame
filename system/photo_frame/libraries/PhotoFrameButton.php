@@ -14,15 +14,23 @@ if(!class_exists('PhotoFrameButton'))
 {
 	abstract class PhotoFrameButton extends BaseClass {
 		
-		public $name;
+		protected $name;
 		
-		public $description;
+		protected $description;
 		
-		public $path;
+		protected $path;
 		
-		public $url;
+		protected $url;
+				
+		protected $className = FALSE;
 		
-		public $image = FALSE;
+		protected $moduleName = FALSE;
+		
+		protected $jsDirectory = 'javascript';
+		
+		protected $dirName = 'buttons';
+		
+		protected $image = FALSE;
 		
 		public function __construct($params = array()) 
 		{
@@ -44,6 +52,16 @@ if(!class_exists('PhotoFrameButton'))
 			return $photo;
 		}
 		
+		public function getClassName()
+		{
+			return $this->className ? $this->className : strtolower($this->name);
+		}
+		
+		public function getModuleName()
+		{
+			return $this->moduleName ? $this->moduleName : 'photo_frame';
+		}
+		
 		public function startCrop($data = array())
 		{ 
 			return array(); 
@@ -56,7 +74,7 @@ if(!class_exists('PhotoFrameButton'))
 		
 		public function javascript()
 		{
-			return array();
+			return array($this->dirName . '/' . strtolower($this->name));
 		}
 	}
 }

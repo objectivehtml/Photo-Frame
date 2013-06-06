@@ -344,7 +344,9 @@ class Photo_frame_ft extends EE_Fieldtype {
 		$this->EE->load->library('photo_frame_lib');
 				
 		$this->EE->cp->add_js_script(array('ui' => array('slider', 'draggable')));		
-
+		
+		$effects = $this->EE->photo_frame_lib->get_effects();
+		
 		$default_settings = array(
 			'photo_frame_display_info'       => 'true',
 			'photo_frame_display_meta'       => 'false',
@@ -405,20 +407,6 @@ class Photo_frame_ft extends EE_Fieldtype {
 		$this->EE->theme_loader->javascript('base');
 		$this->EE->theme_loader->javascript('localStorageDB');
 		$this->EE->theme_loader->javascript('photo_frame');
-		$this->EE->theme_loader->javascript('buttons/rotate');
-		$this->EE->theme_loader->javascript('buttons/crop');
-		$this->EE->theme_loader->javascript('buttons/brightness');
-		$this->EE->theme_loader->javascript('buttons/contrast');
-		$this->EE->theme_loader->javascript('buttons/resize');
-		$this->EE->theme_loader->javascript('buttons/rgba');
-		$this->EE->theme_loader->javascript('buttons/layers');
-		$this->EE->theme_loader->javascript('buttons/flip');
-		$this->EE->theme_loader->javascript('buttons/smoothness');
-		$this->EE->theme_loader->javascript('buttons/blur');
-		$this->EE->theme_loader->javascript('buttons/vignette');
-		$this->EE->theme_loader->javascript('buttons/pixelate');
-		$this->EE->theme_loader->javascript('buttons/effects');
-		$this->EE->theme_loader->javascript('buttons/sharpness');
 		$this->EE->theme_loader->javascript('jquery.ui');
 		$this->EE->theme_loader->javascript('jquery.ui.widget');
 		$this->EE->theme_loader->javascript('jquery.iframe-transport');
@@ -433,61 +421,39 @@ class Photo_frame_ft extends EE_Fieldtype {
 //$settings['photo_frame_show_editor_lv'] && $this->low_variables ||
 		   $settings['photo_frame_show_editor_mx'] == 'true' && $this->matrix)
 		{
-			$buttons = array(
-				'layers',
-				'crop',
-				'rotate',
-				'resize',
-				'brightness',
-				'contrast',
-				'rgba',
-				'flip',
-				'smoothness',
-				'sharpness',
-				'blur',
-				'vignette',
-				'pixelate',
-				'effects',
-			);
+			$buttons = array();
+			
+			$js_directory = $this->EE->theme_loader->js_directory;
+			
+			foreach($this->EE->photo_frame_lib->get_buttons() as $obj)
+			{
+				$buttons[] = $obj->getClassName();
+		
+				$this->EE->theme_loader->module_name  = $obj->getModuleName();				
+				$this->EE->theme_loader->js_directory = $obj->getJsDirectory();
+			
+				if(is_array($obj->javascript()))
+				{
+					foreach($obj->javascript() as $js)
+					{
+						$this->EE->theme_loader->javascript($js);
+					}
+				}
+				
+				if(is_array($obj->css()))
+				{
+					foreach($obj->css() as $css)
+					{
+						$this->EE->theme_loader->css($css);
+					}
+				}
+			}	
+						
+			$this->EE->theme_loader->js_directory = $js_directory;			
 		}
 		else {
 			$buttons = array();
 		}
-		
-		$js_directory = $this->EE->theme_loader->js_directory;
-			
-		foreach($this->EE->photo_frame_lib->get_buttons() as $obj)
-		{
-			foreach($obj->javascript() as $js)
-			{
-				$this->EE->theme_loader->javascript($js);
-			}
-			
-			foreach($obj->css() as $css)
-			{
-				$this->EE->theme_loader->css($css);
-			}
-		}	
-		
-		$this->EE->theme_loader->js_directory = '';
-					
-		foreach(directory_map($this->EE->theme_loader->theme_path()) as $addon_name => $addon)
-		{
-			if(isset($addon['photo_frame']) && is_array($addon['photo_frame']))
-			{
-				foreach($addon['photo_frame'] as $file)
-				{
-					$name = str_replace('.js', '', $file);
-					
-					$buttons[] = $name;
-					
-					$this->EE->theme_loader->module_name  = $addon_name;
-					$this->EE->theme_loader->javascript('photo_frame/'.$name);
-				}
-			}
-		}
-		
-		$this->EE->theme_loader->js_directory = $js_directory;
 		
 		$entry_id  = empty($data) && $data !== FALSE ? $data : ($this->EE->input->get_post('entry_id') ? $this->EE->input->get_post('entry_id') : (isset($this->EE->safecracker) ? $this->EE->safecracker->entry('entry_id') : 0));
 			
