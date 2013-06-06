@@ -70,6 +70,7 @@ $lang	= array(
 	'photo_frame_storybook'  	         => 'Storybook',
 	'photo_frame_newspaper'  	         => 'Newspaper',
 	'photo_frame_aged_paper'  	         => 'Aged Paper',
+	'photo_frame_midnight'  	         => 'Midnight',
 	'photo_frame_lat'				     => 'Lat',
 	'photo_frame_lng'				     => 'Lng',
 	'photo_frame_enter_location'		 => 'Enter an address or zip',

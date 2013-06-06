@@ -180,6 +180,7 @@
 						item.find('a').prepend(img);
 						
 						if(count == data.effects.length) {
+							t.window.ui.innerContent = html;
 							t.window.ui.content.html(html);	
 						}
 					});
@@ -219,6 +220,7 @@
 			});
 			
 			this.bind('cancel', function() {
+				t.effects = [];
 				t.window.ui.content.html('');
 			});
 			

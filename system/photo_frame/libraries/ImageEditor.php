@@ -759,7 +759,7 @@ class ImageEditor extends BaseClass {
 	    $this->save();
 	}
 	
-	public function border($thickness = 1, $r = 0, $g = 0, $b = 0, $usePixels = FALSE)
+	public function border($thickness = 1, $r = 0, $g = 0, $b = 0, $usePixels = TRUE)
 	{
 		$color     = imagecolorallocate($this->image, $r, $g, $b);
 		$x         = 0; 
@@ -779,7 +779,7 @@ class ImageEditor extends BaseClass {
 	    
 	    $this->save();
 	}
-	
+
 	public function storybook()
 	{
 	    $this->contrast(-15); 
@@ -790,16 +790,31 @@ class ImageEditor extends BaseClass {
 	    $this->sharpness(.5); 
 	}
 	
-	public function vintage()
+	private function _desaturate($rgb, $level = .10)
 	{
-	    $this->contrast(-15);
-	    $this->brightness(-15); 
-	    $this->rgba(28, 0, 0);
-	    $this->rgba(20, 10, 0);
-	    $this->vignette(.5, .4);
-	    $this->rgba(0, 0, 45);
-	    $this->rgba(15, 15, 0);
-	    $this->contrast(-15);
+		$alpha = isset($rgb['alpha']) ? $rgb['alpha'] : 0;
+		
+		$gray = (max($rgb['red'], $rgb['green'], $rgb['blue']) + min($rgb['red'], $rgb['green'], $rgb['blue'])) / 2;
+		 
+		 foreach($rgb as $color => $value)
+		 {
+		 	$offset = $value >= $gray ? $value * $level : $value / $level;
+		 	
+			 $rgb[$color] = $value >= $gray ? $value - $offset : $value + $offset;//abs($gray - $value);// * ($level * 1);
+		 }
+		 
+		 $rgb['alpha'] = $alpha;
+		 
+		 return $rgb;
+	}
+	
+	
+	public function midnight()
+	{
+		$this->rgba(34, 43, 109);
+		$this->gamma(1, .30);
+		$this->brightness(30);
+		$this->contrast(-20);
 	}
 	
 	public function gamma($input = 1.0, $output = 1.0)
