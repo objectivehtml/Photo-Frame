@@ -41,6 +41,5 @@ if(!class_exists('PhotoFrameEffect'))
 		public function modifyTables($table = array()) { return $table; }
 		
 		abstract function render($image);
-		
 	}
 }

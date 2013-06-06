@@ -118,7 +118,7 @@
 		},
 		
 		initCrop: function(manipulation) {
-			this.buttonBar.factory.trigger('resizeInitCrop', this, manipulation);
+			this.buttonBar.factory.trigger('resizeReInitCrop', this, manipulation);
 		},
 		
 		toggleLayer: function(visibility, render) {

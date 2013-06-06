@@ -298,13 +298,7 @@
 				t.initCrop(true);
 			});
 			
-			this.bind('rotateInitCrop', function(obj) {
-				console.log('rotate');
-				
-				t.initCrop();
-			});
-			
-			this.bind('r', function(manipulation) {
+			this.bind('resizeReInitCrop', function(obj) {
 				t.initCrop();
 			});
 			

@@ -54,8 +54,8 @@
 			
 			this.buttonBar.factory.trigger('rotate', this, this.getDegree());
 			
-			this.render(function() {				
-				t.buttonBar.factory.trigger('rotateInitCrop', t, t.getDegree());			
+			this.render(function() {	
+				t.buttonBar.factory.trigger('rotateReInitCrop', t, t.getDegree());			
 			});
 		},
 		
