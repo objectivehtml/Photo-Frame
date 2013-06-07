@@ -70,9 +70,19 @@ class Photo_frame_base_api {
 			
 			if(isset($addon[$this->dir_name]) && is_array($addon[$this->dir_name]))
 			{
-				foreach($addon[$this->dir_name] as $file)
-				{					
-					$return[str_replace('.php', '', $file)] = $this->_load($this->dir_name, $addon_name, $file, $params);
+				foreach($addon[$this->dir_name] as $directory => $file)
+				{		
+					if(!is_array($file))
+					{
+						$return[str_replace('.php', '', $file)] = $this->_load($this->dir_name, $addon_name, $file, $params);
+					}
+					else
+					{
+						foreach($file as $name => $value)
+						{
+							$return[str_replace('.php', '', $value)] = $this->_load($this->dir_name . '/' . $directory . '/', $addon_name, $value, $params);
+						}
+					}
 				}
 			}
 		}
@@ -109,6 +119,7 @@ class Photo_frame_base_api {
 	private function _load($directory, $addon_name, $file, $params = array())
 	{		
 		$name  = str_replace('.php', '', $file);
+		
 		$class = ucfirst($name).$this->suffix;
 		
 		if(!class_exists($name))

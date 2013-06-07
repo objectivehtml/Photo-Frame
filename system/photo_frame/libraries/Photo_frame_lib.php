@@ -96,27 +96,9 @@ class Photo_frame_lib {
 	
 	public function get_themes()
 	{    
-	    require_once PATH_THIRD . 'photo_frame/libraries/BaseClass.php';
-	    require_once PATH_THIRD . 'photo_frame/libraries/PhotoFrameTheme.php';	
-	    
-		$this->EE->load->helper('directory');
+		$this->EE->load->library('photo_frame_themes');
 		
-		$directory = config_item('photo_frame_extra_dir_name');
-		
-		$basepath = $this->EE->theme_loader->theme_path() . $directory . '/';
-		$baseurl  = $this->EE->theme_loader->theme_url() . $directory . '/';
-		
-		$return = array();
-		
-		if(is_dir($basepath))
-		{
-			foreach(directory_map($basepath) as $index => $file)
-			{
-			    $return[$index] = PhotoFrameTheme::load($index, $basepath, $baseurl);
-			}	
-		}
-		
-		return $return;	
+		return $this->EE->photo_frame_themes->get();	
 	}
 	
 	public function get_theme($index)

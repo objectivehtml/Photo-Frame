@@ -775,10 +775,25 @@ class Photo_frame_ft extends EE_Fieldtype {
 		    
 		    if(is_object($theme))
 		    {
-			    foreach($theme->getCss() as $file)
+		    	$css_dir = $this->EE->theme_loader->css_directory;
+		    	$js_dir  = $this->EE->theme_loader->js_directory;
+		    	
+		    	$this->EE->theme_loader->module_name   = $theme->getModuleName();
+		    	$this->EE->theme_loader->css_directory = 'themes/'.$theme->getName().'/css';
+		    	$this->EE->theme_loader->js_directory  = 'themes/'.$theme->getName().'/javascript';
+		    	
+			    foreach($theme->css() as $file)
 			    {
 	    		     $this->EE->theme_loader->css($file);   
 			    }
+			    
+			    foreach($theme->javascript() as $file)
+			    {
+	    		     $this->EE->theme_loader->javascript($file);   
+			    }
+			    
+		    	$this->EE->theme_loader->css_directory = $css_dir;
+		    	$this->EE->theme_loader->js_directory  = $js_dir;		    	
 		    }
 		}
 				
@@ -1992,9 +2007,9 @@ class Photo_frame_ft extends EE_Fieldtype {
 		
 		$themes = array('' => 'Default');
 		
-		foreach($this->EE->photo_frame_lib->get_themes() as $theme)
+		foreach($this->EE->photo_frame_lib->get_themes() as $name => $theme)
 		{
-		    $themes[$theme->getName()] = $theme->getTitle();
+		    $themes[$name] = $theme->getTitle();
 		}
 			
 		require PATH_THIRD . 'photo_frame/libraries/InterfaceBuilder/InterfaceBuilder.php';
