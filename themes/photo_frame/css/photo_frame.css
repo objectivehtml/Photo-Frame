@@ -968,7 +968,7 @@ a.photo-frame-tool-window-button:active {
 
 .photo-frame-toolbar .photo-frame-tools { position: absolute; top: 9px; left: 15px; }
 
-.photo-frame-toolbar .photo-frame-tools a { color: white; font-size: 24px; text-shadow: 0 -1px 0 black; position: absolute; top: 6px; }
+.photo-frame-toolbar .photo-frame-tools a { color: white; font-size: 24px; text-shadow: 0 -1px 0 black; position: absolute; top: 6px; text-decoration: none; }
 .photo-frame-toolbar .photo-frame-tools a.photo-frame-active { color: rgb(47, 143, 216); }
 .photo-frame-tool-window-save { float: right; }
 
@@ -1015,7 +1015,7 @@ filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#e2e2e2', end
 
 .photo-frame-layers .photo-frame-layer-title { font-size: 18px; padding-top: 12px; padding-left: 55px; }
 .photo-frame-layers .photo-frame-layer-actions { position: absolute; right: 0; top: 12px; }
-.photo-frame-layers .photo-frame-layer-actions a { font-size: 15px; color: rgb(160, 160, 160); border-right: 1px solid rgb(71, 71, 69); padding: 5px 10px; }
+.photo-frame-layers .photo-frame-layer-actions a { font-size: 15px; color: rgb(160, 160, 160); border-right: 1px solid rgb(71, 71, 69); padding: 5px 10px; text-decoration: none; }
 .photo-frame-layers .photo-frame-layer-actions a:last-child { border-right: none; box-shadow: 1px 0 0 black inset; }
 .photo-frame-layers .photo-frame-layer-actions a:hover { color: white; text-decoration: none; }
 .photo-frame-layers .photo-frame-tool-window-content { max-height: 210px; overflow-y: scroll; }
