@@ -49,7 +49,7 @@ class Photo_frame_mcp {
 		
 		foreach($buttons as $button)
 		{
-			$name = strtolower($button->name);			
+			$name = strtolower($button->getName());			
 			$data = array(
 				'url'          => $url,
 				'cachePath'    => $directory['server_path'] . config_item('photo_frame_cache_directory') . '/',
