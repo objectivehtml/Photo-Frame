@@ -2,6 +2,6 @@
 
 class CropButton extends PhotoFrameButton {
 	
-	public $name = 'Crop';
+	protected $name = 'Crop';
 
 }

@@ -2,7 +2,7 @@
 
 class RotateButton extends PhotoFrameButton {
 	
-	public $name = 'Rotate';
+	protected $name = 'Rotate';
 	
 	public function render($manipulation = array())
 	{

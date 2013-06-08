@@ -2,7 +2,7 @@
 
 class ResizeButton extends PhotoFrameButton {
 	
-	public $name = 'Resize';
+	protected $name = 'Resize';
 	
 	public function render($manipulation = array())
 	{

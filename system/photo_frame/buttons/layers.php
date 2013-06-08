@@ -2,6 +2,6 @@
 
 class LayersButton extends PhotoFrameButton {
 	
-	public $name = 'Layers';
+	protected $name = 'Layers';
 
 }

@@ -62,6 +62,11 @@ if(!class_exists('PhotoFrameButton'))
 			return $this->moduleName ? $this->moduleName : 'photo_frame';
 		}
 		
+		public function getJsDirectory()
+		{
+			return $this->jsDirectory;
+		}
+		
 		public function startCrop($data = array())
 		{ 
 			return array(); 
