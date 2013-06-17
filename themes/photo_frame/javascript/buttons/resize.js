@@ -158,8 +158,9 @@
 				if(t.getManipulation()) {
 					t.initCrop();
 				}
+				t.reset();
 			});
-			
+						
 			this.window.ui.content.find('input[type="text"]').keyup(function(e) {
 				if(t.getMaintainAspect() && t.cropPhoto()) {
 					var aspect, target, val = $(this).val(), id = $(e.target).attr('id');
