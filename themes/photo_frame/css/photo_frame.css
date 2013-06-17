@@ -654,7 +654,6 @@ p.photo-frame-helper,
 	font-size: 24px;
 	color: white;
 	text-shadow: 0 1px 0 black, 0 0 10px black;
-	z-index: 9999;
 }
 .photo-frame-saving {
 	position: absolute;
@@ -1078,7 +1077,7 @@ filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#e2e2e2', end
 .photo-frame-geolocation .photo-frame-tool-window-button { float: right; margin-right: 6px; }
 .photo-frame-geolocation-form.photo-frame-grid label { width: 47px; }
 .photo-frame-geolocation #photo-frame-map { width: 240px; height: 202px; }
-
+.photo-frame-geolocation #photo-frame-map * { text-shadow: none; }
 .photo-frame-tool-window-content * { font-size: 13px; }
 .photo-frame-tool-window-content label { color: white; text-shadow: 0 1px black; }
 .photo-frame-tool-window-content input,

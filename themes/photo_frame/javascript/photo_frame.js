@@ -39,7 +39,7 @@ var PhotoFrame = {};
 		 * Version
 		 */
 		 
-		version: '0.9.510',
+		version: '0.9.515',
 		
 		/**
 		 * Sets the default options
@@ -582,9 +582,9 @@ var PhotoFrame = {};
 		    		id: photo.id,
 		    		manipulations: photo.manipulations,
 		    		index: x,
-		    		settings: {
+		    		settings: $.extend({}, options.settings, {
 			    		setSelect: [photo.x, photo.y, photo.x2, photo.y2]	
-		    		},
+		    		}),
 			    	$wrapper: t.$wrapper.find('#'+t.classes.photo+'-'+t.fieldId+'-'+x)
 		    	});
 	    	}
@@ -1246,6 +1246,7 @@ var PhotoFrame = {};
 			this.factory = factory;
 			this._buildButtonBar();
 			this.addButtons(buttons);
+			this.savePosition();
 			
 			if(this.buttons.length === 0) {
 				this.factory.ui.tools.hide();
@@ -1319,9 +1320,9 @@ var PhotoFrame = {};
 					this.setVisibility(true);
 				}			
 				this.showWindows();
-				
-				this.savePosition();
 			}
+			
+			this.savePosition();
 		},
 		
 		hide: function(save, callback) {
@@ -1466,6 +1467,15 @@ var PhotoFrame = {};
 			title: false
 		},
 		
+		/**
+		 * Constructor method for the button
+		 *
+		 * @param	object  The PhotoFrame.ButtonBar object
+		 * @param	object  A JSON object of options to override params
+		 * @param	bool    If TRUE or undefined, the window will be built
+		 * @return	object
+		 */
+		
 		constructor: function(buttonBar, options, buildWindow) {
 			var t = this;					
 			
@@ -1489,38 +1499,88 @@ var PhotoFrame = {};
 			}
 		},	
 		
+		/**
+		 * Show the manipulation
+		 *
+		 * @return	void
+		 */
+		
 		showManipulation: function() {
 			this.cropPhoto().showManipulation(this.name);
 		},
+		
+		/**
+		 * Hide the manipulation
+		 *
+		 * @return	void
+		 */
 		
 		hideManipulation: function() {
 			this.cropPhoto().hideManipulation(this.name);
 		},
 		
+		/**
+		 * Add the manipulation
+		 *
+		 * @param	bool	If true, the manipulation will be visible
+		 * @param	object  A JSON object used to build the effect
+		 * @return	void
+		 */
+		
 		addManipulation: function(visible, data) {
 			this.cropPhoto().addManipulation(this.name, visible, data);
 		},
+		
+		/**
+		 * Get the photo being cropped
+		 *
+		 * @return	object  PhotoFrame.Photo
+		 */
 		
 		cropPhoto: function() {
 			return this.buttonBar.factory.cropPhoto;
 		},
 		
+		/**
+		 * Render the manipulation
+		 *
+		 * @param	callback  A callback function triggered after the effects triggers
+		 * @return	void
+		 */
+		
 		render: function(callback) {
 			this.cropPhoto().render(callback);	
 		},
+		
+		/**
+		 * Remove the manipulation
+		 *
+		 * @return	void
+		 */
 		
 		removeManipulation: function() {
 			delete this.buttonBar.factory.cropPhoto.manipulations[this.name.toLowerCase()];
 			this.buttonBar.factory.trigger('removeManipulation', this);
 		},
 		
-		apply: function() {
-			t.hideWindow();
-		},
+		/**
+		 * Bind an event
+		 *
+		 * @param	bool	  The name of the event used to bind the callback
+		 * @param	callback  The function called with the bound event
+		 * @return	void
+		 */
 		
 		bind: function(event, callback) {
 			this.buttonBar.factory.bind(event, callback);
 		},
+		
+		/**
+		 * Build the PhotoFrame.Window object
+		 *
+		 * @param	object  A JSON object used to build the effect
+		 * @return	void
+		 */
 		
 		buildWindow: function(options) {
 			if(typeof options == "object") {
@@ -1528,6 +1588,13 @@ var PhotoFrame = {};
 			}
 			this.window = new PhotoFrame.Window(this.buttonBar.factory, this.$obj, this.windowSettings);
 		},
+		
+		/**
+		 * This method is triggered when the button is clicked
+		 *
+		 * @param	object  The event object
+		 * @return	void
+		 */
 		
 		click: function(e) {
 			if(this.$obj.hasClass(this.buttonBar.classes.active)) {
@@ -1542,16 +1609,36 @@ var PhotoFrame = {};
 			}			
 		},
 		
+		/**
+		 * Hide the window
+		 *
+		 * @param	callback  This callback is triggered when the window is hidden
+		 * @return	void
+		 */
+		
 		hideWindow: function(callback) {
 			this.$obj.removeClass(this.buttonBar.classes.active);
 			this.window.close();
 		},
+		
+		/**
+		 * Show the window
+		 *
+		 * @param	callback  This callback is triggered when the window is hidden
+		 * @return	void
+		 */
 		
 		showWindow: function(callback) {		
 			this.$obj.addClass(this.buttonBar.classes.active);		
 			this.window.open();			
 			this.window.position();
 		},
+		
+		/**
+		 * Get the manipulation
+		 *
+		 * @return	mixed  Returns the manipulation object or FALSE is doesn't exist
+		 */
 		
 		getManipulation: function() {
 			if(this.cropPhoto()) {
@@ -1560,26 +1647,56 @@ var PhotoFrame = {};
 			return false;
 		},
 		
+		/**
+		 * Set the manipulation visibility to true or false
+		 *
+		 * @param	bool  True if visible, false for hidden
+		 * @return	void
+		 */
+		
 		setManipulation: function(visibility) {
 			var m = this.getManipulation();
 			m.visible = visibility;
 		},
 		
+		/**
+		 * This method is triggered when the layer is removed
+		 *
+		 * @return	void
+		 */
+		
 		removeLayer: function() {
 			this.reset();		
 		},
+		
+		/**
+		 * Start the rendering
+		 *
+		 * @param	callback  This callback is triggered when the photo starts rendering
+		 * @return	void
+		 */
 		
 		startRendering: function(callback) {
 			this.cropPhoto().startRendering(callback);	
 		},
 		
+		/**
+		 * Stop the rendering
+		 *
+		 * @param	callback  This callback is triggered when the photo stops rendering
+		 * @return	void
+		 */
+		
 		stopRendering: function(callback) {
 			this.cropPhoto().stopRendering(callback);	
 		},
 		
-		progressRendering: function(callback) {
-			this.cropPhoto().progressRendering(callback);	
-		},
+		/**
+		 * This method is triggered when the photo starts being cropped
+		 *
+		 * @param	object  The PhotoFrame.Photo object
+		 * @return	void
+		 */
 		
 		startCrop: function(photo) {
 			var m = this.getManipulation();	
@@ -1593,6 +1710,14 @@ var PhotoFrame = {};
 				}
 			}
 		},
+		
+		/**
+		 * This method toggles the layer's visibility and renders it
+		 *
+		 * @param	bool  The layer's visibility
+		 * @param	bool  True to render the photo, false to skip rendering
+		 * @return	void
+		 */
 		
 		toggleLayer: function(visibility, render) {			
 			if(!visibility) {
@@ -1609,11 +1734,38 @@ var PhotoFrame = {};
 			}
 		},
 		
+		/**
+		 * Apply the effect to the photo
+		 *
+		 * @return	void
+		 */
+		
+		apply: function() {},
+		
+		/**
+		 * Enable the button controls
+		 *
+		 * @return	void
+		 */
+		
 		enable: function() {},
+		
+		/**
+		 * Disable the button controls
+		 *
+		 * @return	void
+		 */
 		
 		disable: function() {},
 		
+		/**
+		 * Reset the button controls
+		 *
+		 * @return	void
+		 */
+		
 		reset: function() {}
+		
 	});
 		
 	PhotoFrame.Window = PhotoFrame.Class.extend({
