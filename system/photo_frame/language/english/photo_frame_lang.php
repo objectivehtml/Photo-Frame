@@ -5,6 +5,7 @@ $lang	= array(
 	'photo_frame_module_name'            => 'Photo Frame',
 	'photo_frame_settings'               => 'Photo Frame Settings',
 	'photo_frame_module_description'     => '',
+	'photo_frame_required'    			 => 'The {field_name} field is required.',
 		
 	'photo_frame_button_text'            => 'Upload',
 	'photo_frame_browse_button_text'     => 'Browse',
