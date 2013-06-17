@@ -60,6 +60,7 @@ class Photo_frame_ft extends EE_Fieldtype {
 		'limit' 		  => FALSE,
 		'offset' 		  => 0,
 		'directory'  	  => FALSE,
+		'pre_loop'  	  => TRUE,
 		'size' 			  => NULL
 	);
 	
@@ -916,7 +917,7 @@ class Photo_frame_ft extends EE_Fieldtype {
 					'is_draft' => $this->is_draft ? 1 : 0
 				)
 			));
-		
+			
 			$photos = array();
 			
 			foreach($data->result() as $photo)
@@ -937,7 +938,7 @@ class Photo_frame_ft extends EE_Fieldtype {
 		}
 	}
 	
-	private function _get_photos($field_id)
+	private function _get_photos($field_id, $pre_loop = TRUE)
 	{
 		if($this->low_variables)
 		{
@@ -948,12 +949,25 @@ class Photo_frame_ft extends EE_Fieldtype {
 		
 		$photos = isset($this->data[$entry_id]) ? $this->data[$entry_id] : array();
 		
+		if($pre_loop !== TRUE)
+		{
+			$photos = array($this->EE->photo_frame_model->get_photos(array(
+				'where' => array(
+					'entry_id' => $entry_id,
+					'field_id' => $field_id,
+					'is_draft' => 0
+				)
+			))->result_array());
+		}
+		
 		if(isset($this->EE->session->cache['ep_better_workflow']) && $this->EE->session->cache['ep_better_workflow']['is_preview'])
 		{
 			$photos = array($this->EE->photo_frame_model->get_photos(array(
-				'entry_id' => $entry_id,
-				'field_id' => $field_id,
-				'is_draft' => 1
+				'where' => array(
+					'entry_id' => $entry_id,
+					'field_id' => $field_id,
+					'is_draft' => 1
+				)
 			))->result_array());
 		}
 		
@@ -1001,6 +1015,7 @@ class Photo_frame_ft extends EE_Fieldtype {
 		$default = array(
 			'file'   	  => FALSE,
 			'width'		  => FALSE,
+			'pre_loop'	  => TRUE,
 			'height'      => '14px',
 			'limit'       => FALSE,
 			'offset'      => 0,
@@ -1009,7 +1024,7 @@ class Photo_frame_ft extends EE_Fieldtype {
 		);
 		
 		$params = array_merge($default, $params);		
-		$photos = $this->_get_photos($this->field_id);
+		$photos = $this->_get_photos($this->field_id, $params['pre_loop']);
 		
 		if(!$params['limit'])
 		{
@@ -1071,6 +1086,7 @@ class Photo_frame_ft extends EE_Fieldtype {
 			'file'   	  => FALSE,
 			'width'		  => FALSE,
 			'height'      => '14px',
+			'pre_loop'    => TRUE,
 			'limit'       => FALSE,
 			'type'        => 'rgb',
 			'offset'      => 0,
@@ -1079,7 +1095,7 @@ class Photo_frame_ft extends EE_Fieldtype {
 		);
 		
 		$params = array_merge($default, $params);		
-		$photos = $this->_get_photos($this->field_id);
+		$photos = $this->_get_photos($this->field_id, $params['pre_loop']);
 		
 		if(!$params['limit'])
 		{
@@ -1135,7 +1151,7 @@ class Photo_frame_ft extends EE_Fieldtype {
 	
 	public function replace_total_photos($data, $params = array(), $tagdata)
 	{		
-		return count($this->_get_photos($this->field_id));
+		return count($this->_get_photos($this->field_id), isset($params['pre_loop']) ? $params['pre_loop'] : TRUE);
 	}
 	
 	public function replace_first_photo($data, $params, $tagdata)
@@ -1229,7 +1245,7 @@ class Photo_frame_ft extends EE_Fieldtype {
 		$params = array_merge($this->default_params, $params);
 		$params['offset'] = (int) $params['offset'];
 		
-		$photos = $this->_get_photos($this->field_id);
+		$photos = $this->_get_photos($this->field_id, $params['pre_loop']);
 		
 		$return = array();
 		
@@ -1916,6 +1932,15 @@ class Photo_frame_ft extends EE_Fieldtype {
 				{
 					$total_photos++;
 				}
+			}
+		}
+		
+		// Required for Safecracker validation
+		if(isset($this->settings['field_required']) && $this->settings['field_required'] == 'y')
+		{
+			if(!$total_photos)
+			{
+				return $this->parse_variables(lang('photo_frame_required'), array('field_name' => $this->settings['field_label']));
 			}
 		}
 		
