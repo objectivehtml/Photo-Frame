@@ -110,7 +110,7 @@
 			});
 			
 			this.bind('stopRendering', function() {
-				t.buttonBar.factory.trigger('rotateInitCrop', t, t.getDegree());				
+				t.buttonBar.factory.trigger('rotateReInitCrop', t, t.getDegree());				
 			});
 		}
 	});

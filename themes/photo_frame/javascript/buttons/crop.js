@@ -298,7 +298,7 @@
 				t.initCrop(true);
 			});
 			
-			this.bind('resizeReInitCrop', function(obj) {
+			this.bind('rotateReInitCrop', function(obj) {
 				t.initCrop();
 			});
 			
@@ -319,9 +319,6 @@
 				//t.toggleLayerCallback(manipulation);
 			});
 			
-			this.bind('rotateToggleLayer', function(manipulation) {
-				//t.toggleLayerCallback(manipulation);
-			});
 			*/
 		},
 		
@@ -343,9 +340,11 @@
 			var select   	 = this.cropPhoto().jcrop.tellSelect();
 			var img      	 = this.cropPhoto().ui.cropPhoto.find('img');
 			
+			this.cropPhoto().ui.cropPhoto.remove();
 			this.cropPhoto().destroyJcrop();				
 			this.cropPhoto().ui.cropPhoto = $('<div class="'+this.buttonBar.factory.classes.cropPhoto+'"></div>');
-			this.buttonBar.factory.ui.crop.append(this.buttonBar.factory.cropPhoto.ui.cropPhoto);				
+			
+			this.buttonBar.factory.ui.crop.append(this.cropPhoto().ui.cropPhoto);				
 			this.cropPhoto().ui.cropPhoto.append(img);
 			
 			this.cropPhoto().initJcrop();
