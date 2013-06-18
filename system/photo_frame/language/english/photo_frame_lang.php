@@ -4,7 +4,7 @@ $lang	= array(
 	
 	'photo_frame_module_name'            => 'Photo Frame',
 	'photo_frame_settings'               => 'Photo Frame Settings',
-	'photo_frame_module_description'     => '',
+	'photo_frame_module_description'     => 'Premium photo management',
 	'photo_frame_required'    			 => 'The {field_name} field is required.',
 		
 	'photo_frame_button_text'            => 'Upload',
@@ -123,7 +123,7 @@ $lang	= array(
 	'photo_frame_upload_dir_not_exists'  => 'The following directory does not exist: {directory}',
 	'photo_frame_upload_file_not_exists' => 'The following file does not exist: {file}',
 	'photo_frame_max_size_exceeded'      => 'The photo you are trying to upload exceeds the maximum file size of {max_size}.',
-	'photo_frame_no_upload'              => 'The photo cannot be uploaded by the server. Check your server settings or contact your service adminstrator.',
+	'photo_frame_no_upload'              => 'The photo cannot be uploaded by the server. Check your server settings or contact your service administrator.',
 	
 	//--------------------------------------------
 	'', ''
