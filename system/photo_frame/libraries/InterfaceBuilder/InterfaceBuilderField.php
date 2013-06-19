@@ -147,7 +147,7 @@ if(!class_exists('InterfaceBuilderField'))
 		 * @return	string	
 		*/
 		
-		abstract function displayField($data);
+		abstract function displayField($data = FALSE);
 		
 		
 		/**
