@@ -173,6 +173,12 @@ var PhotoFrame = {};
 		cancel: false,
 		
 		/**
+		 * An object of global callback methods
+		 */	
+		 
+		callbacks: {},
+		
+		/**
 		 * The default CSS classes
 		 */		
 		
@@ -331,6 +337,12 @@ var PhotoFrame = {};
 			t.windows = [];
 			t.photos  = [];
 			t.index   = PhotoFrame.instances.length;
+			
+			// Global default callbacks
+			
+			t.callbacks = {
+				'buildUploadUrl': function() { return false; } // return false by default	
+			};
 			
 			delete options.photos;
 			
@@ -518,7 +530,7 @@ var PhotoFrame = {};
 					},
 					singleFileUploads: false,
 					dropZone: t.ui.dropZone,
-					url: PhotoFrame.Actions.upload_photo,
+					url: t.getUploadUrl(),
 					add: function (e, data) {
 						if(data.files.length > 0) {
 							t.ui.dropZone.hide();
@@ -753,6 +765,13 @@ var PhotoFrame = {};
 			t.bind('cancel', function() {
 				t.resetOverflow();
 			});
+		},
+		
+		getUploadUrl: function() {
+			var _default = PhotoFrame.Actions.upload_photo
+			var url = this.callbacks.buildUploadUrl();
+			
+			return url ? url : _default;	
 		},
 		
 		showError: function(error) {

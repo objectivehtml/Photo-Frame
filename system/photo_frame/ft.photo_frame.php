@@ -730,7 +730,12 @@ class Photo_frame_ft extends EE_Fieldtype {
 			sortable: '.$settings['photo_frame_sortable'].',
 			safecracker: '.($this->safecracker ? 'true' : 'false').',
 			forceCrop: '.$settings['photo_frame_force_crop'].',
-			disableCrop: '.$settings['photo_frame_disable_crop'].'
+			disableCrop: '.$settings['photo_frame_disable_crop'].',
+			callbacks: {
+				buildUploadUrl: function() {
+					return PhotoFrame.Actions.upload_photo + \'&dir_id='.$settings['photo_frame_upload_group'].(isset($this->var_id) ? '&var_id=' . $this->var_id : '&field_id='.$this->field_id).'\';
+				}
+			}
 		}';
 
 		if($this->matrix)
