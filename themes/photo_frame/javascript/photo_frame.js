@@ -341,9 +341,14 @@ var PhotoFrame = {};
 			// Global default callbacks
 			
 			t.callbacks = {
-				'buildUploadUrl': function() { return false; } // return false by default	
+				'browse': function() {},
+				'buildUploadUrl': function() { return false; }, // return false by default
+				'init': function() {}	
 			};
 			
+			t.callbacks = $.extend(true, {}, t.callbacks, (typeof options.callbacks == "object" ? options.callbacks : {}));
+			
+			delete options.callbacks;
 			delete options.photos;
 			
 			PhotoFrame.instances.push(t)
@@ -550,6 +555,8 @@ var PhotoFrame = {};
 					done: function (e, data) {
 						var errors = [];
 						
+						console.log(data.result);
+						
 						if(typeof data.result[0] == "undefined" || typeof data.result == "string") {
 							errors = [PhotoFrame.Lang.unexpected_error];
 						}	
@@ -600,41 +607,7 @@ var PhotoFrame = {};
 			    	$wrapper: t.$wrapper.find('#'+t.classes.photo+'-'+t.fieldId+'-'+x)
 		    	});
 	    	}
-	    	
-	    	if(t.isAssetsInstalled()) {
-				t.assetSheet = new Assets.Sheet({
-				    multiSelect: true,
-				    filedirs: [t.dirId],
-				    kinds: ['image'],
-				    onSelect: function(files) {
-				    	t.edit = false;
-				    	
-				    	if(files.length == 1) {
-				    		t.showProgress(0, function() {
-					    		t._fileBrowserResponseHandler(files[0].url, function(response) {
-				    				t.showProgress(100, function() {
-						    			t._uploadResponseHandler(response);
-					    			});	
-					    		});
-					    	});
-				    	}
-				    	else {
-			    			t.showProgress(0, function() {
-					    		var count = 1;
-					    		
-						    	$.each(files, function(i, file) {
-							    	t._fileBrowserResponseHandler(file.url, function(response) {
-							    		var progress = parseInt(count / files.length * 100);
-							    		t._assetResponseHandler(response, progress);
-							    		count++;
-							    	});
-						    	});
-			    			});
-				    	}
-				    }
-				});
-			}
-			
+	    				
 			$(window).resize(function() {
 				if(t.ui.crop.css('display') != 'none') {
 					t.ui.crop.center();
@@ -661,17 +634,9 @@ var PhotoFrame = {};
 	    	});
 	    	
 			t.ui.browse.click(function() {
-				if(t.isAssetsInstalled()) {
-					t.assetSheet.show();
-				}
+				t.callback(t.callbacks.browse);
 			});
-			
-			t.ui.browse.click(function() {
-				if(t.isAssetsInstalled()) {
-					t.assetSheet.show();
-				}
-			});
-			
+						
 			t.ui.toolBarToggle.click(function(e) {
 				t.toggleTools();
 				e.preventDefault();
@@ -681,23 +646,6 @@ var PhotoFrame = {};
 		    	t.toggleMeta();
 				e.preventDefault();
 			});
-			
-			if(!t.isAssetsInstalled()) {
-				if(!t.safecracker) {
-					$.ee_filebrowser.add_trigger(t.ui.browse, t.directory.id, {
-						content_type: 'images',
-						directory:    t.directory.id,
-					}, function(file, field){
-						t.showProgress(0, function() {
-				    		t._fileBrowserResponseHandler(file.rel_path, function(response) {
-				    			t.showProgress(100, function() {
-					    			t._uploadResponseHandler(response);
-				    			});				    			
-				    		});
-				    	});
-					});
-				}
-			}
 			
 			t.$wrapper.bind('dragover', function(e) {
 				var obj 	= t.$wrapper.find('.'+t.classes.dropText);
@@ -765,11 +713,13 @@ var PhotoFrame = {};
 			t.bind('cancel', function() {
 				t.resetOverflow();
 			});
+			
+			t.callback(t.callbacks.init);
 		},
 		
 		getUploadUrl: function() {
 			var _default = PhotoFrame.Actions.upload_photo
-			var url = this.callbacks.buildUploadUrl();
+			var url = this.callback(this.callbacks.buildUploadUrl);
 			
 			return url ? url : _default;	
 		},
@@ -1030,13 +980,6 @@ var PhotoFrame = {};
 					}
 				}
 			);
-		},
-		
-		isAssetsInstalled: function() {
-			if(typeof Assets == "object" && this.useAssets) {
-				return true;
-			}
-			return false;
 		},
 		
 		hideMeta: function() {	

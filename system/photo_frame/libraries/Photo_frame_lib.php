@@ -37,13 +37,7 @@ class Photo_frame_lib {
 	
 	public function assets_installed()
 	{		
-		// Make sure that Assets is installed
-		if (array_key_exists('assets', $this->EE->addons->get_installed()))
-		{
-			return TRUE;
-		}
-		
-		return FALSE;
+		return $this->EE->photo_frame_model->assets_installed();
 	}
 	
 	public function color_bars($colors, $width = FALSE, $height = '14px')

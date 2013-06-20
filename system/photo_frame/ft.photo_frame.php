@@ -376,7 +376,8 @@ class Photo_frame_ft extends EE_Fieldtype {
 			'photo_frame_show_editor_cp'     => 'true',
 			'photo_frame_show_editor_sc'     => 'true',
 			// 'photo_frame_show_editor_lv'     => 'true',
-			'photo_frame_show_editor_mx'     => 'true'
+			'photo_frame_show_editor_mx'     => 'true',
+			'photo_frame_folder_id' 		 => FALSE
 		);
 	
 		$settings = array_merge($default_settings, $this->settings);
@@ -728,12 +729,79 @@ class Photo_frame_ft extends EE_Fieldtype {
 			resize: '.json_encode($resize).',
 			resizeMax: '.json_encode($resize_max).',
 			sortable: '.$settings['photo_frame_sortable'].',
-			safecracker: '.($this->safecracker ? 'true' : 'false').',
 			forceCrop: '.$settings['photo_frame_force_crop'].',
 			disableCrop: '.$settings['photo_frame_disable_crop'].',
 			callbacks: {
+				init: function() {
+					var t = this;
+					
+					this.safecracker = '.($this->safecracker ? 'true' : 'false').';
+					
+					this.isAssetsInstalled = function() {
+						if(typeof Assets == "object" && this.useAssets) {
+							return true;
+						}
+						return false;
+					};
+					
+					if(t.isAssetsInstalled()) {
+						t.assetSheet = new Assets.Sheet({
+						    multiSelect: true,
+						    filedirs: [t.dirId],
+						    kinds: [\'image\'],
+						    onSelect: function(files) {
+						    	t.edit = false;
+						    	
+						    	if(files.length == 1) {
+						    		t.showProgress(0, function() {
+							    		t._fileBrowserResponseHandler(files[0].url, function(response) {
+						    				t.showProgress(100, function() {
+								    			t._uploadResponseHandler(response);
+							    			});	
+							    		});
+							    	});
+						    	}
+						    	else {
+					    			t.showProgress(0, function() {
+							    		var count = 1;
+							    		
+								    	$.each(files, function(i, file) {
+									    	t._fileBrowserResponseHandler(file.url, function(response) {
+									    		var progress = parseInt(count / files.length * 100);
+									    		t._assetResponseHandler(response, progress);
+									    		count++;
+									    	});
+								    	});
+					    			});
+						    	}
+						    }
+						});
+					}
+					else {
+						if(!t.safecracker) {
+							$.ee_filebrowser.add_trigger(t.ui.browse, t.directory.id, {
+								content_type: \'images\',
+								directory:    t.directory.id,
+							}, function(file, field){
+								t.showProgress(0, function() {
+						    		t._fileBrowserResponseHandler(file.rel_path, function(response) {
+						    			t.showProgress(100, function() {
+							    			t._uploadResponseHandler(response);
+						    			});				    			
+						    		});
+						    	});
+							});
+						}
+					}
+					
+				},
+				browse: function() {
+					if(this.isAssetsInstalled()) {
+						this.assetSheet.show();
+					}
+				},
 				buildUploadUrl: function() {
-					return PhotoFrame.Actions.upload_photo + \'&dir_id='.$settings['photo_frame_upload_group'].(isset($this->var_id) ? '&var_id=' . $this->var_id : '&field_id='.$this->field_id).'\';
+					return PhotoFrame.Actions.upload_photo + \'&dir_id='.$settings['photo_frame_upload_group'].(isset($this->var_id) ? '&var_id=' . $this->var_id : '&field_id='.$this->field_id).($settings['photo_frame_folder_id'] ? '&folder_id='.$settings['photo_frame_folder_id'] : '').'\';
 				}
 			}
 		}';
@@ -2075,6 +2143,14 @@ class Photo_frame_ft extends EE_Fieldtype {
 				'type'        => 'select',
 				'settings' => array(
 					'options' => $this->EE->photo_frame_model->upload_options()
+				)
+			),
+			'photo_frame_folder_id' => array(
+				'label'       => 'Assets Folder',
+				'description' => 'Select the Asset\'s folder you in which you want to store your photos.',
+				'type'        => 'select',
+				'settings' => array(
+					'options' => $this->EE->photo_frame_model->asset_folders()
 				)
 			),
 			'photo_frame_delete_files' => array(

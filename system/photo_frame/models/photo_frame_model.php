@@ -9,6 +9,37 @@ class Photo_frame_model extends CI_Model {
 		$this->load->driver('channel_data');
 	}
 	
+	public function asset_folders()
+	{
+		$return = array();
+			
+		if($this->assets_installed())
+		{
+			$folders = $this->channel_data->get('assets_folders');
+			
+			if($folders->num_rows() > 0)
+			{
+				foreach($folders->result() as $row)
+				{
+					$return[$row->folder_id] = $row->folder_name;
+				}
+			}
+		}
+		
+		return $return;
+	}
+	
+	public function assets_installed()
+	{		
+		// Make sure that Assets is installed
+		if (array_key_exists('assets', $this->addons->get_installed()))
+		{
+			return TRUE;
+		}
+		
+		return FALSE;
+	}
+	
 	public function get_variable($var_id)
 	{
 		return $this->channel_data->get('low_variables', array(
