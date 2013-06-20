@@ -335,6 +335,11 @@
 		},
 		
 		initCrop: function(init) {	
+						
+			if(!this.cropPhoto().jcrop) {
+				return;
+			}
+			
 			var manipulation = this.getManipulation();
 			var released 	 = this.cropPhoto().released;
 			var select   	 = this.cropPhoto().jcrop.tellSelect();
