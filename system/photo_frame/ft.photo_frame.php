@@ -747,14 +747,14 @@ class Photo_frame_ft extends EE_Fieldtype {
 					if(t.isAssetsInstalled()) {
 						t.assetSheet = new Assets.Sheet({
 						    multiSelect: true,
-						    filedirs: [t.dirId],
+						    filedirs: ['.$this->settings['photo_frame_upload_group'].'],
 						    kinds: [\'image\'],
 						    onSelect: function(files) {
 						    	t.edit = false;
 						    	
 						    	if(files.length == 1) {
 						    		t.showProgress(0, function() {
-							    		t._fileBrowserResponseHandler(files[0].url, function(response) {
+							    		t._fileBrowserResponseHandler(files[0].url, files[0].id, function(response) {
 						    				t.showProgress(100, function() {
 								    			t._uploadResponseHandler(response);
 							    			});	
@@ -794,6 +794,15 @@ class Photo_frame_ft extends EE_Fieldtype {
 						}
 					}
 					
+				},
+				responseHandlerSettings: function() {
+					var data = {};
+					
+					if('.$this->settings['photo_frame_upload_group'].') {
+						data.folderId = '.$this->settings['photo_frame_folder_id'].';
+					}
+					
+					return data;
 				},
 				browse: function() {
 					if(this.isAssetsInstalled()) {

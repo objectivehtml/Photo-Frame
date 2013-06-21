@@ -116,6 +116,7 @@ class Photo_frame_lib {
 		
 		$errors        = array();	
 		$field_id      = $this->EE->input->get_post('fieldId');
+		$folder_id 	   = $this->EE->input->get_post('folderId');
 		$var_id        = $this->EE->input->get_post('varId');
 		$col_id        = $this->EE->input->get_post('colId');
 		$col_id		   = $col_id != 'false' ? preg_replace('/^col_id_/', '', $col_id) : FALSE;
@@ -131,6 +132,39 @@ class Photo_frame_lib {
 		$file_url      = $directory['url'] . $framed_dir_name . '/' . $file_name;
 		$file_path     = $directory['server_path'] . $framed_dir_name . '/' . $file_name;
 		$original_path = $directory['server_path'] . $file_name;
+		$exif_data     = exif_read_data($original_path);
+			
+		/*
+		if($folder_id)
+		{
+			$id = $this->EE->input->get_post('id');
+			$original_path = $this->EE->input->get_post('file');
+			
+			$this->EE->load->add_package_path(PATH_THIRD . 'assets');
+			$this->EE->load->library('assets_lib');
+			
+			
+			$folder_row = $this->EE->assets_lib->get_folder_row_by_id($folder_id);
+			$source 	= $this->EE->assets_lib->instantiate_source_type($folder_row);
+			
+			$_SERVER['CONTENT_LENGTH'] = $source->get_file($id)->size();
+			
+			$_GET['qqfile'] = $original_path;
+			
+			$result = $this->EE->assets_lib->upload_file($folder_id);
+			
+			$folder_id;	
+						
+			// $folder_row = $this->EE->assets_lib->get_folder_row_by_id($folder_id);
+			// $source 	= $this->EE->assets_lib->instantiate_source_type($folder_row);
+			// $source->create_folder($folder_id . '/' . config_item('photo_frame_directory_name'));
+			
+			
+			
+			exit('stop');
+			
+		}
+		*/
 		
 		$response = $this->create_directory($directory);
 		$errors   = array_merge($errors, $response->errors);
@@ -175,7 +209,9 @@ class Photo_frame_lib {
 			'original_file_name' => $file_name,
 			'original_url'       => $original_url,
 			'original_path'      => $original_path,
-			'errors'             => $errors
+			'errors'             => $errors,
+			'exif_data'			 => $exif_data,
+			'exif_string'		 => json_encode($exif_data)
 		));
 	}
 	
@@ -198,6 +234,7 @@ class Photo_frame_lib {
 		
 		$errors     = array();
 		$dir_id     = $this->EE->input->get_post('dir_id');
+		$folder_id  = $this->EE->input->get_post('folder_id');
 		$index	    = $this->EE->input->get_post('index');
 		$field_id   = $this->EE->input->get_post('field_id');
 		$var_id     = $this->EE->input->get_post('var_id');
@@ -255,6 +292,7 @@ class Photo_frame_lib {
 				'success'            => count($errors) == 0 ? TRUE : FALSE,
 				'directory'          => $directory,
 				'index'				 => $index,
+				'exif_data'			 => exif_read_data($file_path),
 				'file_name'          => isset($file_name) ? $file_name : NULL,
 				'file_url'           => isset($file_url) ? $file_url : NULL,
 				'file_path'          => isset($file_path) ? $file_path : NULL,

@@ -343,7 +343,8 @@ var PhotoFrame = {};
 			t.callbacks = {
 				'browse': function() {},
 				'buildUploadUrl': function() { return false; }, // return false by default
-				'init': function() {}	
+				'init': function() {},
+				'responseHandlerSettings': function() { return {}; }	
 			};
 			
 			t.callbacks = $.extend(true, {}, t.callbacks, (typeof options.callbacks == "object" ? options.callbacks : {}));
@@ -555,8 +556,6 @@ var PhotoFrame = {};
 					done: function (e, data) {
 						var errors = [];
 						
-						console.log(data.result);
-						
 						if(typeof data.result[0] == "undefined" || typeof data.result == "string") {
 							errors = [PhotoFrame.Lang.unexpected_error];
 						}	
@@ -719,7 +718,7 @@ var PhotoFrame = {};
 		
 		getUploadUrl: function() {
 			var _default = PhotoFrame.Actions.upload_photo
-			var url = this.callback(this.callbacks.buildUploadUrl);
+			var url = this.callbacks.buildUploadUrl();
 			
 			return url ? url : _default;	
 		},
@@ -965,17 +964,27 @@ var PhotoFrame = {};
 			}	
 		},
 		
-		_fileBrowserResponseHandler: function(file, callback) {
+		_fileBrowserResponseHandler: function(file, id, callback) {
+			if(typeof id == "function") {
+				callback = id;
+				id = false;
+			}
+			
 			var t = this;
-				
-			$.get(PhotoFrame.Actions.photo_response, 
-				{
-					fieldId: t.fieldId,
-					varId: t.varId, 
-					colId: t.colId,
-					file: file
-				}, function(response) {
-					if(typeof callback == "function") {
+			
+			var options = {
+				fieldId: t.fieldId,
+				varId: t.varId, 
+				colId: t.colId,
+				file: file,
+				id: (id ? id : false)
+			};
+			
+			options = $.extend({}, options, t.callbacks.responseHandlerSettings());
+			
+			$.get(PhotoFrame.Actions.photo_response, options, function(response) {
+				console.log(response);
+					if(typeof callback == "function") {				
 						callback(response);
 					}
 				}
@@ -2655,6 +2664,7 @@ var PhotoFrame = {};
 			var obj = {
 				cache: this.cache,
 				url: this.originalUrl,
+				exifData: this.response.exif_string,
 				path: this.factory.directory.server_path,
 				manipulations: this.manipulations,
 				directory: this.factory.directory

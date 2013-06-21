@@ -76,6 +76,9 @@ $lang	= array(
 	'photo_frame_lng'				     => 'Lng',
 	'photo_frame_enter_location'		 => 'Enter an address or zip',
 	
+	'photo_frame_meta'				     => 'Meta Data',
+	'photo_frame_meta_desc'		 		 => 'Read the meta data for the photo.',
+	
 	'photo_frame_maintain_ratio'		 => 'Maintain aspect ratio?',
 	'photo_frame_sharpness_desc'		 => 'Adjust the sharpness of the photo',
 	'photo_frame_grayscale_desc'		 => 'Converts the photo to a grayscale.',

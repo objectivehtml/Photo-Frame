@@ -41,6 +41,7 @@ class Photo_frame_mcp {
 		$cache 		   = $this->EE->input->post('cache', TRUE);
 		$url 		   = $this->EE->input->post('url', TRUE);
 		$path 		   = $this->EE->input->post('path', TRUE);
+		$exif_data     = json_encode($this->EE->input->post('exifData', TRUE));
 		$buttons 	   = $this->EE->photo_frame_lib->get_buttons();
 		
 		$return      = array();
@@ -56,7 +57,8 @@ class Photo_frame_mcp {
 				'cache'        => $cache,
 				'path'		   => $path,
 				'manipulation' => isset($manipulations[$name]) ? $manipulations[$name] : array(),
-				'directory'    => $directory
+				'directory'    => $directory,
+				'exifData'	   => $exif_data
 			);
 			
 			$response = $button->startCrop($data);
@@ -76,7 +78,8 @@ class Photo_frame_mcp {
 			'success'    => $success,
 			'path'		 => $path,
 			'data'       => $return,
-			'validPath'  => $return_path
+			'validPath'  => $return_path,
+			'exifData'	 => $exif_data
 		));
 	}
 	
