@@ -1086,6 +1086,14 @@ filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#e2e2e2', end
 .photo-frame-hidden { display: none; }
 .photo-frame-block { display: block; }
 
+.photo-frame-pill-tabs li { float: left; }
+
+.photo-frame-pill-tabs a,
+.photo-frame-pill-tabs a:hover { color: white; padding: 7px 15px; text-shadow: none; text-decoration: none; }
+
+.photo-frame-pill-tabs .active-tab,
+.photo-frame-pill-tabs .active-tab:hover { background: white; border-radius: 1000px; color: black; }
+
 .photo-frame-small-margin-top { margin-top: 5px !important; }
 .photo-frame-small-margin-bottom { margin-bottom: 5px !important; }
 .photo-frame-small-margin-left { margin-left: 5px !important; }
