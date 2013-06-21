@@ -10,6 +10,7 @@
 	font-style: normal;
 }
 
+/*
 @font-face {
 	font-family: 'photo-frame-alt';
 	src:url('../font/photo-frame-alt.eot');
@@ -20,6 +21,7 @@
 	font-weight: normal;
 	font-style: normal;
 }
+*/
 
 
 .photo-frame-error { text-align: center; font-size: 14px !important; }
@@ -56,19 +58,6 @@ Instead of a list of all class selectors,
 you can use the generic selector below, but it's slower:
 [class*="icon-"] {
 */
-
-
-.photo-frame-icons .icon-crop:before,  
-.photo-frame-icons .icon-crop:before {
-	font-family: 'photo-frame-alt';
-	font-style: normal;
-	font-weight: normal;
-	speak: none;
-	display: inline-block;
-	text-decoration: inherit;
-	margin: 0;
-	padding: 0;
-}
 
 .photo-frame-photo-frame-dimmer .photo-frame-dimmer img,
 .photo-frame-wrapper .photo-frame-dimmer img {
@@ -1208,3 +1197,6 @@ filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#e2e2e2', end
 .photo-frame-icons .icon-beaker:before { content: '\e80b'; } /* '' */
 .photo-frame-icons .icon-feather:before { content: '\e80c'; } /* '' */
 .photo-frame-icons .icon-target:before { content: '\e80d'; } /* '' */
+.photo-frame-icons .icon-crop:before { content: '\e810'; } /* '' */
+.photo-frame-icons .icon-info-alt:before { content: '\e80e'; } /* '' */
+.photo-frame-icons .icon-info-circled:before { content: '\e80f'; } /* '' */
