@@ -2979,6 +2979,8 @@ var PhotoFrame = {};
     			t.settings.setSelect = [size.x, size.y, size.x2, size.y2];
     		}
     		
+    		console.log(response);
+    		
 			$.post(PhotoFrame.Actions.crop_photo, {
 				fieldId: t.factory.fieldId,
 				varId: t.factory.varId,
@@ -3014,6 +3016,7 @@ var PhotoFrame = {};
 				keywords: t.keywords,
 				compression: t.compression
 			}, function(cropResponse) {
+				console.log(cropResponse);
 				if(typeof callback == "function") {
 					callback(cropResponse);					
 				}
