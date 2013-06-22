@@ -703,6 +703,12 @@ class Photo_frame_ft extends EE_Fieldtype {
 			{
 				$saved_data[$index]->manipulations = json_decode($data->manipulations);
 			}
+			
+			foreach($this->EE->photo_frame_lib->get_buttons() as $obj)
+			{
+				$saved_data[$index] = $obj->prepSavedData($data);
+			}
+			
 		}
 		
 		$settings_js 	= '{
@@ -710,9 +716,9 @@ class Photo_frame_ft extends EE_Fieldtype {
 			fieldId: \''.$this->field_id.'\',
 			delId: '.(isset($this->var_id) ? $this->var_id : $this->field_id).',
 			dirId: '.$this->settings['photo_frame_upload_group'].',
-			colId: '.(isset($this->col_id) ? '\'col_id_'.$this->col_id.'\'' : 'false').',
-			varId: '.(isset($this->var_id) ? $this->var_id : 'false').',
-			rowId: '.(isset($this->row_id) ? '\'row_id_'.$this->row_id.'\'' : 'false').',
+			colId: '.(isset($this->col_id) && $this->col_id ? '\'col_id_'.$this->col_id.'\'' : 'false').',
+			varId: '.(isset($this->var_id) && $this->var_id ? $this->var_id : 'false').',
+			rowId: '.(isset($this->row_id) && $this->row_id ? '\'row_id_'.$this->row_id.'\'' : 'false').',
 			photos: '.json_encode($saved_data).',
 			buttons: '.json_encode($buttons).',
 			settings: '.json_encode($jcrop_settings).',
@@ -1678,6 +1684,7 @@ class Photo_frame_ft extends EE_Fieldtype {
     		    if(isset($photo['new']))
     		    {
         		    $photo = (array) json_decode($photo['new']);
+        		  
         		   	$path  = $this->EE->photo_frame_model->parse($photo['file'], 'server_path');
         		   	
         		   	if(isset($photo['cachePath']))
@@ -1730,11 +1737,14 @@ class Photo_frame_ft extends EE_Fieldtype {
     				
     				$photo['colors'] = $colors;
     				
+    				$orig_photo = $photo;
+    				
     				$unset = array(
     					'channel_id' => FALSE,
     					'cachePath'  => FALSE,
     					'cacheUrl'   => FALSE,
     					'directory'  => FALSE,
+    					'exif_data'  => FALSE,
     					'new'        => FALSE,
     					'id'
     				);
@@ -1754,7 +1764,7 @@ class Photo_frame_ft extends EE_Fieldtype {
     				
     				foreach($buttons as $button)
     				{
-	    				$photo = (array) $button->postSave((array) $photo);
+	    				$photo = (array) $button->postSave((array) $photo, $orig_photo);
     				}
     				
     				$new_photos[] = $photo;
@@ -1828,7 +1838,7 @@ class Photo_frame_ft extends EE_Fieldtype {
 	        		    
 	    				foreach($buttons as $button)
 	    				{
-		    				$photo = (object) $button->postSave((array) $photo);
+		    				$photo = (object) $button->postSave((array) $photo, (array) $photo);
 	    				}
 	    				
 	        		    $edit_photos[] = $photo;

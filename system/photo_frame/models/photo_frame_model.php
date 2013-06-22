@@ -738,6 +738,7 @@ class Photo_frame_model extends CI_Model {
 						   !empty($settings['photo_frame_max_size']) ? 
 						   (float) $settings['photo_frame_max_size'] * 1000000: FALSE;
 		
+		/*
 		if($resizeMaxWidth && $width > $resizeMaxWidth && ($gcd == 'width' || $resizeMaxHeight == 0))
 		{	
 			$image->resizeToWidth($resizeMaxWidth);
@@ -747,6 +748,7 @@ class Photo_frame_model extends CI_Model {
 		{
 			$image->resizeToHeight($resizeMaxHeight);
 		}
+		*/
 		
 		if($max_size && $image->getSize() > $max_size)
 		{	

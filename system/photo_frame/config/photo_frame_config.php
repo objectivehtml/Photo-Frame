@@ -1,6 +1,6 @@
 <?php if ( ! defined('BASEPATH')) exit('No direct script access allowed');
 
-$config['photo_frame_version'] = '1.0.0';
+$config['photo_frame_version'] = '1.0.1';
 
 if(!defined('PHOTO_FRAME_VERSION'))
 {
@@ -15,3 +15,17 @@ $config['photo_frame_random_string_len']      = 8;
 $config['photo_frame_extra_dir_name']         = 'photo_frame_extras';
 $config['photo_frame_save_colors']            = 8;
 $config['photo_frame_save_color_granularity'] = 45; 
+
+/* 
+ *	Define the ee() function introduced in EE 2.6
+ */
+
+if ( ! function_exists('ee'))
+{
+    function ee()
+    {
+        static $EE;
+        if ( ! $EE) $EE = get_instance();
+        return $EE;
+    }
+} 

@@ -983,7 +983,6 @@ var PhotoFrame = {};
 			options = $.extend({}, options, t.callbacks.responseHandlerSettings());
 			
 			$.get(PhotoFrame.Actions.photo_response, options, function(response) {
-				console.log(response);
 					if(typeof callback == "function") {				
 						callback(response);
 					}
@@ -2242,7 +2241,7 @@ var PhotoFrame = {};
 		 	
 		constructor: function(factory, response, options) {
 			var t = this;
-				
+			
 			this.ui    = {};
 			this.cache = factory.hash(12);
 			
@@ -2502,10 +2501,15 @@ var PhotoFrame = {};
 				
 				$.post(PhotoFrame.Actions.render, 
 					{
+						fieldId: this.factory.fieldId,
+						colId: this.factory.colId,
+						varId: this.factory.varId,
 						path: this.path,
-						url: this.url,
+						// url: this.url,
 						originalPath: this.originalPath,
 						originalUrl: this.originalUrl,
+						cachePath: this.cachePath,
+						cacheUrl: this.cacheUrl,
 						cache: this.cache,
 						manipulations: t.getManipulations(),
 						directory: this.factory.directory
@@ -2652,8 +2656,8 @@ var PhotoFrame = {};
 			});	
 		},
 		
-		photoUrl: function() {			
-			return this.originalUrl; //!this.useCache ? this.originalUrl : this.cacheUrl;	
+		photoUrl: function() {	
+			return this.useCache ? this.cacheUrl : this.originalUrl;	
 		},
 		
 		startCrop: function(callback) {
@@ -2662,10 +2666,15 @@ var PhotoFrame = {};
 			
 			var t   = this;
 			var obj = {
+				fieldId: this.factory.fieldId ? this.factory.fieldId : false,
+				varId: this.factory.varId ? this.factory.varId : false,
+				colId: this.factory.colId ? this.factory.colId : false,
 				cache: this.cache,
-				url: this.originalUrl,
+				//url: this.originalUrl,
+				originalUrl: this.originalUrl,
+				originalPath: this.originalPath,
 				exifData: this.response.exif_string,
-				path: this.factory.directory.server_path,
+				//path: this.factory.directory.server_path,
 				manipulations: this.manipulations,
 				directory: this.factory.directory
 			};
@@ -2687,90 +2696,95 @@ var PhotoFrame = {};
 			}
 			
 			t.factory.resetMeta();
-		
+			
 			$.post(PhotoFrame.Actions.start_crop, obj, function(response) {
+				t.useCache  = true;
+				t.cacheUrl  = response.cacheUrl;
+				t.cachePath = response.cachePath;
+				
 				if(response.success) {
 					t.factory.trigger('startCropCallback', t, obj, response.data);
 				}
 				else {
 					t.factory.trigger('startCropCallbackFailed', t, obj, response);
 				}
-			});
-			
-			t.load(t.photoUrl(), function(img) {
-				
-				t.factory.hideProgress();
-				
-				t.ui.cropPhoto = $('<div class="'+t.factory.classes.cropPhoto+'"></div>');
-				t.factory.ui.cropPhoto = t.ui.cropPhoto;
-	        	t.ui.instructions = $('<div class="" />').html(PhotoFrame.Lang.instructions);	
-	        	
-	        	if(t.factory.instructions && t.edit === false) {
-	        		t.factory.ui.instructions = $('<div class="'+t.factory.classes.instructions+'" />').html(t.factory.instructions);
-	        		t.factory.ui.dimmer.append(t.factory.ui.instructions);
-	        	}
-	        	else {
-	        		if(t.factory.ui.instructions) {
-		        		t.factory.ui.instructions.hide();
-		        	}
-	        	}
-	        	
-	            t.ui.cropPhoto.html(img);	            
-		        t.factory.ui.crop.prepend(t.ui.cropPhoto);         	
-	            t.factory.ui.crop.center();
-	            t.factory.ui.crop.show();
-	        	   	
-	            t.hideMeta();
-	            
-	            if(t.factory.buttonBar && t.factory.buttonBar.getVisibility()) {
-		            t.factory.showTools();
-	            }
-	            
-	            if(t.edit === false && t.size !== false) {
-	            	var size = t.size.split('x');
-	            	
-	            	size[0] = parseInt(size[0]);
-	            	size[1] = parseInt(size[1]);
-	            	
-	           		var x  = (t.ui.cropPhoto.width()  / 2) - (size[0] / 2);
-	           		var x2 = x + size[0];
-	           		var y  = (t.ui.cropPhoto.height() / 2) - (size[1] / 2);
-	           		var y2 = y + size[1];
-	           		
-	           		t.settings.setSelect = [x, y, x2, y2];
-	            }
-	            
-            	if(t.title) {
-	        		t.factory.ui.metaTitle.val(t.title);
-	        	}
+						
+				t.load(t.photoUrl(), function(img) {
+					
+					t.factory.hideProgress();
+					
+					t.ui.cropPhoto = $('<div class="'+t.factory.classes.cropPhoto+'"></div>');
+					t.factory.ui.cropPhoto = t.ui.cropPhoto;
+		        	t.ui.instructions = $('<div class="" />').html(PhotoFrame.Lang.instructions);	
 		        	
-	        	if(t.keywords) {
-	        		t.factory.ui.metaKeywords.val(t.keywords);
-	        	}
-	        	
-	        	if(t.description) {
-	        		t.factory.ui.metaDescription.val(t.description);
-	        	}
-	        	
-	            t.initJcrop(callback);
-	        	t.updateInfo();
-	        	
-	            $(window).resize();
-	            
-	            if(t.factory.buttonBar) {
-		            for(var x in t.factory.buttons) {
-			            t.factory.buttonBar.buttons[x].startCrop(t);
+		        	if(t.factory.instructions && t.edit === false) {
+		        		t.factory.ui.instructions = $('<div class="'+t.factory.classes.instructions+'" />').html(t.factory.instructions);
+		        		t.factory.ui.dimmer.append(t.factory.ui.instructions);
+		        	}
+		        	else {
+		        		if(t.factory.ui.instructions) {
+			        		t.factory.ui.instructions.hide();
+			        	}
+		        	}
+		        	
+		            t.ui.cropPhoto.html(img);	            
+			        t.factory.ui.crop.prepend(t.ui.cropPhoto);         	
+		            t.factory.ui.crop.center();
+		            t.factory.ui.crop.show();
+		        	   	
+		            t.hideMeta();
+		            
+		            if(t.factory.buttonBar && t.factory.buttonBar.getVisibility()) {
+			            t.factory.showTools();
 		            }
-	            }
-	            
-	            if(t.needsRendered()) {
-		            t.render(function() {
-		            	t.factory.trigger('startCropEnd', t);
-		            });
-	            }
-	            else {
-		           t.factory.trigger('startCropEnd', t);
-	            }
+		            
+		            if(t.edit === false && t.size !== false) {
+		            	var size = t.size.split('x');
+		            	
+		            	size[0] = parseInt(size[0]);
+		            	size[1] = parseInt(size[1]);
+		            	
+		           		var x  = (t.ui.cropPhoto.width()  / 2) - (size[0] / 2);
+		           		var x2 = x + size[0];
+		           		var y  = (t.ui.cropPhoto.height() / 2) - (size[1] / 2);
+		           		var y2 = y + size[1];
+		           		
+		           		t.settings.setSelect = [x, y, x2, y2];
+		            }
+		            
+	            	if(t.title) {
+		        		t.factory.ui.metaTitle.val(t.title);
+		        	}
+			        	
+		        	if(t.keywords) {
+		        		t.factory.ui.metaKeywords.val(t.keywords);
+		        	}
+		        	
+		        	if(t.description) {
+		        		t.factory.ui.metaDescription.val(t.description);
+		        	}
+		        	
+		            t.initJcrop(callback);
+		        	t.updateInfo();
+		        	
+		            $(window).resize();
+		            
+		            if(t.factory.buttonBar) {
+			            for(var x in t.factory.buttons) {
+				            t.factory.buttonBar.buttons[x].startCrop(t);
+			            }
+		            }
+		            
+		            if(t.needsRendered()) {
+			            t.render(function() {
+			            	t.factory.trigger('startCropEnd', t);
+			            });
+		            }
+		            else {
+			           t.factory.trigger('startCropEnd', t);
+		            }
+				});
+				
 			});
 			
 			t.factory.ui.save.unbind('click').bind('click', function(e) {
@@ -2966,8 +2980,13 @@ var PhotoFrame = {};
     		}
     		
 			$.post(PhotoFrame.Actions.crop_photo, {
+				fieldId: t.factory.fieldId,
+				varId: t.factory.varId,
+				colId: t.factory.colId,
 				cache: t.cache,
 				useCache: t.useCache,
+				cacheUrl: t.cacheUrl,
+				cachePath: t.cachePath,
 				id: t.factory.directory.id,
 				index: t.factory.index,
 				photo_id: t.id,
@@ -2977,6 +2996,7 @@ var PhotoFrame = {};
 				directory: t.factory.directory,
 				original: response.original_path,
 				original_file: response.original_file,
+				exifData: response.exif_string,
 				url: response.url,
 				edit: t.edit !== false ? true : false,
 				height: size.h,

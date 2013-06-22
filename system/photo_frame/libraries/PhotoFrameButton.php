@@ -47,9 +47,9 @@ if(!class_exists('PhotoFrameButton'))
 		
 		public function render($manipulation = array()) {}
 		
-		public function postSave($photo)
+		public function postSave($save_photo, $orig_photo = array())
 		{
-			return $photo;
+			return $save_photo;
 		}
 		
 		public function getClassName()
@@ -67,7 +67,12 @@ if(!class_exists('PhotoFrameButton'))
 			return $this->jsDirectory;
 		}
 		
-		public function startCrop($data = array())
+		public function prepSavedData($saved_data)
+		{ 
+			return $saved_data;
+		}
+		
+		public function startCrop($data = array(), $settings = array())
 		{ 
 			return array(); 
 		}

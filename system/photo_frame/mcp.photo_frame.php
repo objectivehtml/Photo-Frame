@@ -36,32 +36,42 @@ class Photo_frame_mcp {
 		
 		$this->EE->theme_loader->module_name = 'photo_frame';
 		
+		$field_id      = $this->EE->input->post('fieldId', TRUE) != 'false' ? $this->EE->input->post('fieldId', TRUE) : false;
+		$var_id        = $this->EE->input->post('varId', TRUE) != 'false' ? $this->EE->input->post('varId', TRUE) : false;
+		$col_id        = $this->EE->input->post('colId', TRUE) != 'false' ? $this->EE->input->post('colId', TRUE) : false;
 		$manipulations = $this->EE->input->post('manipulations', TRUE);
-		$directory	   = $this->EE->input->post('directory', TRUE);
-		$cache 		   = $this->EE->input->post('cache', TRUE);
-		$url 		   = $this->EE->input->post('url', TRUE);
-		$path 		   = $this->EE->input->post('path', TRUE);
+		$directory     = $this->EE->input->post('directory', TRUE);
+		$cache         = $this->EE->input->post('cache', TRUE);
+		$originalUrl   = $this->EE->input->post('originalUrl', TRUE);
+		$originalPath  = $this->EE->input->post('originalPath', TRUE);
+		$path          = $this->EE->input->post('path', TRUE);
 		$exif_data     = json_encode($this->EE->input->post('exifData', TRUE));
-		$buttons 	   = $this->EE->photo_frame_lib->get_buttons();
+		$settings      = $this->EE->photo_frame_model->get_settings($field_id, $col_id, $var_id);
+		$buttons       = $this->EE->photo_frame_lib->get_buttons();
+		$return        = array();
+		$success       = TRUE;
+		$return_path   = FALSE;
 		
-		$return      = array();
-		$success     = TRUE;
-		$return_path = FALSE;
-		
+		$cache_image   = $this->EE->photo_frame_lib->cache_image($cache, $originalPath, $directory['server_path'], $directory['url']);
+	
 		foreach($buttons as $button)
 		{
 			$name = strtolower($button->getName());			
 			$data = array(
-				'url'          => $url,
+				'originalUrl'  => $originalUrl,
+				'originalPath' => $originalPath,
 				'cachePath'    => $directory['server_path'] . config_item('photo_frame_cache_directory') . '/',
 				'cache'        => $cache,
+				'cacheImgPath' => $cache_image->path,
+				'cacheImgUrl'  => $cache_image->url,
+				'serverPath'   => $directory['server_path'],
 				'path'		   => $path,
 				'manipulation' => isset($manipulations[$name]) ? $manipulations[$name] : array(),
 				'directory'    => $directory,
 				'exifData'	   => $exif_data
 			);
 			
-			$response = $button->startCrop($data);
+			$response = $button->startCrop($data, $settings);
 			
 			if(!is_string($response))
 			{	
@@ -75,10 +85,13 @@ class Photo_frame_mcp {
 		}
 		
 		$this->EE->photo_frame_lib->json(array(
-			'success'    => $success,
-			'path'		 => $path,
-			'data'       => $return,
-			'validPath'  => $return_path,
+			'success'      => $success,
+			'originalPath' => $originalPath,
+			'originalUrl'  => $originalUrl,
+			'cachePath'	   => $cache_image->path,
+			'cacheUrl'	   => $cache_image->url,
+			'data'         => $return,
+			//'validPath'  => $return_path,
 			'exifData'	 => $exif_data
 		));
 	}
@@ -115,30 +128,40 @@ class Photo_frame_mcp {
 		
 		//$url           = $this->EE->input->get_post('url');
 		
+		$field_id      = $this->EE->input->post('fieldId', TRUE) != 'false' ? $this->EE->input->post('fieldId', TRUE) : false;
+		$var_id        = $this->EE->input->post('varId', TRUE) != 'false' ? $this->EE->input->post('varId', TRUE) : false;
+		$col_id        = $this->EE->input->post('colId', TRUE) != 'false' ? $this->EE->input->post('colId', TRUE) : false;
+		
 		$orig_path     = $this->EE->input->get_post('originalPath');
 		$orig_url      = $this->EE->input->get_post('originalUrl');
-		$file_path	   = $this->EE->input->get_post('path');
-		$file_url 	   = $this->EE->input->get_post('url');
-		$cache  	   = $this->EE->input->get_post('cache');
-		$directory 	   = $this->EE->input->get_post('directory');
+		$cache_path    = $this->EE->input->get_post('cachePath');
+		$cache_url     = $this->EE->input->get_post('cacheUrl');
+		$file_path     = $this->EE->input->get_post('path');
+		$file_url      = $this->EE->input->get_post('url');
+		$cache         = $this->EE->input->get_post('cache');
+		$directory     = $this->EE->input->get_post('directory');
 		$manipulations = $this->EE->input->get_post('manipulations');
 		$manipulations = $this->EE->photo_frame_lib->array_to_object($manipulations);
-		$cache_path    = $this->EE->photo_frame_lib->cache_image($cache, $orig_path, $directory['server_path'], $directory['url']);
+		//$cache_path    = $this->EE->photo_frame_lib->cache_image($cache, $orig_path, $directory['server_path'], $directory['url']);
 		
 		if(!$cache_path)
 		{
 			return $orig_path;	
 		}
 		
-		copy($orig_path, $cache_path->path);
+		$settings = $this->EE->photo_frame_model->get_settings($field_id, $col_id, $var_id);
 		
-		$image = new ImageEditor($cache_path->path);
+		copy($orig_path, $cache_path);
+		
+		$this->EE->photo_frame_lib->resize_maximum_size($cache_path, $settings);
+		
+		$image = new ImageEditor($cache_path);
 		
 		$buttons = $this->EE->photo_frame_lib->get_buttons(array(
 			'originalPath' => $orig_path,
-			'path'         => $file_path,
+			'path'         => $cache_path,
 			'originalUrl'  => $orig_url,
-			'url' 		   => $file_url,
+			'url' 		   => $cache_url,
 			'image'        => $image
 		));
 		
@@ -152,9 +175,9 @@ class Photo_frame_mcp {
 				}	
 			}
 		}
-		
+	
 		return $this->json(array(
-			'url' => $cache_path->url
+			'url' => $cache_url
 		));
 	}
 	

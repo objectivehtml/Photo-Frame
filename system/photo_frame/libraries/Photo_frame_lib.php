@@ -132,6 +132,7 @@ class Photo_frame_lib {
 		$file_url      = $directory['url'] . $framed_dir_name . '/' . $file_name;
 		$file_path     = $directory['server_path'] . $framed_dir_name . '/' . $file_name;
 		$original_path = $directory['server_path'] . $file_name;
+		
 		$exif_data     = exif_read_data($original_path);
 			
 		/*
@@ -225,6 +226,47 @@ class Photo_frame_lib {
 		return $hex; // returns the hex value including the number sign (#)
 	}
 	
+	public function resize_maximum_size($path, $settings)
+	{
+		if(is_object($path))
+		{
+			$image = $path;
+		}
+		else
+		{
+			$image  = new ImageEditor($path);
+		}
+		
+		$width  = $image->getWidth();
+		$height = $image->getHeight(); 
+		
+		$gcd    = $width > $height ? 'width' : 'height';
+		$errors = array();
+		$resize = FALSE;
+		
+		$resizeMaxWidth  = isset($settings['photo_frame_resize_max_width']) &&
+						   !empty($settings['photo_frame_resize_max_width']) ? 
+						   (int) $settings['photo_frame_resize_max_width'] : FALSE;
+						   		
+		$resizeMaxHeight = isset($settings['photo_frame_resize_max_height']) &&
+						   !empty($settings['photo_frame_resize_max_height']) ? 
+						   (int) $settings['photo_frame_resize_max_height'] : FALSE;
+		
+		$max_size        = isset($settings['photo_frame_max_size']) &&
+						   !empty($settings['photo_frame_max_size']) ? 
+						   (float) $settings['photo_frame_max_size'] * 1000000: FALSE;	
+
+		if($resizeMaxWidth && $width > $resizeMaxWidth && ($gcd == 'width' || $resizeMaxHeight == 0))
+		{	
+			$image->resizeToWidth($resizeMaxWidth);
+		}		
+			   
+		if($resizeMaxHeight && $height > $resizeMaxHeight && ($gcd == 'height' || $resizeMaxWidth == 0))
+		{
+			$image->resizeToHeight($resizeMaxHeight);
+		}
+	}
+	
 	public function upload_action()
 	{
 		$this->EE->load->library('filemanager');
@@ -256,7 +298,9 @@ class Photo_frame_lib {
 					'size'     => $files['files']['size'][$x],
 				)
 			);
-									
+			
+			$exif_data = exif_read_data($files['files']['tmp_name'][$x]);
+								
 			$errors = $this->EE->photo_frame_model->validate_image_size($_FILES['files']['tmp_name'], $settings);
 		
 			if(count($errors) == 0)
@@ -270,21 +314,22 @@ class Photo_frame_lib {
 				$errors = array_merge($errors, $dir_response->errors);
 				
 				$file_name = $file_path = $file_url = $orig_path = $orig_url = NULL;
-					
+				
 				if(count($errors) == 0)
 				{
 					$file_name = $response['file_name'];
 					$file_path = $framed_dir . $file_name;
 					$orig_path = $directory['server_path'] . $file_name;
+			
 					$file_url  = $directory['url'] . $framed_dir_name . '/' . $file_name;
 					$orig_url  = $directory['url'] . $file_name;
 					
 					if(!isset($response['title']))
 					{
 						$response['title'] = $file_name;
-					}		
-					
-					copy($response['rel_path'], $framed_dir.$response['title']);
+					}	
+						
+					copy($response['rel_path'], $framed_dir.$response['title']);	
 				}
 			}
 			
@@ -292,7 +337,7 @@ class Photo_frame_lib {
 				'success'            => count($errors) == 0 ? TRUE : FALSE,
 				'directory'          => $directory,
 				'index'				 => $index,
-				'exif_data'			 => exif_read_data($file_path),
+				'exif_data'			 => $exif_data,
 				'file_name'          => isset($file_name) ? $file_name : NULL,
 				'file_url'           => isset($file_url) ? $file_url : NULL,
 				'file_path'          => isset($file_path) ? $file_path : NULL,
@@ -345,7 +390,13 @@ class Photo_frame_lib {
 	
 	public function crop_action()
 	{
+		$field_id      = $this->EE->input->post('fieldId', TRUE) != 'false' ? $this->EE->input->post('fieldId', TRUE) : false;
+		$var_id        = $this->EE->input->post('varId', TRUE) != 'false' ? $this->EE->input->post('varId', TRUE) : false;
+		$col_id        = $this->EE->input->post('colId', TRUE) != 'false' ? $this->EE->input->post('colId', TRUE) : false;
+		
 		$cache 		   = $this->EE->input->get_post('cache', TRUE);
+		$cacheUrl 	   = $this->EE->input->get_post('cacheUrl', TRUE);
+		$cachePath 	   = $this->EE->input->get_post('cachePath', TRUE);
 		$directory     = $this->EE->input->get_post('directory', TRUE);
 		$index         = $this->EE->input->get_post('index', TRUE);
 		$height        = $this->EE->input->get_post('height', TRUE);
@@ -357,19 +408,24 @@ class Photo_frame_lib {
 		$resize        = $this->EE->input->get_post('resize', TRUE);
 		$resize_max    = $this->EE->input->get_post('resizeMax', TRUE);
 		$manipulations = $this->EE->input->get_post('manipulations', TRUE);
+		$exif_data     = $this->EE->input->get_post('exifData', TRUE);
 		$manipulations = $this->array_to_object($manipulations);
 		$compression   = $this->EE->input->get_post('compression', TRUE);
 		$compression   = $compression ? $compression : 100;
 		
-		$cache_image   = $this->EE->photo_frame_lib->cache_image($cache, $this->orig, $directory['server_path'], $directory['url']);
+		$settings = $this->EE->photo_frame_model->get_settings($field_id, $col_id, $var_id);
+		
+		//$cache_image   = $this->EE->photo_frame_lib->cache_image($cache, $this->orig, $directory['server_path'], $directory['url']);
 	
-		$this->img = $cache_image->path;
-		$this->url = $cache_image->url;
+		$this->img = $cachePath;
+		$this->url = $cacheUrl;
 		
 		//if($this->edit)
 		//{
 			copy($this->orig, $this->img);
 		//}
+		
+		$this->resize_maximum_size($this->img, $settings);
 		
 		$image = new ImageEditor($this->img, array(
 			'compression' => $compression
@@ -384,7 +440,7 @@ class Photo_frame_lib {
 			'originalPath' => $this->orig,
 			'path'         => $this->img,
 			'originalUrl'  => $this->EE->photo_frame_model->parse($this->orig_file, 'url'),
-			'url' 		   => $this->url,
+			'url' 		   => $cacheUrl,
 			'image'        => $image
 		));
 		
@@ -449,6 +505,7 @@ class Photo_frame_lib {
 		}
 		
 		return $this->crop_json(TRUE, array(
+			'exif_data'		=> json_decode($exif_data),
 			'manipulations' => $manipulations, 
 			'height'        => $height,
 			'width'         => $width,
@@ -1192,7 +1249,11 @@ class Photo_frame_lib {
 	{
 		foreach($vars as $var => $value)
 		{
-			$tagdata = str_replace(LD.$var.RD, $value, $tagdata);	
+			if(is_string($value))
+			{
+				$tagdata = str_replace(LD.$var.RD, $value, $tagdata);
+			}
+				
 		}
 		
 		return $tagdata;
