@@ -804,8 +804,8 @@ class Photo_frame_ft extends EE_Fieldtype {
 				responseHandlerSettings: function() {
 					var data = {};
 					
-					if('.$this->settings['photo_frame_upload_group'].') {
-						data.folderId = '.$this->settings['photo_frame_folder_id'].';
+					if('.$settings['photo_frame_upload_group'].') {
+						data.folderId = '.$settings['photo_frame_folder_id'].';
 					}
 					
 					return data;
