@@ -1371,9 +1371,14 @@ class Photo_frame_ft extends EE_Fieldtype {
 					$return[$index] = $row;
 					$return[$index]['count'] = $index + 1;
 					$return[$index]['index'] = $index;
-					$return[$index]['total_photos'] = count($this->_get_photos($this->field_id));
+					$return[$index]['total_photos'] = count($photos);
 					$return[$index]['is_first_photo'] = ($index == 0) ? TRUE : FALSE;
 					$return[$index]['is_last_photo']  = ($index + 1 == $return[$index]['total_photos']) ? TRUE : FALSE;
+					
+					foreach($this->EE->photo_frame_lib->get_buttons() as $button)
+					{
+						$return[$index] = array_merge($return[$index], $button->parseVars($return[$index]));
+					}
 				}
 				else
 				{		

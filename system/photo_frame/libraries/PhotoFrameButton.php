@@ -86,5 +86,10 @@ if(!class_exists('PhotoFrameButton'))
 		{
 			return array($this->dirName . '/' . strtolower($this->name));
 		}
+		
+		public function parseVars($row)
+		{
+			return array();
+		}
 	}
 }
