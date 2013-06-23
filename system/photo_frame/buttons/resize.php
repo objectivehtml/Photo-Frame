@@ -6,7 +6,9 @@ class ResizeButton extends PhotoFrameButton {
 	
 	public function startCrop($data = array(), $settings = array())
 	{
-		ee()->photo_frame_lib->resize_maximum_size($data['cacheImgPath'], $settings);
+		$EE =& get_instance();
+		
+		$EE->photo_frame_lib->resize_maximum_size($data['cacheImgPath'], $settings);
 		
 		return array();
 	}

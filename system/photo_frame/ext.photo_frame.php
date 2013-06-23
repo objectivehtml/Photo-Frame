@@ -38,17 +38,16 @@ class Photo_frame_ext {
     	
 	 	$asset_id   = $file->file_id();
 	 	$asset_path = $file->path();    
-    
+	 	$new_path   = '{filedir_'.$folder_row->filedir_id.'}'.str_replace($file_name, '', $file->subpath()) . $file_name;
+	 	
 	 	if($folder_row->source_type == 'ee')
 	 	{
 	 		$photos = $this->EE->photo_frame_model->get_photos_by_asset_id($asset_id);
 	 		
 	 		foreach($photos->result() as $photo)
 	 		{
-		 		$original_file = preg_replace('/{filedir_\d}/', '{filedir_'.$folder_row->filedir_id.'}', $photo->original_file);
-		 		
 		 		$this->EE->photo_frame_model->update_photo($photo->id, array(
-		 			'original_file' => $original_file
+		 			'original_file' => $new_path
 		 		));
 	 		}
 	 	}

@@ -1732,8 +1732,12 @@ class Photo_frame_ft extends EE_Fieldtype {
     				
     				$colors = $this->EE->photo_frame_lib->get_colors($photo['file'], config_item('photo_frame_save_colors'), config_item('photo_frame_save_color_granularity'));				
     				$colors = array_merge($colors, array((object) $average_color)); 
-    				  				
+    				  	
+    				$photo['original_file'] = $this->EE->photo_frame_lib->replace_asset_subdir($photo['asset_id'], $photo['original_file']);
+    				
     				$photo  = (array) $this->EE->photo_frame_lib->rename($photo, $settings);
+    				
+    				//$photo['original_file'] = $orig_file;
     				
     				$photo['colors'] = $colors;
     				

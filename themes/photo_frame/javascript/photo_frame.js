@@ -977,7 +977,7 @@ var PhotoFrame = {};
 				varId: t.varId, 
 				colId: t.colId,
 				file: file,
-				id: (id ? id : false)
+				assetId: (id ? id : false)
 			};
 			
 			options = $.extend({}, options, t.callbacks.responseHandlerSettings());
@@ -2701,7 +2701,7 @@ var PhotoFrame = {};
 			t.factory.resetMeta();
 			
 			//t.factory.showProgress();
-			
+				
 			$.post(PhotoFrame.Actions.start_crop, obj, function(response) {
 				
 				t.factory.showProgress(100, function() {
@@ -2716,7 +2716,7 @@ var PhotoFrame = {};
 					else {
 						t.factory.trigger('startCropCallbackFailed', t, obj, response);
 					}
-							
+					
 					t.load(t.photoUrl(), function(img) {
 						
 						t.factory.hideProgress();
@@ -2998,6 +2998,7 @@ var PhotoFrame = {};
 				cacheUrl: t.cacheUrl,
 				cachePath: t.cachePath,
 				id: t.factory.directory.id,
+				assetId: t.response.asset_id,
 				index: t.factory.index,
 				photo_id: t.id,
 				image: response.file_path,
@@ -3022,8 +3023,7 @@ var PhotoFrame = {};
 				title: t.title,
 				description: t.description,
 				keywords: t.keywords,
-				compression: t.compression,
-				response: t.response
+				compression: t.compression
 			}, function(cropResponse) {
 				if(typeof callback == "function") {
 					callback(cropResponse);					

@@ -106,7 +106,7 @@ class Photo_frame_model extends CI_Model {
 		return $groups;
 	}
 	
-	public function parse($string, $type = 'url', $file_uploads = FALSE)
+	public function parse($string, $type = 'url', $file_uploads = FALSE, $asset_id = FALSE)
 	{
 		if($string === FALSE)
 		{
@@ -149,6 +149,11 @@ class Photo_frame_model extends CI_Model {
 		
 		$tag = $matches[0];
 		$id  = $matches[1];
+				
+		if($asset_id)
+		{
+			$string = $this->photo_frame_lib->replace_asset_subdir($asset_id, $string);
+		}
 		
 		return str_replace($tag, $file_uploads[$id][$type], $string);		
 	}

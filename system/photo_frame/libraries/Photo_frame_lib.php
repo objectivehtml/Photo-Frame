@@ -122,7 +122,7 @@ class Photo_frame_lib {
 		$col_id		   = $col_id != 'false' ? preg_replace('/^col_id_/', '', $col_id) : FALSE;
 		$original_url  = $this->EE->input->get_post('url');	
 		$original_path = $this->EE->input->get_post('file');
-		$asset_id      = $this->EE->input->get_post('id');
+		$asset_id      = $this->EE->input->get_post('assetId');
 		
 		$file_name 	   = $this->EE->photo_frame_lib->filename($original_path);		
 		$settings 	   = $this->EE->photo_frame_model->get_settings($field_id, $col_id, $var_id);
@@ -134,7 +134,12 @@ class Photo_frame_lib {
 		$file_path     = $directory['server_path'] . $framed_dir_name . '/' . $file_name;
 		$original_path = $directory['server_path'] . $file_name;
 		
-		$exif_data     = exif_read_data($original_path);
+		if($asset_id)
+		{
+			$original_path = $this->replace_asset_subdir($asset_id, $original_path);
+		}
+		
+		$exif_data = exif_read_data($original_path);
 			
 		/*
 		if($folder_id)
@@ -390,11 +395,32 @@ class Photo_frame_lib {
 		);
 	}
 	
+	public function replace_asset_subdir($asset_id, $file)
+	{
+		$this->EE->load->add_package_path(PATH_THIRD . 'assets');
+		$this->EE->load->library('assets_lib');
+		
+		$obj = $this->EE->assets_lib->get_file_by_id($asset_id);
+		
+		if($obj)
+		{
+			$row = $obj->row();
+			
+			if($row['source_type'] == 'ee')
+			{
+				$file = str_replace($obj->file_name(), $obj->subpath(), $file);
+			}
+		}
+		
+		return $file;
+	}
+	
 	public function crop_action()
 	{
 		$field_id      = $this->EE->input->post('fieldId', TRUE) != 'false' ? $this->EE->input->post('fieldId', TRUE) : false;
 		$var_id        = $this->EE->input->post('varId', TRUE) != 'false' ? $this->EE->input->post('varId', TRUE) : false;
 		$col_id        = $this->EE->input->post('colId', TRUE) != 'false' ? $this->EE->input->post('colId', TRUE) : false;
+		$asset_id      = $this->EE->input->post('assetId', TRUE) != 'false' ? $this->EE->input->post('assetId', TRUE) : false;
 		
 		$cache 		   = $this->EE->input->get_post('cache', TRUE);
 		$cacheUrl 	   = $this->EE->input->get_post('cacheUrl', TRUE);
@@ -437,6 +463,11 @@ class Photo_frame_lib {
 		if(empty($this->dir))
 		{
 			return $this->crop_json(FALSE);
+		}
+		
+		if($asset_id)
+		{
+			$this->orig_file = $this->replace_asset_subdir($asset_id, $this->orig_file);
 		}
 		
 		$buttons = $this->EE->photo_frame_lib->get_buttons(array(
@@ -630,8 +661,8 @@ class Photo_frame_lib {
 				
 			$orig_file_name = $file_name = $photo->original_file_name;
 			
-			$path = $this->EE->photo_frame_model->parse($photo->original_file, 'server_path');
-				
+			$path = $this->EE->photo_frame_model->parse($photo->original_file, 'server_path', FALSE, $photo->asset_id);
+			
 			$parse['width']  = ImageEditor::width($path);
 			$parse['height'] = ImageEditor::height($path);
 			
@@ -642,7 +673,7 @@ class Photo_frame_lib {
 			
 			$file_name = $this->parse($parse, $settings['photo_frame_name_format']);		
 		
-			$path = $this->EE->photo_frame_model->parse($photo->original_file, 'server_path');
+			//$path = $this->EE->photo_frame_model->parse($photo->original_file, 'server_path');
 			
 			//$orig = $matches[0].$photo->file_name;
 			$orig = $matches[0].$orig_file_name;
@@ -657,11 +688,11 @@ class Photo_frame_lib {
 			$framed_path = $matches[0].config_item('photo_frame_directory_name').'/'.$file_name;
 			$framed_path = $this->EE->photo_frame_model->parse($framed_path, 'server_path');
 			
-			//$orig_file_name = $this->parse($parse, $settings['photo_frame_name_format']);
+			$orig_file_name = $this->parse($parse, $settings['photo_frame_name_format']);
 			
 			$photo->file_name     = $file_name;
 			$photo->file          = $matches[0].config_item('photo_frame_directory_name').'/'.$file_name;
-			$photo->original_file = $matches[0].$orig_file_name;
+			//$photo->original_file = $this->replace_asset_subdir($photo->asset_id, $matches[0].$orig_file_name);
 			
 			ImageEditor::init($orig)->rename($orig_path);	
 			ImageEditor::init($framed)->rename($framed_path);			
@@ -1253,7 +1284,7 @@ class Photo_frame_lib {
 	{
 		foreach($vars as $var => $value)
 		{
-			if(is_string($value))
+			if(!is_object($value))
 			{
 				$tagdata = str_replace(LD.$var.RD, $value, $tagdata);
 			}
