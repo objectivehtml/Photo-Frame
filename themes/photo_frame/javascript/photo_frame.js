@@ -3022,7 +3022,8 @@ var PhotoFrame = {};
 				title: t.title,
 				description: t.description,
 				keywords: t.keywords,
-				compression: t.compression
+				compression: t.compression,
+				response: t.response
 			}, function(cropResponse) {
 				if(typeof callback == "function") {
 					callback(cropResponse);					

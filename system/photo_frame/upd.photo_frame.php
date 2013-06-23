@@ -55,6 +55,10 @@ class Photo_frame_upd {
 				'type'				=> 'int',
 				'constraint'		=> 50
 			),
+			'asset_id' 	=> array(
+				'type'				=> 'int',
+				'constraint'		=> 50
+			),
 			'order'	=> array(
 				'type'				=> 'int',
 				'constraint'		=> 50
@@ -205,6 +209,7 @@ class Photo_frame_upd {
 	);
 		
 	private $hooks = array(
+		array('assets_move_file', 'assets_move_file')
 	);
 	
     public function __construct()

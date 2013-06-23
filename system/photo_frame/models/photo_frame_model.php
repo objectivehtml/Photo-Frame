@@ -431,6 +431,15 @@ class Photo_frame_model extends CI_Model {
 		return $this->get_photos($params);
 	}
 	
+	public function get_photos_by_asset_id($asset_id)
+	{
+		return $this->get_photos(array(
+			'where' => array(
+				'asset_id' => $asset_id
+			)
+		));
+	}
+	
 	public function get_photos($params)
 	{
 		if(!isset($params['order_by']))

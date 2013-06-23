@@ -122,6 +122,7 @@ class Photo_frame_lib {
 		$col_id		   = $col_id != 'false' ? preg_replace('/^col_id_/', '', $col_id) : FALSE;
 		$original_url  = $this->EE->input->get_post('url');	
 		$original_path = $this->EE->input->get_post('file');
+		$asset_id      = $this->EE->input->get_post('id');
 		
 		$file_name 	   = $this->EE->photo_frame_lib->filename($original_path);		
 		$settings 	   = $this->EE->photo_frame_model->get_settings($field_id, $col_id, $var_id);
@@ -212,7 +213,8 @@ class Photo_frame_lib {
 			'original_path'      => $original_path,
 			'errors'             => $errors,
 			'exif_data'			 => $exif_data,
-			'exif_string'		 => json_encode($exif_data)
+			'exif_string'		 => json_encode($exif_data),
+			'asset_id'			 => $asset_id
 		));
 	}
 	
@@ -409,6 +411,7 @@ class Photo_frame_lib {
 		$resize_max    = $this->EE->input->get_post('resizeMax', TRUE);
 		$manipulations = $this->EE->input->get_post('manipulations', TRUE);
 		$exif_data     = $this->EE->input->get_post('exifData', TRUE);
+		$response      = $this->EE->input->get_post('response', TRUE);
 		$manipulations = $this->array_to_object($manipulations);
 		$compression   = $this->EE->input->get_post('compression', TRUE);
 		$compression   = $compression ? $compression : 100;
@@ -506,6 +509,7 @@ class Photo_frame_lib {
 		
 		return $this->crop_json(TRUE, array(
 			'exif_data'		=> json_decode($exif_data),
+			'asset_id'		=> isset($response['asset_id']) ? $response['asset_id'] : NULL,
 			'manipulations' => $manipulations, 
 			'height'        => $height,
 			'width'         => $width,
