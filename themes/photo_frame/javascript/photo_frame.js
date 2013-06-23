@@ -2291,7 +2291,7 @@ var PhotoFrame = {};
 				'</li>'
 			].join(''));
 			
-			t.load(function(img) {
+			t.load(response.file_url, function(img) {
 				var obj = html.find('.'+t.factory.classes.photo);
 				
 				t._sendCropRequest(function(cropResponse) {
@@ -2325,6 +2325,7 @@ var PhotoFrame = {};
 			
 			if(t.ui.edit) {
 				t.ui.edit.unbind('click').click(function(e) {
+					t.showProgress(0);
 					t.startCrop();					
 					e.preventDefault();
 				});
@@ -2641,13 +2642,12 @@ var PhotoFrame = {};
 	            	t.factory.ui.instructions.fadeOut();
 	            }            
             }
-            
 		},
 		
 		load: function(file, callback) {
 			if(typeof file == "function") {
 				callback = file;
-				file = this.url;
+				file = this.photoUrl();
 			}
 			window.loadImage(file, function(img) {
 				if(typeof callback == "function") {
