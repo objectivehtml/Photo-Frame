@@ -2525,6 +2525,9 @@ var PhotoFrame = {};
 					}
 				);
 			}
+			else {
+				t.callback(callback);
+			}
 		},
 		
 		totalManipulations: function() {
@@ -2770,16 +2773,16 @@ var PhotoFrame = {};
 			        	}
 			        	
 			            t.initJcrop(callback);
+			            
 			        	t.updateInfo();
 			        	
 			            $(window).resize();
-			            
 			            if(t.factory.buttonBar) {
 				            for(var x in t.factory.buttons) {
+			            
 					            t.factory.buttonBar.buttons[x].startCrop(t);
 				            }
 			            }
-			            
 			            if(t.needsRendered()) {
 				            t.render(function() {
 				            	t.factory.trigger('startCropEnd', t);
