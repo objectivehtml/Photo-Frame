@@ -134,12 +134,17 @@ class Photo_frame_lib {
 		$file_path     = $directory['server_path'] . $framed_dir_name . '/' . $file_name;
 		$original_path = $directory['server_path'] . $file_name;
 		
-		if($asset_id)
+		if($asset_id != "false")
 		{
 			$original_path = $this->replace_asset_subdir($asset_id, $original_path);
 		}
 		
-		$exif_data = exif_read_data($original_path);
+		$exif_data = array();
+		
+		if($this->extension($original_path) == 'jpg' || $this->extension($original_url) == 'jpeg')
+		{	
+			$exif_data = exif_read_data($original_path);
+		}
 			
 		/*
 		if($folder_id)
@@ -306,8 +311,14 @@ class Photo_frame_lib {
 				)
 			);
 			
-			$exif_data = exif_read_data($files['files']['tmp_name'][$x]);
-								
+			$exif_data = array();
+				
+			if($this->extension($files['files']['tmp_name'][$x]) == 'jpg' || 
+			   $this->extension($files['files']['tmp_name'][$x]) == 'jpeg')
+			{	
+				$exif_data = exif_read_data($files['files']['tmp_name'][$x]);
+			}
+			
 			$errors = $this->EE->photo_frame_model->validate_image_size($_FILES['files']['tmp_name'], $settings);
 		
 			if(count($errors) == 0)

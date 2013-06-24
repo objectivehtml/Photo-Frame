@@ -804,9 +804,7 @@ class Photo_frame_ft extends EE_Fieldtype {
 				responseHandlerSettings: function() {
 					var data = {};
 					
-					if('.$settings['photo_frame_upload_group'].') {
-						data.folderId = '.$settings['photo_frame_folder_id'].';
-					}
+					'.($settings['photo_frame_folder_id'] ? 'data.folderId = '.$settings['photo_frame_folder_id'] .';' : '').'
 					
 					return data;
 				},
@@ -1239,7 +1237,7 @@ class Photo_frame_ft extends EE_Fieldtype {
 	
 	public function replace_total_photos($data, $params = array(), $tagdata)
 	{		
-		return count($this->_get_photos($this->field_id), isset($params['pre_loop']) ? $params['pre_loop'] : TRUE);
+		return count($this->_get_photos($this->field_id, isset($params['pre_loop']) ? $params['pre_loop'] : TRUE));
 	}
 	
 	public function replace_first_photo($data, $params, $tagdata)
@@ -1738,7 +1736,10 @@ class Photo_frame_ft extends EE_Fieldtype {
     				$colors = $this->EE->photo_frame_lib->get_colors($photo['file'], config_item('photo_frame_save_colors'), config_item('photo_frame_save_color_granularity'));				
     				$colors = array_merge($colors, array((object) $average_color)); 
     				  	
-    				$photo['original_file'] = $this->EE->photo_frame_lib->replace_asset_subdir($photo['asset_id'], $photo['original_file']);
+    				if($photo['asset_id'])
+    				{
+    					$photo['original_file'] = $this->EE->photo_frame_lib->replace_asset_subdir($photo['asset_id'], $photo['original_file']);
+    				}
     				
     				$photo  = (array) $this->EE->photo_frame_lib->rename($photo, $settings);
     				
