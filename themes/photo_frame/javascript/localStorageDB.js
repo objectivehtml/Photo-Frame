@@ -1,11 +1,473 @@
 /*
-	Kailash Nadh (http://kailashnadh.name)
+	Kailash Nadh (http://nadh.in)
 	
 	localStorageDB
 	September 2011
 	A simple database layer for localStorage
 
+	v 1.9 November 2012
+	v 2.0 June 2013
+
 	License	:	MIT License
 */
 
-function localStorageDB(e,t){function u(){delete o[r];s=null}function a(){var e=0;for(var t in s.tables){if(s.tables.hasOwnProperty(t)){e++}}return e}function f(e){return s.tables[e]?true:false}function l(e){if(!f(e)){T("The table '"+e+"' does not exist.")}}function c(e,t){s.tables[e]={fields:t,auto_increment:1};s.data[e]={}}function h(e){delete s.tables[e];delete s.data[e]}function p(e){s.tables[e].auto_increment=1;s.data[e]={}}function d(e){var t=0;for(var n in s.data[e]){if(s.data[e].hasOwnProperty(n)){t++}}return t}function v(e,t){t.ID=s.tables[e].auto_increment;s.data[e][s.tables[e].auto_increment]=t;s.tables[e].auto_increment++;return t.ID}function m(e,t){var n=null,r=[],i=null;for(var o=0;o<t.length;o++){n=t[o];i=s.data[e][n];r.push(N(i))}return r}function g(e,t,n){var r=[],i=false,o=null;for(var u in s.data[e]){if(!s.data[e].hasOwnProperty(u)){continue}o=s.data[e][u];i=true;for(var a in t){if(!t.hasOwnProperty(a)){continue}if(typeof t[a]=="string"){if(o[a].toString().toLowerCase()!=t[a].toString().toLowerCase()){i=false;break}}else{if(o[a]!=t[a]){i=false;break}}}if(i){r.push(u)}if(r.length==n){break}}return r}function y(e,t,n){var r=[],i=false,o=null;for(var u in s.data[e]){if(!s.data[e].hasOwnProperty(u)){continue}o=s.data[e][u];if(t(N(o))==true){r.push(u)}if(r.length==n){break}}return r}function b(e,t){var n=[];for(var r in s.data[e]){if(s.data[e].hasOwnProperty(r)){n.push(r);if(n.length==t){break}}}return n}function w(e,t){for(var n=0;n<t.length;n++){if(s.data[e].hasOwnProperty(t[n])){delete s.data[e][t[n]]}}return t.length}function E(e,t,n){var r="",i=0;for(var o=0;o<t.length;o++){r=t[o];var u=n(N(s.data[e][r]));if(u){delete u["ID"];var a=s.data[e][r];for(var f in u){if(u.hasOwnProperty(f)){a[f]=u[f]}}s.data[e][r]=k(e,a);i++}}return i}function S(){o[r]=JSON.stringify(s)}function x(){return JSON.stringify(s)}function T(e){throw new Error(e)}function N(e){var t={};for(var n in e){if(e.hasOwnProperty(n)){t[n]=e[n]}}return t}function C(e){return e.match(/[^a-z_0-9]/ig)?false:true}function k(e,t){var n="",r={};for(var i=0;i<s.tables[e].fields.length;i++){n=s.tables[e].fields[i];if(t[n]){r[n]=t[n]}}return r}function L(e,t){var n="",r={};for(var i=0;i<s.tables[e].fields.length;i++){n=s.tables[e].fields[i];r[n]=t[n]?t[n]:null}return r}var n="db_",r=n+e,i=false,s=null,o=t==sessionStorage?sessionStorage:localStorage;s=o[r];if(!(s&&(s=JSON.parse(s))&&s.tables&&s.data)){if(!C(e)){T("The name '"+e+"'"+" contains invalid characters.")}else{s={tables:{},data:{}};S();i=true}}return{commit:function(){S()},isNew:function(){return i},drop:function(){u()},serialize:function(){return x()},tableExists:function(e){return f(e)},tableCount:function(){return a()},createTable:function(e,t){var n=false;if(!C(e)){T("The database name '"+e+"'"+" contains invalid characters.")}else if(this.tableExists(e)){T("The table name '"+e+"' already exists.")}else{var r=true;for(var i=0;i<t.length;i++){if(!C(t[i])){r=false;break}}if(r){var s={};for(var i=0;i<t.length;i++){s[t[i]]=true}delete s["ID"];t=["ID"];for(var o in s){if(s.hasOwnProperty(o)){t.push(o)}}c(e,t);n=true}else{T("One or more field names in the table definition contains invalid characters.")}}return n},dropTable:function(e){l(e);h(e)},truncate:function(e){l(e);p(e)},rowCount:function(e){l(e);return d(e)},insert:function(e,t){l(e);return v(e,L(e,t))},insertOrUpdate:function(e,t,n){l(e);var r=[];if(!t){r=b(e)}else if(typeof t=="object"){r=g(e,k(e,t))}else if(typeof t=="function"){r=y(e,t)}if(r.length==0){return v(e,L(e,n))}else{var i=[];for(var s=0;s<r.length;s++){E(e,r,function(e){i.push(e.ID);return n})}return i}},update:function(e,t,n){l(e);var r=[];if(!t){r=b(e)}else if(typeof t=="object"){r=g(e,k(e,t))}else if(typeof t=="function"){r=y(e,t)}return E(e,r,n)},query:function(e,t,n){l(e);var r=[];if(!t){r=b(e,n)}else if(typeof t=="object"){r=g(e,k(e,t),n)}else if(typeof t=="function"){r=y(e,t,n)}return m(e,r,n)},deleteRows:function(e,t){l(e);var n=[];if(!t){n=b(e)}else if(typeof t=="object"){n=g(e,k(e,t))}else if(typeof t=="function"){n=y(e,t)}return w(e,n)}}};
+function localStorageDB(db_name, engine) {
+
+	var db_prefix = 'db_',
+		db_id = db_prefix + db_name,
+		db_new = false,	// this flag determines whether a new database was created during an object initialisation
+		db = null;
+
+		try {
+			var storage = (engine == sessionStorage ? sessionStorage: localStorage);
+		} catch(e) { // ie8 hack
+			var storage = engine;
+		}
+
+	// if the database doesn't exist, create it
+	db = storage[ db_id ];
+	if( !( db && (db = JSON.parse(db)) && db.tables && db.data ) ) {
+		if(!validateName(db_name)) {
+			error("The name '" + db_name + "'" + " contains invalid characters.");
+		} else {
+			db = {tables: {}, data: {}};
+			commit();
+			db_new = true;
+		}
+	}
+	
+	
+	// ______________________ private methods
+	
+	// _________ database functions
+	// drop the database
+	function drop() {
+		delete storage[db_id];
+		db = null;
+	}
+			
+	// number of tables in the database
+	function tableCount() {
+		var count = 0;
+		for(var table in db.tables) {
+			if( db.tables.hasOwnProperty(table) ) {
+				count++;
+			}
+		}
+		return count;
+	}
+
+	// _________ table functions
+	
+	// check whether a table exists
+	function tableExists(table_name) {
+		return db.tables[table_name] ? true : false;
+	}
+	
+	// check whether a table exists, and if not, throw an error
+	function tableExistsWarn(table_name) {
+		if(!tableExists(table_name)) {
+			error("The table '" + table_name + "' does not exist.");
+		}
+	}
+		
+	// create a table
+	function createTable(table_name, fields) {
+		db.tables[table_name] = {fields: fields, auto_increment: 1};
+		db.data[table_name] = {};
+	}
+	
+	// drop a table
+	function dropTable(table_name) {
+		delete db.tables[table_name];
+		delete db.data[table_name];
+	}
+	
+	// empty a table
+	function truncate(table_name) {
+		db.tables[table_name].auto_increment = 1;
+		db.data[table_name] = {};
+	}
+	
+	// number of rows in a table
+	function rowCount(table_name) {
+		var count = 0;
+		for(var ID in db.data[table_name]) {
+			if( db.data[table_name].hasOwnProperty(ID) ) {
+				count++;
+			}
+		}
+		return count;
+	}
+	
+	// insert a new row
+	function insert(table_name, data) {
+		data.ID = db.tables[table_name].auto_increment;
+		db.data[table_name][ db.tables[table_name].auto_increment ] = data;
+		db.tables[table_name].auto_increment++;
+		return data.ID;
+	}
+	
+	// select rows, given a list of IDs of rows in a table
+	function select(table_name, ids) {
+		var ID = null, results = [], row = null;
+		for(var i=0; i<ids.length; i++) {
+			ID = ids[i];
+			row = db.data[table_name][ID];
+			results.push( clone(row) );
+		}
+		return results;
+	}
+	
+	// select rows in a table by field-value pairs, returns the IDs of matches
+	function queryByValues(table_name, data, limit) {
+		var result_ids = [],
+			exists = false,
+			row = null;
+
+		// loop through all the records in the table, looking for matches
+		for(var ID in db.data[table_name]) {
+			if( !db.data[table_name].hasOwnProperty(ID) ) {
+				continue;
+			}
+
+			row = db.data[table_name][ID];
+			exists = true;
+
+			for(var field in data) {
+				if( !data.hasOwnProperty(field) ) {
+					continue;
+				}
+
+				if(typeof data[field] == 'string') {	// if the field is a string, do a case insensitive comparison
+					if( row[field].toString().toLowerCase() != data[field].toString().toLowerCase() ) {
+						exists = false;
+						break;
+					}
+				} else {
+					if( row[field] != data[field] ) {
+						exists = false;
+						break;
+					}
+				}
+			}
+			if(exists) {
+				result_ids.push(ID);
+			}
+			if(result_ids.length == limit) {
+				break;
+			}
+		}
+		return result_ids;
+	}
+	
+	// select rows in a table by a function, returns the IDs of matches
+	function queryByFunction(table_name, query_function, limit) {
+		var result_ids = [],
+			exists = false,
+			row = null;
+
+		// loop through all the records in the table, looking for matches
+		for(var ID in db.data[table_name]) {
+			if( !db.data[table_name].hasOwnProperty(ID) ) {
+				continue;
+			}
+
+			row = db.data[table_name][ID];
+
+			if( query_function( clone(row) ) == true ) {	// it's a match if the supplied conditional function is satisfied
+				result_ids.push(ID);
+			}
+			if(result_ids.length == limit) {
+				break;
+			}
+		}
+		return result_ids;
+	}
+	
+	// return all the IDs in a table
+	function getIDs(table_name, limit) {
+		var result_ids = [];
+		for(var ID in db.data[table_name]) {
+			if( db.data[table_name].hasOwnProperty(ID) ) {
+				result_ids.push(ID);
+
+				if(result_ids.length == limit) {
+					break;
+				}
+			}
+		}
+		return result_ids;
+	}
+	
+	// delete rows, given a list of their IDs in a table
+	function deleteRows(table_name, ids) {
+		for(var i=0; i<ids.length; i++) {
+			if( db.data[table_name].hasOwnProperty(ids[i]) ) {
+				delete db.data[table_name][ ids[i] ];
+			}
+		}
+		return ids.length;
+	}
+	
+	// update rows
+	function update(table_name, ids, update_function) {
+		var ID = '', num = 0;
+
+		for(var i=0; i<ids.length; i++) {
+			ID = ids[i];
+
+			var updated_data = update_function( clone(db.data[table_name][ID]) );
+
+			if(updated_data) {
+				delete updated_data['ID']; // no updates possible to ID
+
+				var new_data = db.data[table_name][ID];				
+				// merge updated data with existing data
+				for(var field in updated_data) {
+					if( updated_data.hasOwnProperty(field) ) {
+						new_data[field] = updated_data[field];
+					}
+				}
+
+				db.data[table_name][ID] = validFields(table_name, new_data);
+				num++;
+			}
+		}
+		return num;
+	}
+	
+
+
+	// commit the database to localStorage
+	function commit() {
+		storage[db_id] = JSON.stringify(db);
+	}
+	
+	// serialize the database
+	function serialize() {
+		return JSON.stringify(db);
+	}
+	
+	// throw an error
+	function error(msg) {
+		throw new Error(msg);
+	}
+	
+	// clone an object
+	function clone(obj) {
+		var new_obj = {};
+		for(var key in obj) {
+			if( obj.hasOwnProperty(key) ) {
+				new_obj[key] = obj[key];
+			}
+		}
+		return new_obj;
+	}
+	
+	// validate db, table, field names (alpha-numeric only)
+	function validateName(name) {
+		return name.match(/[^a-z_0-9]/ig) ? false : true;
+	}
+	
+	// given a data list, only retain valid fields in a table
+	function validFields(table_name, data) {
+		var field = '', new_data = {};
+
+		for(var i=0; i<db.tables[table_name].fields.length; i++) {
+			field = db.tables[table_name].fields[i];
+			
+			if(data[field]) {
+				new_data[field] = data[field];
+			}
+		}
+		return new_data;
+	}
+	
+	// given a data list, populate with valid field names of a table
+	function validateData(table_name, data) {
+		var field = '', new_data = {};
+		for(var i=0; i<db.tables[table_name].fields.length; i++) {
+			field = db.tables[table_name].fields[i];
+			new_data[field] = data[field] ? data[field] : null;
+		}
+		return new_data;
+	}
+	
+
+
+	// ______________________ public methods
+
+	return {
+		// commit the database to localStorage
+		commit: function() {
+			commit();
+		},
+		
+		// is this instance a newly created database?
+		isNew: function() {
+			return db_new;
+		},
+		
+		// delete the database
+		drop: function() {
+			drop();
+		},
+		
+		// serialize the database
+		serialize: function() {
+			return serialize();
+		},
+		
+		// check whether a table exists
+		tableExists: function(table_name) {
+			return tableExists(table_name);
+		},
+		
+		// number of tables in the database
+		tableCount: function() {
+			return tableCount();
+		},
+		
+		// create a table
+		createTable: function(table_name, fields) {
+			var result = false;
+			if(!validateName(table_name)) {
+				error("The database name '" + table_name + "'" + " contains invalid characters.");
+			} else if(this.tableExists(table_name)) {
+				error("The table name '" + table_name + "' already exists.");
+			} else {
+				// make sure field names are valid
+				var is_valid = true;
+				for(var i=0; i<fields.length; i++) {
+					if(!validateName(fields[i])) {
+						is_valid = false;
+						break;
+					}
+				}
+				
+				if(is_valid) {
+					// cannot use indexOf due to <IE9 incompatibility
+					// de-duplicate the field list
+					var fields_literal = {};
+					for(var i=0; i<fields.length; i++) {
+						fields_literal[ fields[i] ] = true;
+					}
+					delete fields_literal['ID']; // ID is a reserved field name
+
+					fields = ['ID'];
+					for(var field in fields_literal) {
+						if( fields_literal.hasOwnProperty(field) ) {
+							fields.push(field);
+						}
+					}
+
+					createTable(table_name, fields);
+					result = true;
+				} else {
+					error("One or more field names in the table definition contains invalid characters.");
+				}
+			}
+
+			return result;
+		},
+		
+		// drop a table
+		dropTable: function(table_name) {
+			tableExistsWarn(table_name);
+			dropTable(table_name);
+		},
+		
+		// empty a table
+		truncate: function(table_name) {
+			tableExistsWarn(table_name);
+			truncate(table_name);
+		},
+		
+		// number of rows in a table
+		rowCount: function(table_name) {
+			tableExistsWarn(table_name);
+			return rowCount(table_name);
+		},
+		
+		// insert a row
+		insert: function(table_name, data) {
+			tableExistsWarn(table_name);
+			return insert(table_name, validateData(table_name, data) );
+		},
+
+		// insert or update based on a given condition
+		insertOrUpdate: function(table_name, query, data) {
+			tableExistsWarn(table_name);
+
+			var result_ids = [];
+			if(!query) {
+				result_ids = getIDs(table_name);				// there is no query. applies to all records
+			} else if(typeof query == 'object') {				// the query has key-value pairs provided
+				result_ids = queryByValues(table_name, validFields(table_name, query));
+			} else if(typeof query == 'function') {				// the query has a conditional map function provided
+				result_ids = queryByFunction(table_name, query);
+			}
+
+			// no existing records matched, so insert a new row
+			if(result_ids.length == 0) {
+				return insert(table_name, validateData(table_name, data) );
+			} else {
+				var ids = [];
+				for(var n=0; n<result_ids.length; n++) {
+					update(table_name, result_ids, function(o) {
+						ids.push(o.ID);
+						return data;
+					});
+				}
+
+				return ids;
+			}
+		},
+		
+		// update rows
+		update: function(table_name, query, update_function) {
+			tableExistsWarn(table_name);
+
+			var result_ids = [];
+			if(!query) {
+				result_ids = getIDs(table_name);				// there is no query. applies to all records
+			} else if(typeof query == 'object') {				// the query has key-value pairs provided
+				result_ids = queryByValues(table_name, validFields(table_name, query));
+			} else if(typeof query == 'function') {				// the query has a conditional map function provided
+				result_ids = queryByFunction(table_name, query);
+			}
+			return update(table_name, result_ids, update_function);
+		},
+
+		// select rows
+		query: function(table_name, query, limit) {
+			tableExistsWarn(table_name);
+			
+			var result_ids = [];
+			if(!query) {
+				result_ids = getIDs(table_name, limit); // no conditions given, return all records
+			} else if(typeof query == 'object') {			// the query has key-value pairs provided
+				result_ids = queryByValues(table_name, validFields(table_name, query), limit);
+			} else if(typeof query == 'function') {		// the query has a conditional map function provided
+				result_ids = queryByFunction(table_name, query, limit);
+			}
+			return select(table_name, result_ids, limit);
+		},
+
+		// delete rows
+		deleteRows: function(table_name, query) {
+			tableExistsWarn(table_name);
+
+			var result_ids = [];
+			if(!query) {
+				result_ids = getIDs(table_name);
+			} else if(typeof query == 'object') {
+				result_ids = queryByValues(table_name, validFields(table_name, query));
+			} else if(typeof query == 'function') {
+				result_ids = queryByFunction(table_name, query);
+			}
+			return deleteRows(table_name, result_ids);
+		}
+	}
+}

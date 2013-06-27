@@ -753,7 +753,7 @@ class Photo_frame_ft extends EE_Fieldtype {
 					if(t.isAssetsInstalled()) {
 						t.assetSheet = new Assets.Sheet({
 						    multiSelect: true,
-						   // filedirs: ['.$this->settings['photo_frame_upload_group'].'],
+						    filedirs: ['.$this->settings['photo_frame_upload_group'].'],
 						    kinds: [\'image\'],
 						    onSelect: function(files) {
 						    	t.edit = false;
