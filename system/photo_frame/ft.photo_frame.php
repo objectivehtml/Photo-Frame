@@ -761,7 +761,6 @@ class Photo_frame_ft extends EE_Fieldtype {
 						    	if(files.length == 1) {
 						    		t.showProgress(0, function() {
 							    		t._fileBrowserResponseHandler(files[0].url, files[0].id, function(response) {
-							    			console.log(response);
 						    				t.showProgress(100, function() {
 								    			t._uploadResponseHandler(response);
 							    			});	
