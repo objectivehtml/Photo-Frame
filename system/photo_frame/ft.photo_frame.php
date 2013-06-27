@@ -1569,8 +1569,6 @@ class Photo_frame_ft extends EE_Fieldtype {
 			{
 				$photo = (array) json_decode($photo['edit']);
 				
-				$photo = $this->_unset($photo);
-			
 				if(!$this->EE->photo_frame_model->has_draft($photo['id'], $this->settings))
 				{	
 					$photo_row = $this->EE->photo_frame_model->get_photo($photo['id'])->row_array();
@@ -1609,6 +1607,8 @@ class Photo_frame_ft extends EE_Fieldtype {
 					
 					$photo_row['id'] = $photo_id;
 					
+					$photo_row = $this->_unset($photo_row);
+			
 					$data[$index]['edit'] = json_encode($photo_row);					
 					
 					$this->EE->photo_frame_model->duplicate_photo_colors($photo['id'], $photo_id);
