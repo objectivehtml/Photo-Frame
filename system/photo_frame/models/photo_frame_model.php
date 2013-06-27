@@ -30,9 +30,9 @@ class Photo_frame_model extends CI_Model {
 	}
 	
 	public function assets_installed()
-	{		
+	{				
 		// Make sure that Assets is installed
-		if (isset($this->addons) && array_key_exists('assets', $this->addons->get_installed()))
+		if (isset(ee()->addons) && array_key_exists('assets', $this->addons->get_installed()))
 		{
 			return TRUE;
 		}

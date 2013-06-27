@@ -318,8 +318,7 @@ class Photo_frame_lib {
 			
 			$exif_data = array();
 				
-			if($this->extension($files['files']['tmp_name'][$x]) == 'jpg' || 
-			   $this->extension($files['files']['tmp_name'][$x]) == 'jpeg')
+			if($files['files']['type'][$x] == 'image/jpeg')
 			{	
 				$exif_data = exif_read_data($files['files']['tmp_name'][$x]);
 			}
@@ -638,7 +637,7 @@ class Photo_frame_lib {
 	
 	public function extension($string)
 	{
-		return pathinfo($string, PATHINFO_EXTENSION);
+		return strtolower(pathinfo($string, PATHINFO_EXTENSION));
 	}
 	
 	public function filename($string, $replace = '')
