@@ -1569,6 +1569,8 @@ class Photo_frame_ft extends EE_Fieldtype {
 			{
 				$photo = (array) json_decode($photo['edit']);
 				
+				$photo = $this->_unset($photo);
+			
 				if(!$this->EE->photo_frame_model->has_draft($photo['id'], $this->settings))
 				{	
 					$photo_row = $this->EE->photo_frame_model->get_photo($photo['id'])->row_array();

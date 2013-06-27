@@ -1303,7 +1303,7 @@ class Photo_frame_lib {
 	{
 		foreach($vars as $var => $value)
 		{
-			if(!is_object($value))
+			if(!is_object($value) && !is_array($value))
 			{
 				$tagdata = str_replace(LD.$var.RD, $value, $tagdata);
 			}
