@@ -141,42 +141,29 @@ class Photo_frame_lib {
 		
 		$exif_data = array();
 		
+		/*
+		if($folder_id)
+		{
+			$id = $this->EE->input->get_post('assetId');
+			//$original_path = $this->EE->input->get_post('file');
+			
+			$file = $this->EE->assets_lib->get_file_by_id($id);
+			
+			if($file->folder_row()->source_type != 'ee')
+			{
+				$path = $file->get_local_copy();
+				$filename = str_replace('.tmp', '.'.$file->extension(), basename($path));
+				
+				//rename($path, str_replace(basename($path), $filename, $path));
+				//copy()
+			}
+		}
+		*/
+		
 		if($this->extension($original_path) == 'jpg' || $this->extension($original_url) == 'jpeg')
 		{	
 			$exif_data = exif_read_data($original_path);
 		}
-			
-		/*
-		if($folder_id)
-		{
-			$id = $this->EE->input->get_post('id');
-			$original_path = $this->EE->input->get_post('file');
-			
-			$this->EE->load->add_package_path(PATH_THIRD . 'assets');
-			$this->EE->load->library('assets_lib');
-			
-			
-			$folder_row = $this->EE->assets_lib->get_folder_row_by_id($folder_id);
-			$source 	= $this->EE->assets_lib->instantiate_source_type($folder_row);
-			
-			$_SERVER['CONTENT_LENGTH'] = $source->get_file($id)->size();
-			
-			$_GET['qqfile'] = $original_path;
-			
-			$result = $this->EE->assets_lib->upload_file($folder_id);
-			
-			$folder_id;	
-						
-			// $folder_row = $this->EE->assets_lib->get_folder_row_by_id($folder_id);
-			// $source 	= $this->EE->assets_lib->instantiate_source_type($folder_row);
-			// $source->create_folder($folder_id . '/' . config_item('photo_frame_directory_name'));
-			
-			
-			
-			exit('stop');
-			
-		}
-		*/
 		
 		$response = $this->create_directory($directory);
 		$errors   = array_merge($errors, $response->errors);
@@ -210,6 +197,24 @@ class Photo_frame_lib {
 		{
 			$original_url  = $directory['url'] . '/' . $file_name;
 		}
+		
+		/*
+		var_dump(array(
+			'success'            => count($errors) == 0 ? TRUE : FALSE,
+			'directory'          => $directory,
+			'file_name'          => isset($file_name) ? $file_name : NULL,
+			'file_url'           => isset($file_url)  ? $file_url  : NULL,
+			'file_path'          => isset($file_path) ? $file_path : NULL,
+			'original_file'      => '{filedir_'.$dir_id.'}'.$file_name,
+			'original_file_name' => $file_name,
+			'original_url'       => $original_url,
+			'original_path'      => $original_path,
+			'errors'             => $errors,
+			'exif_data'			 => $exif_data,
+			'exif_string'		 => json_encode($exif_data),
+			'asset_id'			 => $asset_id
+		));exit();
+		*/
 		
 		return $this->json(array(
 			'success'            => count($errors) == 0 ? TRUE : FALSE,

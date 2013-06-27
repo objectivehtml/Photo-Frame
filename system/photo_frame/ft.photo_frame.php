@@ -753,7 +753,7 @@ class Photo_frame_ft extends EE_Fieldtype {
 					if(t.isAssetsInstalled()) {
 						t.assetSheet = new Assets.Sheet({
 						    multiSelect: true,
-						    filedirs: ['.$this->settings['photo_frame_upload_group'].'],
+						   // filedirs: ['.$this->settings['photo_frame_upload_group'].'],
 						    kinds: [\'image\'],
 						    onSelect: function(files) {
 						    	t.edit = false;
@@ -761,6 +761,7 @@ class Photo_frame_ft extends EE_Fieldtype {
 						    	if(files.length == 1) {
 						    		t.showProgress(0, function() {
 							    		t._fileBrowserResponseHandler(files[0].url, files[0].id, function(response) {
+							    			console.log(response);
 						    				t.showProgress(100, function() {
 								    			t._uploadResponseHandler(response);
 							    			});	
