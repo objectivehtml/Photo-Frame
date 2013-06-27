@@ -1749,28 +1749,7 @@ class Photo_frame_ft extends EE_Fieldtype {
     				
     				$orig_photo = $photo;
     				
-    				$unset = array(
-    					'channel_id' => FALSE,
-    					'cachePath'  => FALSE,
-    					'cacheUrl'   => FALSE,
-    					'directory'  => FALSE,
-    					'exif_data'  => FALSE,
-    					'new'        => FALSE,
-    					'id'
-    				);
-    				
-    				foreach($unset as $var => $rename)
-    				{
-    					if(isset($photo[$var]))
-    					{
-    						if($rename)
-    						{
-    							$photo[$rename] = $photo[$var];
-    						}
-    					}
-    						
-    					unset($photo[$var]);
-    				}
+    				$photo = $this->_unset($photo);
     				
     				foreach($buttons as $button)
     				{
@@ -1846,6 +1825,8 @@ class Photo_frame_ft extends EE_Fieldtype {
 	        		    //$photo->is_draft = $this->is_draft ? 1 : 0;        		   	
 	        		    $photo->order    = $index;  
 	        		    
+	    				$photo = $this->_unset($photo);
+    				
 	    				foreach($buttons as $button)
 	    				{
 		    				$photo = (object) $button->postSave((array) $photo, (array) $photo);
@@ -2621,6 +2602,48 @@ class Photo_frame_ft extends EE_Fieldtype {
 			
 		return $this->EE->TMPL->parse_variables($tagdata, $vars);
 	} 
+	
+	private function _unset($photo)
+	{		
+		$unset = array(
+			'channel_id' => FALSE,
+			'cachePath'  => FALSE,
+			'cacheUrl'   => FALSE,
+			'directory'  => FALSE,
+			'exif_data'  => FALSE,
+			'new'        => FALSE,
+			'id'
+		);
+		
+		$is_object = FALSE;
+		
+		if(is_object($photo))
+		{
+			$is_object = TRUE;
+			
+			$photo = (array) $photo;
+		}
+		
+		foreach($unset as $var => $rename)
+		{
+			if(isset($photo[$var]))
+			{
+				if($rename)
+				{
+					$photo[$rename] = $photo[$var];
+				}
+			}
+				
+			unset($photo[$var]);
+		}
+		
+		if($is_object)
+		{
+			$photo = (object) $photo;	
+		}	
+			
+		return $photo;
+	}
 	
 	private function load_tmpl()
 	{		

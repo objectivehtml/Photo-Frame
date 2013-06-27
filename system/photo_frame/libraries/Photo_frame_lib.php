@@ -413,18 +413,21 @@ class Photo_frame_lib {
 	
 	public function replace_asset_subdir($asset_id, $file)
 	{
-		$this->EE->load->add_package_path(PATH_THIRD . 'assets');
-		$this->EE->load->library('assets_lib');
-		
-		$obj = $this->EE->assets_lib->get_file_by_id($asset_id);
-		
-		if($obj)
+		if($this->assets_installed())
 		{
-			$row = $obj->row();
+			$this->EE->load->add_package_path(PATH_THIRD . 'assets');
+			$this->EE->load->library('assets_lib');
 			
-			if($row['source_type'] == 'ee')
+			$obj = $this->EE->assets_lib->get_file_by_id($asset_id);
+			
+			if($obj)
 			{
-				$file = str_replace($obj->file_name(), $obj->subpath(), $file);
+				$row = $obj->row();
+				
+				if($row['source_type'] == 'ee')
+				{
+					$file = str_replace($obj->file_name(), $obj->subpath(), $file);
+				}
 			}
 		}
 		
@@ -461,7 +464,7 @@ class Photo_frame_lib {
 		$settings = $this->EE->photo_frame_model->get_settings($field_id, $col_id, $var_id);
 		
 		//$cache_image   = $this->EE->photo_frame_lib->cache_image($cache, $this->orig, $directory['server_path'], $directory['url']);
-	
+		
 		$this->img = $cachePath;
 		$this->url = $cacheUrl;
 		
