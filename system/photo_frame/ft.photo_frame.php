@@ -1827,11 +1827,12 @@ class Photo_frame_ft extends EE_Fieldtype {
 	        		    //$photo->is_draft = $this->is_draft ? 1 : 0;        		   	
 	        		    $photo->order    = $index;  
 	        		    
-	    				$photo = $this->_unset($photo);
+	        		    $orig_photo = $photo;
+	    				$photo 		= $this->_unset($photo);
     				
 	    				foreach($buttons as $button)
 	    				{
-		    				$photo = (object) $button->postSave((array) $photo, (array) $photo);
+		    				$photo = (object) $button->postSave((array) $photo, (array) $orig_photo);
 	    				}
 	    				
 	        		    $edit_photos[] = $photo;

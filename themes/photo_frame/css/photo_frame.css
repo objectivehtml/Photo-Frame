@@ -1208,3 +1208,8 @@ filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#e2e2e2', end
 .photo-frame-icons .icon-crop:before { content: '\e810'; } /* '' */
 .photo-frame-icons .icon-info-alt:before { content: '\e80e'; } /* '' */
 .photo-frame-icons .icon-info-circled:before { content: '\e80f'; } /* '' */
+.photo-frame-icons .icon-font:before { content: '\e811'; } /* '' */
+.photo-frame-icons .icon-strike:before { content: '\e815'; } /* '' */
+.photo-frame-icons .icon-underline:before { content: '\e814'; } /* '' */
+.photo-frame-icons .icon-bold:before { content: '\e812'; } /* '' */
+.photo-frame-icons .icon-italic:before { content: '\e813'; } /* '' */

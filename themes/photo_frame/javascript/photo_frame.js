@@ -2496,7 +2496,7 @@ var PhotoFrame = {};
 		render: function(callback) {
 			var t = this;
 			
-			if(!this.isRendering()) {
+			if(!this.isRendering() && t.ui.cropPhoto) {
 				this.startRendering();
 				this.useCache = true;
 				
@@ -2703,98 +2703,101 @@ var PhotoFrame = {};
 			//t.factory.showProgress();
 				
 			$.post(PhotoFrame.Actions.start_crop, obj, function(response) {
-				
-				t.factory.showProgress(100, function() {
-					
-					t.useCache  = true;
-					t.cacheUrl  = response.cacheUrl;
-					t.cachePath = response.cachePath;
-					
-					if(response.success) {
-						t.factory.trigger('startCropCallback', t, obj, response.data);
-					}
-					else {
-						t.factory.trigger('startCropCallbackFailed', t, obj, response);
-					}
-					
-					t.load(t.photoUrl(), function(img) {
+				if(response.success) {
+					t.factory.showProgress(100, function() {
 						
-						t.factory.hideProgress();
+						t.useCache  = true;
+						t.cacheUrl  = response.cacheUrl;
+						t.cachePath = response.cachePath;
 						
-						t.ui.cropPhoto = $('<div class="'+t.factory.classes.cropPhoto+'"></div>');
-						t.factory.ui.cropPhoto = t.ui.cropPhoto;
-			        	t.ui.instructions = $('<div class="" />').html(PhotoFrame.Lang.instructions);	
-			        	
-			        	if(t.factory.instructions && t.edit === false) {
-			        		t.factory.ui.instructions = $('<div class="'+t.factory.classes.instructions+'" />').html(t.factory.instructions);
-			        		t.factory.ui.dimmer.append(t.factory.ui.instructions);
-			        	}
-			        	else {
-			        		if(t.factory.ui.instructions) {
-				        		t.factory.ui.instructions.hide();
-				        	}
-			        	}
-			        	
-			            t.ui.cropPhoto.html(img);	            
-				        t.factory.ui.crop.prepend(t.ui.cropPhoto);         	
-			            t.factory.ui.crop.center();
-			            t.factory.ui.crop.show();
-			        	   	
-			            t.hideMeta();
-			            
-			            if(t.factory.buttonBar && t.factory.buttonBar.getVisibility()) {
-				            t.factory.showTools();
-			            }
-			            
-			            if(t.edit === false && t.size !== false) {
-			            	var size = t.size.split('x');
-			            	
-			            	size[0] = parseInt(size[0]);
-			            	size[1] = parseInt(size[1]);
-			            	
-			           		var x  = (t.ui.cropPhoto.width()  / 2) - (size[0] / 2);
-			           		var x2 = x + size[0];
-			           		var y  = (t.ui.cropPhoto.height() / 2) - (size[1] / 2);
-			           		var y2 = y + size[1];
-			           		
-			           		t.settings.setSelect = [x, y, x2, y2];
-			            }
-			            
-		            	if(t.title) {
-			        		t.factory.ui.metaTitle.val(t.title);
-			        	}
+						if(response.success) {
+							t.factory.trigger('startCropCallback', t, obj, response.data);
+						}
+						else {
+							t.factory.trigger('startCropCallbackFailed', t, obj, response);
+						}
+						
+						t.load(t.photoUrl(), function(img) {
+							
+							t.factory.hideProgress();
+							
+							t.ui.cropPhoto = $('<div class="'+t.factory.classes.cropPhoto+'"></div>');
+							t.factory.ui.cropPhoto = t.ui.cropPhoto;
+				        	t.ui.instructions = $('<div class="" />').html(PhotoFrame.Lang.instructions);	
 				        	
-			        	if(t.keywords) {
-			        		t.factory.ui.metaKeywords.val(t.keywords);
-			        	}
-			        	
-			        	if(t.description) {
-			        		t.factory.ui.metaDescription.val(t.description);
-			        	}
-			        	
-			            t.initJcrop(callback);
-			            
-			        	t.updateInfo();
-			        	
-			            $(window).resize();
-			            if(t.factory.buttonBar) {
-				            for(var x in t.factory.buttons) {
-			            
-					            t.factory.buttonBar.buttons[x].startCrop(t);
+				        	if(t.factory.instructions && t.edit === false) {
+				        		t.factory.ui.instructions = $('<div class="'+t.factory.classes.instructions+'" />').html(t.factory.instructions);
+				        		t.factory.ui.dimmer.append(t.factory.ui.instructions);
+				        	}
+				        	else {
+				        		if(t.factory.ui.instructions) {
+					        		t.factory.ui.instructions.hide();
+					        	}
+				        	}
+				        	
+				            t.ui.cropPhoto.html(img);	            
+					        t.factory.ui.crop.prepend(t.ui.cropPhoto);         	
+				            t.factory.ui.crop.center();
+				            t.factory.ui.crop.show();
+				        	   	
+				            t.hideMeta();
+				            
+				            if(t.factory.buttonBar && t.factory.buttonBar.getVisibility()) {
+					            t.factory.showTools();
 				            }
-			            }
-			            if(t.needsRendered()) {
-				            t.render(function() {
-				            	t.factory.trigger('startCropEnd', t);
-				            });
-			            }
-			            else {
-				           t.factory.trigger('startCropEnd', t);
-			            }
+				            
+				            if(t.edit === false && t.size !== false) {
+				            	var size = t.size.split('x');
+				            	
+				            	size[0] = parseInt(size[0]);
+				            	size[1] = parseInt(size[1]);
+				            	
+				           		var x  = (t.ui.cropPhoto.width()  / 2) - (size[0] / 2);
+				           		var x2 = x + size[0];
+				           		var y  = (t.ui.cropPhoto.height() / 2) - (size[1] / 2);
+				           		var y2 = y + size[1];
+				           		
+				           		t.settings.setSelect = [x, y, x2, y2];
+				            }
+				            
+			            	if(t.title) {
+				        		t.factory.ui.metaTitle.val(t.title);
+				        	}
+					        	
+				        	if(t.keywords) {
+				        		t.factory.ui.metaKeywords.val(t.keywords);
+				        	}
+				        	
+				        	if(t.description) {
+				        		t.factory.ui.metaDescription.val(t.description);
+				        	}
+				        	
+				            t.initJcrop(callback);
+				            
+				        	t.updateInfo();
+				        	
+				            $(window).resize();
+				            if(t.factory.buttonBar) {
+					            for(var x in t.factory.buttons) {
+				            
+						            t.factory.buttonBar.buttons[x].startCrop(t);
+					            }
+				            }
+				            if(t.needsRendered()) {
+					            t.render(function() {
+					            	t.factory.trigger('startCropEnd', t);
+					            });
+				            }
+				            else {
+					           t.factory.trigger('startCropEnd', t);
+				            }
+						});
+							
 					});
-						
-				});
-				
+				}
+				else {
+					t.factory.showErrors(response.errors);
+				}
 			});
 			
 			t.factory.ui.save.unbind('click').bind('click', function(e) {

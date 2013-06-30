@@ -53,35 +53,54 @@ class Photo_frame_mcp {
 		$return_path   = FALSE;
 		
 		$cache_image   = $this->EE->photo_frame_lib->cache_image($cache, $originalPath, $directory['server_path'], $directory['url']);
-	
-		foreach($buttons as $button)
+		
+		$errors = array();
+		
+		if($cache_image)
+		{	
+			foreach($buttons as $button)
+			{
+				$name = strtolower($button->getName());			
+				$data = array(
+					'originalUrl'  => $originalUrl,
+					'originalPath' => $originalPath,
+					'cachePath'    => $directory['server_path'] . config_item('photo_frame_cache_directory') . '/',
+					'cache'        => $cache,
+					'cacheImgPath' => $cache_image->path,
+					'cacheImgUrl'  => $cache_image->url,
+					'serverPath'   => $directory['server_path'],
+					'path'		   => $path,
+					'manipulation' => isset($manipulations[$name]) ? $manipulations[$name] : array(),
+					'directory'    => $directory,
+					'exifData'	   => $exif_data
+				);
+				
+				$response = $button->startCrop($data, $settings);
+				
+				if(!is_string($response))
+				{	
+					$return[$name] = $response;
+				}
+				else
+				{
+					$return_path = $response;
+					$success     = FALSE;
+				}
+			}
+		}
+		else
 		{
-			$name = strtolower($button->getName());			
-			$data = array(
-				'originalUrl'  => $originalUrl,
-				'originalPath' => $originalPath,
-				'cachePath'    => $directory['server_path'] . config_item('photo_frame_cache_directory') . '/',
-				'cache'        => $cache,
-				'cacheImgPath' => $cache_image->path,
-				'cacheImgUrl'  => $cache_image->url,
-				'serverPath'   => $directory['server_path'],
-				'path'		   => $path,
-				'manipulation' => isset($manipulations[$name]) ? $manipulations[$name] : array(),
-				'directory'    => $directory,
-				'exifData'	   => $exif_data
+			$success 	  = FALSE;
+			$originalPath = FALSE;
+			$originalUrl  = FALSE;
+			$cache_image  = (object) array(
+				'path' => FALSE,
+				'url'  => FALSE
 			);
 			
-			$response = $button->startCrop($data, $settings);
-			
-			if(!is_string($response))
-			{	
-				$return[$name] = $response;
-			}
-			else
-			{
-				$return_path = $response;
-				$success     = FALSE;
-			}
+			$errors[] = $this->EE->photo_frame_lib->parse(array(
+				'directory' => $directory['server_path']
+			), lang('photo_frame_upload_dir_not_exists'));
 		}
 		
 		$this->EE->photo_frame_lib->json(array(
@@ -91,8 +110,9 @@ class Photo_frame_mcp {
 			'cachePath'	   => $cache_image->path,
 			'cacheUrl'	   => $cache_image->url,
 			'data'         => $return,
+			'errors'	   => $errors,
 			//'validPath'  => $return_path,
-			'exifData'	 => $exif_data
+			'exifData'	   => $exif_data
 		));
 	}
 	
