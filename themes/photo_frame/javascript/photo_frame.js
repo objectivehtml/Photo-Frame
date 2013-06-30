@@ -2676,7 +2676,7 @@ var PhotoFrame = {};
 				//url: this.originalUrl,
 				originalUrl: this.originalUrl,
 				originalPath: this.originalPath,
-				exifData: this.response.exif_string,
+				exifData: this.response.exif_string ? this.response.exif_string : '',
 				//path: this.factory.directory.server_path,
 				manipulations: this.manipulations,
 				directory: this.factory.directory
@@ -2703,6 +2703,7 @@ var PhotoFrame = {};
 			//t.factory.showProgress();
 				
 			$.post(PhotoFrame.Actions.start_crop, obj, function(response) {
+			
 				if(response.success) {
 					t.factory.showProgress(100, function() {
 						
@@ -2796,7 +2797,13 @@ var PhotoFrame = {};
 					});
 				}
 				else {
-					t.factory.showErrors(response.errors);
+					if(response.errors) {
+						t.factory.showErrors(response.errors);
+					}
+					else {
+						t.log(response);
+						t.factory.showErrors([PhotoFrame.Lang.unexpected_error]);
+					}
 				}
 			});
 			
