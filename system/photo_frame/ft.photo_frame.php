@@ -29,6 +29,7 @@ class Photo_frame_ft extends EE_Fieldtype {
 		'version'		=> PHOTO_FRAME_VERSION
 	);
 	
+	public $grid 				= FALSE;
 	public $matrix 				= FALSE;
 	public $low_variables		= FALSE;
 	public $has_array_data 		= TRUE;
@@ -325,7 +326,17 @@ class Photo_frame_ft extends EE_Fieldtype {
 		return $this->EE->load->view('zenbu_display', $vars, TRUE);	
 	}
 	
-	function display_field($data)
+	public function grid_display_field($data)
+	{
+		$this->grid = TRUE;
+		
+		// Temp bug fix. Delete before release
+		$this->settings['field_label'] = 'Gallery';
+		
+		return $this->display_field($data);
+	}
+	
+	public function display_field($data)
 	{		
 		// Check to see if we are loading a draft into the publish view
 		if (isset($this->EE->session->cache['ep_better_workflow']['is_draft']) && $this->EE->session->cache['ep_better_workflow']['is_draft']) {
@@ -711,7 +722,7 @@ class Photo_frame_ft extends EE_Fieldtype {
 			
 		}
 		
-		$settings_js 	= '{
+			$settings_js 	= '{
 			fieldName: \''.($this->matrix ? $this->cell_name : $this->field_name).'\',
 			fieldId: \''.$this->field_id.'\',
 			delId: '.(isset($this->var_id) ? $this->var_id : $this->field_id).',
@@ -740,6 +751,8 @@ class Photo_frame_ft extends EE_Fieldtype {
 			callbacks: {
 				init: function() {
 					var t = this;
+					
+					'.((isset($this->settings['col_id']) && $this->grid) ? 't.gridId = '.$this->settings['col_id'].';' : '').'
 					
 					this.safecracker = '.($this->safecracker ? 'true' : 'false').';
 					
@@ -814,7 +827,7 @@ class Photo_frame_ft extends EE_Fieldtype {
 					}
 				},
 				buildUploadUrl: function() {
-					return PhotoFrame.Actions.upload_photo + \'&dir_id='.$settings['photo_frame_upload_group'].(isset($this->var_id) ? '&var_id=' . $this->var_id : '&field_id='.$this->field_id).($settings['photo_frame_folder_id'] ? '&folder_id='.$settings['photo_frame_folder_id'] : '').'\';
+					return PhotoFrame.Actions.upload_photo + \'&dir_id='.$settings['photo_frame_upload_group'].(isset($this->var_id) ? '&var_id=' . $this->var_id : '&field_id='.$this->field_id).($settings['photo_frame_folder_id'] ? '&folder_id='.$settings['photo_frame_folder_id'] : '').($settings['col_id'] ? '&grid_id='.$settings['col_id'] : '').'\';
 				}
 			}
 		}';
@@ -841,6 +854,31 @@ class Photo_frame_ft extends EE_Fieldtype {
 					*/
 				});'
 			);
+		}
+		else if($this->grid)
+		{
+			
+			$this->EE->theme_loader->output('
+				
+				if(!PhotoFrame.Grid) {
+					PhotoFrame.Grid = [];
+				}
+				
+				PhotoFrame.Grid[\''.$this->settings['col_id'].'\'] = '.$settings_js.';
+				
+				Grid.bind(\'photo_frame\', \'display\', function(cell) {
+					var id	     = $(cell).data(\'column-id\');					
+					var settings = PhotoFrame.Grid[id];
+					
+				console.log(this);
+				
+					// settings.fieldName = cell.field.id+"["+cell.row.id+"]["+cell.col.id+"]";
+			
+					new PhotoFrame.Factory(cell, settings);
+				});
+			');
+			
+			// var_dump($this->settings);exit();
 		}
 		else		
 		{			
@@ -924,7 +962,8 @@ class Photo_frame_ft extends EE_Fieldtype {
 			'file_upload'	 => $settings['photo_frame_file_upload'] == 'true' ? TRUE : FALSE,
 			'upload_helper'	 => $settings['photo_frame_upload_helper'],
 			'sortable'       => $settings['photo_frame_sortable'] == 'true' ? TRUE : FALSE,
-			'disable_crop'   => $settings['photo_frame_disable_crop'] == 'true' ? TRUE : FALSE
+			'disable_crop'   => $settings['photo_frame_disable_crop'] == 'true' ? TRUE : FALSE,
+			'grid'			 => $this->grid
 		);
 		
 		if($assets_installed && isset($settings['photo_frame_assets']) && $settings['photo_frame_assets'] == 'true')
@@ -1463,6 +1502,16 @@ class Photo_frame_ft extends EE_Fieldtype {
 		return $this->var_id;
 	}
 	
+	
+	public function grid_save_field($data)
+	{
+		$this->grid = TRUE;
+		
+		$this->save($data);
+		
+		return $this->grid_id;
+	}
+	
 	public function save($data)
 	{
 		$this->EE->load->library('photo_frame_lib');
@@ -1636,6 +1685,13 @@ class Photo_frame_ft extends EE_Fieldtype {
 		$this->post_save($data);
 	}
 	
+	public function grid_post_save($data)
+	{
+		$this->grid = TRUE;
+		
+		$this->post_save($data);
+	}
+	
 	public function post_save_cell($data)
 	{
 		$this->matrix = TRUE;
@@ -1659,6 +1715,10 @@ class Photo_frame_ft extends EE_Fieldtype {
 			$settings = $this->settings;
 		}
 		else if($this->low_variables)
+		{
+			$settings = $this->settings;
+		}
+		else if($this->grid)
 		{
 			$settings = $this->settings;
 		}
@@ -1840,7 +1900,7 @@ class Photo_frame_ft extends EE_Fieldtype {
     		    }
     		}
 		}
-				
+		
 		if(count($new_photos) > 0)
 		{   
 			$this->EE->photo_frame_model->save($new_photos);
@@ -1864,10 +1924,23 @@ class Photo_frame_ft extends EE_Fieldtype {
 		{
 			if(!$this->low_variables)
 			{
-				$this->EE->photo_frame_model->update_entry($this->settings['entry_id'], array(
-					'field_id_'.$this->field_id => $this->settings['entry_id']
-				));
-				
+				if(!$this->grid)
+				{
+					$this->EE->photo_frame_model->update_entry($this->settings['entry_id'], array(
+						'field_id_'.$this->field_id => $this->settings['entry_id']
+					));
+				}
+				else
+				{
+					$this->EE->photo_frame_model->update_grid(
+						$this->settings['grid_field_id'], 
+						$this->settings['grid_row_id'], 
+						array(
+							'col_id_'.$this->settings['col_id'] => $this->settings['grid_row_id']
+						)
+					);
+				}	
+								
 				if($this->is_draft)
 				{
 					$this->EE->photo_frame_model->update_draft_data($this->settings['entry_id'], $this->field_id);
@@ -1971,6 +2044,13 @@ class Photo_frame_ft extends EE_Fieldtype {
 		return $this->validate($data);
 	}
 	
+	public function grid_validate($data)
+	{		
+		$this->grid = TRUE;
+		
+		return $this->validate($data);
+	}
+	
 	public function validate($data)
 	{
 		$post_data = NULL;
@@ -2061,7 +2141,7 @@ class Photo_frame_ft extends EE_Fieldtype {
 	{	
 		$post_photos = $this->EE->input->post('photo_frame_delete_photos', TRUE);
 		
-		$id = $this->low_variables ? $this->var_id : $this->settings['field_id'];
+		$id = $this->low_variables ? $this->var_id : ($this->grid ? $this->settings['col_id'] : $this->settings['field_id']);
 		
 		if(!$this->EE->input->post('epBwfDraft_create_draft') && !$this->EE->input->post('epBwfDraft_update_draft') || $force_delete)
 		{		
@@ -2109,6 +2189,25 @@ class Photo_frame_ft extends EE_Fieldtype {
 		return $this->display_settings($data);
 	}
 	
+	public function grid_display_settings($data)
+	{
+		$this->grid = TRUE;
+		
+		$settings = $this->display_settings($data);
+		
+	    return array(
+	        $this->grid_field_formatting_row($data),
+	        $this->grid_text_direction_row($data),
+	        $this->grid_max_length_row($data),
+	        $settings
+	    );
+	}
+	
+	public function grid_settings_modify_column($data)
+	{
+		return $data;
+	}
+
 	public function display_settings($data)
 	{
 		$this->EE->load->config('photo_frame_config');

@@ -307,7 +307,7 @@ class Photo_frame_model extends CI_Model {
 		}
 	}
 	
-	public function get_settings($field_id = FALSE, $col_id = FALSE, $var_id = FALSE)
+	public function get_settings($field_id = FALSE, $col_id = FALSE, $var_id = FALSE, $grid_id = FALSE)
 	{
 		if($var_id && $var_id != 'false')
 		{
@@ -319,10 +319,16 @@ class Photo_frame_model extends CI_Model {
 			$settings = $this->db->get('matrix_cols');
 			$settings = unserialize(base64_decode($settings->row('col_settings')));
 		}
+		else if($grid_id)
+		{		
+			$this->db->where('col_id', $grid_id);				
+			$settings = $this->db->get('grid_columns');
+			$settings = (array) json_decode($settings->row('col_settings'));
+		}
 		else
 		{
 			$this->db->where('field_id', $field_id);		
-			$settings = $this->db->get('channel_fields');
+			$settings = $this->db->get('channel_fields');			
 			$settings = unserialize(base64_decode($settings->row('field_settings')));
 		}
 		
@@ -526,6 +532,12 @@ class Photo_frame_model extends CI_Model {
 		$this->db->update('channel_data', $data);
 	}
 	
+	public function update_grid($field_id, $row_id, $data)
+	{
+		$this->db->where('row_id', $row_id);
+		$this->db->update('grid_field_'.$field_id, $data);
+	}
+	
 	public function update_cell($row_id, $data)
 	{
 		$this->db->where('row_id', $row_id);
@@ -718,8 +730,9 @@ class Photo_frame_model extends CI_Model {
 	{
 		if(!is_array($settings))
 		{		
-			$field_id = $this->input->get_post('field_id');
-			$settings = $this->photo_frame_model->get_settings($field_id);		
+			$field_id = $this->input->get_post('field_id', TRUE);
+			$grid_id  = $this->input->get_post('grid_id', TRUE);
+			$settings = $this->get_settings($field_id, FALSE, FALSE, $grid_id);		
 		}
 		
 		if(empty($file))

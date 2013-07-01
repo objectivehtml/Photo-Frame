@@ -39,6 +39,7 @@ class Photo_frame_mcp {
 		$field_id      = $this->EE->input->post('fieldId', TRUE) != 'false' ? $this->EE->input->post('fieldId', TRUE) : false;
 		$var_id        = $this->EE->input->post('varId', TRUE) != 'false' ? $this->EE->input->post('varId', TRUE) : false;
 		$col_id        = $this->EE->input->post('colId', TRUE) != 'false' ? $this->EE->input->post('colId', TRUE) : false;
+		$grid_id       = $this->EE->input->post('gridId', TRUE) != 'false' ? $this->EE->input->post('gridId', TRUE) : false;
 		$manipulations = $this->EE->input->post('manipulations', TRUE);
 		$directory     = $this->EE->input->post('directory', TRUE);
 		$cache         = $this->EE->input->post('cache', TRUE);
@@ -46,7 +47,7 @@ class Photo_frame_mcp {
 		$originalPath  = $this->EE->input->post('originalPath', TRUE);
 		$path          = $this->EE->input->post('path', TRUE);
 		$exif_data     = json_encode($this->EE->input->post('exifData', TRUE));
-		$settings      = $this->EE->photo_frame_model->get_settings($field_id, $col_id, $var_id);
+		$settings      = $this->EE->photo_frame_model->get_settings($field_id, $col_id, $var_id, $grid_id);
 		$buttons       = $this->EE->photo_frame_lib->get_buttons();
 		$return        = array();
 		$success       = TRUE;
@@ -151,6 +152,7 @@ class Photo_frame_mcp {
 		$field_id      = $this->EE->input->post('fieldId', TRUE) != 'false' ? $this->EE->input->post('fieldId', TRUE) : false;
 		$var_id        = $this->EE->input->post('varId', TRUE) != 'false' ? $this->EE->input->post('varId', TRUE) : false;
 		$col_id        = $this->EE->input->post('colId', TRUE) != 'false' ? $this->EE->input->post('colId', TRUE) : false;
+		$grid_id       = $this->EE->input->post('gridId', TRUE) != 'false' ? $this->EE->input->post('gridId', TRUE) : false;
 		
 		$orig_path     = $this->EE->input->get_post('originalPath');
 		$orig_url      = $this->EE->input->get_post('originalUrl');
@@ -169,7 +171,7 @@ class Photo_frame_mcp {
 			return $orig_path;	
 		}
 		
-		$settings = $this->EE->photo_frame_model->get_settings($field_id, $col_id, $var_id);
+		$settings = $this->EE->photo_frame_model->get_settings($field_id, $col_id, $var_id, $grid_id);
 		
 		copy($orig_path, $cache_path);
 		

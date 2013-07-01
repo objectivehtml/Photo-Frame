@@ -43,6 +43,10 @@
 		<input type="hidden" name="<?php echo $field_name?>[][placeholder]" value="1" />
 	<?php endif; ?>
 	
+	<?php if($grid): ?>
+		<input type="hidden" name="<?php echo $field_name?>[][placeholder]" value="" class="grid-placeholder" />
+	<?php endif; ?>
+	
 	<!--[if lt IE 10]> </div> <![endif]-->
 
 </div>

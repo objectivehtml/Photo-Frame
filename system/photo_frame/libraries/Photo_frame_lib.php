@@ -118,6 +118,7 @@ class Photo_frame_lib {
 		$field_id      = $this->EE->input->get_post('fieldId');
 		$folder_id 	   = $this->EE->input->get_post('folderId');
 		$var_id        = $this->EE->input->get_post('varId');
+		$grid_id       = $this->EE->input->get_post('gridId');
 		$col_id        = $this->EE->input->get_post('colId');
 		$col_id		   = $col_id != 'false' ? preg_replace('/^col_id_/', '', $col_id) : FALSE;
 		$original_url  = $this->EE->input->get_post('url');	
@@ -125,7 +126,7 @@ class Photo_frame_lib {
 		$asset_id      = $this->EE->input->get_post('assetId');
 		
 		$file_name 	   = $this->EE->photo_frame_lib->filename($original_path);		
-		$settings 	   = $this->EE->photo_frame_model->get_settings($field_id, $col_id, $var_id);
+		$settings 	   = $this->EE->photo_frame_model->get_settings($field_id, $col_id, $var_id, $grid_id);
 	
 		$dir_id        = $settings['photo_frame_upload_group'];	
 		$directory     = $this->EE->filemanager->directory($dir_id, FALSE, TRUE);		
@@ -292,12 +293,14 @@ class Photo_frame_lib {
 		$framed_dir_name = config_item('photo_frame_directory_name');
 		
 		$errors     = array();
-		$dir_id     = $this->EE->input->get_post('dir_id');
-		$folder_id  = $this->EE->input->get_post('folder_id');
-		$index	    = $this->EE->input->get_post('index');
-		$field_id   = $this->EE->input->get_post('field_id');
-		$var_id     = $this->EE->input->get_post('var_id');
-		$settings   = $this->EE->photo_frame_model->get_settings($field_id, FALSE, $var_id);
+		$dir_id     = $this->EE->input->get_post('dir_id', TRUE);
+		$folder_id  = $this->EE->input->get_post('folder_id', TRUE);
+		$index	    = $this->EE->input->get_post('index', TRUE);
+		$field_id   = $this->EE->input->get_post('field_id', TRUE);
+		$var_id     = $this->EE->input->get_post('var_id', TRUE);
+		$grid_id    = $this->EE->input->get_post('grid_id', TRUE);
+		
+		$settings   = $this->EE->photo_frame_model->get_settings($field_id, FALSE, $var_id, $grid_id);
 		
 		$directory  = $this->EE->filemanager->directory($dir_id, FALSE, TRUE);
 		$ie			= $this->EE->input->get_post('ie') == 'true' ? TRUE : FALSE;
@@ -438,6 +441,7 @@ class Photo_frame_lib {
 		$field_id      = $this->EE->input->post('fieldId', TRUE) != 'false' ? $this->EE->input->post('fieldId', TRUE) : false;
 		$var_id        = $this->EE->input->post('varId', TRUE) != 'false' ? $this->EE->input->post('varId', TRUE) : false;
 		$col_id        = $this->EE->input->post('colId', TRUE) != 'false' ? $this->EE->input->post('colId', TRUE) : false;
+		$grid_id       = $this->EE->input->post('gridId', TRUE) != 'false' ? $this->EE->input->post('gridId', TRUE) : false;
 		$asset_id      = $this->EE->input->post('assetId', TRUE) != 'false' ? $this->EE->input->post('assetId', TRUE) : false;
 		
 		$cache 		   = $this->EE->input->get_post('cache', TRUE);
@@ -460,7 +464,7 @@ class Photo_frame_lib {
 		$compression   = $this->EE->input->get_post('compression', TRUE);
 		$compression   = $compression ? $compression : 100;
 		
-		$settings = $this->EE->photo_frame_model->get_settings($field_id, $col_id, $var_id);
+		$settings = $this->EE->photo_frame_model->get_settings($field_id, $col_id, $var_id, $grid_id);
 		
 		//$cache_image   = $this->EE->photo_frame_lib->cache_image($cache, $this->orig, $directory['server_path'], $directory['url']);
 		
