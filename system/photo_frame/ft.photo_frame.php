@@ -440,24 +440,29 @@ class Photo_frame_ft extends EE_Fieldtype {
 			
 			foreach($this->EE->photo_frame_lib->get_buttons() as $obj)
 			{
-				$buttons[] = $obj->getClassName();
+				$button = $obj->getClassName();
 		
-				$this->EE->theme_loader->module_name  = $obj->getModuleName();				
-				$this->EE->theme_loader->js_directory = $obj->getJsDirectory();
-			
-				if(is_array($obj->javascript()))
+				if(!empty($button))
 				{
-					foreach($obj->javascript() as $js)
-					{
-						$this->EE->theme_loader->javascript($js);
-					}
-				}
+					$buttons[] = $button;
+
+					$this->EE->theme_loader->module_name  = $obj->getModuleName();				
+					$this->EE->theme_loader->js_directory = $obj->getJsDirectory();
 				
-				if(is_array($obj->css()))
-				{
-					foreach($obj->css() as $css)
+					if(is_array($obj->javascript()))
 					{
-						$this->EE->theme_loader->css($css);
+						foreach($obj->javascript() as $js)
+						{
+							$this->EE->theme_loader->javascript($js);
+						}
+					}
+					
+					if(is_array($obj->css()))
+					{
+						foreach($obj->css() as $css)
+						{
+							$this->EE->theme_loader->css($css);
+						}
 					}
 				}
 			}	
@@ -827,7 +832,7 @@ class Photo_frame_ft extends EE_Fieldtype {
 					}
 				},
 				buildUploadUrl: function() {
-					return PhotoFrame.Actions.upload_photo + \'&dir_id='.$settings['photo_frame_upload_group'].(isset($this->var_id) ? '&var_id=' . $this->var_id : '&field_id='.$this->field_id).($settings['photo_frame_folder_id'] ? '&folder_id='.$settings['photo_frame_folder_id'] : '').($settings['col_id'] ? '&grid_id='.$settings['col_id'] : '').'\';
+					return PhotoFrame.Actions.upload_photo + \'&dir_id='.$settings['photo_frame_upload_group'].(isset($this->var_id) ? '&var_id=' . $this->var_id : '&field_id='.$this->field_id).($settings['photo_frame_folder_id'] ? '&folder_id='.$settings['photo_frame_folder_id'] : '').(isset($settings['col_id']) ? '&grid_id='.$settings['col_id'] : '').'\';
 				}
 			}
 		}';
@@ -1974,7 +1979,7 @@ class Photo_frame_ft extends EE_Fieldtype {
 			$var_id = NULL;
 		}
 		
-		$this->EE->photo_frame_lib->resize_photos($this->field_id, $this->settings['entry_id'], $col_id, $row_id, $var_id, $var_id, $settings, $this->matrix);
+		$this->EE->photo_frame_lib->resize_photos($this->field_id, $this->settings['entry_id'], $col_id, $row_id, $var_id, $settings, $this->matrix);
 			
 		if(isset($this->EE->session->cache['ep_better_workflow']['is_publish']) && $this->EE->session->cache['ep_better_workflow']['is_publish'] == TRUE)
 		{
