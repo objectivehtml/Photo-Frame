@@ -1123,6 +1123,15 @@ filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#e2e2e2', end
 .photo-frame-column:last-child { margin-right: 0; }
 .two-columns .photo-frame-column { width: 47.5%; margin-right: 2.5%;}
 
+.photo-frame-center { text-align: center; }
+
+.photo-frame-right { float: right; }
+.photo-frame-left { float: left; }
+.photo-frame-clear { clear: both; }
+.photo-frame-clear-left { clear: left; }
+.photo-frame-clear-right { clear: right; }
+
+
 /* -----------------------------------------
 	Clearfix
 ----------------------------------------- */
