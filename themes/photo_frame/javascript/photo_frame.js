@@ -1757,11 +1757,11 @@ var PhotoFrame = {};
 		 */	
 		 
 		callbacks: {
-			ondrag: function() {},
-			ondragstart: function() {},
-			ondragend: function() {},
-			onclose: function() {},
-			onopen: function() {}
+			drag: function() {},
+			dragstart: function() {},
+			dragend: function() {},
+			close: function() {},
+			open: function() {}
 		},
 		
 		/**
@@ -1912,14 +1912,14 @@ var PhotoFrame = {};
 				handle: this.ui.title,
 				containment: 'parent',
 				scroll: false,
-				drag: this.callbacks.ondrag,
+				drag: this.callbacks.drag,
 				start: function(e) {
 					t.bringToFront();
-					t.callback(t.callbacks.ondragstart, e);
+					t.callback(t.callbacks.dragstart, e);
 				},
 				stop: function(e) {
 					t.savePosition();
-					t.callback(t.callbacks.ondragend, e);
+					t.callback(t.callbacks.dragend, e);
 				}
 			});
 			
@@ -1955,7 +1955,7 @@ var PhotoFrame = {};
 			this.ui.window.fadeOut({
 				duration: this.duration
 			}, function() {
-				t.callback(t.callbacks.onclose);
+				t.callback(t.callbacks.close);
 				t.callback(callback);
 			});
 			
@@ -1987,7 +1987,7 @@ var PhotoFrame = {};
 			.css('position', 'fixed');
 			
 			setTimeout(function() {
-				t.callback(t.callbacks.onopen);
+				t.callback(t.callbacks.open);
 				t.callback(callback);
 				t.factory.trigger('windowOpenEnd', t);
 			}, this.duration);
@@ -3293,7 +3293,7 @@ var PhotoFrame = {};
 				callbacks: {
 					init: function() {},
 					cancel: function() {},
-					onProgress: function() {},	
+					progress: function() {},	
 					hide: function() {},	
 					show: function() {},	
 					reset: function() {},	
@@ -3379,7 +3379,7 @@ var PhotoFrame = {};
 			
 			t.ui.fill.css('width', t.progress);
 			
-			t.callbacks.onProgress(t, t.progress);
+			t.callbacks.progress(t, t.progress);
 			
 			setTimeout(function() {
 				if(typeof callback == "function") {
