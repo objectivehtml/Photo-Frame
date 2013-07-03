@@ -1070,6 +1070,12 @@ class Photo_frame_ft extends EE_Fieldtype {
 	
 	private function _get_photos($field_id, $pre_loop = TRUE)
 	{
+		// Set pre_loop to FALSE for earlier versions of EE
+		if(version_compare(APP_VER, '2.5.0', '<'))
+		{
+			$pre_loop = FALSE;
+		}
+
 		if($this->low_variables)
 		{
 			return $this->data;
@@ -1374,9 +1380,9 @@ class Photo_frame_ft extends EE_Fieldtype {
 					
 		$params = array_merge($this->default_params, $params);
 		$params['offset'] = (int) $params['offset'];
-		
+
 		$photos = $this->_get_photos($this->field_id, $params['pre_loop']);
-		
+
 		$return = array();
 		
 		$total_photos = 0;
