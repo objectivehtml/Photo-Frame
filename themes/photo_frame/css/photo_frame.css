@@ -1002,14 +1002,19 @@ filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#e2e2e2', end
 .photo-frame-layers .photo-frame-layer-icon a:hover { color: white; font-size: 20px; text-decoration: none; }
 
 .photo-frame-layers .photo-frame-layer-title { font-size: 18px; padding-top: 12px; padding-left: 55px; }
+
 .photo-frame-layers .photo-frame-layer-actions { position: absolute; right: 0; top: 12px; }
 .photo-frame-layers .photo-frame-layer-actions a { font-size: 15px; color: rgb(160, 160, 160); border-right: 1px solid rgb(71, 71, 69); padding: 5px 10px; text-decoration: none; }
 .photo-frame-layers .photo-frame-layer-actions a:last-child { border-right: none; box-shadow: 1px 0 0 black inset; }
 .photo-frame-layers .photo-frame-layer-actions a:hover { color: white; text-decoration: none; }
+
 .photo-frame-layers .photo-frame-tool-window-content { max-height: 210px; overflow-y: scroll; }
 .photo-frame-layer-empty { text-align: center; font-size: 1em; padding: 10px 0; }
 
-.photo-frame-control-value {
+.photo-frame-control-value,
+.photo-frame-slider-tooltip {
+	position: fixed;
+	display: inline-block;
 	background: rgb(220, 221, 221);
 	text-align: center;
 	padding: .5em 1em;
@@ -1025,7 +1030,10 @@ filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#e2e2e2', end
 	z-index: 1000;
 }
 
-.photo-frame-control-value:after, .photo-frame-control-value:before {
+.photo-frame-control-value:after, 
+.photo-frame-control-value:before,
+.photo-frame-slider-tooltip:after,
+.photo-frame-slider-tooltip:before {
 	bottom: 100%;
 	border: solid transparent;
 	content: " ";
@@ -1035,14 +1043,16 @@ filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#e2e2e2', end
 	pointer-events: none;
 }
 
-.photo-frame-control-value:after {
+.photo-frame-control-value:after,
+.photo-frame-slider-tooltip:after {
 	border-color: rgba(205, 205, 12, 0);
 	border-bottom-color: #dcdcdc;
 	border-width: 3px;
 	left: 50%;
 	margin-left: -3px;
 }
-.photo-frame-control-value:before {
+.photo-frame-control-value:before,
+.photo-frame-slider-tooltip:after {
 	border-color: rgba(220, 220, 220, 0);
 	border-bottom-color: #dcdcdc;
 	border-width: 9px;
@@ -1131,6 +1141,28 @@ filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#e2e2e2', end
 .photo-frame-clear-left { clear: left; }
 .photo-frame-clear-right { clear: right; }
 
+.photo-frame-focus .photo-frame-text-label-cover { display: none; }
+.photo-frame-text-label-wrapper { z-index: 10000; position: relative; display: inline-block; min-height: 60px; min-width: 100px; }
+.photo-frame-text-label-cover { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: transparent; z-index: 100; }
+.photo-frame-text-label-wrapper .photo-frame-textarea {  resize: none; position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: transparent; color: white; border: 0px solid transparent; }
+.photo-frame-text-label-wrapper .photo-frame-textarea.photo-frame-focus {  border: 1px solid black; border-radius: 0; -moz-border-radius: none; -webkit-border-radius: none; }
+
+.photo-frame-text-label-wrapper .ui-resizable-handle,
+ .photo-frame-text-label-wrapper.ui-draggable.ui-draggable-dragging .ui-resizable-handle { background: none; display: none; position: absolute !important; }
+
+.photo-frame-text-label-wrapper.photo-frame-focus .ui-resizable-handle { display: none !important; }
+
+.photo-frame-text-label-wrapper.photo-frame-highlight { border: 1px solid rgb(233, 233, 233); border-radius: none;}
+.photo-frame-text-label-wrapper.photo-frame-highlight .ui-resizable-handle { width: 8px !important; height: 8px !important; background: white; border: 1px solid black; display: inline-block; }
+
+.photo-frame-text-label-wrapper .ui-resizable-e,
+.photo-frame-text-label-wrapper .ui-resizable-w { top: 47% !important; }
+
+.photo-frame-text-label-wrapper .ui-resizable-n,
+.photo-frame-text-label-wrapper .ui-resizable-s { left: 47% !important; }
+.photo-frame-text-label-wrapper .ui-resizable-se { right: -5px !important; bottom: -5px !important; }
+
+body .photo-frame-text-label-wrapper.ui-resizable { position: absolute !important; }
 
 /* -----------------------------------------
 	Clearfix
@@ -1222,3 +1254,4 @@ filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#e2e2e2', end
 .photo-frame-icons .icon-underline:before { content: '\e814'; } /* '' */
 .photo-frame-icons .icon-bold:before { content: '\e812'; } /* '' */
 .photo-frame-icons .icon-italic:before { content: '\e813'; } /* '' */
+.photo-frame-icons .icon-popup:before { content: '\e816'; } /* '' */
