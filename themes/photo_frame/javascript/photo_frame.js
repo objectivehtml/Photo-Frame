@@ -1877,6 +1877,10 @@ var PhotoFrame = {};
 					button: $btn
 				}
 				
+				if(typeof button.init === "function") {
+					button.init(button);
+				}
+				
 				if(typeof button.onclick === "function") {
 					$btn.click(function(e) {
 						button.onclick(e, button);
@@ -1928,6 +1932,7 @@ var PhotoFrame = {};
 			}
 			
 			this.ui.window.mousedown(function() {
+				t.factory.trigger('windowMousedown', t);
 				t.bringToFront();
 			})
 			
@@ -3655,6 +3660,287 @@ var PhotoFrame = {};
 		}
 		
 	});
+
+	PhotoFrame.Slider = PhotoFrame.Class.extend({
+
+		/**
+		 * Slider animation speed
+		 */	
+
+		animate: false,
+
+		/**
+		 * An object of callback methods
+		 */	
+		 
+		callbacks: {
+			create: function(event, ui) {},
+			start: function(event, ui) {},
+			slide: function(event, ui) {},
+			stop: function(event, ui) {}
+		},
+
+		/**
+		 * Is slider disabled?
+		 */	
+
+		disabled: false,
+		 
+		/**
+		 * The PhotoFrame.Factory object
+		 */	
+
+		factory: false,
+
+		/**
+		 * Minimum slider value
+		 */	
+
+		min: false,
+		 
+		/**
+		 * Maximum slider value
+		 */	
+
+		max: false,
+
+		/**
+		 * The slider's orientation
+		 */	
+
+		orientation: false,
+
+		/**
+		 * The parent jQuery object to append the slider
+		 */	
+
+		parent: false,
+
+		/**
+		 * Use the min & max for the slider's range?
+		 */	
+
+		range: false,
+
+		/**
+		 * The slider's increment value
+		 */	
+
+		step: 1,
+
+		/**
+		 * An object of UI elements
+		 */	
+		 
+		ui: {
+		 	slider: false,
+			tooltip: false
+		},
+
+		/**
+		 * The slider value
+		 */	
+
+		value: 0,
+
+		/**
+		 * Constructor method
+		 *
+		 * @param   object  The PhotoFrame.Factory object
+		 * @param   object  The parent jQuery object to append the slider
+		 * @param   object  An object of options
+		 * @return  void
+		 */		
+		 
+		constructor: function(factory, parent, options) {
+			var t 		  = this;
+			var callbacks = (typeof options == "object" ? options.callbacks : {});
+
+		 	this.ui 	   = {};
+		 	this.factory   = factory;
+			this.parent    = parent;
+			this.base(options);
+			this.callbacks = $.extend(true, {}, this.callbacks, callbacks);
+			this.buildSlider();
+		},
+
+		/**
+		 * Build the slider HTML
+		 *
+		 * @return  void
+		 */		
+		 
+		buildSlider: function() {
+			var t 	    = this;
+			var classes = 'photo-frame-slider-tooltip photo-frame-hidden';
+			
+		 	this.ui.slider  = $('<div class="photo-frame-slider"></div>');
+		 	this.ui.tooltip = $('<div class="'+classes+'"></div>');
+
+		 	this.parent.append(this.ui.slider);
+		 	this.parent.append(this.ui.tooltip);
+
+		 	this.ui.slider.slider({
+		 		animate: this.animate,
+		 		disabled: this.disabled,
+				min: this.min,
+				max: this.max,
+				orientation: this.orientation,
+				range: this.range,
+				step: this.step,
+				value: this.value,
+				start: function(e, ui) {
+					t.showTooltip();
+					t.positionTooltip(ui);
+					t.factory.trigger('sliderStart', t);
+					t.callback(t.callbacks.start);
+				},
+				create: function(e, ui) {
+					t.positionTooltip(ui);
+					t.factory.trigger('sliderCreate', t);
+					t.callback(t.callbacks.create);
+				},
+				slide: function(e, ui) {
+					t.positionTooltip(ui);
+					t.factory.trigger('sliderSlide', t);
+					t.callback(t.callbacks.slide);
+				},
+				stop: function(e, ui) {
+					t.hideTooltip();
+					t.positionTooltip(ui);
+					t.factory.trigger('sliderStop', t);
+					t.callback(t.callbacks.stop);
+				}
+			});
+		},
+
+		/**
+		 * Position the tooltip
+		 *
+		 * @param   object  The slider UI object
+		 * @return  void
+		 */		
+		 
+		positionTooltip: function(ui) {			
+			this.ui.tooltip.html(ui.value);		
+			this.ui.tooltip.position({
+				of: ui.handle,
+				my: 'center top',
+				at: 'center bottom'
+			});
+			
+			var top = parseInt(this.ui.tooltip.css('top').replace('px', ''), 10);
+			
+			this.ui.tooltip.css('top', top+10);			
+		},
+
+		/**
+		 * Show the tooltip
+		 *
+		 * @return  void
+		 */		
+		 
+		showTooltip: function() {
+			this.ui.tooltip.removeClass('photo-frame-hidden');
+		},
+
+		/**
+		 * Hide the tooltip
+		 *
+		 * @return  void
+		 */		
+		 
+		hideTooltip: function() {
+			this.ui.tooltip.addClass('photo-frame-hidden');
+		},
+
+		/**
+		 * Enable the slider
+		 *
+		 * @return  void
+		 */		
+		 
+		enable: function() {
+			this.disabled = false;
+			this.ui.slider.slider('enable');
+		},
+
+		/**
+		 * Disable the tooltip
+		 *
+		 * @return  void
+		 */		
+		 
+		disable: function() {
+			this.disabled = true;
+			this.ui.slider.slider('disable');
+		},
+
+		/**
+		 * Get the slider option
+		 *
+		 * @param   string  The slider option name
+		 * @return  mixed
+		 */		
+		 
+		getSliderOption: function(option) {
+			return this.ui.slider.slider(option);
+		},
+
+		/**
+		 * Show the tooltip
+		 *
+		 * @param   string  The option to set
+		 * @param   mixed   The option value
+		 * @return  void
+		 */		
+		 
+		setSliderOption: function(option, value) {
+			this.ui.slider.slider(option, value);
+		},
+
+		/**
+		 * Set the slider value
+		 *
+		 * @param   mixed   The slider value
+		 * @return  void
+		 */		
+		 
+		setValue: function(value) {
+			this.setSliderOption('value', value);
+		},
+
+		/**
+		 * Get the slider value
+		 *
+		 * @return  int
+		 */		
+		 
+		getValue: function() {
+			return this.getSliderOption('value');
+		},
+
+		/**
+		 * Is the slider enabled?
+		 *
+		 * @return  bool
+		 */		
+		 
+		isEnabled: function() {
+			return this.getSliderOption('disabled') ? false : true;
+		},
+
+		/**
+		 * Is the slider disabled?
+		 *
+		 * @return  bool
+		 */		
+		 
+		isDisabled: function() {
+			return this.getSliderOption('disabled');
+		}
+
+	});
 	
 	/**
 	 * This datatable stores the locations of the windows
@@ -3684,12 +3970,24 @@ var PhotoFrame = {};
 		 
 		visible: false,
 		
+		/**
+		 * Get the window visibility
+		 *
+		 * @return  bool
+		 */		
+		 
 		getVisibility: function() {
 			var data = PhotoFrame.Model.WindowLocations.get({title: this.title});
 			
 			return data.length > 0 && data[0].visible ? data[0].visible : false;
 		},
 		
+		/**
+		 * Set the window visibility
+		 *
+		 * @return  void
+		 */		
+		 
 		setVisibility: function(visible) {
 			visible = visible ? true : false;
 			
@@ -3700,6 +3998,12 @@ var PhotoFrame = {};
 			this.visible = visible;
 		},
 		
+		/**
+		 * Save the window position
+		 *
+		 * @return  void
+		 */		
+		 
 		savePosition: function() {
 			PhotoFrame.Model.WindowLocations.insertOrUpdate({title: this.title}, {
 				visible: this.getVisibility(),
@@ -3709,15 +4013,33 @@ var PhotoFrame = {};
 			});	
 		},
 		
+		/**
+		 * Bring window to the front
+		 *
+		 * @return  void
+		 */		
+		 
 		bringToFront: function() {
 			this.factory.zIndexCount++;
 			this.ui.window.css('z-index', this.factory.zIndexCount);
 		},
 		
+		/**
+		 * Does the window have a position?
+		 *
+		 * @return  bool
+		 */		
+		 
 		hasPosition: function() {
 			return this.getPosition() ? true : false;	
 		},
 		
+		/**
+		 * Get the window position
+		 *
+		 * @return  object
+		 */		
+		 
 		getPosition: function() {
 			var pos = PhotoFrame.Model.WindowLocations.get({title: this.title});
 			
@@ -3728,12 +4050,24 @@ var PhotoFrame = {};
 			return pos[0];
 		},
 		
+		/**
+		 * Restore the window position
+		 *
+		 * @return  void
+		 */		
+		 
 		restorePosition: function() {
 			var position = this.getPosition();
 			
 			this.setPosition(position.x, position.y);
 		},
 		
+		/**
+		 * Set the window position
+		 *
+		 * @return  void
+		 */		
+		 
 		setPosition: function(x, y) {
 			this.ui.window.css('left', x).css('top', y);
 		}
