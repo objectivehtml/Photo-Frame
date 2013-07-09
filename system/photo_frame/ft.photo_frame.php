@@ -2152,7 +2152,7 @@ class Photo_frame_ft extends EE_Fieldtype {
 	{	
 		$post_photos = $this->EE->input->post('photo_frame_delete_photos', TRUE);
 		
-		$id = $this->low_variables ? $this->var_id : ($this->grid ? $this->settings['col_id'] : $this->settings['field_id']);
+		$id = $this->low_variables ? $this->var_id : ($this->grid || $this->matrix ? $this->settings['col_id'] : $this->settings['field_id']);
 		
 		if(!$this->EE->input->post('epBwfDraft_create_draft') && !$this->EE->input->post('epBwfDraft_update_draft') || $force_delete)
 		{		
