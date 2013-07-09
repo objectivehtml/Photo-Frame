@@ -129,6 +129,12 @@ $lang	= array(
 	
 	'photo_frame_meta'				     => 'Meta Data',
 	'photo_frame_meta_desc'		 		 => 'Read the meta data for the photo.',
+
+	'photo_frame_text'				     => 'Labels',
+	'photo_frame_fonts'				     => 'Fonts',
+	'photo_frame_new_label'				 => '<i class="icon-plus"></i> New Label',
+	'photo_frame_text_desc'		 		 => 'Create and overlay text labels over photos.',
+	'photo_frame_label_default'			 => 'Your text here...',
 	
 	//--------------------------------------------	
 	'', ''
