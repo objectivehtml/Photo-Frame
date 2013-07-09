@@ -786,7 +786,8 @@ var PhotoFrame = {};
 			t.ui.activity.hide();
 			t.ui.crop.hide();
 			t.ui.form.hide();
-			
+			t.progressBar.hide();
+
 			$.each(errors, function(i, error) {
 				t.showError(error);
 			});
@@ -1028,8 +1029,14 @@ var PhotoFrame = {};
 			options = $.extend({}, options, t.callbacks.responseHandlerSettings());
 			
 			$.get(PhotoFrame.Actions.photo_response, options, function(response) {
-					if(typeof callback == "function") {				
-						callback(response);
+					if(typeof response != "object") {
+						t.log(response);
+						t.showErrors([PhotoFrame.Lang.unexpected_error]);
+					}
+					else {
+						if(typeof callback == "function") {				
+							callback(response);
+						}
 					}
 				}
 			);
