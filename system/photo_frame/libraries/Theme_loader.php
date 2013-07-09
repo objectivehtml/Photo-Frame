@@ -12,7 +12,7 @@
  * @author		Justin Kimbrell
  * @copyright	Copyright (c) 2011, Justin Kimbrell
  * @link 		http://www.objectivehtml.com/libraries/channel_data
- * @version		1.4.2
+ * @version		1.4.3
  * @build		201300521
  */
  
@@ -286,6 +286,12 @@ if(!class_exists('Theme_loader'))
 		 */
 		private function is_valid_url($url) {
 		  if ($this->str_starts_with(strtolower($url), $this->localhost)) {
+		    return true;
+		  }
+		  if ($this->str_starts_with(strtolower($url), 'http://')) {
+		    return true;
+		  }
+		  if ($this->str_starts_with(strtolower($url), 'https://')) {
 		    return true;
 		  }
 		  return preg_match($this->url_format, $url);
