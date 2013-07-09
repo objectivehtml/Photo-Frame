@@ -776,7 +776,7 @@ class Photo_frame_ft extends EE_Fieldtype {
 						    kinds: [\'image\'],
 						    onSelect: function(files) {
 						    	t.edit = false;
-						    	
+
 						    	if(files.length == 1) {
 						    		t.showProgress(0, function() {
 							    		t._fileBrowserResponseHandler(files[0].url, files[0].id, function(response) {
@@ -947,12 +947,12 @@ class Photo_frame_ft extends EE_Fieldtype {
 			$var_id = $this->var_id;
 			$var    = $this->EE->photo_frame_model->get_variable($var_id)->row();
 		}
-		
+
 		$vars = array(
 			'id'             => $this->field_id,
 			'safecracker'    => $this->safecracker,
 			'selector'       => $uid,
-			'field_label'    => $this->low_variables ? $var->variable_label : $settings['field_label'],
+			'field_label'    => $this->low_variables ? $var->variable_label : isset($settings['field_label']) ? $settings['field_label'] : '',
 			'field_name'     => ($this->matrix ? $this->cell_name : $this->field_name),
 			'theme'          => $theme ? $theme->getWrapperClass() : '',
 			'data'   	     => $saved_data,
