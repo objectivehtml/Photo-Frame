@@ -952,7 +952,7 @@ class Photo_frame_ft extends EE_Fieldtype {
 			'id'             => $this->field_id,
 			'safecracker'    => $this->safecracker,
 			'selector'       => $uid,
-			'field_label'    => $this->low_variables ? $var->variable_label : isset($settings['field_label']) ? $settings['field_label'] : '',
+			'field_label'    => $this->low_variables ? $var->variable_label : (isset($settings['field_label']) ? $settings['field_label'] : ''),
 			'field_name'     => ($this->matrix ? $this->cell_name : $this->field_name),
 			'theme'          => $theme ? $theme->getWrapperClass() : '',
 			'data'   	     => $saved_data,
