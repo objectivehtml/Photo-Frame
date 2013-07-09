@@ -77,6 +77,8 @@
 						$target.html(PhotoFrame.Lang.hide_all);
 						t.showAll();
 					}
+
+					e.preventDefault();
 				}
 			},{
 				text: PhotoFrame.Lang.rerender,
