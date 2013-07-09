@@ -14,7 +14,7 @@ class ImageEditor extends BaseClass {
 	
 	protected $compression = 100; // JPEG only
 	
-	protected $bgd_color = 0;
+	protected $bgdColor = 0;
 	
 	/* -----------------------------------------
 		Static Functions
@@ -228,9 +228,9 @@ class ImageEditor extends BaseClass {
 	 * @access	public
 	 * @return	object
 	 */
-	public function getType($return_int = FALSE)
+	public function getType($returnInt = FALSE)
 	{
-		if($return_int)
+		if($returnInt)
 		{
 			return $this->type;	
 		}
@@ -337,9 +337,9 @@ class ImageEditor extends BaseClass {
 	 * @param   int		Ignore the image transparency 
 	 * @return	object
 	 */
-	public function rotate($angle = 0, $ignore_transparent = 0)
+	public function rotate($angle = 0, $ignoreTransparent = 0)
 	{
-		$this->image = imagerotate($this->image, $angle, $this->bgd_color, $ignore_transparent);
+		$this->image = imagerotate($this->image, $angle, $this->bgdColor, $ignoreTransparent);
 		
 		$this->save();
 	}
@@ -414,15 +414,15 @@ class ImageEditor extends BaseClass {
 	 */
 	public function resize($width, $height, $x = 0, $y = 0, $x2 = 0, $y2 = 0)
 	{
-		$resized_image = imagecreatetruecolor($width, $height);
+		$resizedImage = imagecreatetruecolor($width, $height);
 		
 		/* Check if this image is PNG or GIF, then set if Transparent*/  
 		
-		$resized_image = $this->preserve_transparency($resized_image, $width, $height);
+		$resizedImage = $this->preserveTransparency($resizedImage, $width, $height);
 		
-		imagecopyresampled($resized_image, $this->image, $x2, $y2, $x, $y, $width, $height, $this->getWidth(), $this->getHeight());
+		imagecopyresampled($resizedImage, $this->image, $x2, $y2, $x, $y, $width, $height, $this->getWidth(), $this->getHeight());
 		
-		$this->image = $resized_image;
+		$this->image = $resizedImage;
 		
 		$this->save();
 	}
@@ -437,7 +437,7 @@ class ImageEditor extends BaseClass {
 	 * @param   int 	A new image height
 	 * @return	object
 	 */
-	public function preserve_transparency($image = FALSE, $width = FALSE, $height = FALSE)
+	public function preserveTransparency($image = FALSE, $width = FALSE, $height = FALSE)
 	{
 		$return = TRUE;
 		
@@ -489,15 +489,15 @@ class ImageEditor extends BaseClass {
 	 */
 	public function crop($width, $height, $x = 0, $y = 0, $x2 = 0, $y2 = 0)
 	{
-		$resized_image = imagecreatetruecolor($width, $height);
+		$resizedImage = imagecreatetruecolor($width, $height);
 		
 		/* Check if this image is PNG or GIF, then set if Transparent*/  
 		
-		$this->preserve_transparency($resized_image, $width, $height);
+		$this->preserveTransparency($resizedImage, $width, $height);
 		
-		imagecopyresampled($resized_image, $this->image, $x2, $y2, $x, $y, $width, $height, $width, $height);
+		imagecopyresampled($resizedImage, $this->image, $x2, $y2, $x, $y, $width, $height, $width, $height);
 		
-		$this->image = $resized_image;
+		$this->image = $resizedImage;
 		
 		$this->save();
 	}
@@ -721,7 +721,7 @@ class ImageEditor extends BaseClass {
 		}
 		else
 		{
-			$this->_imageflip($dir);
+			$this->_imageFlip($dir);
 		}
 		
 		$this->save();
@@ -750,7 +750,7 @@ class ImageEditor extends BaseClass {
 	        {   
 	            $index = imagecolorat($this->image, $x, $y);
 	            $rgb   = imagecolorsforindex($this->image, $index);
-	            $rgb   = $this->_vignette_effect($sharp, $level, $x, $y, $rgb);
+	            $rgb   = $this->_vignetteEffect($sharp, $level, $x, $y, $rgb);
 	            $color = imagecolorallocate($this->image, $rgb['red'], $rgb['green'], $rgb['blue']);
 	            imagesetpixel($this->image, $x, $y, $color);   
 	        }
@@ -807,6 +807,69 @@ class ImageEditor extends BaseClass {
 	    
 	    $this->save();
 	}
+
+	public function label($text, $x, $y, $width)
+	{
+		$font = '/Users/justinkimbrell/Github/Photo Frame Text Pack/system/photo_frame_text_pack/fonts/Open_Sans/OpenSans-Regular.ttf';
+
+		$font_size        = 14; 
+		$text_angle        = 0; 
+		$text_padding    = 10; // Img padding - around text 
+
+		$color = imagecolorallocate($this->image, 255, 255, 255); 
+		imagettftext($this->image, 
+		    $font_size, 
+		    $text_angle, 
+		    $x, 
+		    $y, 
+		    $color, 
+		    $font, 
+		    $this->_makeTextBlock($text, $font, $font_size, $width)
+		);
+
+		$this->save();
+	}
+	
+	/*
+	private function _calculateTextBox($text,$fontFile,$fontSize,$fontAngle = 0)
+	{
+	    $rect = imagettfbbox($fontSize,$fontAngle,$fontFile,$text); 
+	    $minX = min(array($rect[0],$rect[2],$rect[4],$rect[6])); 
+	    $maxX = max(array($rect[0],$rect[2],$rect[4],$rect[6])); 
+	    $minY = min(array($rect[1],$rect[3],$rect[5],$rect[7])); 
+	    $maxY = max(array($rect[1],$rect[3],$rect[5],$rect[7])); 
+	    
+	    return array( 
+	    	'left'   => abs($minX) - 1, 
+	     	'top'    => abs($minY) - 1, 
+	     	'width'  => $maxX - $minX, 
+	     	'height' => $maxY - $minY, 
+	     	'box'    => $rect 
+	    ); 
+	} 
+	*/
+	
+	private function _makeTextBlock($text, $font, $size, $width) 
+	{    
+	    $words = explode(' ', $text); 
+	    $lines = array($words[0]); 
+	    $currentLine = 0; 
+	    for($i = 1; $i < count($words); $i++) 
+	    { 
+	        $lineSize = imagettfbbox($fontsize, 0, $font, $lines[$currentLine] . ' ' . $words[$i]); 
+	        if($lineSize[2] - $lineSize[0] < $width) 
+	        { 
+	            $lines[$currentLine] .= ' ' . $words[$i]; 
+	        } 
+	        else 
+	        { 
+	            $currentLine++; 
+	            $lines[$currentLine] = $words[$i]; 
+	        } 
+	    } 
+	    
+	    return implode("\n", $lines); 
+	} 
 	
 	public function highlightColor($r, $g, $b, $level = 9500)
 	{
@@ -836,7 +899,7 @@ class ImageEditor extends BaseClass {
 	    $this->save();
 	}
 	
-	private function _vignette_effect($sharp, $level, $x, $y, $rgb)
+	private function _vignetteEffect($sharp, $level, $x, $y, $rgb)
 	{
 	    $width  = $this->getWidth();
 	    $height = $this->getHeight();
@@ -865,38 +928,38 @@ class ImageEditor extends BaseClass {
 	 * @param	string  The direction of the flip (horizon|vertical|both)
 	 * @return	void
 	 */
-	private function _imageflip($mode)
+	private function _imageFlip($mode)
 	{
-		$width      = $this->getWidth();
-	    $height     = $this->getHeight();
-	    $src_x      = 0;
-	    $src_y      = 0;
-	    $src_width  = $width;
-	    $src_height = $height;
+		$width     = $this->getWidth();
+	    $height    = $this->getHeight();
+	    $srcX      = 0;
+	    $srcY      = 0;
+	    $srcWidth  = $width;
+	    $srcHeight = $height;
 			
 	    switch ($mode)
 	    {
 	        case 'vertical': //vertical
-	            $src_y      = $height -1;
-	            $src_height = -$height;
+	            $srcY      = $height -1;
+	            $srcHeight = -$height;
 	        break;
 	
 	        case 'horizontal': //horizontal
-	            $src_x      = $width -1;
-	            $src_width  = -$width;
+	            $srcX      = $width -1;
+	            $srcWidth  = -$width;
 	        break;
 	
 	        case 'both': //both
-	            $src_x      = $width -1;
-	            $src_y      = $height -1;
-	            $src_width  = -$width;
-	            $src_height = -$height;
+	            $srcX      = $width -1;
+	            $srcY      = $height -1;
+	            $srcWidth  = -$width;
+	            $srcHeight = -$height;
 	        break;
 	    }
 	    
 	    $imgdest = imagecreatetruecolor($width, $height);
 	
-	    imagecopyresampled($imgdest, $this->image, 0, 0, $src_x, $src_y , $width, $height, $src_width, $src_height);
+	    imagecopyresampled($imgdest, $this->image, 0, 0, $srcX, $srcY , $width, $height, $srcWidth, $srcHeight);
 	    
 	    $this->image = $imgdest;
 	}
