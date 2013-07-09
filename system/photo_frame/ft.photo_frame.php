@@ -419,6 +419,7 @@ class Photo_frame_ft extends EE_Fieldtype {
 		$this->EE->theme_loader->css('jquery.jcrop');
 		$this->EE->theme_loader->javascript('base');
 		$this->EE->theme_loader->javascript('localStorageDB');
+		$this->EE->theme_loader->javascript('spectrum');
 		$this->EE->theme_loader->javascript('photo_frame');
 		$this->EE->theme_loader->javascript('jquery.ui');
 		$this->EE->theme_loader->javascript('jquery.ui.widget');
@@ -874,9 +875,8 @@ class Photo_frame_ft extends EE_Fieldtype {
 				Grid.bind(\'photo_frame\', \'display\', function(cell) {
 					var id	     = $(cell).data(\'column-id\');					
 					var settings = PhotoFrame.Grid[id];
-					
-				console.log(this);
-				
+					var isNew    = cell.data("row-id") ? true : false;
+
 					// settings.fieldName = cell.field.id+"["+cell.row.id+"]["+cell.col.id+"]";
 			
 					new PhotoFrame.Factory(cell, settings);

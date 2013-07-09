@@ -152,6 +152,51 @@ var PhotoFrame = {};
 		}
 	});
 	
+	PhotoFrame.BaseElement = PhotoFrame.Class.extend({
+
+		/**
+		 * An object of callback methods
+		 */	
+		 
+		callbacks: {},
+
+		/**
+		 * The PhotoFrame.Factory object
+		 */	
+
+		factory: false,
+
+		/**
+		 * The object's unique identifier (optional)
+		 */	
+
+		id: false,
+
+		/**
+		 * The parent jQuery object
+		 */	
+
+		parent: false,
+
+		/**
+		 * An object of UI elements
+		 */	
+		 
+		ui: {},
+
+		constructor: function(factory, parent, options) {
+			var t 		  = this;
+			var callbacks = (typeof options == "object" ? options.callbacks : {});
+
+		 	this.ui 	   = {};
+		 	this.factory   = factory;
+			this.parent    = parent;
+			this.base(options);
+			this.callbacks = $.extend(true, {}, this.callbacks, callbacks);
+		}
+		
+	});
+
 	PhotoFrame.Factory = PhotoFrame.Class.extend({
 		
 		/**
@@ -462,7 +507,7 @@ var PhotoFrame = {};
 			
 			t.ui.toolbar.hide();
 			t.ui.body.append(t.ui.dimmer);
-		
+
 			if(t.infoPanel) {
 				t.ui.info = t.ui.dimmer.find('.'+t.classes.infoPanel);
 				t.ui.info.draggable();
@@ -1734,7 +1779,23 @@ var PhotoFrame = {};
 		 * @return	void
 		 */
 		
-		reset: function() {}
+		reset: function() {},
+
+		/**
+		 * Triggers each time the startCropCallback is called
+		 *
+		 * @return	void
+		 */
+		
+		startCropCallback: function() {},
+
+		/**
+		 * Triggers each time the startCropCallbackFailed is called
+		 *
+		 * @return	void
+		 */
+		
+		startCropCallbackFailed: function() {}
 		
 	});
 		
@@ -2719,9 +2780,15 @@ var PhotoFrame = {};
 						t.cachePath = response.cachePath;
 						
 						if(response.success) {
+							$.each(t.factory.buttonBar.buttons, function(i, button) {
+								button.startCropCallback(t, obj, response.data);
+							});
 							t.factory.trigger('startCropCallback', t, obj, response.data);
 						}
 						else {
+							$.each(t.factory.buttonBar.buttons, function(i, button) {
+								button.startCropCallbackFailed(t, obj, response.data);
+							});
 							t.factory.trigger('startCropCallbackFailed', t, obj, response);
 						}
 						
@@ -2830,6 +2897,8 @@ var PhotoFrame = {};
 		    		t.hideMeta();		    		
 			    	t.saveCrop();
 		    	}
+
+		    	e.preventDefault();
 			});
 			
 			t.factory.ui.cancel.unbind('click').click(function(e) {
@@ -3661,7 +3730,7 @@ var PhotoFrame = {};
 		
 	});
 
-	PhotoFrame.Slider = PhotoFrame.Class.extend({
+	PhotoFrame.Slider = PhotoFrame.BaseElement.extend({
 
 		/**
 		 * Slider animation speed
@@ -3738,10 +3807,16 @@ var PhotoFrame = {};
 		},
 
 		/**
+		 * Should the slider use the preferences?
+		 */	
+
+		usePreferences: false,
+
+		/**
 		 * The slider value
 		 */	
 
-		value: 0,
+		value: false,
 
 		/**
 		 * Constructor method
@@ -3753,14 +3828,7 @@ var PhotoFrame = {};
 		 */		
 		 
 		constructor: function(factory, parent, options) {
-			var t 		  = this;
-			var callbacks = (typeof options == "object" ? options.callbacks : {});
-
-		 	this.ui 	   = {};
-		 	this.factory   = factory;
-			this.parent    = parent;
-			this.base(options);
-			this.callbacks = $.extend(true, {}, this.callbacks, callbacks);
+			this.base(factory, parent, options);
 			this.buildSlider();
 		},
 
@@ -3793,25 +3861,28 @@ var PhotoFrame = {};
 					t.showTooltip();
 					t.positionTooltip(ui);
 					t.factory.trigger('sliderStart', t);
-					t.callback(t.callbacks.start);
+					t.callback(t.callbacks.start, e, ui);
 				},
 				create: function(e, ui) {
 					t.positionTooltip(ui);
 					t.factory.trigger('sliderCreate', t);
-					t.callback(t.callbacks.create);
+					t.callback(t.callbacks.create, e, ui);
 				},
 				slide: function(e, ui) {
 					t.positionTooltip(ui);
 					t.factory.trigger('sliderSlide', t);
-					t.callback(t.callbacks.slide);
+					t.callback(t.callbacks.slide, e, ui);
+					t.setPreference();
 				},
 				stop: function(e, ui) {
 					t.hideTooltip();
 					t.positionTooltip(ui);
 					t.factory.trigger('sliderStop', t);
-					t.callback(t.callbacks.stop);
+					t.callback(t.callbacks.stop, e, ui);
 				}
 			});
+
+		 	this.setValueFromPreferences();
 		},
 
 		/**
@@ -3938,6 +4009,396 @@ var PhotoFrame = {};
 		 
 		isDisabled: function() {
 			return this.getSliderOption('disabled');
+		},
+
+		/**
+		 * Set the last slider value to the preferences
+		 *
+		 * @return  void
+		 */		
+		 
+		setPreference: function() {
+			if(this.usePreferences) {
+				PhotoFrame.Model.Preferences.setPreference('sliderLastValue', this.getValue());
+			}
+		},
+
+		/**
+		 * Get the last slider value to the preferences
+		 *
+		 * @return  mixed
+		 */		
+		 
+		getPreference: function() {
+			if(this.usePreferences) {
+				return PhotoFrame.Model.Preferences.getPreference('sliderLastValue');
+			}
+			return false;
+		},
+
+		/**
+		 * Set the slider value from the preferences
+		 *
+		 * @return  value
+		 */		
+		 
+		setValueFromPreferences: function() {
+			if(this.usePreferences && this.value === false) {
+				this.setValue(this.getPreference());
+			}
+		}
+
+	});
+	
+	PhotoFrame.ColorPicker = PhotoFrame.BaseElement.extend({
+
+		/**
+		 * An object of callback methods
+		 */	
+
+		callbacks: {
+			init: function() {},
+			change: function(color) {},
+			move: function(color) {},
+			hide: function(color) {},
+			show: function(color) {},
+			beforeShow: function(color) {},
+		},
+
+		/**
+		 * Override the default cancel button text
+		 */	
+
+		cancelText: false,
+
+		/**
+		 * Override the default choose button text
+		 */	
+
+		chooseText: false,
+
+		/**
+		 * Add an additional class name to the color picker
+		 */	
+
+		className: 'photo-frame-color-picker',
+
+		/**
+		 * When clicking outside the colorpicker, force to change the value
+		 */	
+
+		clickoutFiresChange: false,
+
+		/**
+		 * The default color string
+		 */	
+
+		color: false,
+
+		/**
+		 * Disable the color picker by default
+		 */	
+
+		disabled: false,
+
+		/**
+		 * Flat mode
+		 */	
+
+		flat: false,
+
+		/**
+		 * Fonts PhotoFrame.Window object ID
+		 */
+
+		fontWindowId: 'fontWindowColorPicker',
+
+		/**
+		 * The default colors in the palette
+		 */	
+
+		palette: [],
+
+		/**
+		 * Change the preferred output of the color format
+		 * Accepted Values: hex|hex6|hsl|rgb|name
+		 */	
+
+		preferredFormat: 'hex',
+
+		/**
+		 * Show the alpha transparency option
+		 */	
+
+		showAlpha: false,
+
+		/**
+		 * Show the cancel and choose buttons
+		 */	
+
+		showButtons: false,
+
+		/**
+		 * Show the initial color beside the new color
+		 */	
+
+		showInitial: false,
+
+		/**
+		 * Allow free form typing via text input
+		 */	
+
+		showInput: false,
+
+		/**
+		 * Show the user created color palette
+		 */	
+
+		showPalette: false,
+
+		/**
+		 * Show the color that is selected within the palette
+		 */	
+
+		showSelectionPalette: false,
+
+		/**
+		 * Should the slider use the preferences?
+		 */	
+
+		usePreferences: false,
+
+
+		constructor: function(factory, parent, options) {
+			this.base(factory, parent, options);
+			this.buildColorPicker();
+
+			if(!this.color) {
+				this.setColorFromPreferences();
+			}
+		},
+
+		buildColorPicker: function() {
+			var t = this;
+
+			this.parent.spectrum({
+				cancelText: this.cancelText,
+				chooseText: this.chooseText,
+				className: this.className,
+				clickoutFiresChange: this.clickoutFiresChange,
+				color: this.color,
+				disabled: this.disabled,
+				flat: this.flat,
+				palette: this.palette,
+				preferredFormat: this.preferredFormat,
+				showAlpha: this.showAlpha,
+				showButtons: this.showButtons,
+				showInitial: this.showInitial,
+				showInput: this.showInput,
+				showPalette: this.showPalette,
+				showSelectionPalette: this.showSelectionPalette,
+				change: function(color) {
+					t.setPreference();
+					t.callback(t.callbacks.change, color);
+					t.factory.trigger('colorPickerChange', t, color);
+				},
+				move: function(color) {
+					t.callback(t.callbacks.move, color);
+					t.factory.trigger('colorPickerMove', t, color);
+				},
+				hide: function(color) {
+					t.callback(t.callbacks.hide, color);
+					t.factory.trigger('colorPickerHide', t, color);
+				},
+				show: function(color) {
+					t.callback(t.callbacks.show, color);
+					t.factory.trigger('colorPickerShow', t, color);
+				},
+				beforeShow: function(color) {
+					t.callback(t.callbacks.beforeShow, color);
+					t.factory.trigger('colorPickerBeforeShow', t, color);
+				}
+			});
+
+			this.callback(this.callbacks.init);
+			this.factory.trigger('colorPickerInit');
+		},
+
+		get: function() {
+			return this.getColor();
+		},
+
+		set: function(color) {
+			this.setColor(color);
+		},
+
+		getRgb: function() {
+			return this.getColor().toRgb();
+		},
+		
+		getRgbString: function() {
+			return this.getColor().toRgbString();
+		},
+
+		getHsl: function() {
+			return this.getColor().toHsl();
+		},
+		
+		getHslString: function() {
+			return this.getColor().toHslString();
+		},
+
+		getName: function() {
+			return this.getColor().toName();
+		},
+		
+		getPercentageRgb: function() {
+			return this.getColor().toPercentageRgb();
+		},
+		
+		getPercentageRgbString: function() {
+			return this.getColor().toPercentageRgbString();
+		},
+		
+		getHex: function() {
+			return this.getColor().toHex();
+		},
+
+		getHexString: function() {
+			return this.getColor().toHexString();
+		},
+
+		getColor: function() {
+			return this.parent.spectrum('get');
+		},
+		
+		getString: function(format) {
+			return this.getColor().toString(format);
+		},
+
+		setColor: function(color) {
+			this.parent.spectrum('set', color);
+			this.setPreference();
+		},
+		
+		enable: function() {
+			this.parent.spectrum('enable');
+			this.factory.trigger('colorPickerEnable');
+		},
+
+		disable: function() {
+			this.parent.spectrum('disable');
+			this.factory.trigger('colorPickerDiable');
+		},
+
+		destroy: function() {
+			this.parent.spectrum('destroy');
+			this.factory.trigger('colorPickerDestroy');
+		},
+
+		show: function() {
+			this.parent.spectrum('show');
+			this.factory.trigger('colorPickerShow');
+		},
+
+		hide: function() {
+			this.parent.spectrum('hide');
+			this.factory.trigger('colorPickerHide');
+		},
+
+		toggle: function() {
+			this.parent.spectrum('toggle');
+			this.factory.trigger('colorPickerToggle');
+		},
+
+		getPreference: function() {
+			var _return = {
+				rgb: PhotoFrame.Model.Preferences.getPreference('colorPickerLastColorRgb'),
+				hex: PhotoFrame.Model.Preferences.getPreference('colorPickerLastColorHex')
+			};
+
+			if(!this.usePreferences && typeof _return == "array" && _return.length == 0) {
+				return false;
+			}
+
+			return _return;
+		},
+
+		setPreference: function() {
+			if(this.usePreferences) {
+				PhotoFrame.Model.Preferences.setPreference('colorPickerLastColorRgb', this.getRgbString());
+				PhotoFrame.Model.Preferences.setPreference('colorPickerLastColorHex', this.getHexString());
+			}
+		},
+
+		setColorFromPreferences: function() {
+			if(this.usePreferences) {
+				this.setColor(this.getPreference().hex);
+			}
+		}
+	});
+
+	/**
+	 * This datatable stores the locations of the windows
+	 */
+	 
+	PhotoFrame.Model.Preferences = new PhotoFrame.Database({
+		
+		/**
+		 * The name of the datatable
+		 */
+		 
+		name: 'photoFramePrefs',
+		
+		/**
+		 * An array of datatable columns
+		 */
+		 
+		fields: ['key', 'value'],
+
+		/**
+		 * Get one or more preferences by defining a key.
+		 * If no key is present, all preferences are returned.
+		 *
+		 * @param   mixed  A preference name (the key)
+		 * @return  bool
+		 */		
+		 
+		getPreference: function(key) {
+			if(typeof key != "undefined") {
+				var _return = PhotoFrame.Model.Preferences.get({key: key});
+
+				if(_return.length > 0) {
+					return _return[0].value;
+				}
+
+				return false;
+			}
+			return PhotoFrame.Model.Preferences.get();
+		},
+		
+		/**
+		 * Set one or preferences by passing a key and value.
+		 * If an object is passed, it will set multiple prefs.
+		 *
+		 * @param  mixed  The preference name (Or object of keys and values)
+		 * @param  mixed  The preference value
+		 * @return void
+		 */		
+		 
+		setPreference: function(key, value) {
+			if(typeof key == "object") {
+				var obj = key;
+				for(key in obj) {
+		  			this.setPreference(key, obj[key]);
+	  			}
+			}
+			else {
+				PhotoFrame.Model.Preferences.insertOrUpdate({key: key}, {
+					key: key,
+					value: value
+				});	
+			}
 		}
 
 	});
