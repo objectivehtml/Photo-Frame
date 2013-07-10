@@ -826,12 +826,15 @@ class Photo_frame_model extends CI_Model {
 	public function get_upload_group($id)
 	{	
 		$this->db->where('id', $id);
+		$this->db->where('site_id', config_item('site_id'));
 		
 		return $this->get_upload_groups()->row();
 	}
 	
 	public function get_upload_groups()
 	{
+		$this->db->where('site_id', config_item('site_id'));
+		
 		return $this->db->get('upload_prefs');
 	}
 	
