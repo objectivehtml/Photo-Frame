@@ -27,6 +27,12 @@
 		enabled: true,
 		
 		/**
+		 * Should Photo Frame render the photo after removing the layer
+		 */	
+		 
+		renderAfterRemovingLayer: false,
+		
+		/**
 		 * The JSON object used for Window settings 
 		 */
 		

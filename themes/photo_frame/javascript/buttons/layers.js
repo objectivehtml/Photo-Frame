@@ -247,7 +247,7 @@
 					
 					trash.click(function(e) {
 						t.removeLayer(x, manipulation, trash);
-						if(x != 'crop') {
+						if(button.renderAfterRemovingLayer) {
 							// no need to render when removing the crop layer
 							t.render(function() {								
 								button.removeLayer();

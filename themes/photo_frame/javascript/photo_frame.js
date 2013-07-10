@@ -1506,6 +1506,12 @@ var PhotoFrame = {};
 		$obj: false,
 	
 		/**
+		 * Should Photo Frame render the photo after removing the layer
+		 */	
+		 
+		renderAfterRemovingLayer: true,
+		
+		/**
 		 * The primary PhotoFrame.Window object 
 		 */
 		
