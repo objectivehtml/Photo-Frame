@@ -11,7 +11,7 @@
  * @build		20121217
  */
 
-require 'config/photo_Frame_config.php';
+require 'config/photo_frame_config.php';
 
 class Photo_frame_ext {
 
