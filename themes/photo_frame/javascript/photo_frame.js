@@ -2477,7 +2477,7 @@ var PhotoFrame = {};
 		},
 		
 		hideManipulation: function(title) {			
-			var name = title.toLowerCase();
+			var name   = title.toLowerCase();
 			var exists = this.manipulations[name] ? this.manipulations[name] : false;
 			if(this.manipulations[name]) {
 				this.manipulations[name].visible = false;
@@ -2486,7 +2486,7 @@ var PhotoFrame = {};
 		},
 		
 		showManipulation: function(title) {			
-			var name = title.toLowerCase();
+			var name   = title.toLowerCase();
 			var exists = this.manipulations[name] ? this.manipulations[name] : false;
 			if(this.manipulations[name]) {
 				this.manipulations[name].visible = true;
