@@ -1698,6 +1698,16 @@ var PhotoFrame = {};
 		},
 		
 		/**
+		 * Get the manipulation visibility
+		 *
+		 * @return	bool
+		 */
+		
+		getVisibility: function() {
+			return this.getManipulation() ? this.getManipulation().visible : true;
+		},
+		
+		/**
 		 * Get the manipulation
 		 *
 		 * @return	mixed  Returns the manipulation object or FALSE is doesn't exist
