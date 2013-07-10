@@ -1808,6 +1808,28 @@ var PhotoFrame = {};
 		},
 		
 		/**
+		 * Get the data used for the save() method
+		 *
+		 * @return	object
+		 */
+		
+		getData: function() {
+			return {};
+		},
+
+		/**
+		 * Add a manipulation and save the refreshed JSON object.
+		 * Note, this method is different than render().
+		 *
+		 * @return	object
+		 */
+		
+		save: function(data) {
+			this.addManipulation(this.getVisibility(), data);
+			this.updateJson();
+		},
+
+		/**
 		 * Apply the effect to the photo
 		 *
 		 * @return	void
