@@ -140,6 +140,14 @@ var PhotoFrame = {};
   			}
 		},
 		
+		/**
+		 * Remove an index from an array
+		 *
+		 * @param 	array 	The subject array
+		 * @param 	int 	The index to remove from the array
+		 * @return  array
+		 */		
+		
 		removeIndex: function(array, index) {
 			 for(var i=0; i<array.length; i++) {
 		        if(array[i] == index) {
@@ -149,7 +157,30 @@ var PhotoFrame = {};
 		    }
 		    
 		    return array;
+		},
+
+		/**
+		 * Parse string into a JSON object (or array)
+		 *
+		 * @param 	string 	The string to parse
+		 * @return  mixed
+		 */		
+		
+		jsonEncode: function(str) {
+			return JSON.parse(str);
+		},
+
+		/**
+		 * Convert a JSON object (or array) to a string
+		 *
+		 * @param 	mixed 	The value to decode
+		 * @return  string
+		 */		
+		
+		jsonDecode: function(obj) {
+			return JSON.stringify(obj);
 		}
+
 	});
 	
 	PhotoFrame.BaseElement = PhotoFrame.Class.extend({
@@ -1564,6 +1595,16 @@ var PhotoFrame = {};
 		},
 		
 		/**
+		 * Update the manipulation JSON without an AJAX callback
+		 *
+		 * @return	void
+		 */
+		
+		updateJson: function() {
+			this.cropPhoto().updateJson();	
+		},
+		
+		/**
 		 * Render the manipulation
 		 *
 		 * @param	callback  A callback function triggered after the effects triggers
@@ -2565,6 +2606,22 @@ var PhotoFrame = {};
 		clearNotices: function(callback) {
 			this.factory.clearNotices(callback);
 		}, 
+
+		getSaveData: function() {
+			return this.ui.field.val();
+		},
+
+		setSaveData: function(data) {
+			this.ui.field.val(data).html(data);
+		},
+
+		updateJson: function() {
+			var saveData = this.jsonEncode(this.getSaveData());
+
+			saveData.manipulations = this.getManipulations();
+
+			this.setSaveData(this.jsonDecode(saveData));
+		},
 		
 		render: function(callback) {
 			var t = this;

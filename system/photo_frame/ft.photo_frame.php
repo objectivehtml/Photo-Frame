@@ -354,9 +354,9 @@ class Photo_frame_ft extends EE_Fieldtype {
 		
 		$this->EE->load->config('photo_frame_config');
 		$this->EE->load->library('photo_frame_lib');
-				
+			
 		$this->EE->cp->add_js_script(array('ui' => array('slider', 'draggable')));		
-		
+
 		$effects = $this->EE->photo_frame_lib->get_effects();
 		
 		$default_settings = array(
@@ -429,6 +429,7 @@ class Photo_frame_ft extends EE_Fieldtype {
 		$this->EE->theme_loader->javascript('jquery.load-image');
 		$this->EE->theme_loader->javascript('jquery.jcrop');
 		$this->EE->theme_loader->javascript('jquery.color');
+		$this->EE->theme_loader->javascript('json2');
 		
 		if($settings['photo_frame_show_editor_cp'] == 'true' && !$this->safecracker ||
 		   $settings['photo_frame_show_editor_sc'] == 'true' && $this->safecracker ||
