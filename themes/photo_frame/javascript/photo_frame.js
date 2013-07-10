@@ -2646,11 +2646,18 @@ var PhotoFrame = {};
 		}, 
 
 		getSaveData: function() {
-			return this.ui.field.val();
+			if(this.ui.field) {
+				return this.ui.field.val();
+			}
+			else  {
+				return false;
+			}
 		},
 
 		setSaveData: function(data) {
-			this.ui.field.val(data).html(data);
+			if(this.ui.field) {
+				this.ui.field.val(data).html(data);
+			}
 		},
 
 		updateJson: function() {
