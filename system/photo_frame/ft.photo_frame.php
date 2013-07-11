@@ -728,7 +728,7 @@ class Photo_frame_ft extends EE_Fieldtype {
 			}
 			
 		}
-		
+
 			$settings_js 	= '{
 			fieldName: \''.($this->matrix ? $this->cell_name : $this->field_name).'\',
 			fieldId: \''.$this->field_id.'\',
@@ -940,6 +940,18 @@ class Photo_frame_ft extends EE_Fieldtype {
 			else
 			{
 				$data->saved_data['sizes'] = NULL;
+			}
+
+			if(isset($data->saved_data['manipulations']))
+			{
+				if(is_string($data->saved_data['manipulations']))
+				{
+					$data->saved_data['manipulations'] = json_decode($data->saved_data['manipulations']);
+				}
+			}
+			else
+			{
+				$data->saved_data['manipulations'] = '{}';
 			}
 		}
 		
@@ -1836,7 +1848,7 @@ class Photo_frame_ft extends EE_Fieldtype {
     		    if(isset($photo['edit']) && count($photo['edit']))
     		    {
         		    $photo = json_decode($photo['edit']);
-        		   	
+
         		   	if(is_object($photo))
         		   	{    
         		   		$existing_photo = $this->EE->photo_frame_model->get_photo($photo->id);
@@ -1884,11 +1896,6 @@ class Photo_frame_ft extends EE_Fieldtype {
 		    				));
         		   		}
         		   		
-	        		    if(!is_string($photo->manipulations))
-	        		    {        		
-	    					$photo->manipulations = json_encode($photo->manipulations);
-	        		    }
-	        		     
 						$photo_names[] = $photo->file_name;
 						
 	        		    if($this->matrix)
@@ -1907,6 +1914,11 @@ class Photo_frame_ft extends EE_Fieldtype {
 		    				$photo = (object) $button->postSave((array) $photo, (array) $orig_photo);
 	    				}
 	    				
+	        		    if(!is_string($photo->manipulations))
+	        		    {        		
+	    					$photo->manipulations = json_encode($photo->manipulations);
+	        		    }
+
 	        		    $edit_photos[] = $photo;
         		    }
     		    }
