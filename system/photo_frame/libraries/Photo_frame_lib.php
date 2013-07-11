@@ -172,7 +172,9 @@ class Photo_frame_lib {
 		}
 		*/
 		
-		if($this->extension($original_path) == 'jpg' || $this->extension($original_url) == 'jpeg')
+		if( function_exists('exif_read_data') && 
+			$this->extension($original_path) == 'jpg' || 
+			$this->extension($original_url) == 'jpeg')
 		{	
 			$exif_data = exif_read_data($original_path);
 		}
@@ -342,7 +344,7 @@ class Photo_frame_lib {
 			
 			$exif_data = array();
 				
-			if($files['files']['type'][$x] == 'image/jpeg')
+			if(function_exists('exif_read_data') && $files['files']['type'][$x] == 'image/jpeg')
 			{	
 				$exif_data = exif_read_data($files['files']['tmp_name'][$x]);
 			}
