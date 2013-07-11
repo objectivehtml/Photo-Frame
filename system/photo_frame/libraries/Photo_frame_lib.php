@@ -118,6 +118,7 @@ class Photo_frame_lib {
 		$field_id      = $this->EE->input->get_post('fieldId');
 		$folder_id 	   = $this->EE->input->get_post('folderId');
 		$var_id        = $this->EE->input->get_post('varId');
+		$site_id       = $this->EE->input->get_post('siteId');
 		$grid_id       = $this->EE->input->get_post('gridId');
 		$col_id        = $this->EE->input->get_post('colId');
 		$col_id		   = $col_id != 'false' ? preg_replace('/^col_id_/', '', $col_id) : FALSE;
@@ -125,11 +126,21 @@ class Photo_frame_lib {
 		$original_path = $this->EE->input->get_post('file');
 		$asset_id      = $this->EE->input->get_post('assetId');
 		
+		// Hack: 07/11/13 - EE 2.5.5 - Photo Frame 1.0.2.5 (1.1 beta)
+		// Site id in an AJAX request is always 1 if using MSM.
+		// So the solution is to pass the original site id
+		// through the AJAX request and set it again here. LAME!!
+
+		$this->EE->config->set_item('site_id', $site_id);
+
+		// END HACK
+
 		$file_name 	   = $this->EE->photo_frame_lib->filename($original_path);		
 		$settings 	   = $this->EE->photo_frame_model->get_settings($field_id, $col_id, $var_id, $grid_id);
 	
 		$dir_id        = $settings['photo_frame_upload_group'];	
 		$directory     = $this->EE->filemanager->directory($dir_id, FALSE, TRUE);		
+
 		$framed_dir    = $directory['server_path'] . $framed_dir_name . '/';	
 		$file_url      = $directory['url'] . $framed_dir_name . '/' . $file_name;
 		$file_path     = $directory['server_path'] . $framed_dir_name . '/' . $file_name;
@@ -161,7 +172,9 @@ class Photo_frame_lib {
 		}
 		*/
 		
-		if($this->extension($original_path) == 'jpg' || $this->extension($original_url) == 'jpeg')
+		if( function_exists('exif_read_data') && 
+			$this->extension($original_path) == 'jpg' || 
+			$this->extension($original_url) == 'jpeg')
 		{	
 			$exif_data = exif_read_data($original_path);
 		}
@@ -295,11 +308,21 @@ class Photo_frame_lib {
 		$errors     = array();
 		$dir_id     = $this->EE->input->get_post('dir_id', TRUE);
 		$folder_id  = $this->EE->input->get_post('folder_id', TRUE);
+		$site_id    = $this->EE->input->get_post('site_id', TRUE);
 		$index	    = $this->EE->input->get_post('index', TRUE);
 		$field_id   = $this->EE->input->get_post('field_id', TRUE);
 		$var_id     = $this->EE->input->get_post('var_id', TRUE);
 		$grid_id    = $this->EE->input->get_post('grid_id', TRUE);
 		
+		// Hack: 07/11/13 - EE 2.5.5 - Photo Frame 1.0.2.5 (1.1 beta)
+		// Site id in an AJAX request is always 1 if using MSM.
+		// So the solution is to pass the original site id
+		// through the AJAX request and set it again here. LAME!!
+
+		$this->EE->config->set_item('site_id', $site_id);
+
+		// END HACK
+
 		$settings   = $this->EE->photo_frame_model->get_settings($field_id, FALSE, $var_id, $grid_id);
 		
 		$directory  = $this->EE->filemanager->directory($dir_id, FALSE, TRUE);
@@ -321,7 +344,7 @@ class Photo_frame_lib {
 			
 			$exif_data = array();
 				
-			if($files['files']['type'][$x] == 'image/jpeg')
+			if(function_exists('exif_read_data') && $files['files']['type'][$x] == 'image/jpeg')
 			{	
 				$exif_data = exif_read_data($files['files']['tmp_name'][$x]);
 			}
