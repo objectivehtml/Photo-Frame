@@ -115,16 +115,16 @@ class Photo_frame_lib {
 		$framed_dir_name = config_item('photo_frame_directory_name');
 		
 		$errors        = array();	
-		$field_id      = $this->EE->input->get_post('fieldId');
-		$folder_id 	   = $this->EE->input->get_post('folderId');
-		$var_id        = $this->EE->input->get_post('varId');
-		$site_id       = $this->EE->input->get_post('siteId');
-		$grid_id       = $this->EE->input->get_post('gridId');
-		$col_id        = $this->EE->input->get_post('colId');
+		$field_id      = $this->EE->input->get_post('fieldId', TRUE);
+		$folder_id 	   = $this->EE->input->get_post('folderId', TRUE);
+		$var_id        = $this->EE->input->get_post('varId', TRUE) != 'false' ? $this->EE->input->get_post('varId', TRUE) : FALSE;
+		$site_id       = $this->EE->input->get_post('siteId', TRUE);
+		$grid_id       = $this->EE->input->get_post('gridId', TRUE) != 'false' ? $this->EE->input->get_post('gridId', TRUE) : FALSE;
+		$col_id        = $this->EE->input->get_post('colId', TRUE);
 		$col_id		   = $col_id != 'false' ? preg_replace('/^col_id_/', '', $col_id) : FALSE;
-		$original_url  = $this->EE->input->get_post('url');	
-		$original_path = $this->EE->input->get_post('file');
-		$asset_id      = $this->EE->input->get_post('assetId');
+		$original_url  = $this->EE->input->get_post('url', TRUE);	
+		$original_path = $this->EE->input->get_post('file', TRUE);
+		$asset_id      = $this->EE->input->get_post('assetId', TRUE);
 		
 		// Hack: 07/11/13 - EE 2.5.5 - Photo Frame 1.0.2.5 (1.1 beta)
 		// Site id in an AJAX request is always 1 if using MSM.
@@ -310,9 +310,9 @@ class Photo_frame_lib {
 		$folder_id  = $this->EE->input->get_post('folder_id', TRUE);
 		$site_id    = $this->EE->input->get_post('site_id', TRUE);
 		$index	    = $this->EE->input->get_post('index', TRUE);
-		$field_id   = $this->EE->input->get_post('field_id', TRUE);
-		$var_id     = $this->EE->input->get_post('var_id', TRUE);
-		$grid_id    = $this->EE->input->get_post('grid_id', TRUE);
+		$field_id   = $this->EE->input->get_post('field_id', TRUE) != 'false' ? $this->EE->input->get_post('field_id', TRUE) : FALSE;
+		$var_id     = $this->EE->input->get_post('var_id', TRUE) != 'false' ? $this->EE->input->get_post('var_id', TRUE) : FALSE;
+		$grid_id    = $this->EE->input->get_post('grid_id', TRUE) != 'false' ? $this->EE->input->get_post('grid_id', TRUE) : FALSE;
 		
 		// Hack: 07/11/13 - EE 2.5.5 - Photo Frame 1.0.2.5 (1.1 beta)
 		// Site id in an AJAX request is always 1 if using MSM.
