@@ -758,6 +758,15 @@ a.photo-frame-meta-toggle.active,  a.photo-frame-meta-toggle:hover {
 	-ms-filter: blur(7px);
 }
 
+.photo-frame-row { clear: both; }
+
+.photo-frame-row label { display: inline-block; margin-bottom: 3px; }
+.photo-frame-row label input { display: inline-block; margin: 2px 3px 0 0; width: auto; float: left; }
+
+.photo-frame-row select, 
+.photo-frame-row input,
+.photo-frame-row textarea { display: block; width: 100%; }
+
 .photo-frame-render-text {
 	text-align: center;
 	position: absolute;
@@ -1480,8 +1489,8 @@ License: MIT
 /* Basic display options (colors, fonts, global widths) */
 .sp-container {
     border-radius: 0;
-    background-color: #ECECEC;
-    border: solid 1px #f0c49B;
+    background-color: rgba(229,229,229,1);
+    border: solid 1px rgba(229,229,229,1);
     padding: 0;
 }
 .sp-container, .sp-container button, .sp-container input, .sp-color, .sp-hue
@@ -1595,14 +1604,22 @@ License: MIT
     display:inline-block;
     *zoom: 1;
     *display: inline;
-    border: solid 1px #91765d;
-    background: #eee;
-    color: #333;
+   	text-shadow: 0 1px 0 white;
+	text-decoration: none;
+	color: rgb(100, 100, 100);
+	background: rgb(255,255,255);
+	background: -moz-linear-gradient(top,  rgba(255,255,255,1) 0%, rgba(229,229,229,1) 100%);
+	background: -webkit-gradient(linear, left top, left bottom, color-stop(0%,rgba(255,255,255,1)), color-stop(100%,rgba(229,229,229,1)));
+	background: -webkit-linear-gradient(top,  rgba(255,255,255,1) 0%,rgba(229,229,229,1) 100%);
+	background: -o-linear-gradient(top,  rgba(255,255,255,1) 0%,rgba(229,229,229,1) 100%);
+	background: -ms-linear-gradient(top,  rgba(255,255,255,1) 0%,rgba(229,229,229,1) 100%);
+	background: linear-gradient(to bottom,  rgba(255,255,255,1) 0%,rgba(229,229,229,1) 100%);
+	filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#ffffff', endColorstr='#e5e5e5',GradientType=0 ); 
     vertical-align: middle;
 }
 .sp-replacer:hover, .sp-replacer.sp-active {
-    border-color: #F0C49B;
-    color: #111;
+    border-color: rgb(19, 138, 252);
+    box-shadow: 0 0 5px rgb(19, 138, 252);
 }
 .sp-replacer.sp-disabled {
     cursor:default;
