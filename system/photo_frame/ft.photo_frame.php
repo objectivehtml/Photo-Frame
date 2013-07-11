@@ -729,7 +729,9 @@ class Photo_frame_ft extends EE_Fieldtype {
 			
 		}
 
-			$settings_js 	= '{
+		$grid_id = $this->grid ? $settings['col_id'] : FALSE;
+
+		$settings_js 	= '{
 			fieldName: \''.($this->matrix ? $this->cell_name : $this->field_name).'\',
 			fieldId: \''.$this->field_id.'\',
 			siteId: '.config_item('site_id').',
@@ -835,7 +837,7 @@ class Photo_frame_ft extends EE_Fieldtype {
 					}
 				},
 				buildUploadUrl: function() {
-					return PhotoFrame.Actions.upload_photo + \'&dir_id='.$settings['photo_frame_upload_group'].(isset($this->var_id) ? '&var_id=' . $this->var_id : '&field_id='.$this->field_id).($settings['photo_frame_folder_id'] ? '&folder_id='.$settings['photo_frame_folder_id'] : '').(isset($settings['col_id']) ? '&grid_id='.$settings['col_id'] : '').'&site_id='.config_item('site_id').'\';
+					return PhotoFrame.Actions.upload_photo + \'&dir_id='.$settings['photo_frame_upload_group'].(isset($this->var_id) ? '&var_id=' . $this->var_id : '&field_id='.$this->field_id).($settings['photo_frame_folder_id'] ? '&folder_id='.$settings['photo_frame_folder_id'] : '').($this->grid ? '&grid_id='.$grid_id : '' ).'\';
 				}
 			}
 		}';
