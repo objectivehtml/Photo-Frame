@@ -80,20 +80,20 @@ class Photo_frame_ft extends EE_Fieldtype {
 	public function __construct()
 	{
 		$this->EE =& get_instance();
-				
+
 		if(isset($this->EE->safecracker_lib))
 		{
 			$this->safecracker = TRUE;
 		}
-		
+	
+		$this->EE->load->add_package_path(PATH_THIRD . 'photo_frame');
+
 		/* -----------------------------------------
 			Load assets for Zenbu results
 		----------------------------------------- */
 		
 		if(isset($this->EE->zenbu_get))
 		{
-			$this->EE->load->add_package_path(PATH_THIRD . 'photo_frame');
-			
 			if(!isset($this->EE->theme_loader))
 			{
 				$this->EE->load->library('theme_loader');
@@ -160,8 +160,6 @@ class Photo_frame_ft extends EE_Fieldtype {
 	{
 		$this->low_variables = TRUE;
 		
-		$this->EE->load->add_package_path(PATH_THIRD . 'photo_frame');
-		
 		return $this->display_field($data);
 	}
 	
@@ -208,9 +206,7 @@ class Photo_frame_ft extends EE_Fieldtype {
 	}
 	
 	public function zenbu_field_extra_settings($table_col, $channel_id, $extra_options)
-	{
-		$this->EE->load->add_package_path(PATH_THIRD . 'photo_frame');
-		
+	{		
 		if(!class_exists('InterfaceBuilder'))
 		{
 				require_once(PATH_THIRD . 'photo_frame/libraries/InterfaceBuilder/InterfaceBuilder.php');
@@ -272,7 +268,6 @@ class Photo_frame_ft extends EE_Fieldtype {
 	
 	public function zenbu_get_table_data($entry_ids, $field_ids, $channel_id, $output_upload_prefs, $settings, $rel_array)
 	{
-		$this->EE->load->add_package_path(PATH_THIRD . 'photo_frame');
 		$this->EE->load->library('photo_frame_lib');
 		
 		$new_entry_ids = array();
@@ -537,6 +532,8 @@ class Photo_frame_ft extends EE_Fieldtype {
 			$where['row_id'] = $data;
 		}
 		
+		// var_dump($data);exit();
+		
 		if($this->low_variables && !empty($data))
 		{
 			unset($where['entry_id']);
@@ -544,7 +541,7 @@ class Photo_frame_ft extends EE_Fieldtype {
 			
 			$where['var_id'] = $this->var_id;
 		}
-		
+
 		$saved_data = $this->EE->photo_frame_model->get_photos(array(
 			'where' => $where
 		));
@@ -1354,9 +1351,7 @@ class Photo_frame_ft extends EE_Fieldtype {
 		$this->data[$data]     = $data;
 		
 		$this->low_variables = TRUE;
-		
-		$this->EE->load->add_package_path(PATH_THIRD . 'photo_frame');
-		
+				
 		$this->pre_loop($data);
 		
 		return $this->replace_tag($data, $params, $tagdata);
@@ -1364,8 +1359,6 @@ class Photo_frame_ft extends EE_Fieldtype {
 	
 	public function delete_var($var_id)
 	{		
-		$this->EE->load->add_package_path(PATH_THIRD . 'photo_frame');
-		
 		$this->EE->load->model('photo_frame_model');
 		
 		$photos = $this->EE->photo_frame_model->get_photos(array(
@@ -1513,23 +1506,21 @@ class Photo_frame_ft extends EE_Fieldtype {
 	{
 		$this->matrix = TRUE;
 		
-		$this->EE->load->add_package_path(PATH_THIRD . 'photo_frame');
-		
 		$this->save($data);
 		
 		//unset($this->EE);
-		
+
 		if(isset($this->settings['entry_id']))
 		{
 			return $this->settings['entry_id'];
 		}
+
+		return TRUE;
 	}
 	
 	public function save_var_field($data)
 	{
 		$this->low_variables = TRUE;
-		
-		$this->EE->load->add_package_path(PATH_THIRD . 'photo_frame');
 		
 		$this->save($data);
 		
@@ -1600,7 +1591,6 @@ class Photo_frame_ft extends EE_Fieldtype {
 	
 	public function draft_discard()
 	{
-		$this->EE->load->add_package_path(PATH_THIRD . 'photo_frame');
 		$this->EE->load->model('photo_frame_model');
 		
 		$photos = $this->EE->photo_frame_model->get_photos(array(
@@ -1621,7 +1611,6 @@ class Photo_frame_ft extends EE_Fieldtype {
 	{
 		$this->is_draft = TRUE;
 		
-		$this->EE->load->add_package_path(PATH_THIRD . 'photo_frame');
 		$this->EE->load->model('photo_frame_model');
 		$this->EE->load->helper('string');
 		
@@ -1736,12 +1725,12 @@ class Photo_frame_ft extends EE_Fieldtype {
 	public function post_save_var($data)
 	{
 		$this->low_variables = TRUE;
+
 		$this->post_save($data);	
 	}
 	
 	public function post_save($data)
 	{	
-		
 		$this->EE->load->library('photo_frame_lib');
 		
 		if($this->matrix || $this->low_variables)
@@ -1934,7 +1923,7 @@ class Photo_frame_ft extends EE_Fieldtype {
     		    }
     		}
 		}
-		
+
 		if(count($new_photos) > 0)
 		{   
 			$this->EE->photo_frame_model->save($new_photos);
@@ -1949,7 +1938,7 @@ class Photo_frame_ft extends EE_Fieldtype {
 		{	
 			$row_id = $this->settings['row_id'];
 			$col_id = $this->settings['col_id'];
-			
+
 			$this->EE->photo_frame_model->update_cell($this->settings['row_id'], array(
 				'col_id_'.$col_id => $this->settings['row_id']
 			));			
@@ -2072,8 +2061,6 @@ class Photo_frame_ft extends EE_Fieldtype {
 	public function validate_cell($data)
 	{		
 		$this->matrix = TRUE;
-		
-		$this->EE->load->add_package_path(PATH_THIRD . 'photo_frame');
 		
 		return $this->validate($data);
 	}
@@ -2217,9 +2204,7 @@ class Photo_frame_ft extends EE_Fieldtype {
 	public function display_var_settings($data)
 	{
 		$this->low_variables = TRUE;
-		
-		$this->EE->load->add_package_path(PATH_THIRD . 'photo_frame');
-		
+				
 		return $this->display_settings($data);
 	}
 	
@@ -2699,11 +2684,18 @@ class Photo_frame_ft extends EE_Fieldtype {
 	
 	private function _get_post()
 	{
-
-		if($this->matrix && !$this->low_variables)
+		if($this->matrix)
 		{
-			$post = $this->EE->input->post($this->settings['field_name'], TRUE);
-			
+			if (!empty($this->var_id))
+ 			{
+ 				$post = $this->EE->input->post('var', TRUE);
+ 				$post = $post[$this->var_id];
+ 			}
+ 			else
+ 			{
+ 				$post = $this->EE->input->post($this->settings['field_name'], TRUE);
+ 			}
+
 			if(isset($post[$this->settings['row_name']][$this->settings['col_name']]))
 			{
 				$post = $post[$this->settings['row_name']][$this->settings['col_name']];
