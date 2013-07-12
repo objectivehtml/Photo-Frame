@@ -527,6 +527,12 @@ class Photo_frame_ft extends EE_Fieldtype {
 		{
 			unset($where['entry_id']);
 			
+			if (!empty($this->var_id))
+ 			{
+ 				unset($where['field_id']);
+ 				$where['var_id'] = $this->var_id;
+ 			}
+
 			$where['col_id'] = $this->col_id;
 			$where['row_id'] = $data;
 		}
@@ -542,7 +548,7 @@ class Photo_frame_ft extends EE_Fieldtype {
 		$saved_data = $this->EE->photo_frame_model->get_photos(array(
 			'where' => $where
 		));
-		
+
 		if($this->is_draft)
 		{
 			$draft_data = $this->EE->photo_frame_model->get_photos(array('where' => array(
@@ -1723,19 +1729,19 @@ class Photo_frame_ft extends EE_Fieldtype {
 	public function post_save_cell($data)
 	{
 		$this->matrix = TRUE;
-		
+
 		$this->post_save($data);
 	}
 	
 	public function post_save_var($data)
 	{
 		$this->low_variables = TRUE;
-		
 		$this->post_save($data);	
 	}
 	
 	public function post_save($data)
 	{	
+		
 		$this->EE->load->library('photo_frame_lib');
 		
 		if($this->matrix || $this->low_variables)
@@ -2693,9 +2699,10 @@ class Photo_frame_ft extends EE_Fieldtype {
 	
 	private function _get_post()
 	{
-		if($this->matrix)
+
+		if($this->matrix && !$this->low_variables)
 		{
-			$post = $this->EE->input->post($this->settings['field_name']);
+			$post = $this->EE->input->post($this->settings['field_name'], TRUE);
 			
 			if(isset($post[$this->settings['row_name']][$this->settings['col_name']]))
 			{
