@@ -608,10 +608,13 @@ var PhotoFrame = {};
 					progress: function(e, data) {
 						t.showProgress(parseInt(data.loaded / data.total * 100) * .5);
 					},
+					pasteZone: null,
 					singleFileUploads: false,
 					dropZone: t.ui.dropZone,
 					url: t.getUploadUrl(),
 					add: function (e, data) {
+
+						console.log(data.files);
 
 						if(t.maxPhotos > 0 && (t.maxPhotos <= t.getTotalPhotos())) {
 							t.showErrors([PhotoFrame.Lang.max_photos_error], {
