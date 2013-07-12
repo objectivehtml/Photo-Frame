@@ -312,16 +312,19 @@ class Photo_frame_model extends CI_Model {
 	public function get_settings($field_id = FALSE, $col_id = FALSE, $var_id = FALSE, $grid_id = FALSE)
 	{
 		if($col_id)
-		{		
-			if($field_id && !empty($field_id))
-			{
-				$this->db->where('field_id', $field_id);				
-			}
-			
+		{	
+			$col_id = (int) str_replace('col_id_', '', $col_id);
+
 			if($var_id)
 			{
 				$this->db->where('var_id', $var_id);
 			}
+			else if($field_id && !empty($field_id))
+			{
+				$this->db->where('field_id', $field_id);				
+			}
+
+			$this->db->where('col_id', $col_id);
 
 			$settings = $this->db->get('matrix_cols');
 			$settings = unserialize(base64_decode($settings->row('col_settings')));
