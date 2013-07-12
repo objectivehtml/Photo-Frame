@@ -729,8 +729,6 @@ class Photo_frame_ft extends EE_Fieldtype {
 			
 		}
 
-		$grid_id = $this->grid ? $settings['col_id'] : FALSE;
-
 		$settings_js 	= '{
 			fieldName: \''.($this->matrix ? $this->cell_name : $this->field_name).'\',
 			fieldId: \''.$this->field_id.'\',
@@ -1402,12 +1400,13 @@ class Photo_frame_ft extends EE_Fieldtype {
 		$return = array();
 		
 		$total_photos = 0;
-		
+		$photo_index  = 0;
+
 		foreach($photos as $index => $row)
 		{
 			$index = count($return);
-			
-			if($params['offset'] <= $index && (!$params['limit'] || $total_photos < $params['limit']))
+
+			if($params['offset'] <= $photo_index && (!$params['limit'] || $total_photos < $params['limit']))
 			{	
 				$row['thumb'] = $this->EE->photo_frame_model->parse($this->EE->photo_frame_lib->swap_filename($row['original_file_name'], $row['original_file'], '_thumbs/'), 'url');
 								
@@ -1468,6 +1467,8 @@ class Photo_frame_ft extends EE_Fieldtype {
 				
 				$total_photos++;
 			}
+
+			$photo_index++;
 		}
 		
 		if($tagdata)
