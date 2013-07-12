@@ -1096,33 +1096,49 @@ class Photo_frame_ft extends EE_Fieldtype {
 		{
 			return $this->data;
 		}
-		
-		$entry_id = $this->row['entry_id'];
-		
-		$photos = isset($this->data[$entry_id]) ? $this->data[$entry_id] : array();
-		
-		if($pre_loop !== TRUE)
+
+		if(isset($this->row['entry_id']))
 		{
-			$photos = array($this->EE->photo_frame_model->get_photos(array(
-				'where' => array(
-					'entry_id' => $entry_id,
-					'field_id' => $field_id,
-					'is_draft' => 0
-				)
-			))->result_array());
-		}
+			$entry_id = $this->row['entry_id'];
 		
-		if(isset($this->EE->session->cache['ep_better_workflow']) && $this->EE->session->cache['ep_better_workflow']['is_preview'])
+			$photos = isset($this->data[$entry_id]) ? $this->data[$entry_id] : array();
+
+			if($pre_loop !== TRUE)
+			{
+				$photos = array($this->EE->photo_frame_model->get_photos(array(
+					'where' => array(
+						'entry_id' => $entry_id,
+						'field_id' => $field_id,
+						'is_draft' => 0
+					)
+				))->result_array());
+			}
+			
+			if(isset($this->EE->session->cache['ep_better_workflow']) && $this->EE->session->cache['ep_better_workflow']['is_preview'])
+			{
+				$photos = array($this->EE->photo_frame_model->get_photos(array(
+					'where' => array(
+						'entry_id' => $entry_id,
+						'field_id' => $field_id,
+						'is_draft' => 1
+					)
+				))->result_array());
+			}
+		}
+		else
 		{
-			$photos = array($this->EE->photo_frame_model->get_photos(array(
-				'where' => array(
-					'entry_id' => $entry_id,
-					'field_id' => $field_id,
-					'is_draft' => 1
-				)
-			))->result_array());
+			if(isset($this->col_id))
+			{
+				$photos = array($this->EE->photo_frame_model->get_photos(array(
+					'where' => array(
+						'col_id' 	=> $this->col_id,
+						'row_id' 	=> $this->row_id,
+						'is_draft'	=> 0
+					)
+				))->result_array());
+			}
 		}
-		
+
 		// http://addon.dev/images/uploads/images/_framed/XyWGoI2p-596-776.png?date=1370229255
 		
 		$return = array();
@@ -1147,7 +1163,7 @@ class Photo_frame_ft extends EE_Fieldtype {
 		
 		return $return;
 	}
-	
+
 	public function replace_color_bar($data, $params = array(), $tagdata)
 	{
 		if(!$params)
@@ -1393,7 +1409,7 @@ class Photo_frame_ft extends EE_Fieldtype {
 		$params = array_merge($this->default_params, $params);
 		$params['offset'] = (int) $params['offset'];
 
-		$photos = $this->_get_photos($this->field_id, $params['pre_loop']);
+		$photos = $this->_get_photos($this->field_id, $params['pre_loop'], $data);
 
 		$return = array();
 		
