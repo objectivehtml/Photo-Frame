@@ -416,16 +416,14 @@ var PhotoFrame = {};
 			
 			// Global default callbacks
 			
-			t.callbacks = {
-				'browse': function() {},
-				'buildUploadUrl': function() { return false; }, // return false by default
-				'init': function() {},
-				'responseHandlerSettings': function() { return {}; }	
-			};
+			t.callbacks = $.extend(true, {
+				browse: function() {},
+				buildUploadUrl: function() { return false; }, // return false by default
+				init: function() {},
+				responseHandlerSettings: function() { return {}; }	
+			}, options.callbacks);
 			
-			t.callbacks = $.extend(true, {}, t.callbacks, (typeof options.callbacks == "object" ? options.callbacks : {}));
-			
-			delete options.callbacks;
+			//delete options.callbacks;
 			delete options.photos;
 			
 			PhotoFrame.instances.push(t)
@@ -716,7 +714,7 @@ var PhotoFrame = {};
 	    		t.hideMeta();
 		    	e.preventDefault();
 	    	});
-	    	
+
 			t.ui.browse.click(function() {
 				t.callback(t.callbacks.browse);
 			});
