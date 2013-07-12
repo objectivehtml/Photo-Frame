@@ -614,13 +614,22 @@ var PhotoFrame = {};
 					dropZone: t.ui.dropZone,
 					url: t.getUploadUrl(),
 					add: function (e, data) {
-						if(data.files.length > 0) {
-							t.ui.dropZone.hide();
-							t.initialized = false;
-							t.showProgress(0);
-							t.startUpload(data.files, function() {
-								t.jqXHR = data.submit();
+
+						if(t.maxPhotos > 0 && (t.maxPhotos <= t.getTotalPhotos())) {
+							t.showErrors([PhotoFrame.Lang.max_photos_error], {
+								max_photos: t.maxPhotos,
+								max_photos_name: (t.maxPhotos == 1 ? 'photo' : 'photos')
 							});
+						}	
+						else {
+							if(data.files.length > 0) {
+								t.ui.dropZone.hide();
+								t.initialized = false;
+								t.showProgress(0);
+								t.startUpload(data.files, function() {
+									t.jqXHR = data.submit();
+								});
+							}
 						}
 					},
 					fail: function (e, data) {
@@ -726,16 +735,19 @@ var PhotoFrame = {};
 				var obj 	= t.$wrapper.find('.'+t.classes.dropText);
 				var parent  = obj.parent();
 				
-				t.ui.dropZone.show();
-				
-				obj.position({
-					of: parent,
-					my: 'center',
-					at: 'center'
-				});
-				
-				t.$wrapper.addClass(t.classes.dragging);
-												
+				if(t.maxPhotos == 0 || (t.maxPhotos > t.getTotalPhotos())) {
+							
+					t.ui.dropZone.show();
+					
+					obj.position({
+						of: parent,
+						my: 'center',
+						at: 'center'
+					});
+					
+					t.$wrapper.addClass(t.classes.dragging);					
+				}
+
 				e.preventDefault();
 			});
 			
@@ -798,9 +810,18 @@ var PhotoFrame = {};
 			
 			return url ? url : _default;	
 		},
+
+		parse: function(string, vars) {
+			$.each(vars, function(i, value) {
+				string = string.replace('{'+i+'}', value);
+			});
+			return string;
+		},
 		
-		showError: function(error) {
+		showError: function(error, vars) {
 			var t = this;
+			error = this.parse(error, vars);
+
 			t.hideProgress(function() {
 				t.ui.errors.find('ul').append('<li>'+error+'</li>');
 				t.ui.errors.show();
@@ -810,7 +831,7 @@ var PhotoFrame = {};
 			});
 		},
 		
-		showErrors: function(errors) {
+		showErrors: function(errors, vars) {
 			var t = this;
 			t.ui.errors.find('ul').html('');
 			t.ui.errors.hide();
@@ -820,7 +841,7 @@ var PhotoFrame = {};
 			t.progressBar.hide();
 
 			$.each(errors, function(i, error) {
-				t.showError(error);
+				t.showError(error, vars);
 			});
 		},
 		
@@ -1081,7 +1102,7 @@ var PhotoFrame = {};
 		hideUpload: function() {
 			this.ui.upload.hide();
 			this.ui.browse.hide();
-			this.ui.helper.hide();	
+			this.ui.helper.hide();
 		},
 		
 		/**
@@ -2907,6 +2928,7 @@ var PhotoFrame = {};
 							
 							t.ui.cropPhoto = $('<div class="'+t.factory.classes.cropPhoto+'"></div>');
 							t.factory.ui.cropPhoto = t.ui.cropPhoto;
+							t.factory.trigger('cropPhotoLoaded', t, img);
 				        	t.ui.instructions = $('<div class="" />').html(PhotoFrame.Lang.instructions);	
 				        	
 				        	if(t.factory.instructions && t.edit === false) {
