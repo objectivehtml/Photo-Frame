@@ -407,7 +407,7 @@ var PhotoFrame = {};
 		constructor: function(obj, options) {
 			
 			var t      = this;
-			var photos = options.photos;
+			var photos = $.extend(true, {}, options.photos);
 					
 			t.events  = {};
 			t.windows = [];
@@ -423,8 +423,8 @@ var PhotoFrame = {};
 				responseHandlerSettings: function() { return {}; }	
 			}, options.callbacks);
 			
-			//delete options.callbacks;
-			delete options.photos;
+			//options.callbacks = $.extend(true, {}, t.callbacks);
+			//options.photos    = $.merge(true, [], photos);
 			
 			PhotoFrame.instances.push(t)
 			
@@ -675,7 +675,7 @@ var PhotoFrame = {};
 		    	t.ui.iframe = $('<iframe name="photo-frame-iframe-'+t.index+'" id="photo-frame-iframe-'+t.index+'" src="" style="display:none;width:0;height:0"></iframe>');
 		    	t.ui.body.append(t.ui.iframe);
 	    	}
-	    	
+
 	    	for(var x in photos) {
 		    	var photo = photos[x];
 		    	
@@ -2413,11 +2413,12 @@ var PhotoFrame = {};
 		constructor: function(factory, response, options) {
 			var t = this;
 			
-			this.ui    = {};
-			this.cache = factory.hash(12);
+			this.ui       = {};
+			this.$wrapper = false
+			this.cache    = factory.hash(12);
 			
 			this.base(options);
-			
+
 			this.factory      = factory;
 		    this.title        = response.title;
 		    this.description  = response.description;
@@ -2438,7 +2439,7 @@ var PhotoFrame = {};
 			if(!this.index) {
 				this.index = this.factory.getTotalPhotos();
 			}
-			
+
 			if(this.$wrapper) {
 				this._loadFromObj(this.$wrapper);
 			}
@@ -2494,6 +2495,8 @@ var PhotoFrame = {};
 		_bindClickEvents: function() {
 			var t = this;
 			
+			// console.log(t.ui.edit);
+
 			if(t.ui.edit) {
 				t.ui.edit.unbind('click').click(function(e) {
 					t.showProgress(0);
@@ -3121,7 +3124,7 @@ var PhotoFrame = {};
 			t.ui.field     = t._generateNewDataField(saveData);
 			
 			t.ui.photo.append(t.ui.field);	
-			
+
 			t._bindClickEvents();
 		},
 		

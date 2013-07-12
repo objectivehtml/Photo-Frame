@@ -847,22 +847,21 @@ class Photo_frame_ft extends EE_Fieldtype {
 		{
 			$this->EE->theme_loader->output('
 				
-				PhotoFrame.matrix[\'col_id_'.$this->col_id.'\'] = '.$settings_js.';
+				if(!PhotoFrame.matrix[\'col_id_'.$this->col_id.'\']) {
+					PhotoFrame.matrix[\'col_id_'.$this->col_id.'\'] = {};
+				}
+
+				PhotoFrame.matrix[\'col_id_'.$this->col_id.'\'][\''.$uid.'\'] = '.$settings_js.';
 				
 				Matrix.bind(\'photo_frame\', \'display\', function(cell) {
 					//if(cell.row.isNew) {
-						var settings = PhotoFrame.matrix[cell.col.id];
-						
+						var uid      = cell.dom.$td.find(\'.photo-frame-wrapper\').attr(\'id\');
+						var settings = PhotoFrame.matrix[cell.col.id][uid];
+
 						settings.fieldName = cell.field.id+"["+cell.row.id+"]["+cell.col.id+"]";
 				
 						new PhotoFrame.Factory(cell.dom.$td, settings);
 					//}
-				});
-			
-				$(document).ready(function() { 
-					/*
-					new PhotoFrame.Factory($("#'.$uid.'"), 	'.$settings_js.')
-					*/
 				});'
 			);
 		}
