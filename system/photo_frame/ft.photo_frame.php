@@ -1873,7 +1873,7 @@ class Photo_frame_ft extends EE_Fieldtype {
         		   		}
         		   		
         		   		// var_dump($this->EE->photo_frame_lib->needs_manipulation($compare, $existing_manip));exit();
-        		   		
+
         		   		if($this->EE->photo_frame_lib->needs_manipulation($compare, $existing_manip))
         		   		{	
 		    				$average_color = (array) $this->EE->photo_frame_lib->get_average_color($photo->file, config_item('photo_frame_save_colors'), config_item('photo_frame_save_color_granularity'));
@@ -1886,7 +1886,7 @@ class Photo_frame_ft extends EE_Fieldtype {
 		    				$this->EE->photo_frame_model->insert_colors($colors, $photo->id, array(
 		    					'site_id'  => config_item('site_id'),
 		    					'field_id' => $this->field_id,
-		    					'entry_id' => $this->settings['entry_id'],
+		    					'entry_id' => isset($this->settings['entry_id']) ? $this->settings['entry_id'] : '',
 		    					'date'	   => date('Y-m-d H:i:s', time()),
 		    					'row_id'   => isset($this->settings['row_id']) ? $this->settings['row_id'] : '',
 		    					'col_id'   => isset($this->settings['col_id']) ? $this->settings['col_id'] : '',
