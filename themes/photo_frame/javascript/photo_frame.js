@@ -1075,6 +1075,7 @@ var PhotoFrame = {};
 				fieldId: t.fieldId,
 				varId: t.varId, 
 				colId: t.colId,
+				siteId: t.siteId,
 				file: file,
 				assetId: (id ? id : false)
 			};
@@ -1252,7 +1253,7 @@ var PhotoFrame = {};
 			var args = [];
 					
 			for(var x = 1; x <= newArgs.length; x++) {
-				if(newArgs[x]) {
+				if(typeof newArgs[x] != "undefined") {
 					args.push(newArgs[x]);
 				}
 			}
@@ -1853,7 +1854,10 @@ var PhotoFrame = {};
 		 */
 		
 		save: function(data) {
-			this.addManipulation(this.getVisibility(), data);
+			if(data.length > 0) {
+				console.log(data);
+				this.addManipulation(this.getVisibility(), data);
+			}
 			this.updateJson();
 		},
 
@@ -3209,7 +3213,7 @@ var PhotoFrame = {};
     		else {
     			t.settings.setSelect = [size.x, size.y, size.x2, size.y2];
     		}
-    		
+
 			$.post(PhotoFrame.Actions.crop_photo, {
 				fieldId: t.factory.fieldId,
 				varId: t.factory.varId,
@@ -3248,7 +3252,7 @@ var PhotoFrame = {};
 				compression: t.compression
 			}, function(cropResponse) {
 				if(typeof callback == "function") {
-					callback(cropResponse);					
+					callback(cropResponse);		
 				}
 			});
 		},
