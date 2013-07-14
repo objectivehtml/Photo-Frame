@@ -131,7 +131,7 @@ class Photo_frame_lib {
 		// So the solution is to pass the original site id
 		// through the AJAX request and set it again here. LAME!!
 
-		$this->EE->config->set_item('site_id', $site_id);
+		$this->EE->config->set_item('site_id', ($site_id ? $site_id : 1));
 
 		// END HACK
 
