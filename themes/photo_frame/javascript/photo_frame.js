@@ -411,7 +411,6 @@ var PhotoFrame = {};
 					
 			t.events  = {};
 			t.windows = [];
-			t.photos  = [];
 			t.index   = PhotoFrame.instances.length;
 			
 			// Global default callbacks
@@ -613,9 +612,6 @@ var PhotoFrame = {};
 					dropZone: t.ui.dropZone,
 					url: t.getUploadUrl(),
 					add: function (e, data) {
-
-						console.log(data.files);
-
 						if(t.maxPhotos > 0 && (t.maxPhotos <= t.getTotalPhotos())) {
 							t.showErrors([PhotoFrame.Lang.max_photos_error], {
 								max_photos: t.maxPhotos,
@@ -678,6 +674,8 @@ var PhotoFrame = {};
 		    	t.ui.iframe = $('<iframe name="photo-frame-iframe-'+t.index+'" id="photo-frame-iframe-'+t.index+'" src="" style="display:none;width:0;height:0"></iframe>');
 		    	t.ui.body.append(t.ui.iframe);
 	    	}
+
+			t.photos  = [];
 
 	    	for(var x in photos) {
 		    	var photo = photos[x];
@@ -1855,7 +1853,6 @@ var PhotoFrame = {};
 		
 		save: function(data) {
 			if(data.length > 0) {
-				console.log(data);
 				this.addManipulation(this.getVisibility(), data);
 			}
 			this.updateJson();
@@ -2531,7 +2528,7 @@ var PhotoFrame = {};
 					
 			t.ui.parent.fadeOut(function() {
 				t.ui.parent.remove();
-				
+
 				if((t.factory.maxPhotos > 0 && t.factory.maxPhotos > t.factory.getTotalPhotos() - 1) || (t.factory.minPhotos == 0 && t.factory.maxPhotos == 0)) {
 					t.factory.showUpload();
 				}
