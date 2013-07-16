@@ -732,7 +732,7 @@ class Photo_frame_ft extends EE_Fieldtype {
 			
 		}
 
-		$del_id = isset($this->col_id) ? $this->col_id : (isset($this->var_id) ? $this->var_id : $this->field_id);
+		$del_id = (isset($this->col_id) && !empty($this->col_id)) ? $this->col_id : (isset($this->var_id) ? $this->var_id : $this->field_id);
 
 		$settings_js 	= '{
 			fieldName: \''.($this->matrix ? $this->cell_name : $this->field_name).'\',
@@ -1099,7 +1099,8 @@ class Photo_frame_ft extends EE_Fieldtype {
 			return $this->data;
 		}
 
-		if(isset($this->row['entry_id']))
+
+		if(isset($this->row['entry_id']) && (!isset($this->col_id) || empty($this->col_id)))
 		{
 			$entry_id = $this->row['entry_id'];
 		
@@ -1129,16 +1130,13 @@ class Photo_frame_ft extends EE_Fieldtype {
 		}
 		else
 		{
-			if(isset($this->col_id))
-			{
-				$photos = array($this->EE->photo_frame_model->get_photos(array(
-					'where' => array(
-						'col_id' 	=> $this->col_id,
-						'row_id' 	=> $this->row_id,
-						'is_draft'	=> 0
-					)
-				))->result_array());
-			}
+			$photos = array($this->EE->photo_frame_model->get_photos(array(
+				'where' => array(
+					'col_id' 	=> $this->col_id,
+					'row_id' 	=> $this->row_id,
+					'is_draft'	=> 0
+				)
+			))->result_array());
 		}
 
 		// http://addon.dev/images/uploads/images/_framed/XyWGoI2p-596-776.png?date=1370229255
