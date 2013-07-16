@@ -732,11 +732,13 @@ class Photo_frame_ft extends EE_Fieldtype {
 			
 		}
 
+		$del_id = isset($this->col_id) ? $this->col_id : (isset($this->var_id) ? $this->var_id : $this->field_id);
+
 		$settings_js 	= '{
 			fieldName: \''.($this->matrix ? $this->cell_name : $this->field_name).'\',
 			fieldId: \''.$this->field_id.'\',
 			siteId: '.config_item('site_id').',
-			delId: '.(isset($this->var_id) ? $this->var_id : $this->field_id).',
+			delId: '.$del_id.',
 			dirId: '.$this->settings['photo_frame_upload_group'].',
 			colId: '.(isset($this->col_id) && $this->col_id ? '\'col_id_'.$this->col_id.'\'' : 'false').',
 			varId: '.(isset($this->var_id) && $this->var_id ? $this->var_id : 'false').',
@@ -2176,7 +2178,7 @@ class Photo_frame_ft extends EE_Fieldtype {
 	private function _delete_photos($force_delete = FALSE)
 	{	
 		$post_photos = $this->EE->input->post('photo_frame_delete_photos', TRUE);
-		
+
 		$id = $this->low_variables ? $this->var_id : ($this->grid || $this->matrix ? $this->settings['col_id'] : $this->settings['field_id']);
 		
 		if(!$this->EE->input->post('epBwfDraft_create_draft') && !$this->EE->input->post('epBwfDraft_update_draft') || $force_delete)
