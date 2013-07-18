@@ -2504,8 +2504,6 @@ var PhotoFrame = {};
 		_bindClickEvents: function() {
 			var t = this;
 			
-			// console.log(t.ui.edit);
-
 			if(t.ui.edit) {
 				t.ui.edit.unbind('click').click(function(e) {
 					t.showProgress(0);
@@ -3420,8 +3418,6 @@ var PhotoFrame = {};
 				ratioString: t.settings.aspectRatioString
 			};
 
-			console.log(minHeight, height);
-			
 			if(minWidth > 0 && minWidth > width) {
 				response.validWidth = false;
 				errors.push(this.factory.parse(PhotoFrame.Lang.min_width, 'min_width', minWidth));
