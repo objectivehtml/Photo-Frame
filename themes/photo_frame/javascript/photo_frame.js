@@ -810,7 +810,12 @@ var PhotoFrame = {};
 			return url ? url : _default;	
 		},
 
-		parse: function(string, vars) {
+		parse: function(string, vars, value) {
+			if(typeof vars != "object") {
+				var obj   = {};
+				obj[vars] = value;
+				vars      = obj;
+			}
 			$.each(vars, function(i, value) {
 				string = string.replace('{'+i+'}', value);
 			});
@@ -3391,8 +3396,8 @@ var PhotoFrame = {};
 			var maxHeight   = t.settings.maxSize ? t.settings.maxSize[1] : 0;
 			var isCropped   = t.isCropped(cropSize);
 			
-			var height      = cropSize.h;
-			var width       = cropSize.w;
+			var height      = Math.ceil(cropSize.h);
+			var width       = Math.ceil(cropSize.w);
 			var errors      = [];
 			var imgWidth    = Math.ceil(this.width());
 			var imgHeight   = Math.ceil(this.height());
@@ -3414,31 +3419,33 @@ var PhotoFrame = {};
 				ratio: ratio,
 				ratioString: t.settings.aspectRatioString
 			};
+
+			console.log(minHeight, height);
 			
 			if(minWidth > 0 && minWidth > width) {
 				response.validWidth = false;
-				errors.push('The image must have a minimum width of '+minWidth+'px');
+				errors.push(this.factory.parse(PhotoFrame.Lang.min_width, 'min_width', minWidth));
 			}
 			
 			if(minHeight > 0 && minHeight > height) {
 				response.validHeight = false;
-				errors.push('The image must have a minimum height of '+minHeight+'px');
+				errors.push(this.factory.parse(PhotoFrame.Lang.min_height, 'min_height', minHeight));
 			}
 			
 			if(maxWidth > 0 && maxWidth < width) {
 				response.validWidth = false;
-				errors.push('The image must have a maximum width of '+maxWidth+'px');
+				errors.push(this.factory.parse(PhotoFrame.Lang.max_width, 'max_width', maxWidth));
 			}
 			
 			if(maxHeight > 0 && maxHeight < height) {
 				response.validHeight = false;
-				errors.push('The image must have a maximum height of '+maxHeight+'px');
+				errors.push(this.factory.parse(PhotoFrame.Lang.max_height, 'max_height', maxHeight));
 			}
 			
 			if(!isCropped && ratio) {
 				if(t.round(ratio, 100) != t.round(cropWidth / cropHeight, 100)) {
 					response.validRatio = false;
-					errors.push('The image must have an apect ratio of '+t.settings.aspectRatioString);
+					errors.push(this.factory.parse(PhotoFrame.Lang.required_ratio, t.settings.aspectRatioString));
 				}
 			}
 			

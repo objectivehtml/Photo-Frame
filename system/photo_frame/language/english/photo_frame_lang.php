@@ -130,6 +130,10 @@ $lang	= array(
 
 	/* Introduced in Photo Frame 1.1 */
 	
+	'photo_frame_max_width'              => 'The image must have a maximum width of {max_width}px',
+	'photo_frame_max_height'             => 'The image must have a maximum height of {max_height}px',
+	'photo_frame_required_ratio'         => 'The image must have an aspect ratio of {aspect_ratio}',
+	
 	'photo_frame_meta'				     => 'Meta Data',
 	'photo_frame_meta_desc'		 		 => 'Read the meta data for the photo.',
 
