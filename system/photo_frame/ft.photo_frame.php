@@ -1088,6 +1088,8 @@ class Photo_frame_ft extends EE_Fieldtype {
 	
 	private function _get_photos($field_id, $pre_loop = TRUE)
 	{
+		$this->EE->load->model('photo_frame_model');
+		
 		// Set pre_loop to FALSE for earlier versions of EE
 		if(version_compare(APP_VER, '2.5.0', '<'))
 		{
