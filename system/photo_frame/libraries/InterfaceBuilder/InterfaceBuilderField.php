@@ -14,6 +14,16 @@ if(!class_exists('InterfaceBuilderField'))
 		
 		protected $data;
 			
+
+		/**
+		 * Field default data
+		 *
+		 * @access	protected
+		 * @type	mixed	
+		*/
+		
+		protected $default = '';
+			
 			
 		/**
 		 * Field Description
