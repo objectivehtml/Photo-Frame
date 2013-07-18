@@ -6,8 +6,8 @@
  * @author		Justin Kimbrell
  * @copyright	Copyright (c) 2012, Objective HTML
  * @link 		http://www.objectivehtml.com/
- * @version		1.0.0
- * @build		20120914
+ * @version		1.0.2
+ * @build		20130718
  */
 
 /**
@@ -48,7 +48,7 @@ if(!function_exists('action_url'))
 		
 		if($current_url)
 		{
-			$url = page_url(FALSE, FALSE);
+			$url = page_url(TRUE, FALSE);
 		}
 		else
 		{
@@ -82,13 +82,22 @@ if(!function_exists('page_url'))
 		
 		if($uri_segments)
 		{
-			$uri = '/' . implode('/', $segments);
+			if(count($segments) > 0)
+			{
+				$uri = '/' . implode('/', $segments);
+			}
+			else
+			{
+				$uri 	  = preg_replace('/\?.*$/', '', $_SERVER['REQUEST_URI']);
+				$filename = basename($uri);
+				$uri      = str_replace($filename, '', $uri);
+			}
 		}
 		else
 		{
 			$uri = isset($_SERVER['PHP_SELF']) ? $_SERVER['PHP_SELF'] : NULL;	
 		}
-		
+
 		if(count($_GET) > 0 && $append_get)
 		{
 			$get = '?'.http_build_query($_GET);

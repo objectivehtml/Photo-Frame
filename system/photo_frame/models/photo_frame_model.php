@@ -70,11 +70,12 @@ class Photo_frame_model extends CI_Model {
 		
 		foreach($actions->result() as $action)
 		{		 
-			$return[$action->method] = base_page(). '?ACT='.$action->action_id;
+			$return[$action->method] = page_url(TRUE, FALSE). '?ACT='.$action->action_id;
 		}
 		
 		return $return;
 	}
+	
 	
 	public function get_file_upload_groups()
 	{
