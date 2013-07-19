@@ -1532,6 +1532,12 @@ var PhotoFrame = {};
 		$obj: false,
 	
 		/**
+		 * The name of the package. If name, default to name property
+		 */	
+		 
+		packageName: false,
+		
+		/**
 		 * Should Photo Frame render the photo after removing the layer
 		 */	
 		 
@@ -1579,11 +1585,19 @@ var PhotoFrame = {};
 				e.preventDefault();
 			});
 			
+			if(!this.packageName) {
+				this.packageName = this.name;
+			}
+
 			if(buildWindow === true) {
 				this.buildWindow();
 			}
 		},	
 		
+		getPackageName: function() {
+			return (this.packageName ? this.packageName : this.name).toLowerCase();
+		},
+
 		/**
 		 * Show the manipulation
 		 *
@@ -1591,7 +1605,7 @@ var PhotoFrame = {};
 		 */
 		
 		showManipulation: function() {
-			this.cropPhoto().showManipulation(this.name);
+			this.cropPhoto().showManipulation(this.getPackageName());
 		},
 		
 		/**
@@ -1601,7 +1615,7 @@ var PhotoFrame = {};
 		 */
 		
 		hideManipulation: function() {
-			this.cropPhoto().hideManipulation(this.name);
+			this.cropPhoto().hideManipulation(this.getPackageName());
 		},
 		
 		/**
@@ -1613,7 +1627,7 @@ var PhotoFrame = {};
 		 */
 		
 		addManipulation: function(visible, data) {
-			this.cropPhoto().addManipulation(this.name, visible, data);
+			this.cropPhoto().addManipulation(this.getPackageName(), visible, data);
 		},
 		
 		/**
@@ -1654,7 +1668,7 @@ var PhotoFrame = {};
 		 */
 		
 		removeManipulation: function() {
-			delete this.buttonBar.factory.cropPhoto.manipulations[this.name.toLowerCase()];
+			delete this.buttonBar.factory.cropPhoto.manipulations[this.getPackageName()];
 			this.buttonBar.factory.trigger('removeManipulation', this);
 		},
 		
@@ -1747,7 +1761,7 @@ var PhotoFrame = {};
 		
 		getManipulation: function() {
 			if(this.cropPhoto()) {
-				return this.cropPhoto().getManipulation(this.name);
+				return this.cropPhoto().getManipulation(this.getPackageName());
 			}
 			return false;
 		},
@@ -2720,6 +2734,7 @@ var PhotoFrame = {};
 						manipulations: t.getManipulations(),
 						directory: this.factory.directory
 					}, function(data) {
+						console.log(data);
 						t.cacheUrl = data.url;
 						t.load(data.url, function(img) {			
 							t.ui.cropPhoto.html(img); 

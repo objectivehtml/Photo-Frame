@@ -132,7 +132,7 @@
 				for(var i in this.buttonBar.buttons) {
 					var button = this.buttonBar.buttons[i];
 					
-					if(m[button.name.toLowerCase()]) {
+					if(m[button.getPackageName()]) {
 						button.toggleLayer(visible, false);
 					}
 				}
@@ -208,7 +208,7 @@
 			
 			for(var y in this.buttonBar.buttons) {
 				var button = this.buttonBar.buttons[y];				
-				buttons[button.name.toLowerCase()] = button;
+				buttons[button.getPackageName()] = button;
 			}
 			
 			$.each(photo.manipulations, function(x, manipulation) {
@@ -216,7 +216,7 @@
 				var button       = buttons[x];
 				
 				if(button) {
-					var title = button.name.toLowerCase();
+					var title = button.getPackageName();
 					
 					var visible = $('<a href="#" class="'+t.classes.visible+'"><i class="icon-'+(manipulation.visible ? t.icons.eye : t.icons.eyeClose)+'"></i></a>');
 					var trash   = $('<a href="#" class="'+t.classes.trash+'"><i class="icon-'+t.icons.trash+'"></i></a>');
