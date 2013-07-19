@@ -399,6 +399,7 @@ a.photo-frame-tool-window-close {
 .photo-frame-crop {
 	display: inline-block;
 	display: none;
+	z-index: 0;
 }
 .photo-frame-crop-photo {
 	background: url('../img/canvas-background.jpg') 0 0 repeat;	
