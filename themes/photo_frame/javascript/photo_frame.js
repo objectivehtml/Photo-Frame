@@ -2732,9 +2732,9 @@ var PhotoFrame = {};
 						cacheUrl: this.cacheUrl,
 						cache: this.cache,
 						manipulations: t.getManipulations(),
-						directory: this.factory.directory
+						directory: this.factory.directory,
+						preview: true
 					}, function(data) {
-						console.log(data);
 						t.cacheUrl = data.url;
 						t.load(data.url, function(img) {			
 							t.ui.cropPhoto.html(img); 

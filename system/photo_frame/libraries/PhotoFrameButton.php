@@ -32,6 +32,8 @@ if(!class_exists('PhotoFrameButton'))
 		
 		protected $image = FALSE;
 		
+		protected $preview = FALSE;
+		
 		public function __construct($params = array()) 
 		{
 			parent::__construct($params);

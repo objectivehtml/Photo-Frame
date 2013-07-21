@@ -163,6 +163,7 @@ class Photo_frame_mcp {
 		$cache         = $this->EE->input->get_post('cache');
 		$directory     = $this->EE->input->get_post('directory');
 		$manipulations = $this->EE->input->get_post('manipulations');
+		$preview	   = $this->EE->input->get_post('preview') == 'true' ? true : false;
 		$manipulations = $this->EE->photo_frame_lib->array_to_object($manipulations);
 		//$cache_path    = $this->EE->photo_frame_lib->cache_image($cache, $orig_path, $directory['server_path'], $directory['url']);
 		
@@ -184,9 +185,12 @@ class Photo_frame_mcp {
 			'path'         => $cache_path,
 			'originalUrl'  => $orig_url,
 			'url' 		   => $cache_url,
-			'image'        => $image
+			'image'        => $image,
+			'preview'      => $preview
 		));
 		
+		// var_dump($manipulations);exit();
+
 		foreach($manipulations as $name => $manipulation)
 		{
 			if($manipulation->visible === TRUE || $manipulation->visible == 'true')
