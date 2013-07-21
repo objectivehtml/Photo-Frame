@@ -370,6 +370,7 @@
 			}
 			
 			this.buttonBar.factory.ui.crop.center();	
+			this.buttonBar.factory.trigger('initCrop');
 		},
 		
 		refresh: function(formFields) {
