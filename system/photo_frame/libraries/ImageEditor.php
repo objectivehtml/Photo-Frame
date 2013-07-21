@@ -808,15 +808,21 @@ class ImageEditor extends BaseClass {
 	    $this->save();
 	}
 
-	public function label($text, $x, $y, $width)
+	public function label($text, $x, $y, $width, $font, $font_size = 14, $color = '#ffffff')
 	{
-		$font = '/Users/justinkimbrell/Github/Photo Frame Text Pack/system/photo_frame_text_pack/fonts/Open_Sans/OpenSans-Regular.ttf';
+		// $font = '/Users/justinkimbrell/Github/Photo Frame Text Pack/system/photo_frame_text_pack/fonts/Open_Sans/OpenSans-Regular.ttf';
+		
+		$text_angle   = 0; 
+		$text_padding = 10; // Img padding - around text 
 
-		$font_size        = 14; 
-		$text_angle        = 0; 
-		$text_padding    = 10; // Img padding - around text 
+		if(preg_match('/^#.+/', $color))
+		{
+			$color = $this->hex2rgb($color);
+			$color = explode(',', $color);
+		}
 
-		$color = imagecolorallocate($this->image, 255, 255, 255); 
+		$color = imagecolorallocate($this->image, $color[0], $color[1], $color[2]); 
+
 		imagettftext($this->image, 
 		    $font_size, 
 		    $text_angle, 
@@ -856,7 +862,7 @@ class ImageEditor extends BaseClass {
 	    $currentLine = 0; 
 	    for($i = 1; $i < count($words); $i++) 
 	    { 
-	        $lineSize = imagettfbbox($fontsize, 0, $font, $lines[$currentLine] . ' ' . $words[$i]); 
+	        $lineSize = imagettfbbox($size, 0, $font, $lines[$currentLine] . ' ' . $words[$i]); 
 	        if($lineSize[2] - $lineSize[0] < $width) 
 	        { 
 	            $lines[$currentLine] .= ' ' . $words[$i]; 
