@@ -798,7 +798,7 @@ class Photo_frame_ft extends EE_Fieldtype {
 							    		var count = 1;
 							    		
 								    	$.each(files, function(i, file) {
-									    	t._fileBrowserResponseHandler(file.url, function(response) {
+									    	t._fileBrowserResponseHandler(file.url, file.id, function(response) {
 									    		var progress = parseInt(count / files.length * 100);
 									    		t._assetResponseHandler(response, progress);
 									    		count++;
