@@ -665,6 +665,7 @@ var PhotoFrame = {};
 							else {
 								t.hideProgress();
 								t.showErrors(errors);
+								t.log(data.result);
 							}
 						}
 					}
