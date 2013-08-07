@@ -2490,6 +2490,10 @@ var PhotoFrame = {};
 			t.load(response.file_url, function(img) {
 				var obj = html.find('.'+t.factory.classes.photo);
 				
+				if(!t.cachePath) {
+					t.cachePath = response.directory.server_path + t.cache + '.' + t.extension(response.file_name);
+				}
+
 				t._sendCropRequest(function(cropResponse) {
 					obj.prepend(img).append(t._generateNewDataField(cropResponse.save_data));
 					t.factory.ui.preview.find('ul').append(html);
@@ -2533,6 +2537,10 @@ var PhotoFrame = {};
 					e.preventDefault();
 				});
 			}
+		},
+		
+		extension: function(filename) {
+			return filename.split('.').pop();
 		},
 		
 		remove: function() {
