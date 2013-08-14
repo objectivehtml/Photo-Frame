@@ -1324,6 +1324,25 @@ class Photo_frame_ft extends EE_Fieldtype {
 		return count($this->_get_photos($this->field_id, isset($params['pre_loop']) ? $params['pre_loop'] : TRUE));
 	}
 	
+	public function replace_url($data, $params = array(), $tagdata)
+	{
+		$prefix = isset($params['prefix']) ? $params['prefix'] : 'photo:';
+
+		return $this->replace_tag($data, $params, '{'.$prefix.'url}');
+	}
+
+	public function replace_path($data, $params = array(), $tagdata)
+	{
+		$prefix = isset($params['prefix']) ? $params['prefix'] : 'photo:';
+
+		return $this->replace_tag($data, $params, '{'.$prefix.'file}');
+	}
+
+	public function replace_file($data, $params = array(), $tagdata)
+	{
+		return $this->replace_path($data, $params, $tagdata);
+	}
+
 	public function replace_first_photo($data, $params, $tagdata)
 	{
 		$total_photos = $this->replace_total_photos($data, $params, $tagdata);
