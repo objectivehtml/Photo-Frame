@@ -2312,7 +2312,7 @@ class Photo_frame_ft extends EE_Fieldtype {
 					'options' => $this->EE->photo_frame_model->upload_options()
 				)
 			),
-			'photo_frame_folder_id' => array(
+			/*'photo_frame_folder_id' => array(
 				'label'       => 'Assets Folder',
 				'description' => 'Select the Asset\'s folder you in which you want to store your photos.',
 				'type'        => 'select',
@@ -2320,6 +2320,7 @@ class Photo_frame_ft extends EE_Fieldtype {
 					'options' => $this->EE->photo_frame_model->asset_folders()
 				)
 			),
+			*/
 			'photo_frame_delete_files' => array(
 				'label'       => 'Delete Files',
 				'description' => 'Do you want to delete the files stored on the server when users delete photos within the entries? If this setting is set to False, then the files will always remain on the server.',
@@ -2635,6 +2636,11 @@ class Photo_frame_ft extends EE_Fieldtype {
 			return $return;
 		}
 		
+		if(!isset($data['photo_frame_name_format']))
+		{
+			$data['photo_frame_name_format'] = '{random_string}-{width}-{height}.{extension}';
+		}
+
 		$vars = array(
 			'matrix' 	   => $this->matrix,
 			'resize_table' => InterfaceBuilder::table($resize_fields, $data, array(), array(
