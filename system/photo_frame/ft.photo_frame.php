@@ -840,7 +840,7 @@ class Photo_frame_ft extends EE_Fieldtype {
 					}
 				},
 				buildUploadUrl: function() {
-					return PhotoFrame.Actions.upload_photo + \'&site_id='.$settings['site_id'].'&dir_id='.$settings['photo_frame_upload_group'].(isset($this->var_id) ? '&var_id=' . $this->var_id : '&field_id='.$this->field_id).($settings['photo_frame_folder_id'] ? '&folder_id='.$settings['photo_frame_folder_id'] : '').($this->grid ? '&grid_id='.$grid_id : '' ).'\';
+					return PhotoFrame.Actions.upload_photo + \'&site_id='.config_item('site_id').'&dir_id='.$settings['photo_frame_upload_group'].(isset($this->var_id) ? '&var_id=' . $this->var_id : '&field_id='.$this->field_id).($settings['photo_frame_folder_id'] ? '&folder_id='.$settings['photo_frame_folder_id'] : '').($this->grid ? '&grid_id='.$grid_id : '' ).'\';
 				}
 			}
 		}';
@@ -1413,11 +1413,10 @@ class Photo_frame_ft extends EE_Fieldtype {
 	
 	public function replace_tag($data, $params = array(), $tagdata)
 	{	
-		if(isset($this->EE->session->cache['ep_better_workflow']) && $this->EE->session->cache['ep_better_workflow']['is_preview'])
+		if(isset($this->EE->session->cache['ep_better_workflow']['is_preview']) && $this->EE->session->cache['ep_better_workflow']['is_preview'])
 		{
 			$this->is_draft = TRUE;	
 		}
-		
 		
 		$this->EE->load->library('photo_frame_lib');
 		$this->EE->load->config('photo_frame_config');

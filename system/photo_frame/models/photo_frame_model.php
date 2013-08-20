@@ -68,9 +68,12 @@ class Photo_frame_model extends CI_Model {
 			)
 		));
 		
+		$base_url = base_url(TRUE);
+		$base_url = !empty($base_url) ? $base_url : base_page();
+		
 		foreach($actions->result() as $action)
 		{		 
-			$return[$action->method] = base_url(TRUE). '?ACT='.$action->action_id;
+			$return[$action->method] = $base_url . '?ACT='.$action->action_id;
 		}
 		
 		return $return;
