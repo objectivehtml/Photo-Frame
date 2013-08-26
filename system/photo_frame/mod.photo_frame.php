@@ -42,6 +42,36 @@ class Photo_frame {
 	{
 		$this->EE->TMPL->tagparams[$param] = $value;	
 	}
+
+	public function resize()
+	{
+		$path = $this->param('path');
+		$img  = ImageEditor::init($path);
+
+		$x 		= $this->param('x', 0);
+		$y 	    = $this->param('y', 0);
+		$height = $this->param('height', $img->getHeight(), FALSE, TRUE);
+		$width  = $this->param('width', $img->getWidth(), FALSE, TRUE);
+
+		$this->EE->load->library('photo_frame_resizer');
+
+		$cache_path = $this->EE->photo_frame_resizer->cache($path, $this->param('cache'), $this->param('cache_length'));
+
+		$this->EE->photo_frame_resizer->crop($cache_path, $x, $y, $width, $height, $img->getWidth(), $img->getHeight(),  $this->param('mode', 'crop'));
+		
+		$url  = rtrim(config_item('photo_frame_front_end_cache_url'), '/') . '/' . basename($cache_path);
+
+		if($this->EE->TMPL->tagdata)
+		{
+			return $this->parse(array($this->EE->channel_data->utility->add_prefix('cache', array(
+				'url'  => $url,
+				'path' => $cache_path,
+				'file' => $cache_path
+			))));
+		}
+		
+		return $url;
+	}
 	
 	public function first_photo()
 	{

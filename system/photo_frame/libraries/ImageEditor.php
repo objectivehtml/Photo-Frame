@@ -487,15 +487,25 @@ class ImageEditor extends BaseClass {
 	 * @param   int 	Resize an image to specified Y2 coordinate
 	 * @return	object
 	 */
-	public function crop($width, $height, $x = 0, $y = 0, $x2 = 0, $y2 = 0)
+	public function crop($width, $height, $x = 0, $y = 0, $x2 = 0, $y2 = 0, $sourceWidth = FALSE, $sourceHeight = FALSE)
 	{
+		if(!$sourceWidth)
+		{
+			$sourceWidth = $width;
+		}
+
+		if(!$sourceHeight)
+		{
+			$sourceHeight = $height;
+		}
+
 		$resizedImage = imagecreatetruecolor($width, $height);
 		
 		/* Check if this image is PNG or GIF, then set if Transparent*/  
 		
 		$this->preserveTransparency($resizedImage, $width, $height);
 		
-		imagecopyresampled($resizedImage, $this->image, $x2, $y2, $x, $y, $width, $height, $width, $height);
+		imagecopyresampled($resizedImage, $this->image, $x2, $y2, $x, $y, $width, $height, $sourceWidth, $sourceHeight);
 		
 		$this->image = $resizedImage;
 		
