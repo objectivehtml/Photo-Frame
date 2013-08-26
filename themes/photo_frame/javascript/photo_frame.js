@@ -179,6 +179,10 @@ var PhotoFrame = {};
 		
 		jsonDecode: function(obj) {
 			return JSON.stringify(obj);
+		},
+
+		isRetina: function() {
+			return window.devicePixelRatio > 1;
 		}
 
 	});
@@ -1871,8 +1875,8 @@ var PhotoFrame = {};
 		 * @return	object
 		 */
 		
-		save: function(data) {
-			if(data.length > 0) {
+		save: function(data, forceSave) {
+			if(data.length > 0 || forceSave) {
 				this.addManipulation(this.getVisibility(), data);
 			}
 			this.updateJson();
@@ -3237,6 +3241,44 @@ var PhotoFrame = {};
     		else {
     			t.settings.setSelect = [size.x, size.y, size.x2, size.y2];
     		}
+
+    		console.log({
+				fieldId: t.factory.fieldId,
+				varId: t.factory.varId,
+				colId: t.factory.colId,
+				gridId: t.factory.gridId,
+				cache: t.cache,
+				useCache: t.useCache,
+				cacheUrl: t.cacheUrl ? t.cacheUrl : response.file_url,
+				cachePath: t.cachePath ? t.cachePath : response.file_path,
+				id: t.factory.directory.id,
+				assetId: t.response.asset_id,
+				index: t.factory.index,
+				photo_id: t.id,
+				image: response.file_path,
+				name: response.file_name,
+				manipulations: t.manipulations,
+				directory: t.factory.directory,
+				original: response.original_path,
+				original_file: response.original_file,
+				exifData: response.exif_string,
+				url: response.url,
+				edit: t.edit !== false ? true : false,
+				height: size.h,
+				width: size.w,
+				scale: t.scale,
+				rotate: t.rotate,
+				resize: t.resize,
+				resizeMax: t.resizeMax,
+				x: size.x,
+				x2: size.x2,
+				y: size.y,
+				y2: size.y2,
+				title: t.title,
+				description: t.description,
+				keywords: t.keywords,
+				compression: t.compression
+			});
 
 			$.post(PhotoFrame.Actions.crop_photo, {
 				fieldId: t.factory.fieldId,
