@@ -1024,6 +1024,7 @@ class Photo_frame_ft extends EE_Fieldtype {
 		$actions = $this->EE->photo_frame_model->get_actions();
 		
 		$actions['upload_photo'] .= '&dir_id='.$settings['photo_frame_upload_group'].(isset($this->var_id) ? '&var_id=' . $this->var_id : '&field_id='.$this->field_id);
+		$actions['theme_url']     = $this->EE->theme_loader->theme_url();
 		$actions['effects']       = $this->EE->theme_loader->theme_url() . 'photo_frame/img/effects/';
 		
 		return json_encode($actions);
