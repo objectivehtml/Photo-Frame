@@ -327,6 +327,10 @@
 			
 			*/
 		},
+
+		isActive: function() {
+			return this.getSetting('disable_regular_crop') === 'true' ? false : true;
+		},
 		
 		toggleLayerCallback: function(manipulation) {
 			// resizeVisibility = manipulation.visible;
@@ -371,11 +375,19 @@
 			
 			this.buttonBar.factory.ui.crop.center();	
 			this.buttonBar.factory.trigger('initCrop');
+
+			if(this.buttonBar.factory.settings.photo_frame_disable_regular_crop == 'true') {
+				this.disable();
+			}
 		},
 		
 		refresh: function(formFields) {
 			var crop = this.getCrop(formFields)
 			
+			if(!this.isActive()) {
+				this.window.close();
+			}
+
 			if(crop.x || crop.y || crop.x2 || crop.y2) {
 				this.window.ui.x.val(crop.x);
 				this.window.ui.y.val(crop.y);

@@ -320,6 +320,12 @@ var PhotoFrame = {};
 		},	
 		
 		/**
+		 * Crop Settings
+		 */		
+		 
+		cropSettings: {},
+			
+		/**
 		 * Force users to crop new photos?
 		 */		
 		 
@@ -372,7 +378,7 @@ var PhotoFrame = {};
 		photos: [],
 		
 		/**
-		 * Crop Settings.
+		 * Settings.
 		 */		
 		 
 		settings: {},
@@ -413,9 +419,11 @@ var PhotoFrame = {};
 			var t      = this;
 			var photos = $.extend(true, {}, options.photos);
 					
-			t.events  = {};
-			t.windows = [];
-			t.index   = PhotoFrame.instances.length;
+			t.events   	   = {};
+			t.settings 	   = {};
+			t.cropSettings = {};
+			t.windows      = [];
+			t.index        = PhotoFrame.instances.length;
 			
 			// Global default callbacks
 			
@@ -689,7 +697,7 @@ var PhotoFrame = {};
 		    		id: photo.id,
 		    		manipulations: photo.manipulations,
 		    		index: x,
-		    		settings: $.extend({}, options.settings, {
+		    		cropSettings: $.extend({}, options.cropSettings, {
 			    		setSelect: [photo.x, photo.y, photo.x2, photo.y2]	
 		    		}),
 			    	$wrapper: t.$wrapper.find('#'+t.classes.photo+'-'+t.fieldId+'-'+x)
@@ -807,7 +815,21 @@ var PhotoFrame = {};
 			
 			t.callback(t.callbacks.init);
 		},
+
+		getSettings: function() {
+			return this.settings;
+		},
 		
+		getSetting: function(index) {
+			var settings = this.getSettings(), index = 'photo_frame_'+index;
+
+		 	if(settings[index]) {
+		 		return settings[index];
+		 	}
+
+		 	return undefined;
+		},
+
 		getUploadUrl: function() {
 			var _default = PhotoFrame.Actions.upload_photo
 			var url = this.callbacks.buildUploadUrl();
@@ -1019,7 +1041,7 @@ var PhotoFrame = {};
 				}
 				
 				var props = {
-					settings: this.settings,
+					cropSettings: this.cropSettings,
 					compression: this.compression,
 					size: this.size,
 					forceCrop: this.forceCrop,
@@ -1340,12 +1362,13 @@ var PhotoFrame = {};
 		addButton: function(button, options) {
 			var button = this.loadButton(button, options);
 			
-			if(button) {
+			if(button && button.isActive()) {
 				var item = $('<li />').append(button.$obj);
 				
-				this.ui.list.append(item);			
-				this.buttons.push(button);
-			}
+				this.ui.list.append(item);
+			}			
+			
+			this.buttons.push(button);
 		},				
 		
 		addButtons: function(buttons, options) {
@@ -1736,6 +1759,16 @@ var PhotoFrame = {};
 		},
 		
 		/**
+		 * Is button active (visible) in the tool bar?
+		 *
+		 * @return	bool
+		 */
+
+		isActive: function() {
+		 	return true;
+		},
+		
+		/**
 		 * Show the window
 		 *
 		 * @param	callback  This callback is triggered when the window is hidden
@@ -1868,6 +1901,26 @@ var PhotoFrame = {};
 			return {};
 		},
 
+		/**
+		 * Get the settings object
+		 *
+		 * @return	object
+		 */
+
+		getSettings: function() {
+		 	return this.buttonBar.factory.getSettings();
+		},
+
+		/**
+		 * Get a single setting value
+		 *
+		 * @return	object
+		 */
+
+		getSetting: function(index) {
+		 	return this.buttonBar.factory.getSetting(index);
+		},
+		
 		/**
 		 * Add a manipulation and save the refreshed JSON object.
 		 * Note, this method is different than render().
@@ -2278,6 +2331,12 @@ var PhotoFrame = {};
 		 */	
 		 
 		compression: 100,
+		 
+		/**
+		 * Crop Settings
+		 */
+		 
+		cropSettings: {},
 		
 		/**
 		 * Photo Description
@@ -2380,12 +2439,6 @@ var PhotoFrame = {};
 		 */
 		 
 		size: false,
-		 
-		/**
-		 * Crop Settings
-		 */
-		 
-		settings: {},
 		
 		/**
 		 * Photo Title
@@ -2634,37 +2687,37 @@ var PhotoFrame = {};
 			if(t.initialized) {
 				t.destroyJcrop();
 			}
-			
-            t.settings.onChange = function() {
+
+            t.cropSettings.onChange = function() {
             	t.hideInstructions();
 	          	t.updateInfo();	
 	            this.released = false;
 	            t.factory.trigger('jcropOnChange', this);
             };
             
-            t.settings.onRelease = function() {
+            t.cropSettings.onRelease = function() {
 	            this.released = true;            	
 	            t.factory.trigger('jcropOnRelease', this);
             };
             
-            t.settings.onSelect = function() {
+            t.cropSettings.onSelect = function() {
 	            this.released = false;	            
 	            t.factory.trigger('jcropOnSelect', this);
             }
             
-			if(t.settings.setSelect) {
+			if(t.cropSettings.setSelect) {
 				var size = 0;
 				
-				for(var x in t.settings.setSelect) {
-					size += t.settings.setSelect[x];
+				for(var x in t.cropSettings.setSelect) {
+					size += t.cropSettings.setSelect[x];
 				}
 				
 				if(size == 0) {
-					delete t.settings.setSelect;
+					delete t.cropSettings.setSelect;
 				}
 			}
 			
-			t.ui.cropPhoto.Jcrop(t.settings, function() {
+			t.ui.cropPhoto.Jcrop(t.cropSettings, function() {
 				t.jcrop = this;
 	            if(typeof callback == "function") {
 		            callback(this);
@@ -2999,7 +3052,7 @@ var PhotoFrame = {};
 				           		var y  = (t.ui.cropPhoto.height() / 2) - (size[1] / 2);
 				           		var y2 = y + size[1];
 				           		
-				           		t.settings.setSelect = [x, y, x2, y2];
+				           		t.cropSettings.setSelect = [x, y, x2, y2];
 				            }
 				            
 			            	if(t.title) {
@@ -3020,8 +3073,7 @@ var PhotoFrame = {};
 				        	
 				            $(window).resize();
 				            if(t.factory.buttonBar) {
-					            for(var x in t.factory.buttons) {
-				            
+					            for(var x in t.factory.buttons) {				            
 						            t.factory.buttonBar.buttons[x].startCrop(t);
 					            }
 				            }
@@ -3236,10 +3288,10 @@ var PhotoFrame = {};
     		
     		if(!size.w || !size.h) {
     			size = _defaultSize;
-	    		delete t.settings.setSelect;
+	    		delete t.cropSettings.setSelect;
     		}
     		else {
-    			t.settings.setSelect = [size.x, size.y, size.x2, size.y2];
+    			t.cropSettings.setSelect = [size.x, size.y, size.x2, size.y2];
     		}
 
     		console.log({
@@ -3375,11 +3427,11 @@ var PhotoFrame = {};
 			cropSize.w = cropSize.w == 0 ? image.w : cropSize.w;
 			cropSize.h = cropSize.h == 0 ? image.h : cropSize.h;
 			
-			if(!this.settings.aspectRatio) {
+			if(!this.cropSettings.aspectRatio) {
 				var aspect = this.reduce(Math.ceil(cropSize.w), Math.ceil(cropSize.h));
 			}
 			else {
-				var aspect = this.settings.aspectRatioString.split(':');
+				var aspect = this.cropSettings.aspectRatioString.split(':');
 				
 				if(typeof aspect[0] == "undefined") {
 					aspect[0] = 0;
@@ -3449,15 +3501,15 @@ var PhotoFrame = {};
 				var json = false;	
 			}
 			
-			var ratio       = t.settings.aspectRatio ? t.settings.aspectRatio : false;
+			var ratio       = t.cropSettings.aspectRatio ? t.cropSettings.aspectRatio : false;
 			var cropSize    = t.cropDimensions();
 			
 			var cropWidth   = cropSize.w;
 			var cropHeight  = cropSize.h;
-			var minWidth    = t.settings.minSize ? t.settings.minSize[0] : 0;
-			var minHeight   = t.settings.minSize ? t.settings.minSize[1] : 0;
-			var maxWidth    = t.settings.maxSize ? t.settings.maxSize[0] : 0;
-			var maxHeight   = t.settings.maxSize ? t.settings.maxSize[1] : 0;
+			var minWidth    = t.cropSettings.minSize ? t.cropSettings.minSize[0] : 0;
+			var minHeight   = t.cropSettings.minSize ? t.cropSettings.minSize[1] : 0;
+			var maxWidth    = t.cropSettings.maxSize ? t.cropSettings.maxSize[0] : 0;
+			var maxHeight   = t.cropSettings.maxSize ? t.cropSettings.maxSize[1] : 0;
 			var isCropped   = t.isCropped(cropSize);
 			
 			var height      = Math.ceil(cropSize.h);
@@ -3481,7 +3533,7 @@ var PhotoFrame = {};
 				y: cropSize.y,
 				y2: cropSize.y2,
 				ratio: ratio,
-				ratioString: t.settings.aspectRatioString
+				ratioString: t.cropSettings.aspectRatioString
 			};
 
 			if(minWidth > 0 && minWidth > width) {
@@ -3507,7 +3559,7 @@ var PhotoFrame = {};
 			if(!isCropped && ratio) {
 				if(t.round(ratio, 100) != t.round(cropWidth / cropHeight, 100)) {
 					response.validRatio = false;
-					errors.push(this.factory.parse(PhotoFrame.Lang.required_ratio, t.settings.aspectRatioString));
+					errors.push(this.factory.parse(PhotoFrame.Lang.required_ratio, t.cropSettings.aspectRatioString));
 				}
 			}
 			

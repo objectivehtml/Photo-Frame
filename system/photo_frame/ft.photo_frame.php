@@ -745,7 +745,8 @@ class Photo_frame_ft extends EE_Fieldtype {
 			rowId: '.(isset($this->row_id) && $this->row_id ? '\'row_id_'.$this->row_id.'\'' : 'false').',
 			photos: '.json_encode($saved_data).',
 			buttons: '.json_encode($buttons).',
-			settings: '.json_encode($jcrop_settings).',
+			cropSettings: '.json_encode($jcrop_settings).',
+			settings: '.json_encode($settings).',
 			useAssets: '.$settings['photo_frame_assets'].',
 			directory: '.json_encode($directory).',
 			infoPanel: '.$settings['photo_frame_display_info'].',
@@ -2679,7 +2680,7 @@ class Photo_frame_ft extends EE_Fieldtype {
 				));
 			}
 		}
-		
+
 		$vars['addon_tables'] = implode('', $vars['addon_tables']);
 
 		return $this->EE->load->view('settings', $vars, TRUE);
