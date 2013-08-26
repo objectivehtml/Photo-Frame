@@ -16,4 +16,6 @@
 	
 	<?php echo $info_table?>
 
+	<?php echo $addon_tables?>
+
 </div>

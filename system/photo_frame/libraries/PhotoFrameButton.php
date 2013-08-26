@@ -93,5 +93,10 @@ if(!class_exists('PhotoFrameButton'))
 		{
 			return array();
 		}
+
+		public function settings($data)
+		{
+			return array();
+		}
 	}
 }

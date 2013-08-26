@@ -2662,7 +2662,26 @@ class Photo_frame_ft extends EE_Fieldtype {
 				'cellspacing' => 0
 			))
 		);
+
+		$vars['addon_tables'] = array();
+
+		foreach($this->EE->photo_frame_lib->get_buttons() as $button)
+		{
+			$settings = $button->settings($data);
+
+			if(count($settings) > 0)
+			{
+				$vars['addon_tables'][] = '<h3>'.$button->getName().' Settings</h3>'.InterfaceBuilder::table($settings, $data, array(), array(
+					'class'       => $this->matrix ? 'matrix-col-settings' : 'mainTable padTable',
+					'border'      => 0,
+					'cellpadding' => 0,
+					'cellspacing' => 0
+				));
+			}
+		}
 		
+		$vars['addon_tables'] = implode('', $vars['addon_tables']);
+
 		return $this->EE->load->view('settings', $vars, TRUE);
 	}
 	
