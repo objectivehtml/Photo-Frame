@@ -14,7 +14,13 @@ $config['photo_frame_original_size']          = 'original';
 $config['photo_frame_random_string_len']      = 8;
 $config['photo_frame_extra_dir_name']         = 'photo_frame_extras';
 $config['photo_frame_save_colors']            = 8;
-$config['photo_frame_save_color_granularity'] = 45; 
+$config['photo_frame_save_color_granularity'] = 45;
+
+// Dynamic caching for front-end use. (For Focal cropping)
+
+$config['photo_frame_front_end_cache_path']	  = FALSE;
+$config['photo_frame_front_end_cache_url']	  = '/assets/img/cache/';
+$config['photo_frame_front_end_cache_length'] = 0; //3600 * 24; // (in seconds)
 
 /* 
  *	Define the ee() function introduced in EE 2.6
