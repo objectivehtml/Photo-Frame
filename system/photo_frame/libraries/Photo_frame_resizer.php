@@ -18,11 +18,11 @@ if(class_exists('ImageEditor'))
 
 class Photo_frame_resizer {
 	
-	public function crop($path, $x, $y, $width, $height, $sourceWidth, $sourceHeight, $mode = 'crop')
+	public function crop($path, $x, $y, $width, $height, $sourceWidth, $sourceHeight, $mode = 'crop', $resize = TRUE)
 	{
 		$obj = ImageEditor::init($path);
 
-		if($mode == 'crop')
+		if($mode == 'crop' && $resize)
 		{
 			$resizeWidth  = FALSE;
 			$resizeHeight = FALSE;
@@ -69,7 +69,7 @@ class Photo_frame_resizer {
 			}
 
 		}
-		elseif($mode == 'fit')
+		elseif($mode == 'fit' && $resize)
 		{
 			if($width >= $height)
 			{
@@ -90,7 +90,7 @@ class Photo_frame_resizer {
 				}
 			}
 		}
-		elseif($mode == 'stretch')
+		elseif($mode == 'stretch' && $resize)
 		{
 			$obj->resize($width, $height);
 		}
