@@ -142,7 +142,17 @@ $lang	= array(
 	'photo_frame_new_label'				 => '<i class="icon-plus"></i> New Label',
 	'photo_frame_text_desc'		 		 => 'Create and overlay text labels over photos.',
 	'photo_frame_label_default'			 => 'Your text here...',
+
+
+	'photo_frame_focal_point'			 => 'Focal Point',
+	'photo_frame_focal_point_desc'		 => 'Define a focal point on the photo.',
 	
+	/* Introduced in Photo Frame 1.2 */
+
+
+	'photo_frame_hide_focal_point' 	     		 => 'Hide Focus',
+	'photo_frame_show_focal_point'	     		 => 'Show Focus',
+
 	//--------------------------------------------	
 	'', ''
 );
