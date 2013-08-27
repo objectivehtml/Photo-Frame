@@ -60,6 +60,9 @@ class Photo_frame_model extends CI_Model {
 	{
 		$this->load->helper('addon');
 		
+		$http = isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] == 'on' ? 'https://' : 'http://';
+		$www  = preg_match('/^www./', $_SERVER['HTTP_HOST']) ? 'www.' : '';
+
 		$return  = array();		
 		$actions = $this->channel_data->get('actions', array(
 			'select' => 'action_id, method',
@@ -71,14 +74,16 @@ class Photo_frame_model extends CI_Model {
 		$base_url = base_url(TRUE);
 		$base_url = !empty($base_url) ? $base_url : base_page();
 		
+		$base_url = preg_replace('/^www./', '', $base_url);
+		$base_url = preg_replace('/http(s|)\:\/\//', $http . $www, $base_url);
+	
 		foreach($actions->result() as $action)
 		{		 
 			$return[$action->method] = $base_url . '?ACT='.$action->action_id;
 		}
 		
 		return $return;
-	}
-	
+	}	
 	
 	public function get_file_upload_groups()
 	{
