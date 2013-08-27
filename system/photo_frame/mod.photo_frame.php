@@ -50,12 +50,31 @@ class Photo_frame {
 
 		$x 		= $this->param('x', 0);
 		$y 	    = $this->param('y', 0);
+		$ratio  = $this->param('ratio');
+
+		if($ratio)
+		{
+			$ratio  = explode(':', $ratio);
+			$width  = $this->param('width');
+			$height = $this->param('height');
+
+			if($width && !$height)
+			{
+				$this->EE->TMPL->tagparams['height'] = $width * ((float) $ratio[1] / (float) $ratio[0]);
+			}
+
+			if($height && !$width)
+			{
+				$this->EE->TMPL->tagparams['width'] = $height * ((float) $ratio[0] / (float) $ratio[1]);
+			}
+		}
+
 		$height = $this->param('height', $img->getHeight(), FALSE, TRUE);
 		$width  = $this->param('width', $img->getWidth(), FALSE, TRUE);
 
 		$this->EE->load->library('photo_frame_resizer');
 
-		$cache_path = $this->EE->photo_frame_resizer->cache($path, $this->param('cache'), $this->param('cache_length'));
+		$cache_path = $this->EE->photo_frame_resizer->cache($path, $this->param('id'), $this->param('cache'), $this->param('cache_length'));
 
 		$this->EE->photo_frame_resizer->crop($cache_path, $x, $y, $width, $height, $img->getWidth(), $img->getHeight(),  $this->param('mode', 'crop'));
 		

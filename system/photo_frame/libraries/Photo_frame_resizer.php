@@ -4,7 +4,7 @@
  * Photo Frame
  * 
  * @package		Photo Frame
- * @author		Justin Kimbrell
+ * @author		Justin Kimbr
  * @copyright	Copyright (c) 2012, Justin Kimbrell
  * @link 		http://www.objectivehtml.com/photo-frame
  * @version		0.7.0
@@ -22,7 +22,7 @@ class Photo_frame_resizer {
 	{
 		$obj = ImageEditor::init($path);
 
-		if($mode == 'crop' && $resize)
+		if($mode == 'crop')
 		{
 			$resizeWidth  = FALSE;
 			$resizeHeight = FALSE;
@@ -43,13 +43,31 @@ class Photo_frame_resizer {
 			if($x <= 0)
 			{
 				$x = 0;
+
+				if($obj->getWidth() <= $height) {
+					$resizeWidth = $width;
+					$width = $obj->getWidth();
+				}
+			}
+			
+			if($y <= 0)
+			{
+				$y = 0;
+
+				if($obj->getHeight() <= $height) {
+					$resizeHeight = $height;
+					$height = $obj->getHeight();
+				}
+			}
+
+			if($width > $obj->getWidth())
+			{
 				$resizeWidth = $width;
 				$width = $obj->getWidth();
 			}
 
-			if($y <= 0)
+			if($height > $obj->getHeight())
 			{
-				$y = 0;
 				$resizeHeight = $height;
 				$height = $obj->getHeight();
 			}
@@ -65,7 +83,7 @@ class Photo_frame_resizer {
 			}
 
 			if($resizeHeight && $resizeWidth) {
-				$this->resize($resizeHeight, $resizeWidth);
+				$obj->resize($resizeWidth, $resizeHeight);
 			}
 
 		}
@@ -96,7 +114,7 @@ class Photo_frame_resizer {
 		}
 	}
 
-	public function cache($path, $cache_path = FALSE, $cache_leng = FALSE)
+	public function cache($path, $id = FALSE, $cache_path = FALSE, $cache_leng = FALSE)
 	{
 		if(!$cache_path)
 		{
@@ -104,7 +122,7 @@ class Photo_frame_resizer {
 		}
 
 		$cache_path = rtrim($cache_path, '/') . '/';
-		$filename   = basename($path);
+		$filename   = ($id ? $id . '--' : '') . basename($path);
 
 		if(!$cache_path)
 		{
