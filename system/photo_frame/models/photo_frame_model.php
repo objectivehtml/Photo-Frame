@@ -168,6 +168,15 @@ class Photo_frame_model extends CI_Model {
 		
 		return str_replace($tag, $file_uploads[$id][$type], $string);		
 	}
+
+	public function get_grid_photos($col_id, $row_id)
+	{
+		return $this->get_photos(array(
+			'site_id' => config_item('site_id'),
+			'col_id'  => $col_id,
+			'row_id'  => $row_id
+  		));
+	}
 	
 	public function delete_entries($ids = array(), $field_id = FALSE, $settings = FALSE)
 	{	
@@ -177,9 +186,16 @@ class Photo_frame_model extends CI_Model {
 			{
 				$this->db->where('field_id', $field_id);	
 			}
-			
-			$photos = $this->get_entry_photos($id);
-			
+
+			if(isset($settings['grid_field_id']))
+			{
+				$photos = $this->get_grid_photos($settings['col_id'], $id);
+			}
+			else
+			{
+				$photos = $this->get_entry_photos($id);
+			}
+
 			$delete_photos  = array();
 			$settings_array = array();
 			
@@ -189,7 +205,7 @@ class Photo_frame_model extends CI_Model {
 				
 				if(!isset($settings_array[$photo->field_id]))
 				{
-					$settings = $this->photo_frame_model->get_settings($field_id);
+					$settings = !$settings ? $this->photo_frame_model->get_settings($field_id) : $settings;
 					
 					if(isset($settings['photo_frame_delete_files']) && $settings['photo_frame_delete_files'] == 'true')
 					{
@@ -197,9 +213,9 @@ class Photo_frame_model extends CI_Model {
 						$delete_photos[$field_id][] = $photo->id;	
 					}
 				}
-						
+
 			}
-			
+
 			foreach($delete_photos as $field_id => $photos)
 			{
 				if(count($photos) > 0)
@@ -207,9 +223,17 @@ class Photo_frame_model extends CI_Model {
 					$this->delete($photos, $settings_array[$field_id]);
 				}
 			}
-		
-					
-			$this->db->where('entry_id', $id);
+
+			if(isset($settings['grid_field_id']))
+			{	
+				$this->db->where('field_id', $settings['grid_field_id']);
+				$this->db->where('col_id', $settings['col_id']);
+			}
+			else
+			{
+				$this->db->where('entry_id', $id);
+			}
+
 			$this->db->delete('photo_frame');
 		}
 	}
@@ -344,7 +368,7 @@ class Photo_frame_model extends CI_Model {
 		}
 		else if($grid_id)
 		{		
-			$this->db->where('col_id', $grid_id);				
+			$this->db->where('field_id', $grid_id);				
 			$settings = $this->db->get('grid_columns');
 			$settings = (array) json_decode($settings->row('col_settings'));
 		}
@@ -558,7 +582,7 @@ class Photo_frame_model extends CI_Model {
 	public function update_grid($field_id, $row_id, $data)
 	{
 		$this->db->where('row_id', $row_id);
-		$this->db->update('grid_field_'.$field_id, $data);
+		$this->db->update('channel_grid_field_'.$field_id, $data);
 	}
 	
 	public function update_cell($row_id, $data)

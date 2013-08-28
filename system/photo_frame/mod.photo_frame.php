@@ -32,15 +32,13 @@ class Photo_frame {
 	
 	public function __construct()
 	{
-		$this->EE =& get_instance();
-		
-		$this->EE->load->library('photo_frame_lib');
-		$this->EE->load->model('photo_frame_model');
+		ee()->load->library('photo_frame_lib');
+		ee()->load->model('photo_frame_model');
 	}
 	
 	private function _set_param($param, $value)
 	{
-		$this->EE->TMPL->tagparams[$param] = $value;	
+		ee()->TMPL->tagparams[$param] = $value;	
 	}
 
 	public function resize()
@@ -60,29 +58,29 @@ class Photo_frame {
 
 			if($width && !$height)
 			{
-				$this->EE->TMPL->tagparams['height'] = $width * ((float) $ratio[1] / (float) $ratio[0]);
+				ee()->TMPL->tagparams['height'] = $width * ((float) $ratio[1] / (float) $ratio[0]);
 			}
 
 			if($height && !$width)
 			{
-				$this->EE->TMPL->tagparams['width'] = $height * ((float) $ratio[0] / (float) $ratio[1]);
+				ee()->TMPL->tagparams['width'] = $height * ((float) $ratio[0] / (float) $ratio[1]);
 			}
 		}
 
 		$height = $this->param('height', $img->getHeight(), FALSE, TRUE);
 		$width  = $this->param('width', $img->getWidth(), FALSE, TRUE);
 
-		$this->EE->load->library('photo_frame_resizer');
+		ee()->load->library('photo_frame_resizer');
 
-		$cache_path = $this->EE->photo_frame_resizer->cache($path, $this->param('id'), $this->param('cache'), $this->param('cache_length'));
+		$cache_path = ee()->photo_frame_resizer->cache($path, $this->param('id'), $this->param('cache'), $this->param('cache_length'));
 
-		$this->EE->photo_frame_resizer->crop($cache_path, $x, $y, $width, $height, $img->getWidth(), $img->getHeight(),  $this->param('mode', 'crop'));
+		ee()->photo_frame_resizer->crop($cache_path, $x, $y, $width, $height, $img->getWidth(), $img->getHeight(),  $this->param('mode', 'crop'));
 		
 		$url  = rtrim(config_item('photo_frame_front_end_cache_url'), '/') . '/' . basename($cache_path);
 
-		if($this->EE->TMPL->tagdata)
+		if(ee()->TMPL->tagdata)
 		{
-			return $this->parse(array($this->EE->channel_data->utility->add_prefix('cache', array(
+			return $this->parse(array(ee()->channel_data->utility->add_prefix('cache', array(
 				'url'  => $url,
 				'path' => $cache_path,
 				'file' => $cache_path
@@ -119,18 +117,18 @@ class Photo_frame {
 	
 	public function average_color()
 	{
-		$file        = $this->param('file', $this->EE->TMPL->tagdata);		
+		$file        = $this->param('file', ee()->TMPL->tagdata);		
 		$total       = $this->param('total', config_item('photo_frame_save_colors'));
 		$type        = $this->param('type', 'rgb');
 		$granularity = $this->param('granularity', config_item('photo_frame_save_color_granularity'));
 		
-		$color = $this->EE->photo_frame_lib->get_average_color($file, $total, $granularity);
+		$color = ee()->photo_frame_lib->get_average_color($file, $total, $granularity);
 		
 		if(!$color)
 		{
-			if($this->EE->TMPL->tagdata)
+			if(ee()->TMPL->tagdata)
 			{
-				return $this->EE->TMPL->no_results();
+				return ee()->TMPL->no_results();
 			}
 			
 			return NULL;
@@ -139,9 +137,9 @@ class Photo_frame {
 		$rgb = 'rgb('.$color->r.','.$color->g.','.$color->b.')';
 		$hex = ImageEditor::rgb2hex($rgb);
 		
-		if($this->EE->TMPL->tagdata && $this->EE->TMPL->tagdata != $file)
+		if(ee()->TMPL->tagdata && ee()->TMPL->tagdata != $file)
 		{
-			return $this->parse(array($this->EE->channel_data->utility->add_prefix($this->param('prefix', 'color'), array(
+			return $this->parse(array(ee()->channel_data->utility->add_prefix($this->param('prefix', 'color'), array(
 				'rgb' => $rgb,
 				'hex' => $hex
 			))));
@@ -165,26 +163,26 @@ class Photo_frame {
 			'file',
 		);
 		
-		$file   = $this->param('file', $this->EE->TMPL->tagdata);
-		$colors = $this->EE->photo_frame_lib->get_colors($file, $this->param('total', 8), $this->param('granularity', 10));
+		$file   = $this->param('file', ee()->TMPL->tagdata);
+		$colors = ee()->photo_frame_lib->get_colors($file, $this->param('total', 8), $this->param('granularity', 10));
 		
 		if(!$colors)
 		{
-			return $this->EE->TMPL->no_results();
+			return ee()->TMPL->no_results();
 		}
 		
-		$bars = $this->EE->photo_frame_lib->color_bars($colors, $this->param('width'), $this->param('height', '14px'));
+		$bars = ee()->photo_frame_lib->color_bars($colors, $this->param('width'), $this->param('height', '14px'));
 		
 		$params = array();
 		
-		if(!isset($this->EE->TMPL->tagparams['class']))
+		if(!isset(ee()->TMPL->tagparams['class']))
 		{
-			$this->EE->TMPL->tagparams['class'] = 'color-bar';
+			ee()->TMPL->tagparams['class'] = 'color-bar';
 		}
 		
-		if(is_array($this->EE->TMPL->tagparams))
+		if(is_array(ee()->TMPL->tagparams))
 		{
-			foreach($this->EE->TMPL->tagparams as $param => $value)
+			foreach(ee()->TMPL->tagparams as $param => $value)
 			{
 				if(!in_array($param, $reserved) && !empty($value))
 				{
@@ -198,13 +196,13 @@ class Photo_frame {
 	
 	public function extract_colors()
 	{
-		$file   = $this->param('file', $this->EE->TMPL->tagdata);
-		$colors = $this->EE->photo_frame_lib->get_colors($file, $this->param('total', 8), $this->param('granularity', 10));
+		$file   = $this->param('file', ee()->TMPL->tagdata);
+		$colors = ee()->photo_frame_lib->get_colors($file, $this->param('total', 8), $this->param('granularity', 10));
 		$html   = array();
 		
 		if(!$colors)
 		{
-			return $this->EE->TMPL->no_results();
+			return ee()->TMPL->no_results();
 		}
 	
 		$limit  = (int) $this->param('limit', count($colors));
@@ -227,17 +225,17 @@ class Photo_frame {
 		
 		if(count($return) == 0)
 		{				
-			return $this->EE->TMPL->no_results();	
+			return ee()->TMPL->no_results();	
 		}		
 			
-		return $this->parse($this->EE->channel_data->utility->add_prefix($this->param('prefix', 'color'), $return));
+		return $this->parse(ee()->channel_data->utility->add_prefix($this->param('prefix', 'color'), $return));
 	}
 	
 	public function colors($return = FALSE)
 	{
 		$where = $this->_where();
 		
-		$colors = $this->EE->photo_frame_model->get_colors(array(
+		$colors = ee()->photo_frame_model->get_colors(array(
 			'where'    => $where,
 			'limit'    => $this->param('limit'),
 			'offset'   => $this->param('offset'),
@@ -258,7 +256,7 @@ class Photo_frame {
 			$return[$index]['count'] = $index + 1;
 			$return[$index]['index'] = $index;
 			$return[$index]['rgb']   = 'rgb('.$row->r.','.$row->g.','.$row->b.')';
-			$return[$index]['hex']   = $this->EE->photo_frame_lib->rgb2hex($return[$index]['rgb']);
+			$return[$index]['hex']   = ee()->photo_frame_lib->rgb2hex($return[$index]['rgb']);
 			$return[$index]['total_colors']   = $colors->num_rows();
 			$return[$index]['is_first_color'] = ($index == 0) ? TRUE : FALSE;
 			$return[$index]['is_last_color']  = ($index + 1 == $return[$index]['total_colors']) ? TRUE : FALSE;	
@@ -266,7 +264,7 @@ class Photo_frame {
 		
 		if($prefix = $this->param('prefix', 'color'))
 		{
-			$return = $this->EE->channel_data->utility->add_prefix($prefix, $return);
+			$return = ee()->channel_data->utility->add_prefix($prefix, $return);
 		}
 		
 		return $this->parse($return);
@@ -276,7 +274,7 @@ class Photo_frame {
 	{
 		$where = $this->_where();
 		
-		$photos = $this->EE->photo_frame_model->get_photos(array(
+		$photos = ee()->photo_frame_model->get_photos(array(
 			'where'    => $where,
 			'limit'    => $this->param('limit'),
 			'offset'   => $this->param('offset'),
@@ -291,11 +289,11 @@ class Photo_frame {
 		
 		$return = array();
 		
-		$upload_prefs = $this->EE->photo_frame_model->get_file_upload_groups();
+		$upload_prefs = ee()->photo_frame_model->get_file_upload_groups();
 
 		foreach($photos->result() as $index => $row)
 		{
-			$row = $this->EE->photo_frame_lib->parse_vars($row, $upload_prefs, $this->param('directory'));
+			$row = ee()->photo_frame_lib->parse_vars($row, $upload_prefs, $this->param('directory'));
 				
 			if(!empty($row['sizes']))
 			{
@@ -303,9 +301,9 @@ class Photo_frame {
 				
 				if(isset($sizes->{$this->param('size')}))	
 				{
-					$row['file'] = $this->EE->photo_frame_model->parse($sizes->{$this->param('size')}->file, 'file');						
-					$row['url']  = $this->EE->photo_frame_model->parse($sizes->{$this->param('size')}->file, 'url');					
-					$row['file_name'] = $this->EE->photo_frame_model->file_name($sizes->{$this->param('size')}->file);
+					$row['file'] = ee()->photo_frame_model->parse($sizes->{$this->param('size')}->file, 'file');						
+					$row['url']  = ee()->photo_frame_model->parse($sizes->{$this->param('size')}->file, 'url');					
+					$row['file_name'] = ee()->photo_frame_model->file_name($sizes->{$this->param('size')}->file);
 				}
 			}	
 			
@@ -320,7 +318,7 @@ class Photo_frame {
 		
 		if($prefix = $this->param('prefix', 'photo'))
 		{
-			$return = $this->EE->channel_data->utility->add_prefix($prefix, $return);
+			$return = ee()->channel_data->utility->add_prefix($prefix, $return);
 		}
 		
 		return $this->parse($return);
@@ -330,7 +328,7 @@ class Photo_frame {
 	{
 		if($field_name = $this->param('field_name'))
 		{
-			$this->_set_param('field_id', $this->EE->channel_data->get_field_by_name($field_name)->row('field_id'));	
+			$this->_set_param('field_id', ee()->channel_data->get_field_by_name($field_name)->row('field_id'));	
 		}
 		
 		$where = array('site_id' => config_item('site_id'));
@@ -350,9 +348,9 @@ class Photo_frame {
 			}
 		}
 		
-		if(is_array($this->EE->TMPL->tagparams))
+		if(is_array(ee()->TMPL->tagparams))
 		{
-			foreach($this->EE->TMPL->tagparams as $param => $value)
+			foreach(ee()->TMPL->tagparams as $param => $value)
 			{
 				if(!isset($this->exclude_params[$param]))
 				{					
@@ -373,16 +371,16 @@ class Photo_frame {
 	{
 		if($tagdata === FALSE)
 		{
-			$tagdata = $this->EE->TMPL->tagdata;
+			$tagdata = ee()->TMPL->tagdata;
 		}
 			
-		return $this->EE->TMPL->parse_variables($tagdata, $vars);
+		return ee()->TMPL->parse_variables($tagdata, $vars);
 	}
 	
 	private function param($param, $default = FALSE, $boolean = FALSE, $required = FALSE)
 	{
 		$name	= $param;
-		$param 	= $this->EE->TMPL->fetch_param($param);
+		$param 	= ee()->TMPL->fetch_param($param);
 		
 		if($required && !$param) show_error('You must define a "'.$name.'" parameter in the '.__CLASS__.' tag.');
 			

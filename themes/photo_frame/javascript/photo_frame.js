@@ -415,10 +415,10 @@ var PhotoFrame = {};
 		 */		
 		 
 		constructor: function(obj, options) {
-			
+
 			var t      = this;
 			var photos = $.extend(true, {}, options.photos);
-					
+				
 			t.events   	   = {};
 			t.settings 	   = {};
 			t.cropSettings = {};
@@ -1107,7 +1107,8 @@ var PhotoFrame = {};
 				colId: t.colId,
 				siteId: t.siteId,
 				file: file,
-				assetId: (id ? id : false)
+				assetId: (id ? id : false),
+				gridId: (t.gridId ? t.gridId : false)
 			};
 			
 			options = $.extend({}, options, t.callbacks.responseHandlerSettings());
