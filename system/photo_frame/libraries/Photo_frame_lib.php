@@ -176,7 +176,7 @@ class Photo_frame_lib {
 			($this->extension($original_path) == 'jpg' || $this->extension($original_url) == 'jpeg') &&
 			file_exists($original_path))
 		{	
-			$exif_data = exif_read_data($original_path);
+			$exif_data = @exif_read_data($original_path);
 		}
 				
 		$response = $this->create_directory($directory);
