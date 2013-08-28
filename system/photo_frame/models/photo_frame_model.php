@@ -73,10 +73,10 @@ class Photo_frame_model extends CI_Model {
 		
 		$base_url = base_url(TRUE);
 		$base_url = !empty($base_url) ? $base_url : base_page();
-		
+		$base_url = preg_replace('/^http(s|)\:\/\//', '', $base_url);
 		$base_url = preg_replace('/^www./', '', $base_url);
-		$base_url = preg_replace('/http(s|)\:\/\//', $http . $www, $base_url);
-	
+		$base_url = $http . $www . $base_url;
+
 		foreach($actions->result() as $action)
 		{		 
 			$return[$action->method] = $base_url . '?ACT='.$action->action_id;
