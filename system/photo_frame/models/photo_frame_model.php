@@ -9,6 +9,19 @@ class Photo_frame_model extends CI_Model {
 		$this->load->driver('channel_data');
 	}
 	
+	public function get_directory($dir_id)
+	{
+		$directory = $this->filemanager->directory($dir_id, FALSE, TRUE);
+		$prefs     = config_item('upload_preferences');
+
+		if(isset($pref[$dir_id]))
+		{
+			$directory = array_merge($directory, $prefs[$dir_id]);
+		}
+
+		return $directory;
+	}
+
 	public function asset_folders()
 	{
 		$return = array();
