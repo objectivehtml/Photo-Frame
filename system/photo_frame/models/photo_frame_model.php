@@ -14,7 +14,7 @@ class Photo_frame_model extends CI_Model {
 		$directory = $this->filemanager->directory($dir_id, FALSE, TRUE);
 		$prefs     = config_item('upload_preferences');
 
-		if(isset($pref[$dir_id]))
+		if(isset($prefs[$dir_id]))
 		{
 			$directory = array_merge($directory, $prefs[$dir_id]);
 		}

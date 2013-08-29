@@ -332,9 +332,6 @@ class Photo_frame_lib {
 
 		// $directory  = $this->EE->filemanager->directory($dir_id, FALSE, TRUE);
 
-
-		var_dump($directory);exit();
-
 		$ie			= $this->EE->input->get_post('ie') == 'true' ? TRUE : FALSE;
 		
 		$files 		= $_FILES;
