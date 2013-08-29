@@ -139,7 +139,7 @@ class Photo_frame_lib {
 		$settings 	   = $this->EE->photo_frame_model->get_settings($field_id, $col_id, $var_id, $grid_id);
 	
 		$dir_id        = $settings['photo_frame_upload_group'];	
-		$directory     = $this->EE->photo_frame_model->directory($dir_id);		
+		$directory     = $this->EE->photo_frame_model->get_directory($dir_id);		
 
 		$framed_dir    = $directory['server_path'] . $framed_dir_name . '/';	
 		$file_url      = $directory['url'] . $framed_dir_name . '/' . $file_name;
