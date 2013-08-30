@@ -11,15 +11,9 @@ class Photo_frame_model extends CI_Model {
 	
 	public function get_directory($dir_id)
 	{
-		$directory = $this->filemanager->directory($dir_id, FALSE, TRUE);
-		$prefs     = config_item('upload_preferences');
+		$this->load->library('filemanager');
 
-		if(isset($prefs[$dir_id]))
-		{
-			$directory = array_merge($directory, $prefs[$dir_id]);
-		}
-
-		return $directory;
+		return $this->filemanager->directory($dir_id, FALSE, TRUE);
 	}
 
 	public function asset_folders()

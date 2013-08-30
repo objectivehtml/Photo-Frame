@@ -708,7 +708,7 @@ class Photo_frame_ft extends EE_Fieldtype {
 			$jcrop_settings['maxSize'] = array($max_width, $max_height);
 		}
 		
-		$directory = ee()->photo_frame_model->get_upload_group($this->settings['photo_frame_upload_group']);
+		$directory = ee()->photo_frame_model->get_directory($this->settings['photo_frame_upload_group']);
 		
 		$jcrop_settings = (object) $jcrop_settings;
 		

@@ -35,7 +35,7 @@ class Photo_frame_mcp {
 		}
 		
 		$this->EE->theme_loader->module_name = 'photo_frame';
-		
+
 		$field_id      = $this->EE->input->post('fieldId', TRUE) != 'false' ? $this->EE->input->post('fieldId', TRUE) : false;
 		$var_id        = $this->EE->input->post('varId', TRUE) != 'false' ? $this->EE->input->post('varId', TRUE) : false;
 		$col_id        = $this->EE->input->post('colId', TRUE) != 'false' ? $this->EE->input->post('colId', TRUE) : false;
@@ -52,11 +52,11 @@ class Photo_frame_mcp {
 		$return        = array();
 		$success       = TRUE;
 		$return_path   = FALSE;
-		
+
 		$cache_image   = $this->EE->photo_frame_lib->cache_image($cache, $originalPath, $directory['server_path'], $directory['url']);
 		
 		$errors = array();
-		
+
 		if($cache_image)
 		{	
 			foreach($buttons as $button)

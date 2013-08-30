@@ -359,7 +359,10 @@ class Photo_frame_lib {
 		
 			if(count($errors) == 0)
 			{
-				$response  = $this->EE->filemanager->upload_file($dir_id);												
+				ee()->load->library('photo_frame_upload');
+
+				$response  = ee()->filemanager->upload_file($dir_id);	
+
 				$errors    = isset($response['error']) ? array($response['error']) : array();
 							
 				$dir_response = $this->EE->photo_frame_lib->create_directory($directory, $framed_dir_name);			
@@ -864,7 +867,7 @@ class Photo_frame_lib {
 		$filename  = $this->filename($orig_path);
 		$extension = $this->extension($orig_path);
 		$basepath  = $cache_path;
-		
+
 		if(is_writable($basepath))
 		{
 			$cache_basepath = config_item('photo_frame_cache_directory') . '/';
