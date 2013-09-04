@@ -18,35 +18,143 @@ if(class_exists('ImageEditor'))
 
 class Photo_frame_resizer {
 	
-	public function crop($path, $x, $y, $width, $height, $sourceWidth, $sourceHeight, $mode = 'crop', $resize = TRUE)
-	{
-		$obj = ImageEditor::init($path);
+	/**
+	 * The photo id
+	 */
 
-		if($mode == 'crop')
+	public $id = FALSE;
+
+	/**
+	 * The file path of the photo to resize
+	 */
+
+	public $path;
+
+	/**
+	 * The url of the photo to resize
+	 */
+
+	public $url;
+
+	/**
+	 * The filename of the cached image. FALSE if not set yet.
+	 */
+
+	public $filename = FALSE;
+
+	/**
+	 * The base file path for the cache directory
+	 */
+
+	public $cache_path;
+
+	/**
+	 * The base url for the cache directory
+	 */
+
+	public $cache_url;
+
+	/**
+	 * The height of the resized photo
+	 */
+
+	public $height;
+
+	/**
+	 * The width of the resized photo
+	 */
+
+	public $width;
+
+	/**
+	 * The x coordinate of the focal point
+	 */
+
+	public $x;
+
+	/**
+	 * The y coordinate of the focal point
+	 */
+
+	public $y;
+
+	/**
+	 * Resize the cropped photo?
+	 */
+
+	public $resize = TRUE;
+
+	/**
+	 * Crop Mode (crop|fit|stretch)
+	 */
+
+	public $mode = 'crop';
+
+
+	public function __construct($params = array())
+	{
+		$this->set_params($params);
+	}
+
+
+	public function set_params($params = array())
+	{
+		foreach($params as $param => $value)
+		{
+			$this->set_param($param, $value);
+		}
+	}
+
+	public function set_param($param, $value)
+	{
+		if(property_exists($this, $param))
+		{
+			$this->$param = $value;
+		}
+	}
+
+	public function get_param($param, $value)
+	{
+		if(property_exists($this, $param))
+		{
+			return $this->$param;
+		}
+
+		return NULL;
+	}
+
+	public function crop()
+	{
+		$obj = ImageEditor::init($this->path);
+
+		$actualWidth = $obj->getWidth();
+		$actualHeight = $obj->getHeight();
+
+		if($this->mode == 'crop')
 		{
 			$resizeWidth  = FALSE;
 			$resizeHeight = FALSE;
 
-			$x = $x - ($width / 2);
-			$y = $y - ($height / 2);
+			$x = $this->x - ($this->width / 2);
+			$y = $this->y - ($this->height / 2);
 
-			if(($max_width = $x + $width) && $max_width > $obj->getWidth())
+			if(($max_width = $x + $this->width) && $max_width > $actualWidth)
 			{
-				$x -= $max_width - $obj->getWidth();
+				$x -= $max_width - $actualWidth;
 			}
 
-			if(($max_height = $y + $height) && $max_height > $obj->getHeight())
+			if(($max_height = $y + $this->height) && $max_height > $actualHeight)
 			{
-				$y -= $max_height - $obj->getHeight();
+				$y -= $max_height - $actualHeight;
 			}
 
 			if($x <= 0)
 			{
 				$x = 0;
 
-				if($obj->getWidth() <= $height) {
-					$resizeWidth = $width;
-					$width = $obj->getWidth();
+				if($actualWidth <= $this->height) {
+					$resizeWidth = $this->width;
+					$this->width = $actualWidth;
 				}
 			}
 			
@@ -54,97 +162,105 @@ class Photo_frame_resizer {
 			{
 				$y = 0;
 
-				if($obj->getHeight() <= $height) {
-					$resizeHeight = $height;
-					$height = $obj->getHeight();
+				if($actualHeight <= $this->height) {
+					$resizeHeight = $this->height;
+					$this->height = $actualHeight;
 				}
 			}
 
-			if($width > $obj->getWidth())
+			if($this->width > $actualWidth)
 			{
-				$resizeWidth = $width;
-				$width = $obj->getWidth();
+				$resizeWidth = $this->width;
+				$this->width = $actualWidth;
 			}
 
-			if($height > $obj->getHeight())
+			if($this->height > $actualHeight)
 			{
-				$resizeHeight = $height;
-				$height = $obj->getHeight();
+				$resizeHeight = $this->height;
+				$this->height = $actualHeight;
 			}
 
-			$obj->crop($width, $height, $x, $y, 0, 0, $width, $height);
+			$obj->crop($this->width, $this->height, $x, $y, 0, 0, $this->width, $this->height);
 
-			if($resizeWidth && !$resizeHeight) {
-				$obj->resizeToWidth($resizeWidth);
+			if($this->resize)
+			{	
+				if($resizeWidth && !$resizeHeight) {
+					$obj->resizeToWidth($resizeWidth);
+				}
+
+				if($resizeHeight && !$resizeWidth) {
+					$obj->resizeToHeight($resizeHeight);
+				}
+
+				if($resizeHeight && $resizeWidth) {
+					$obj->resize($resizeWidth, $resizeHeight);
+				}
 			}
-
-			if($resizeHeight && !$resizeWidth) {
-				$obj->resizeToHeight($resizeHeight);
-			}
-
-			if($resizeHeight && $resizeWidth) {
-				$obj->resize($resizeWidth, $resizeHeight);
-			}
-
 		}
-		elseif($mode == 'fit' && $resize)
+		elseif($this->mode == 'fit' && $this->resize)
 		{
-			if($width >= $height)
+			if($this->width >= $this->height)
 			{
-				if($width > $obj->getWidth() || $obj->getWidth() > $obj->getHeight()) {
-					$obj->resizeToWidth($width);
+				if($this->width > $obj->getWidth() || $obj->getWidth() > $obj->getHeight()) {
+					$obj->resizeToWidth($this->width);
 				}
-				else if($height > $obj->getHeight() || $obj->getHeight() > $obj->getWidth()) {
-					$obj->resizeToHeight($height);
+				else if($this->height > $obj->getHeight() || $obj->getHeight() > $obj->getWidth()) {
+					$obj->resizeToHeight($this->height);
 				}
 			}
 			else
 			{
-				if($height > $obj->getHeight() || $obj->getHeight() > $obj->getWidth()) {
-					$obj->resizeToHeight($height);
+				if($this->height > $obj->getHeight() || $obj->getHeight() > $obj->getWidth()) {
+					$obj->resizeToHeight($this->height);
 				}
-				else if($width > $obj->getWidth() || $obj->getWidth() > $obj->getHeight()) {
-					$obj->resizeToWidth($width);
+				else if($this->width > $obj->getWidth() || $obj->getWidth() > $obj->getHeight()) {
+					$obj->resizeToWidth($this->width);
 				}
 			}
 		}
-		elseif($mode == 'stretch' && $resize)
+		elseif($this->mode == 'stretch' && $this->resize)
 		{
-			$obj->resize($width, $height);
+			$obj->resize($this->width, $this->height);
 		}
 	}
 
-	public function cache($path, $id = FALSE, $cache_path = FALSE, $cache_leng = FALSE)
+	public function cache()
 	{
-		if(!$cache_path)
+		if(!$this->cache_path)
 		{
-			$cache_path = config_item('photo_frame_front_end_cache_path');
+			$this->cache_path = config_item('photo_frame_front_end_cache_path');
 		}
 
-		$cache_path = rtrim($cache_path, '/') . '/';
-		$filename   = ($id ? $id . '--' : '') . basename($path);
+		if(!$this->cache_url)
+		{
+			$this->cache_url = config_item('photo_frame_front_end_cache_url');
+		}
 
-		if(!$cache_path)
+		$this->cache_path = rtrim($this->cache_path, '/') . '/';
+		$this->filename   = ($this->id ? $this->id . '--' : '') . basename($this->path);
+
+		if(!$this->cache_path)
 		{
 			show_error('The Photo Frame cache path has not been set. You must open the photo_frame_config.php file and set config path.');
 		}
 
-		if(!is_dir($cache_path))
+		if(!is_dir($this->cache_path))
 		{
 			show_error('The following directory does not exist: <b>'.$cache_path.'</b>. Make sure the directory exists and has read and write permissions.');
 		}
 
-		if(!is_writable($cache_path))
+		if(!is_writable($this->cache_path))
 		{
 			show_error('The following directory is not writable: <b>'.$cache_path.'</b>. Make sure the directory exists and has read and write permissions.');
 		}
 
-		if(!file_exists($path) || $this->is_expired($path))
+		if(!file_exists($this->path) || $this->is_expired($this->path))
 		{
-			copy($path, $cache_path . $filename);
+			copy($this->path, $this->cache_path . $this->filename);
 		}
 
-		return $cache_path . $filename;
+		$this->path = $this->cache_path . $this->filename;
+		$this->url  = $this->cache_url  . $this->filename;
 	}
 
 	public function is_expired($path, $cache_leng = FALSE)

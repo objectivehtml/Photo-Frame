@@ -10,7 +10,9 @@
  * @version		0.7.0
  * @build		20121031
  */
- 
+
+require_once PATH_THIRD . 'photo_frame/libraries/photo_frame_resizer.php';
+
 class Photo_frame {
 	
 	protected $exclude_params = array(
@@ -70,24 +72,32 @@ class Photo_frame {
 		$height = $this->param('height', $img->getHeight(), FALSE, TRUE);
 		$width  = $this->param('width', $img->getWidth(), FALSE, TRUE);
 
-		ee()->load->library('photo_frame_resizer');
+		$resize = new Photo_frame_resizer(array(
+			'path'  	 => $path,
+			'id'   		 => $this->param('id'),
+			'cache_path' => $this->param('cache_path'),
+			'cache_url'  => $this->param('cache_url'),
+			'width'      => $this->param('width'),
+			'height'     => $this->param('height'),
+			'x'          => $x,
+			'y'          => $y,
+			'resize'	 => $this->param('resize', TRUE, TRUE),
+			'mode'       => $this->param('mode', 'crop')
+		));
 
-		$cache_path = ee()->photo_frame_resizer->cache($path, $this->param('id'), $this->param('cache'), $this->param('cache_length'));
-
-		ee()->photo_frame_resizer->crop($cache_path, $x, $y, $width, $height, $img->getWidth(), $img->getHeight(),  $this->param('mode', 'crop'));
+		$resize->cache();
+		$resize->crop();
 		
-		$url  = rtrim(config_item('photo_frame_front_end_cache_url'), '/') . '/' . basename($cache_path);
-
 		if(ee()->TMPL->tagdata)
 		{
 			return $this->parse(array(ee()->channel_data->utility->add_prefix('cache', array(
-				'url'  => $url,
-				'path' => $cache_path,
-				'file' => $cache_path
+				'url'  => $resize->url,
+				'path' => $resize->path,
+				'file' => $resize->path
 			))));
 		}
 		
-		return $url;
+		return $resize->url;
 	}
 	
 	public function first_photo()
