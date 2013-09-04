@@ -307,6 +307,12 @@
 			this.bind('rotateReInitCrop', function(obj) {
 				t.initCrop();
 			});
+
+			this.bind('startCropEnd', function() {
+				if(t.buttonBar.factory.settings.photo_frame_disable_regular_crop == 'true') {
+					t.disable();
+				}
+			});
 			
 			/*
 			this.bind('resize', function(obj, width, height) {
@@ -375,10 +381,6 @@
 			
 			this.buttonBar.factory.ui.crop.center();	
 			this.buttonBar.factory.trigger('initCrop');
-
-			if(this.buttonBar.factory.settings.photo_frame_disable_regular_crop == 'true') {
-				this.disable();
-			}
 		},
 		
 		refresh: function(formFields) {
