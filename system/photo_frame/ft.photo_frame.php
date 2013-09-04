@@ -2648,6 +2648,17 @@ class Photo_frame_ft extends EE_Fieldtype {
 					)
 				)
 			),
+			'photo_frame_hide_instructions' => array(
+				'label' 	  => 'Do you want to hide the instructions all-together?',
+				'description' => 'If yes, this will hide the cropping instructions completely.',
+				'type'        => 'select',
+				'settings'    => array(
+					'options' => array(
+						'false' => 'False',
+						'true'  => 'True',
+					)
+				)
+			),
 			'photo_frame_button_text' => array(
 				'label' 	  => 'Upload Button Text',
 				'description' => 'Override the default upload button text. If no value is present the default text will be used.'

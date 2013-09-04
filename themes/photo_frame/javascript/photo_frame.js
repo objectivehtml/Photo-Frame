@@ -3021,15 +3021,17 @@ var PhotoFrame = {};
 							t.factory.trigger('cropPhotoLoaded', t, img);
 				        	t.ui.instructions = $('<div class="" />').html(PhotoFrame.Lang.instructions);	
 				        	
-				        	if(t.factory.instructions && t.edit === false) {
-				        		t.factory.ui.instructions = $('<div class="'+t.factory.classes.instructions+'" />').html(t.factory.instructions);
-				        		t.factory.ui.dimmer.append(t.factory.ui.instructions);
-				        	}
-				        	else {
-				        		if(t.factory.ui.instructions) {
-					        		t.factory.ui.instructions.hide();
+				        	if(t.factory.settings.photo_frame_hide_instructions != 'true') {
+					        	if(t.factory.instructions && t.edit === false) {
+					        		t.factory.ui.instructions = $('<div class="'+t.factory.classes.instructions+'" />').html(t.factory.instructions);
+					        		t.factory.ui.dimmer.append(t.factory.ui.instructions);
 					        	}
-				        	}
+					        	else {
+					        		if(t.factory.ui.instructions) {
+						        		t.factory.ui.instructions.hide();
+						        	}
+					        	}
+					        }
 				        	
 				            t.ui.cropPhoto.html(img);	            
 					        t.factory.ui.crop.prepend(t.ui.cropPhoto);         	
