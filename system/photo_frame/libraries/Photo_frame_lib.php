@@ -359,8 +359,6 @@ class Photo_frame_lib {
 		
 			if(count($errors) == 0)
 			{
-				ee()->load->library('photo_frame_upload');
-
 				$response  = ee()->filemanager->upload_file($dir_id);	
 
 				$errors    = isset($response['error']) ? array($response['error']) : array();
