@@ -2564,8 +2564,8 @@ class Photo_frame_ft extends EE_Fieldtype {
 				)
 			),
 			'photo_frame_disable_crop' => array(
-				'label'       => 'Disable Photo Cropping?',
-				'description' => 'If "True", the user will have the ability to manually crop the photo. If you want to disable manual photo cropping set this to option to "False".',
+				'label'       => 'Disable Photo Editing?',
+				'description' => 'If "True", the user will have the ability to manually crop the photo. If you want to disable the photo editing completely, set this to option to "False".',
 				'type'        => 'select',
 				'settings' => array(
 					'options' => array(
