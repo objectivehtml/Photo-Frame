@@ -704,9 +704,13 @@ class Photo_frame_ft extends EE_Fieldtype {
 			$jcrop_settings['aspectRatioString'] = "{$aspect_ratio[0]}:{$aspect_ratio[1]}";
 		}
 		
-		if($min_width > 0 && $min_height > 0)
+		if($min_width > 0 && $min_width)
 		{
 			$jcrop_settings['minSize'] = array($min_width, $min_height);
+		}
+
+		if($max_height > 0 && $max_width)
+		{
 			$jcrop_settings['maxSize'] = array($max_width, $max_height);
 		}
 		
