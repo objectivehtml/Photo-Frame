@@ -246,12 +246,12 @@ class Photo_frame_resizer {
 
 		if(!is_dir($this->cache_path))
 		{
-			show_error('The following directory does not exist: <b>'.$cache_path.'</b>. Make sure the directory exists and has read and write permissions.');
+			show_error('The following directory does not exist: <b>'.$this->cache_path.'</b>. Make sure the directory exists and has read and write permissions.');
 		}
 
 		if(!is_writable($this->cache_path))
 		{
-			show_error('The following directory is not writable: <b>'.$cache_path.'</b>. Make sure the directory exists and has read and write permissions.');
+			show_error('The following directory is not writable: <b>'.$this->cache_path.'</b>. Make sure the directory exists and has read and write permissions.');
 		}
 
 		if(!file_exists($this->path) || $this->is_expired($this->path))

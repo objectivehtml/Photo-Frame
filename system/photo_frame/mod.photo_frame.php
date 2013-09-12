@@ -13,7 +13,7 @@
 
 if(!class_exists('Photo_frame_resizer'))
 {
-	require_once PATH_THIRD . 'photo_frame/libraries/photo_frame_resizer.php';
+	require_once PATH_THIRD . 'photo_frame/libraries/Photo_frame_resizer.php';
 }
 
 require_once PATH_THIRD . 'photo_frame/config/photo_frame_config.php';
