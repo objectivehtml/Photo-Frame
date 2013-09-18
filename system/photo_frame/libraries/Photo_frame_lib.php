@@ -693,7 +693,7 @@ class Photo_frame_lib {
 		return $matches[1] . $insert . $this->filename($matches[3], $filename);
 	}
 	
-	public function rename($photo, $settings = FALSE, $return_parse = FALSE)
+	public function rename($photo, $settings = FALSE, $return_parse = FALSE, $entry = array())
 	{
 		$photo = (object) $photo;
 		
@@ -707,7 +707,7 @@ class Photo_frame_lib {
 		{
 			$parse = array_merge($this->parse_vars($photo), array(
 				'name' => config_item('photo_frame_original_size'),
-			));
+			), $entry);
 			
 			preg_match("/".LD."filedir_(\d*)".RD."/", $photo->file, $matches);
 				

@@ -856,7 +856,7 @@ class Photo_frame_ft extends EE_Fieldtype {
 					}
 				},
 				buildUploadUrl: function() {
-					return PhotoFrame.Actions.upload_photo + \'&site_id='.config_item('site_id').'&dir_id='.$settings['photo_frame_upload_group'].(isset($this->var_id) ? '&var_id=' . $this->var_id : '&field_id='.$this->field_id).($settings['photo_frame_folder_id'] ? '&folder_id='.$settings['photo_frame_folder_id'] : '').($this->grid ? '&grid_id='.$this->settings['grid_field_id'] : '' ).'\';
+					return PhotoFrame.Actions.upload_photo + \'&site_id='.config_item('site_id').'&dir_id='.$settings['photo_frame_upload_group'].(isset($this->var_id) ? '&var_id=' . $this->var_id : '&field_id='.$this->field_id).($settings['photo_frame_folder_id'] ? '&folder_id='.$settings['photo_frame_folder_id'] : '').($this->grid && isset($this->settings['grid_field_id']) ? '&grid_id='.$this->settings['grid_field_id'] : '' ).'\';
 				},
 				getFieldName: function(t) {
 					console.log(t);
@@ -1167,8 +1167,6 @@ class Photo_frame_ft extends EE_Fieldtype {
 			))->result_array());
 		}
 
-		// http://addon.dev/images/uploads/images/_framed/XyWGoI2p-596-776.png?date=1370229255
-		
 		$return = array();
 		
 		foreach($photos as $entry)
@@ -1853,7 +1851,7 @@ class Photo_frame_ft extends EE_Fieldtype {
 					}
 					
 					$photo_names[] = $photo['file_name'];
-					
+
         		    $photo['original_file_name'] = $photo['file_name'];
         		    $photo['site_id']    		 = config_item('site_id');
     				$photo['field_id']   		 = $this->field_id;
@@ -1896,7 +1894,14 @@ class Photo_frame_ft extends EE_Fieldtype {
     					$photo['original_file'] = $this->EE->photo_frame_lib->replace_asset_subdir($photo['asset_id'], $photo['original_file']);
     				}
     				
-    				$photo  = (array) $this->EE->photo_frame_lib->rename($photo, $settings);
+    				$entry = array();
+
+    				if(isset($this->settings['entry_id']))
+    				{
+    					$entry = $this->EE->channel_data->get_entry($this->settings['entry_id'])->row_array();
+    				}
+
+    				$photo  = (array) $this->EE->photo_frame_lib->rename($photo, $settings, FALSE, $entry);
     				
     				//$photo['original_file'] = $orig_file;
     				
