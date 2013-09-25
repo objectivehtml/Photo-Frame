@@ -1489,11 +1489,13 @@ class Photo_frame_ft extends EE_Fieldtype {
 				
 				if($tagdata)
 				{							
+
 					$return[$index] = $row;
 					$return[$index]['count'] = $index + 1;
 					$return[$index]['index'] = $index;
 					$return[$index]['grand_total_photos'] = count($photos);
-					$return[$index]['total_photos']   = !$params['limit'] ? count($photos) : $params['limit'];
+					$return[$index]['total_photos']   = !$params['limit'] ? $return[$index]['grand_total_photos'] : ($params['limit'] > $return[$index]['grand_total_photos'] ? $return[$index]['grand_total_photos'] : $params['limit']);
+
 					$return[$index]['is_first_photo'] = ($index == 0) ? TRUE : FALSE;
 					$return[$index]['is_last_photo']  = ($index + 1 == $return[$index]['total_photos']) ? TRUE : FALSE;
 					
