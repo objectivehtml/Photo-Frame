@@ -191,16 +191,17 @@ a.photo-frame-tool-window-close {
 	margin-bottom: 5px;
 	display: block;
 }
-.photo-frame-meta input, .photo-frame-meta textarea {
+.photo-frame-meta input,
+.photo-frame-meta input:focus,
+.photo-frame-meta textarea,
+.photo-frame-meta textarea:focus {
 	width: 100%;
 	padding: .5em;
 	background: white;
 	min-width: 350px;
-	border: 1px solid rgb(214, 214, 214); /* added by Brent */
-	-moz-border-radius: 4px;  /* added by Brent */
-	-webkit-border-radius: 4px; /* added by Brent */
-	border-radius: 4px; /* added by Brent */
+	border: 1px solid rgb(214, 214, 214);
 }
+.photo-frame-meta textarea { font-size: 14px; }
 .photo-frame-meta ul {
 	padding: 1em;
 }
@@ -353,9 +354,7 @@ a.photo-frame-tool-window-close {
 }
 .photo-frame-activity p {
 	display: none
-} /* Added by Brent */
-.photo-frame-activity .photo-frame-button.photo-frame-cancel {
-}
+} 
 .photo-frame-activity .photo-frame-indicator {
 	left: -15px;
 	top: -35px;
@@ -667,7 +666,6 @@ p.photo-frame-helper,
 }
 a.photo-frame-meta-toggle {
 	position: fixed;
-	display: none; /* REMOVE at some point */
 	top: 15px;
 	right: 15px;
 	color: white;

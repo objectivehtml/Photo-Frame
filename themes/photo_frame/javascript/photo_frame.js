@@ -441,7 +441,7 @@ var PhotoFrame = {};
 			
 			t.$wrapper = $(obj);
 			
-			t.sortable();	
+			t.sortable({forcePlaceholderSize: true});	
 			t.base(options);	
 			
 			t.ui = {
@@ -1215,6 +1215,7 @@ var PhotoFrame = {};
 		 * Show the progress bar.
 		 */		
 		showProgress: function(progress, callback) {
+			this.ui.metaToggle.hide();
 			this.ui.dimmer.fadeIn();
 			this.ui.errors.hide();
 			this.progressBar.show();
@@ -2804,7 +2805,7 @@ var PhotoFrame = {};
 					}, function(data) {
 						t.cacheUrl = data.url;
 						t.load(data.url, function(img) {			
-							t.ui.cropPhoto.html(img); 
+							t.ui.cropPhoto.html(img);
 							t.stopRendering();
 							t.callback(callback, data);
 							t.factory.trigger('render');
@@ -3080,6 +3081,9 @@ var PhotoFrame = {};
 						            t.factory.buttonBar.buttons[x].startCrop(t);
 					            }
 				            }
+
+							t.factory.ui.metaToggle.show();
+
 				            if(t.needsRendered()) {
 					            t.render(function() {
 					            	t.factory.trigger('startCropEnd', t);
@@ -3155,7 +3159,7 @@ var PhotoFrame = {};
 			var t 	 = this;			
 			var date = new Date();
 			var edit = t.edit;
-			
+
 			this.factory.trigger('saveBegin', this);
 			
 			if(!edit) {			
@@ -3229,6 +3233,7 @@ var PhotoFrame = {};
 		saveCrop: function() {
 			var t    = this;
 			
+			this.factory.ui.metaToggle.hide();
 			this.factory.trigger('saveCropStart', t);
 			
 			var errors = t.validate();
