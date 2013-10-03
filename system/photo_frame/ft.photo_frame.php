@@ -1455,6 +1455,11 @@ class Photo_frame_ft extends EE_Fieldtype {
 
 		$photos = $this->_get_photos($this->field_id, $params['pre_loop'], $data);
 
+		if(count($photos) == 0)
+		{
+			return FALSE;
+		}
+
 		$return = array();
 		
 		$total_photos = 0;
