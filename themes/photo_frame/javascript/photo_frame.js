@@ -33,13 +33,13 @@ var PhotoFrame = {};
 		 * Build Date
 		 */
 		 
-		buildDate: '2013-09-05',
+		buildDate: '2013-09-30',
 		
 		/**
 		 * Version
 		 */
 		 
-		version: '1.2.0',
+		version: '1.2.2',
 		
 		/**
 		 * Sets the default options
@@ -3020,9 +3020,10 @@ var PhotoFrame = {};
 							t.ui.cropPhoto = $('<div class="'+t.factory.classes.cropPhoto+'"></div>');
 							t.factory.ui.cropPhoto = t.ui.cropPhoto;
 							t.factory.trigger('cropPhotoLoaded', t, img);
-				        	t.ui.instructions = $('<div class="" />').html(PhotoFrame.Lang.instructions);	
-				        	
+				        	t.factory.ui.instructions = $('<div class="'+t.factory.classes.instructions+'" />').html(PhotoFrame.Lang.instructions);	
+
 				        	if(t.factory.settings.photo_frame_hide_instructions != 'true') {
+				        	
 					        	if(t.factory.instructions && t.edit === false) {
 					        		t.factory.ui.instructions = $('<div class="'+t.factory.classes.instructions+'" />').html(t.factory.instructions);
 					        		t.factory.ui.dimmer.append(t.factory.ui.instructions);
@@ -3352,14 +3353,14 @@ var PhotoFrame = {};
 			}
 			
 			if(!cropSize && this.jcrop.tellSelect) {
-				var cropSize = this.jcrop.tellScalled();
+				var cropSize = this.jcrop.tellSelect();
 			}
 			
 			if(this.factory.ui.dimmer.find('.jcrop-tracker').width() == 0) {
 				return false;
 			}
-			
-			return typeof cropSize == "undefined" || cropSize.x || cropSize.y || cropSize.x2 || cropSize.y2 ? true : false;	
+
+			return typeof cropSize == "undefined" || (this.jcrop.ui.selection.css('display') != 'none' && (cropSize.x || cropSize.y || cropSize.x2 || cropSize.y2)) ? true : false;	
 		},
 		
 		reduce: function(numerator, denominator) {
@@ -3525,11 +3526,11 @@ var PhotoFrame = {};
 				response.validHeight = false;
 				errors.push(this.factory.parse(PhotoFrame.Lang.max_height, 'max_height', maxHeight));
 			}
-			
+
 			if(!isCropped && ratio) {
 				if(t.round(ratio, 100) != t.round(cropWidth / cropHeight, 100)) {
 					response.validRatio = false;
-					errors.push(this.factory.parse(PhotoFrame.Lang.required_ratio, t.cropSettings.aspectRatioString));
+					errors.push(this.factory.parse(PhotoFrame.Lang.required_ratio, 'aspect_ratio', t.cropSettings.aspectRatioString));
 				}
 			}
 			
