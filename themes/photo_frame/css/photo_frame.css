@@ -810,6 +810,7 @@ filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#d12d2d2d', e
 	display: none;
 }
 
+.photo-frame-button-bar { width: 70px; }
 
 .photo-frame-toolbar-tools-title {
 	text-align: center;

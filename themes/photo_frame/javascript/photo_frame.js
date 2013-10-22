@@ -578,6 +578,8 @@ var PhotoFrame = {};
 			t.buttonBar = new PhotoFrame.ButtonBar(t, t.buttons, {
 				title: PhotoFrame.Lang.tools
 			});
+
+			t.buttonBar.ui.window.addClass('photo-frame-button-bar');
 				
 			$(window).keyup(function(e) {
 				if (e.keyCode == 27) { 

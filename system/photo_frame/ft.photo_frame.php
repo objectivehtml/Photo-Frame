@@ -1460,6 +1460,11 @@ class Photo_frame_ft extends EE_Fieldtype {
 		$total_photos = 0;
 		$photo_index  = 0;
 
+		if(!count($photos))
+		{
+			return FALSE;
+		}
+
 		foreach($photos as $index => $row)
 		{
 			$index = count($return);
