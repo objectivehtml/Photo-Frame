@@ -74,7 +74,8 @@ class Photo_frame_ft extends EE_Fieldtype {
 		'size',
 		'order_by',
 		'sort',
-		'directory'
+		'directory',
+		'pre_loop'
 	);	
 
 	public function __construct()
