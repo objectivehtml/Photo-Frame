@@ -7,6 +7,14 @@ if(!defined('PHOTO_FRAME_VERSION'))
 	define('PHOTO_FRAME_VERSION', $config['photo_frame_version']);
 }
 
+/*------------------------------------------
+ *	Photo Frame Base URL
+ *  - Override the default current_url with
+      one you define.
+/* -------------------------------------- */
+
+$config['photo_frame_base_url'] 			  = config_item('photo_frame_base_url');
+
 $config['photo_frame_directory_name']         = config_item('photo_frame_directory_name') ? 
 												config_item('photo_frame_directory_name') :
 												'_framed';

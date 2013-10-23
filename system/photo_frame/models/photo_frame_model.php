@@ -78,7 +78,8 @@ class Photo_frame_model extends CI_Model {
 			)
 		));
 		
-		$base_url = config_item('site_url');
+		$base_url = config_item('photo_frame_base_url');
+		$base_url = $base_url ? $base_url : config_item('site_url') . config_item('site_index');
 		$base_url = $base_url && !empty($base_url) ? $base_url : base_url();
 		$base_url = !empty($base_url) ? $base_url : base_page();
 		$base_url = preg_replace('/^http(s|)\:\/\//', '', $base_url);
