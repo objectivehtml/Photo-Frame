@@ -174,7 +174,7 @@ class Photo_frame_model extends CI_Model {
 			$string = $this->photo_frame_lib->replace_asset_subdir($asset_id, $string);
 		}
 		
-		return str_replace($tag, $file_uploads[$id][$type], $string);		
+		return $this->functions->remove_double_slashes(str_replace($tag, $file_uploads[$id][$type], $string));		
 	}
 
 	public function get_grid_photos($col_id, $row_id)

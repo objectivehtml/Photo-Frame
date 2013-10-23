@@ -1471,8 +1471,9 @@ class Photo_frame_ft extends EE_Fieldtype {
 
 			if($params['offset'] <= $photo_index && (!$params['limit'] || $total_photos < $params['limit']))
 			{	
-				$row['thumb'] = $this->EE->photo_frame_model->parse($this->EE->photo_frame_lib->swap_filename($row['original_file_name'], $row['original_file'], '_thumbs/'), 'url');
-								
+				//$row['thumb'] = $this->EE->photo_frame_model->parse($this->EE->photo_frame_lib->swap_filename($row['original_file_name'], $row['original_file'], '_thumbs/'), 'url');
+				$row['thumb'] = $this->EE->photo_frame_model->parse(rtrim(str_replace($row['original_file_name'], '', $row['original_file']), '/') . '/_thumbs/' . $row['original_file_name']);
+
 				$row = $this->EE->photo_frame_lib->parse_vars($row, $this->upload_prefs, $params['directory']);
 				
 				if($this->is_draft)
@@ -1509,10 +1510,20 @@ class Photo_frame_ft extends EE_Fieldtype {
 				}
 				else
 				{		
+
+					$src  = $this->EE->photo_frame_model->parse((isset($params['directory']) && $params['directory'] ? $row[$params['directory']] : $row['url']), 'url');
+					
+					if(isset($params['directory']) && $params['directory'] == '_thumbs')
+					{
+						$src = $row['thumb'];
+					}		
+
+					$src .= ($this->is_draft ? '?__='.time() : '');
+
 					$img = array(
-						'src="'.$this->EE->photo_frame_model->parse((isset($params['directory']) && $params['directory'] ? $row[$params['directory']] : $row['url']), 'url').($this->is_draft ? '?__='.time() : '').'"'
+						'src="'.$src.'"'
 					);
-							
+
 					if(empty($params['alt']))
 					{
 						$params['alt'] = !empty($row['title']) ? $row['title'] : (isset($this->row['title']) ? $this->row['title'] : NULL);

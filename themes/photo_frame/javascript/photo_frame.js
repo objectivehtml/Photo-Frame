@@ -3526,7 +3526,7 @@ var PhotoFrame = {};
 			if(!isCropped && ratio) {
 				if(t.round(ratio, 100) != t.round(cropWidth / cropHeight, 100)) {
 					response.validRatio = false;
-					errors.push(this.factory.parse(PhotoFrame.Lang.required_ratio, t.cropSettings.aspectRatioString));
+					errors.push(this.factory.parse(PhotoFrame.Lang.required_ratio, 'aspect_ratio', t.cropSettings.aspectRatioString));
 				}
 			}
 			
