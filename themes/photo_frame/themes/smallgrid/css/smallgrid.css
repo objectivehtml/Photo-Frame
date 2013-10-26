@@ -20,3 +20,7 @@
     width: 200px;
     float: left;
 }
+
+.photo-frame-small-grid .photo-frame-ie .photo-frame-sortable li { margin-right: 1em; }
+.photo-frame-small-grid .photo-frame-ie .photo-frame-sortable li { width: 200px; }
+.photo-frame-small-grid .photo-frame-ie .photo-frame-photo img { width: 200px; }

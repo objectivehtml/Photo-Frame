@@ -563,9 +563,11 @@ a.photo-frame-bar-button.photo-frame-cancel.photo-frame-float-left {
 .photo-frame-photo img {
 	max-width: none;
 	display: block;
-	width: 100%;
 	height: auto;
+	width: 100%;
 }
+
+.photo-frame-ie .photo-frame-photo img { width: auto; }
 
 .matrix .photo-frame-photo img {
 	height: auto;
