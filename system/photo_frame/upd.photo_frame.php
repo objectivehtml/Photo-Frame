@@ -209,7 +209,7 @@ class Photo_frame_upd {
 	);
 		
 	private $hooks = array(
-		array('assets_move_file', 'assets_move_file')
+		array('assets_move_file', 'assets_move_file'),
 		array('assets_rename_file', 'assets_rename_file')
 	);
 	
