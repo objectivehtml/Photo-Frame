@@ -324,7 +324,13 @@ var PhotoFrame = {};
 		 */		
 		 
 		cropSettings: {},
-			
+		
+		/**
+		 * Is the file browser response in progress?
+		 */		
+		
+		fileBrowserResponseInProgress: false,
+
 		/**
 		 * Force users to crop new photos?
 		 */		
@@ -1100,9 +1106,8 @@ var PhotoFrame = {};
 				callback = id;
 				id = false;
 			}
-			
+
 			var t = this;
-			
 			var options = {
 				fieldId: t.fieldId,
 				varId: t.varId, 
@@ -1113,9 +1118,11 @@ var PhotoFrame = {};
 				gridId: (t.gridId ? t.gridId : false)
 			};
 			
-			options = $.extend({}, options, t.callbacks.responseHandlerSettings());
-			
-			$.get(PhotoFrame.Actions.photo_response, options, function(response) {
+			options = $.extend({}, options, this.callbacks.responseHandlerSettings());
+			if(!this.fileBrowserResponseInProgress) {
+				this.fileBrowserResponseInProgress = true;
+				$.get(PhotoFrame.Actions.photo_response, options, function(response) {
+					t.fileBrowserResponseInProgress = false;
 					if(typeof response != "object") {
 						t.log(response);
 						t.showErrors([PhotoFrame.Lang.unexpected_error]);
@@ -1125,8 +1132,8 @@ var PhotoFrame = {};
 							callback(response);
 						}
 					}
-				}
-			);
+				});
+			}
 		},
 		
 		hideMeta: function() {	
@@ -3291,7 +3298,7 @@ var PhotoFrame = {};
     		
     		var size = t.released ? _defaultSize : t.tellScaled();
     		
-    		if(!size.w || !size.h) {
+    		if(!size.w || !size.h || this.factory.settings.photo_frame_disable_regular_crop === 'true') {
     			size = _defaultSize;
 	    		delete t.cropSettings.setSelect;
     		}
