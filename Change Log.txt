@@ -1,0 +1,148 @@
+/**
+ * Photo Frame
+ * 
+ * @package		Photo Frame
+ * @author		Justin Kimbrell
+ * @copyright   Copyright (c) 2013, Objective HTML
+ * @link 		https://www.objectivehtml.com/photo-frame
+ * @version		1.2.2
+ * @build		20131103
+ */
+
+#### 1.2.2
+##### 11/03/2013
+
+- (Bug Fix) Fixed the meta panel toggle and the way it was displaying.
+- (Bug Fix) Fixed a bug that was still causing the {photo:is_last_photo} from working in all scenarios.
+- (Bug Fix) Fixed an issue with Photo Frame FT tags parsing with there are no photos. Now returns FALSE.
+- (Bug Fix) Fixed IE display issue
+- (Bug Fix) Fixed issue with the {if your_field} tag not working properly.
+- (Bug Fix) Fixed issues with incorrect aspect ratio notice.
+- (Bug Fix) Fixed issue with thumbnails not working if a subdirectory in Assets was used
+- (Bug Fix) Fixed an issue with sub directories in Assets in conjunction with the Effects Pack
+- (Bug Fix) Fixed the issue of the "pre_loop" attribute being appended to the dom.
+- (Bug Fix) Fixed an issue with Photo Frame not respecting the site_index config
+- (Feature) Added the ability to override the base url's used in Photo Frame in multiple environments using Master Config bootstrap
+- (Bug Fix) Fixed issues with Photo Frame breaking image paths if a user renamed a file in Assets
+- (Bug Fix) Fixed a number of IE8 issues
+- (Bug Fix) Fixed a UX issue that was triggered if the user double clicked a photo thumbnail in the EE file browser.
+- (Bug Fix) Fixed an issue if the focal crop setting was enabled alongside the force crop setting.
+
+#### 1.2.1
+##### 09/24/2013
+
+- (Feature) Added new {photo:grand_total_photos} tag to return the grand total of photos regardless of the limit param.
+- (Bug Fix) Made it so the limit parameter affects the total_photos variable and the values that are returned.
+- (Bug Fix) Fixed an issue with is_last_photo working correctly.
+- (Bug Fix) Fixed issue with min/max settings not getting set properly
+- (Bug Fix) Fixed a number of PHP errors as a result of refactoring
+- (Bug Fix) Fixed an issue with the entry vars and url_title not parsing with dynamic filenames.
+
+#### 1.2.0
+##### 09/05/2013
+
+- (Feature) Added new exp:photo_frame:resize tag with cache options
+- (Feature) Added compatibility for the new Grid fieldtype
+- (Feature) Added a new setting to hide upload instructions completely
+- (Feature) Updated config file so every config option can be overwritten with a personalized bootstrap file. This is good for working with multiple environments.
+- (API) Added Theme Url to the PhotoFrame.Actions.theme_url property.
+- (API) Added new Focal crop language files
+- (API) Added new isRetina() method.
+- (API) Added new config vars for template caching
+- (API) Added the ability for buttons to have their own settings for each FT
+- (API) Changed the settings property to cropSettings and passed the global FT settings object to the FT
+- (API) Added ability to programmatically disable buttons and make them not appear on the toolbar
+- (API) Made the Crop button compatible with the new Disable Regular Crop settings so users can only allow focal crops if desired.
+- (Bug Fix) Fixed a typo that would cause a PHP error
+- (Bug Fix) Fixed an issue with PF + MSM not working correctly form alt sites.
+- (Bug Fix) Fixed an issue that would trigger PHP errors during upload if the site_url config var didn't have 'www' but the current URL did (error also triggered if other way around).
+- (Bug Fix) Fixed an issue with some servers reporting an error if the exif_read_data method exists.
+- (Bug Fix) Fixed EE 2.7 compatibility issues
+- (Bug Fix) Made it so the file upload directory is always fetched from the db and overwritten with the 'upload_preferences' config item.
+- (Bug Fix) Fixed yet another MSM compatibility issue
+
+#### 1.1.0
+##### 08/14/2013
+
+*IMPORTANT - If upgrading from 1.0 to 1.1 and using the Button Pack and/or Effects Pack, you must also upgrade those packages to make them compatible with 1.1.*
+
+- (Feature) Added the new Meta Pack
+- (Feature) Added the new Text Pack
+- (Feature) Added new :url FT helper tag that returns the photo's url.
+- (Feature) Added new :path FT helper tag that returns the photo's server path.
+- (Feature) Added new :file FT helper tag as an alias to :path.
+- (API) Refactored API so that PhotoFrame.Button objects have a "packageName" property and a getPackageName() method to return the name of the pack. This allows the name of the package to be different than the label that appears in the Layers window.
+- (API) Added new 'preview' property to the PhotoFrameButton class that will be set to TRUE when the effects are being rendered by the preview.
+- (API) Added new ImageEditor::label() method.
+- (API) Added new items to the language pack.
+- (API) Added new icons and CSS to accommodate the new slider
+- (API) Added new pill tabs to the core css
+- (API) Removed legacy InterfaceBuilder files
+- (API) Removed legacy icon files
+- (API) Added new parseVars method to the BaseButton class
+- (API) Refactored the handling of Assets and Native File Manager. Code is no longer in the core and is now more modular and abstract.
+- (API) Removed the "on" nomenclature from the callback methods.
+- (API) Added new PhotoFrame.Slider abstraction to make creating a slider easier
+- (API) Added a new PhotoFrame.ColorPicker class which is an abstraction of spectrum.js.
+- (API) Added json2.js to the package
+- (API) Added new methods to buttons to save manipulation changes without re-rendering the photo.
+- (API) Added new PhotoFrame.Button.getVisibility method that returns the current manipulation visibility (for this button)
+- (API) Added new PhotoFrame.Button.save method to make saving data easier.
+- (API) Added new PhotoFrame.Button.getData method as a boilerplate to fetch data that will be saved. This is different than the render() method which uses server side methods to generate the data.
+- (API) Added new renderAfterRemovingLayer property to allow buttons to avoid rendering after their layers' have been removed. Layers, Geolocation, Crop, and Text buttons were affected.
+- (Bug Fix) Added a new default dynamic name format so that Photo Frame will work by default if a user forgets to change this setting. If blank, the resize photos option doesn't work.
+- (Bug Fix) Fixed an issue that would upload using the wrong field settings if more than one Photo Frame existed on the same page.
+- (Bug Fix) Fixed an issue with PHP 5.2 compatibility
+- (Bug Fix) Fixed issue with Photo Frame deleting the exif data on original images
+- (Bug Fix) Improved the progress bar to report a more accurate picture
+- (Bug Fix) Fixed issue that would cause the crop utility not to work properly with the geolocation utility
+- (Bug Fix) Added new extension to update original photo paths if moved with Assets
+- (Bug Fix) Fixed an issue with the :total_photos FT tag not working properly.
+- (Bug Fix) Fixed legacy migration issues that would break photos that were being edited.
+- (Bug Fix) Added more error tolerance so if there was an unexpected error, it notifies user and outputs response in the log.
+- (Bug Fix) Fixed an issue with photo resize options not working.
+- (Bug Fix) Fixed an issue that would cause errors if a button fails to load and an empty index string is added to the buttons array.
+- (Bug Fix) Fixed an issue with EE versions prior to 2.5 that would cause the FT to not return photos
+- (Bug Fix) Fixed an issue with the ee() function being undefined
+- (Bug Fix) Fixed an issue that would cause the scroll position to change when clicking a button in the layers window.
+- (Bug Fix) Refactored ImageEditor class to be PSR compliant.
+- (Bug Fix) Fixed an issue with Theme Loader that would load external URL's incorrectly.
+- (Bug Fix) Fixed an issue with the get_settings() method returning incorrect settings if Photo Frame was used within Matrix within Low Variables.
+- (Bug Fix) Added error tolerance so if an unexpected error occurs it prompts the user and logs the response in the console.
+- (Bug Fix) Fixed an issue that would cause PHP errors within a Matrix field that is within Low Variables
+- (Bug Fix) Fixed an issue with the casing on a filename that cause issues with some versions of PHP
+- (Bug Fix) Fixed MSM upload directory issue
+- (Bug Fix) Fixed an issue that would cause the manipulation object to not get decoded properly and would save a string.
+- (Bug Fix) Fixed issues with EE and MSM. Found bug within EE 2.5.5 and MSM with AJAX requests that would always return site_id = '1'. Applied a workaround/hack.
+- (Bug Fix) Fixed an issue that caused a PHP error if exif_read_data didn't exist.
+- (Bug Fix) Fixed an issue that would allow users to drag/drop photos in the FT when the max photos settings was TRUE.
+- (Bug Fix) Fixed an issue with the language of the error message that triggered when more photos were uploaded than permitted.
+- (Bug Fix) Fixed an issue with the offset parameter not performing the correct logic.
+- (Bug Fix) Fixed an issue when Photo Frame was within Matrix that was within Low Variables that would cause the rows not to save.
+- (Bug Fix) Fixed an issue with the browse button not working on any row after the first when inside Matrix.
+- (Bug Fix) Fixed issue with Matrix not working properly if multiple rows present
+- (Bug Fix) Fixed an issue with the color index not working properly in Low Variables
+- (Bug Fix) Fixed with front-end FT tags not working when Photo Frame was within a Matrix within a Low Variable
+- (Bug Fix) Fixed an issue when pasting certain content in the browser would cause the file upload process to trigger.
+- (Bug Fix) Passed the site id to the photo_response callback
+- (Bug Fix) Fixed an issue with the trigger() method not passing values if they were false.
+- (Bug Fix) If no site_id is found in AJAX requests, default to '1'
+- (Bug Fix) Fixed an issue with the deleting photos and the upload button not re-appearing.
+- (Bug Fix) Fixed a bug with InterfaceBuilder's default value which would cause the Password field to break.
+- (Bug Fix) Fixed an issue that would cause the page_url() method to return an incorrect URL if called within the CP.
+- (Bug Fix) Removed hardcoded localized English string to the language file
+- (Bug Fix) Improved variable parsing routine (for lang files)
+- (Bug Fix) Fixed an issue that would cause a false positive for min/max photo widths if the crop utility was a tiny fraction off. The solution always round up to the nearest whole number.
+- (Bug Fix) Fixed an issue with the photo_frame_model class not loading before it's used.
+- (Bug Fix) Fixed a issue with Safari that was caused by the z-index property not being set, which would force the toolbar windows behind the photo being cropped.
+- (Bug Fix) Fixed an issue that would cause a PHP if the cacheUrl and cachePath properties were not set.
+- (Bug Fix) Fixed an issue with certain installs with renamed system directories above web root.
+- (Bug Fix) Fixed an issue when selecting multiple files with Assets
+- (Bug Fix) Fixed issue with site id not being passing in some ajax requests
+- (Bug Fix) Fixed an issue with the photos not uploading correctly if the "Force Crop" settings was disabled.
+
+
+#### 1.0.0
+##### 06/18/2013
+
+Initial release
