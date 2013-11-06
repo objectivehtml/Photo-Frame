@@ -51,6 +51,12 @@ class Photo_frame {
 	public function resize()
 	{
 		$path = $this->param('path');
+
+		if(!file_exists($path))
+		{
+			return ee()->TMPL->no_results();
+		}
+
 		$img  = ImageEditor::init($path);
 
 		$x 		= $this->param('x', 0);
