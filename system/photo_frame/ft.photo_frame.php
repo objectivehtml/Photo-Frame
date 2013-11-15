@@ -363,6 +363,8 @@ class Photo_frame_ft extends EE_Fieldtype {
 			'photo_frame_jpeg_compression'   => 100,
 			'photo_frame_resize_max_width'   => FALSE,
 			'photo_frame_resize_min_height'  => FALSE,
+			'photo_frame_resize_fixed_width' => FALSE,
+			'photo_frame_resize_fixed_height'=> FALSE,
 			'photo_frame_cropped_max_width'  => FALSE,
 			'photo_frame_cropped_max_height' => FALSE,
 			'photo_frame_cropped_width'      => FALSE,
@@ -2417,6 +2419,16 @@ class Photo_frame_ft extends EE_Fieldtype {
 			'photo_frame_jpeg_compression' => array(
 				'label'       => 'Image Compression (JPEG Only)',
 				'description' => 'Enter an integer 1-100 with 100 being the best quality.',
+				'type'        => 'input'
+			),
+			'photo_frame_resize_fixed_width' => array(
+				'label'       => 'Resize Uploaded Photo (Fixed Width)',
+				'description' => 'Resize the photo to a fixed width <i>before</i> it is uploaded.',
+				'type'        => 'input'
+			),
+			'photo_frame_resize_fixed_height' => array(
+				'label'       => 'Resize Uploaded Photo (Fixed Height)',
+				'description' => 'Resize the photo to a fixed height <i>before</i> it is uploaded.',
 				'type'        => 'input'
 			),
 			'photo_frame_resize_max_width' => array(
