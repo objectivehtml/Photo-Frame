@@ -5,9 +5,16 @@
  * @author		Justin Kimbrell
  * @copyright   Copyright (c) 2013, Objective HTML
  * @link 		https://www.objectivehtml.com/photo-frame
- * @version		1.2.2
- * @build		20131103
+ * @version		1.2.3
+ * @build		20131121
  */
+
+#### 1.2.3
+##### 11/21/2013
+
+- (Feature) Added two new settings to resize photos to a fixed height and width before each photo is uploaded. This contradicts the resize size that works with max photo sizes (opposed to fixed).
+- (Bug Fix) Fixed an issue that would throw an error if the photo didn't exist and the resize tag was trying to access it.
+- (Bug Fix) Fixed an issue caused by Chrome's auto-update that would break the activity indicator script.
 
 #### 1.2.2
 ##### 11/03/2013
