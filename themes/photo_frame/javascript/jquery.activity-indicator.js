@@ -174,7 +174,7 @@
 		// VML Rendering
 		// =======================================================================================
 		
-		var s = $('div').appendTo('body').html('<v:shape id="vml_flag1" adj="1" />');
+		var s = $('shape').appendTo('body').html('<v:shape id="vml_flag1" adj="1" />');
 
 		s = s.find(':first').css('behavior', 'url(#default#VML)');
 

@@ -20,7 +20,7 @@
 			layerActions: 'photo-frame-layer-actions',
 			visible: 'photo-frame-toggle-visible',
 			toggleButton: 'photo-frame-toggle-layer-button',
-			trash: 'photo-frame-trash',			
+			trash: 'photo-frame-trash'			
 		},
 		
 		/**

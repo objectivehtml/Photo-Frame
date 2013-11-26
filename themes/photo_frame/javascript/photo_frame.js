@@ -1057,7 +1057,7 @@ var PhotoFrame = {};
 					manipulations: {},
 					//resize: this.resize,
 					//resizeMax: this.resizeMax,
-					index: this.photos.length,
+					index: this.photos.length
 				};
 				
 				var photo = new PhotoFrame.Photo(this, response, props);
@@ -2242,7 +2242,7 @@ var PhotoFrame = {};
 			this.parent.addClass(this.factory.buttonBar.classes.active);
 			
 			this.ui.window.fadeIn({
-				duration: this.duration,
+				duration: this.duration
 				//easing: this.easeIn
 			})
 			.css('display', 'inline-block')
@@ -3601,7 +3601,7 @@ var PhotoFrame = {};
 					progress: function() {},	
 					hide: function() {},	
 					show: function() {},	
-					reset: function() {},	
+					reset: function() {}	
 				},
 				duration: 333,
 				classes: {
@@ -4293,7 +4293,7 @@ var PhotoFrame = {};
 			move: function(color) {},
 			hide: function(color) {},
 			show: function(color) {},
-			beforeShow: function(color) {},
+			beforeShow: function(color) {}
 		},
 
 		/**

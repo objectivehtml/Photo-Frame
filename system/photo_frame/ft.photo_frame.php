@@ -82,11 +82,11 @@ class Photo_frame_ft extends EE_Fieldtype {
 	{
 		$this->EE =& get_instance();
 
-		if(isset($this->EE->safecracker_lib))
+		if(isset($this->EE->safecracker_lib) || isset($this->EE->channel_form_lib))
 		{
 			$this->safecracker = TRUE;
 		}
-
+		
 		$this->EE->load->add_package_path(PATH_THIRD . 'photo_frame');
 
 		/* -----------------------------------------
@@ -415,6 +415,7 @@ class Photo_frame_ft extends EE_Fieldtype {
 		$this->EE->theme_loader->css('photo_frame');
 		$this->EE->theme_loader->css('smoothness/jquery-ui-1.10.3.custom.css');
 		$this->EE->theme_loader->css('jquery.jcrop');
+		$this->EE->theme_loader->javascript('json2');
 		$this->EE->theme_loader->javascript('base');
 		$this->EE->theme_loader->javascript('localStorageDB');
 		$this->EE->theme_loader->javascript('spectrum');
@@ -427,7 +428,6 @@ class Photo_frame_ft extends EE_Fieldtype {
 		$this->EE->theme_loader->javascript('jquery.load-image');
 		$this->EE->theme_loader->javascript('jquery.jcrop');
 		$this->EE->theme_loader->javascript('jquery.color');
-		$this->EE->theme_loader->javascript('json2');
 		
 		if($settings['photo_frame_show_editor_cp'] == 'true' && !$this->safecracker ||
 		   $settings['photo_frame_show_editor_sc'] == 'true' && $this->safecracker ||
@@ -832,7 +832,7 @@ class Photo_frame_ft extends EE_Fieldtype {
 						if(!t.safecracker) {
 							$.ee_filebrowser.add_trigger(t.ui.browse, t.directory.id, {
 								content_type: \'images\',
-								directory:    t.directory.id,
+								directory:    t.directory.id
 							}, function(file, field){
 								t.showProgress(0, function() {
 						    		t._fileBrowserResponseHandler(file.rel_path, function(response) {
@@ -1027,6 +1027,29 @@ class Photo_frame_ft extends EE_Fieldtype {
 			}
 		}
 
+		$vars = array(
+			'id'             => $this->field_id,
+			'safecracker'    => $this->safecracker,
+			'selector'       => $uid,
+			'field_label'    => $this->low_variables ? $var->variable_label : (isset($settings['field_label']) ? $settings['field_label'] : ''),
+			'field_name'     => ($this->matrix ? $this->cell_name : $this->field_name),
+			'theme'          => $theme ? $theme->getWrapperClass() : '',
+			'data'   	     => $saved_data,
+			'new_photos'     => $new_photos,
+			'preview_styles' => trim($preview_styles),
+			'button_text'	 => $button_text,
+			'browse_button_text' => $browse_button_text,
+			'overlimit'	 	 => $overlimit,
+			'assets'		 => FALSE,
+			'drop_zone'	     => $settings['photo_frame_drop_zone'] == 'true' ? TRUE : FALSE,
+			'file_browser'	 => $settings['photo_frame_file_browser'] == 'true' ? TRUE : FALSE,
+			'file_upload'	 => $settings['photo_frame_file_upload'] == 'true' ? TRUE : FALSE,
+			'upload_helper'	 => $settings['photo_frame_upload_helper'],
+			'sortable'       => $settings['photo_frame_sortable'] == 'true' ? TRUE : FALSE,
+			'disable_crop'   => $settings['photo_frame_disable_crop'] == 'true' ? TRUE : FALSE,
+			'grid'			 => $this->grid
+		);
+		
 		return $this->EE->load->view('fieldtype', $vars, TRUE);
 	}
 	
