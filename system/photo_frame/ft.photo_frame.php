@@ -1027,29 +1027,6 @@ class Photo_frame_ft extends EE_Fieldtype {
 			}
 		}
 
-		$vars = array(
-			'id'             => $this->field_id,
-			'safecracker'    => $this->safecracker,
-			'selector'       => $uid,
-			'field_label'    => $this->low_variables ? $var->variable_label : (isset($settings['field_label']) ? $settings['field_label'] : ''),
-			'field_name'     => ($this->matrix ? $this->cell_name : $this->field_name),
-			'theme'          => $theme ? $theme->getWrapperClass() : '',
-			'data'   	     => $saved_data,
-			'new_photos'     => $new_photos,
-			'preview_styles' => trim($preview_styles),
-			'button_text'	 => $button_text,
-			'browse_button_text' => $browse_button_text,
-			'overlimit'	 	 => $overlimit,
-			'assets'		 => FALSE,
-			'drop_zone'	     => $settings['photo_frame_drop_zone'] == 'true' ? TRUE : FALSE,
-			'file_browser'	 => $settings['photo_frame_file_browser'] == 'true' ? TRUE : FALSE,
-			'file_upload'	 => $settings['photo_frame_file_upload'] == 'true' ? TRUE : FALSE,
-			'upload_helper'	 => $settings['photo_frame_upload_helper'],
-			'sortable'       => $settings['photo_frame_sortable'] == 'true' ? TRUE : FALSE,
-			'disable_crop'   => $settings['photo_frame_disable_crop'] == 'true' ? TRUE : FALSE,
-			'grid'			 => $this->grid
-		);
-		
 		return $this->EE->load->view('fieldtype', $vars, TRUE);
 	}
 	
@@ -1867,6 +1844,11 @@ class Photo_frame_ft extends EE_Fieldtype {
 			$post = $data;
 		}
 		
+		if(empty($this->field_id) && isset($this->settings['field_id']))
+		{
+			$this->field_id = $this->settings['field_id'];
+		}
+
 		$buttons = $this->EE->photo_frame_lib->get_buttons();
 		
 		if(is_array($post))
