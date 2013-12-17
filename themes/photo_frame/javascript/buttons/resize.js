@@ -15,6 +15,12 @@
 		description: 'The resize the image.',
 		
 		/**
+		 * The button icon
+		 */
+		
+		icon: 'resize',
+
+		/**
 		 * Name of the button
 		 */
 		

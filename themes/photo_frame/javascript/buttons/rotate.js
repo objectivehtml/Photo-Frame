@@ -15,6 +15,12 @@
 		description: false,
 		
 		/**
+		 * Icon
+		 */
+		
+		icon: 'rotate',
+
+		/**
 		 * Name of the button
 		 */
 		
@@ -35,6 +41,7 @@
 			this.description          = PhotoFrame.Lang.rotate_desc;	
 			this.windowSettings.title = PhotoFrame.Lang.rotate;		
 			this.buttons = [{
+				icon: this.icon,
 				text: PhotoFrame.Lang.rotate,
 				css: 'photo-frame-tool-window-save',
 				onclick: function(e, button) {

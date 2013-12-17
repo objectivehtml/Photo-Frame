@@ -15,6 +15,12 @@
 		description: false,
 		
 		/**
+		 * The button icon
+		 */
+		
+		icon: 'crop',
+
+		/**
 		 * Name of the button
 		 */
 		
