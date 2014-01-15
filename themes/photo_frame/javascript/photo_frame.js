@@ -3306,6 +3306,10 @@ var PhotoFrame = {};
     			t.cropSettings.setSelect = [size.x, size.y, size.x2, size.y2];
     		}
 
+    		if(!t.forceCrop) {
+				t.cachePath = response.directory.server_path + '_cache/' + t.cache + '.' + t.extension(response.file_name)
+			}
+
 			$.post(PhotoFrame.Actions.crop_photo, {
 				fieldId: t.factory.fieldId,
 				varId: t.factory.varId,
@@ -3322,6 +3326,7 @@ var PhotoFrame = {};
 				image: response.file_path,
 				name: response.file_name,
 				manipulations: t.manipulations,
+				forceCrop: t.factory.forceCrop,
 				directory: t.factory.directory,
 				original: response.original_path,
 				original_file: response.original_file,

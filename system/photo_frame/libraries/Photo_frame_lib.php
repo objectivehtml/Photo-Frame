@@ -500,6 +500,7 @@ class Photo_frame_lib {
 		$grid_id       = $this->EE->input->post('gridId', TRUE) != 'false' ? $this->EE->input->post('gridId', TRUE) : false;
 		$asset_id      = $this->EE->input->post('assetId', TRUE) != 'false' ? $this->EE->input->post('assetId', TRUE) : false;
 		
+		$forceCrop	   = $this->EE->input->get_post('forceCrop', TRUE) == 'false' ? FALSE : TRUE;
 		$cache 		   = $this->EE->input->get_post('cache', TRUE);
 		$cacheUrl 	   = $this->EE->input->get_post('cacheUrl', TRUE);
 		$cachePath 	   = $this->EE->input->get_post('cachePath', TRUE);
