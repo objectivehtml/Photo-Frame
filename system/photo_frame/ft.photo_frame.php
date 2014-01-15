@@ -1828,6 +1828,11 @@ class Photo_frame_ft extends EE_Fieldtype {
 		}
 		else
 		{
+			if(!isset($this->settings['field_settings']))
+			{
+				return;
+			}
+			
 			$settings = unserialize(base64_decode($this->settings['field_settings']));
 		}
 		
