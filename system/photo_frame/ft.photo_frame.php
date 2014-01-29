@@ -61,7 +61,7 @@ class Photo_frame_ft extends EE_Fieldtype {
 		'limit' 		  => FALSE,
 		'offset' 		  => 0,
 		'directory'  	  => FALSE,
-		'pre_loop'  	  => TRUE,
+		'pre_loop'  	  => FALSE,
 		'size' 			  => NULL
 	);
 	
@@ -1101,7 +1101,7 @@ class Photo_frame_ft extends EE_Fieldtype {
 			{
 				$photos[$photo->entry_id][$photo->field_id][] = (array) $photo;
 			}
-			
+
 			$this->data = $photos;
 		}
 		else
@@ -1129,7 +1129,6 @@ class Photo_frame_ft extends EE_Fieldtype {
 		{
 			return $this->data;
 		}
-
 
 		if(isset($this->row['entry_id']) && (!isset($this->col_id) || empty($this->col_id)))
 		{
@@ -1212,7 +1211,7 @@ class Photo_frame_ft extends EE_Fieldtype {
 		$default = array(
 			'file'   	  => FALSE,
 			'width'		  => FALSE,
-			'pre_loop'	  => TRUE,
+			'pre_loop'	  => FALSE,
 			'height'      => '14px',
 			'limit'       => FALSE,
 			'offset'      => 0,
@@ -1283,7 +1282,7 @@ class Photo_frame_ft extends EE_Fieldtype {
 			'file'   	  => FALSE,
 			'width'		  => FALSE,
 			'height'      => '14px',
-			'pre_loop'    => TRUE,
+			'pre_loop'    => FALSE,
 			'limit'       => FALSE,
 			'type'        => 'rgb',
 			'offset'      => 0,
@@ -1863,7 +1862,7 @@ class Photo_frame_ft extends EE_Fieldtype {
     		    if(isset($photo['new']))
     		    {
         		    $photo = (array) json_decode($photo['new']);
-        		  
+
         		   	$path  = $this->EE->photo_frame_model->parse($photo['file'], 'server_path');
         		   	
         		   	if(isset($photo['cachePath']))
