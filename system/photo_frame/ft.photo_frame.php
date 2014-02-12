@@ -2044,7 +2044,7 @@ class Photo_frame_ft extends EE_Fieldtype {
 			$col_id = $this->settings['col_id'];
 
 			$this->EE->photo_frame_model->update_cell($this->settings['row_id'], array(
-				'col_id_'.$col_id => $this->settings['row_id']
+				'col_id_'.$col_id => (count($new_photos) > 0 || count($edit_photos) > 0) ? $this->settings['row_id'] : ''
 			));			
 		}
 		else
@@ -2057,20 +2057,20 @@ class Photo_frame_ft extends EE_Fieldtype {
 						$this->settings['grid_field_id'], 
 						$this->settings['grid_row_id'], 
 						array(
-							'col_id_'.$this->settings['col_id'] => $this->settings['grid_row_id']
+							'col_id_'.$this->settings['col_id'] => (count($new_photos) > 0 || count($edit_photos) > 0) ? $this->settings['grid_row_id'] : ''
 						)
 					);
 				}
 				else
 				{
 					$this->EE->photo_frame_model->update_entry($this->settings['entry_id'], array(
-						'field_id_'.$this->field_id => $this->settings['entry_id']
+						'field_id_'.$this->field_id => (count($new_photos) > 0 || count($edit_photos) > 0) ? $this->settings['entry_id'] : ''
 					));
 				}	
 								
 				if($this->is_draft)
 				{
-					$this->EE->photo_frame_model->update_draft_data($this->settings['entry_id'], $this->field_id);
+					$this->EE->photo_frame_model->update_draft_data($this->settings['entry_id'], (count($new_photos) > 0 || count($edit_photos) > 0) ? $this->field_id : '');
 				}
 				
 				$var_id = NULL;			
