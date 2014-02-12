@@ -1024,7 +1024,6 @@ var PhotoFrame = {};
 	    			if(typeof callback == "function") {
 		    			callback(response);
 	    			}
-    			
 				});
 			});
 		},
@@ -1119,8 +1118,9 @@ var PhotoFrame = {};
 			};
 			
 			options = $.extend({}, options, this.callbacks.responseHandlerSettings());
-			if(!this.fileBrowserResponseInProgress) {
-				this.fileBrowserResponseInProgress = true;
+			
+			//if(!this.fileBrowserResponseInProgress) {
+			//	this.fileBrowserResponseInProgress = true;
 				$.get(PhotoFrame.Actions.photo_response, options, function(response) {
 					t.fileBrowserResponseInProgress = false;
 					if(typeof response != "object") {
@@ -1133,7 +1133,7 @@ var PhotoFrame = {};
 						}
 					}
 				});
-			}
+			// }
 		},
 		
 		hideMeta: function() {	
