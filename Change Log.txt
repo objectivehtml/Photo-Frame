@@ -5,9 +5,26 @@
  * @author		Justin Kimbrell
  * @copyright   Copyright (c) 2013, Objective HTML
  * @link 		https://www.objectivehtml.com/photo-frame
- * @version		1.2.3
- * @build		20131121
+ * @version		1.2.4
+ * @build		20130311
  */
+
+#### 1.2.4
+##### 03/11/2013
+
+- (Feature) Updated repo to include language packs from the Github repo
+- (Bug Fix) Fixed more issues with IE
+- (Bug Fix) Removed deprecated function that caused an extra db call
+- (Bug Fix) Fixed more JS issues with the Chrome auto-update
+- (Bug Fix) Fixed some jQuery noConflict issues
+- (Bug Fix) Fixed an issue with some instances of Photo Frame not working with Matrix
+- (Bug Fix) Added icon classes so the buttons aren't reliant on the language pack for classes
+- (Bug Fix) Fixed an issue with Photo Frame breaking with the channel entries api
+- (Bug Fix) Fixed an issue with the force crop setting copying files into the parent directory erroneously
+- (Bug Fix) Changed the pre_loop attribute default value to FALSE since it was breaking in the relationship field in some cases.
+- (Bug Fix) Fixed an issue with an error when saving data photo_frame_colors via the photo_frame_model
+- (Bug Fix) Fixed an issue causing Photo Frame to fail when selecting multiple resources from an Assets sheet.
+- (Bug Fix) Made Photo Frame only add the entry_id to the proper index when photos are actually uploaded. An empty string is saved when no photos are present. This gives better context in the db to determine if a field has no photos uploaded.
 
 #### 1.2.3
 ##### 11/21/2013
