@@ -2353,7 +2353,41 @@ class Photo_frame_ft extends EE_Fieldtype {
 	
 	public function grid_settings_modify_column($data)
 	{
-		return $data;
+		return $this->_get_column_settings('text', $data['col_id'], TRUE);
+	}
+
+	private function _get_column_settings($data_type, $field_id, $grid = FALSE)
+	{
+		$field_name = ($grid) ? 'col_id_'.$field_id : 'field_id_'.$field_id;
+
+		switch($data_type)
+		{
+			case 'numeric':
+				$fields[$field_name] = array(
+					'type'		=> 'FLOAT',
+					'default'	=> 0
+				);
+				break;
+			case 'integer':
+				$fields[$field_name] = array(
+					'type'		=> 'INT',
+					'default'	=> 0
+				);
+				break;
+			case 'decimal':
+				$fields[$field_name] = array(
+					'type'		=> 'DECIMAL(10,4)',
+					'default'	=> 0
+				);
+				break;
+			default:
+				$fields[$field_name] = array(
+					'type'		=> 'text',
+					'null'		=> TRUE
+				);
+		}
+
+		return $fields;
 	}
 
 	public function display_settings($data)
@@ -2842,6 +2876,10 @@ class Photo_frame_ft extends EE_Fieldtype {
 		return $data;
 	}
 	
+	function grid_save_settings($data)
+	{
+		return $data;
+	}
 	
 	private function bool_param($param)
 	{
