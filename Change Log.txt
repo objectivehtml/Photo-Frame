@@ -6,11 +6,11 @@
  * @copyright   Copyright (c) 2013, Objective HTML
  * @link 		https://www.objectivehtml.com/photo-frame
  * @version		1.2.4
- * @build		20130311
+ * @build		20140311
  */
 
 #### 1.2.4
-##### 03/11/2013
+##### 03/11/2014
 
 - (Feature) Updated repo to include language packs from the Github repo
 - (Bug Fix) Fixed more issues with IE
