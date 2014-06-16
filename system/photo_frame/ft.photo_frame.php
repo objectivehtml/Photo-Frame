@@ -2334,7 +2334,7 @@ class Photo_frame_ft extends EE_Fieldtype {
 	
 	public function accepts_content_type($name)
 	{
-	    return ($name == 'channel' || $name == 'grid');
+		return TRUE;
 	}
 
 	public function grid_display_settings($data)
