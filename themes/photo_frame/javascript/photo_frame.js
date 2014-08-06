@@ -324,7 +324,13 @@ var PhotoFrame = {};
 		 */		
 		 
 		cropSettings: {},
-			
+		
+		/**
+		 * Is the file browser response in progress?
+		 */		
+		
+		fileBrowserResponseInProgress: false,
+
 		/**
 		 * Force users to crop new photos?
 		 */		
@@ -578,6 +584,8 @@ var PhotoFrame = {};
 			t.buttonBar = new PhotoFrame.ButtonBar(t, t.buttons, {
 				title: PhotoFrame.Lang.tools
 			});
+
+			t.buttonBar.ui.window.addClass('photo-frame-button-bar');
 				
 			$(window).keyup(function(e) {
 				if (e.keyCode == 27) { 
@@ -1016,7 +1024,6 @@ var PhotoFrame = {};
 	    			if(typeof callback == "function") {
 		    			callback(response);
 	    			}
-    			
 				});
 			});
 		},
@@ -1049,7 +1056,7 @@ var PhotoFrame = {};
 					manipulations: {},
 					//resize: this.resize,
 					//resizeMax: this.resizeMax,
-					index: this.photos.length,
+					index: this.photos.length
 				};
 				
 				var photo = new PhotoFrame.Photo(this, response, props);
@@ -1098,9 +1105,8 @@ var PhotoFrame = {};
 				callback = id;
 				id = false;
 			}
-			
+
 			var t = this;
-			
 			var options = {
 				fieldId: t.fieldId,
 				varId: t.varId, 
@@ -1111,9 +1117,12 @@ var PhotoFrame = {};
 				gridId: (t.gridId ? t.gridId : false)
 			};
 			
-			options = $.extend({}, options, t.callbacks.responseHandlerSettings());
+			options = $.extend({}, options, this.callbacks.responseHandlerSettings());
 			
-			$.get(PhotoFrame.Actions.photo_response, options, function(response) {
+			//if(!this.fileBrowserResponseInProgress) {
+			//	this.fileBrowserResponseInProgress = true;
+				$.get(PhotoFrame.Actions.photo_response, options, function(response) {
+					t.fileBrowserResponseInProgress = false;
 					if(typeof response != "object") {
 						t.log(response);
 						t.showErrors([PhotoFrame.Lang.unexpected_error]);
@@ -1123,8 +1132,8 @@ var PhotoFrame = {};
 							callback(response);
 						}
 					}
-				}
-			);
+				});
+			// }
 		},
 		
 		hideMeta: function() {	
@@ -2234,7 +2243,7 @@ var PhotoFrame = {};
 			this.parent.addClass(this.factory.buttonBar.classes.active);
 			
 			this.ui.window.fadeIn({
-				duration: this.duration,
+				duration: this.duration
 				//easing: this.easeIn
 			})
 			.css('display', 'inline-block')
@@ -3295,13 +3304,17 @@ var PhotoFrame = {};
     		
     		var size = t.released ? _defaultSize : t.tellScaled();
     		
-    		if(!size.w || !size.h) {
+    		if(!size.w || !size.h || this.factory.settings.photo_frame_disable_regular_crop === 'true') {
     			size = _defaultSize;
 	    		delete t.cropSettings.setSelect;
     		}
     		else {
     			t.cropSettings.setSelect = [size.x, size.y, size.x2, size.y2];
     		}
+
+    		if(!t.forceCrop) {
+				t.cachePath = response.directory.server_path + '_cache/' + t.cache + '.' + t.extension(response.file_name)
+			}
 
 			$.post(PhotoFrame.Actions.crop_photo, {
 				fieldId: t.factory.fieldId,
@@ -3319,6 +3332,7 @@ var PhotoFrame = {};
 				image: response.file_path,
 				name: response.file_name,
 				manipulations: t.manipulations,
+				forceCrop: t.factory.forceCrop,
 				directory: t.factory.directory,
 				original: response.original_path,
 				original_file: response.original_file,
@@ -3598,7 +3612,7 @@ var PhotoFrame = {};
 					progress: function() {},	
 					hide: function() {},	
 					show: function() {},	
-					reset: function() {},	
+					reset: function() {}	
 				},
 				duration: 333,
 				classes: {
@@ -4290,7 +4304,7 @@ var PhotoFrame = {};
 			move: function(color) {},
 			hide: function(color) {},
 			show: function(color) {},
-			beforeShow: function(color) {},
+			beforeShow: function(color) {}
 		},
 
 		/**
@@ -4765,79 +4779,79 @@ var PhotoFrame = {};
 
 	PhotoFrame.Window.implement(PhotoFrame.WindowControls);
 	PhotoFrame.ButtonBar.implement(PhotoFrame.WindowControls);
-		
+	
+	/**
+	 * Get the current jQuery version and test is similar to version_compare();
+	 *
+	 * @param	string 	First version to compare
+	 * @param	string 	Comparison operator
+	 * @param	string 	Second version to compare (optional)
+	 *
+	 * @return	mixed;
+	 */
+
+	jQuery.isVersion = function(left, oper, right) {
+	    if (left) {
+	        var pre = /pre/i,
+	            replace = /[^\d]+/g,
+	            oper = oper || "==",
+	            right = right || jQuery.fn.jquery,
+	            l = left.replace(replace, ''),
+	            r = right.replace(replace, ''),
+	            l_len = l.length, r_len = r.length,
+	            l_pre = pre.test(left), r_pre = pre.test(right);
+
+	        l = (r_len > l_len ? parseInt(l) * ((r_len - l_len) * 10) : parseInt(l));
+	        r = (l_len > r_len ? parseInt(r) * ((l_len - r_len) * 10) : parseInt(r));
+
+	        switch(oper) {
+	            case "==": {
+	                return (true === (l == r && (l_pre == r_pre)));
+	            }
+	            case ">=": {
+	                return (true === (l >= r && (!l_pre || l_pre == r_pre)));
+	            }
+	            case "<=": {
+	                return (true === (l <= r && (!r_pre || r_pre == l_pre)));
+	            }
+	            case ">": {
+	                return (true === (l > r || (l == r && r_pre)));
+	            }
+	            case "<": {
+	                return (true === (l < r || (l == r && l_pre)));
+	            }
+	        }
+	    }
+
+	    return false;
+	}
+
+	/**
+	 * Center a specific element on the screen. Works with various versions of jQuery
+	 *
+	 * @return object;
+	 */
+
+	jQuery.fn.center = function () {
+	    var w = $(window);
+	    this.css("position","fixed");
+	    
+	    if($.isVersion('1.7.0', '<=') && w.outerHeight() != null && w.outerWidth() != null && 
+	       !isNaN(w.outerHeight()) && !isNaN(w.outerWidth())) {
+		    var outerHeight = w.outerHeight();
+		    var outerWidth  = w.outerWidth();
+	    } else {
+	    	var outerHeight = w.height();
+		    var outerWidth  = w.width();
+	    }
+	    
+	    this.css("top",outerHeight/2-this.height()/2 + "px");
+	    this.css("left",outerWidth/2-this.width()/2  + "px");
+	    
+	    return this;
+	}
+	
 }(jQuery));
-
-/**
- * Get the current jQuery version and test is similar to version_compare();
- *
- * @param	string 	First version to compare
- * @param	string 	Comparison operator
- * @param	string 	Second version to compare (optional)
- *
- * @return	mixed;
- */
-
-jQuery.isVersion = function(left, oper, right) {
-    if (left) {
-        var pre = /pre/i,
-            replace = /[^\d]+/g,
-            oper = oper || "==",
-            right = right || jQuery.fn.jquery,
-            l = left.replace(replace, ''),
-            r = right.replace(replace, ''),
-            l_len = l.length, r_len = r.length,
-            l_pre = pre.test(left), r_pre = pre.test(right);
-
-        l = (r_len > l_len ? parseInt(l) * ((r_len - l_len) * 10) : parseInt(l));
-        r = (l_len > r_len ? parseInt(r) * ((l_len - r_len) * 10) : parseInt(r));
-
-        switch(oper) {
-            case "==": {
-                return (true === (l == r && (l_pre == r_pre)));
-            }
-            case ">=": {
-                return (true === (l >= r && (!l_pre || l_pre == r_pre)));
-            }
-            case "<=": {
-                return (true === (l <= r && (!r_pre || r_pre == l_pre)));
-            }
-            case ">": {
-                return (true === (l > r || (l == r && r_pre)));
-            }
-            case "<": {
-                return (true === (l < r || (l == r && l_pre)));
-            }
-        }
-    }
-
-    return false;
-}
-
-/**
- * Center a specific element on the screen. Works with various versions of jQuery
- *
- * @return object;
- */
-
-jQuery.fn.center = function () {
-    var w = $(window);
-    this.css("position","fixed");
-    
-    if($.isVersion('1.7.0', '<=') && w.outerHeight() != null && w.outerWidth() != null && 
-       !isNaN(w.outerHeight()) && !isNaN(w.outerWidth())) {
-	    var outerHeight = w.outerHeight();
-	    var outerWidth  = w.outerWidth();
-    } else {
-    	var outerHeight = w.height();
-	    var outerWidth  = w.width();
-    }
-    
-    this.css("top",outerHeight/2-this.height()/2 + "px");
-    this.css("left",outerWidth/2-this.width()/2  + "px");
-    
-    return this;
-}
 
 /**
  * Capitalize the first letter in a string

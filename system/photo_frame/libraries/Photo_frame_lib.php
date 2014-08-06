@@ -274,6 +274,14 @@ class Photo_frame_lib {
 		$gcd    = $width > $height ? 'width' : 'height';
 		$errors = array();
 		$resize = FALSE;
+
+		$resizeFixedWidth  = isset($settings['photo_frame_resize_fixed_width']) &&
+						   !empty($settings['photo_frame_resize_fixed_width']) ? 
+						   (int) $settings['photo_frame_resize_fixed_width'] : FALSE;
+						   		
+		$resizeFixedHeight = isset($settings['photo_frame_resize_fixed_height']) &&
+						   !empty($settings['photo_frame_resize_fixed_height']) ? 
+						   (int) $settings['photo_frame_resize_fixed_height'] : FALSE;		
 		
 		$resizeMaxWidth  = isset($settings['photo_frame_resize_max_width']) &&
 						   !empty($settings['photo_frame_resize_max_width']) ? 
@@ -286,6 +294,24 @@ class Photo_frame_lib {
 		$max_size        = isset($settings['photo_frame_max_size']) &&
 						   !empty($settings['photo_frame_max_size']) ? 
 						   (float) $settings['photo_frame_max_size'] * 1000000: FALSE;	
+
+		if($resizeFixedWidth || $resizeFixedHeight)
+		{
+			if(!$resizeFixedWidth)
+			{
+				$resizeFixedWidth = $width;
+			}
+
+			if(!$resizeFixedHeight)
+			{
+				$resizeFixedHeight = $height;
+			}
+
+			$width  = (int) $resizeFixedWidth;
+			$height = (int) $resizeFixedHeight;
+
+			$image->resize($resizeFixedWidth, $resizeFixedHeight);
+		}
 
 		if($resizeMaxWidth && $width > $resizeMaxWidth && ($gcd == 'width' || $resizeMaxHeight == 0))
 		{	
@@ -474,6 +500,7 @@ class Photo_frame_lib {
 		$grid_id       = $this->EE->input->post('gridId', TRUE) != 'false' ? $this->EE->input->post('gridId', TRUE) : false;
 		$asset_id      = $this->EE->input->post('assetId', TRUE) != 'false' ? $this->EE->input->post('assetId', TRUE) : false;
 		
+		$forceCrop	   = $this->EE->input->get_post('forceCrop', TRUE) == 'false' ? FALSE : TRUE;
 		$cache 		   = $this->EE->input->get_post('cache', TRUE);
 		$cacheUrl 	   = $this->EE->input->get_post('cacheUrl', TRUE);
 		$cachePath 	   = $this->EE->input->get_post('cachePath', TRUE);

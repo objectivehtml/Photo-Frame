@@ -61,7 +61,7 @@ class Photo_frame_ft extends EE_Fieldtype {
 		'limit' 		  => FALSE,
 		'offset' 		  => 0,
 		'directory'  	  => FALSE,
-		'pre_loop'  	  => TRUE,
+		'pre_loop'  	  => FALSE,
 		'size' 			  => NULL
 	);
 	
@@ -74,18 +74,19 @@ class Photo_frame_ft extends EE_Fieldtype {
 		'size',
 		'order_by',
 		'sort',
-		'directory'
+		'directory',
+		'pre_loop'
 	);	
 
 	public function __construct()
 	{
 		$this->EE =& get_instance();
 
-		if(isset($this->EE->safecracker_lib))
+		if(isset($this->EE->safecracker_lib) || isset($this->EE->channel_form_lib))
 		{
 			$this->safecracker = TRUE;
 		}
-
+		
 		$this->EE->load->add_package_path(PATH_THIRD . 'photo_frame');
 
 		/* -----------------------------------------
@@ -362,6 +363,8 @@ class Photo_frame_ft extends EE_Fieldtype {
 			'photo_frame_jpeg_compression'   => 100,
 			'photo_frame_resize_max_width'   => FALSE,
 			'photo_frame_resize_min_height'  => FALSE,
+			'photo_frame_resize_fixed_width' => FALSE,
+			'photo_frame_resize_fixed_height'=> FALSE,
 			'photo_frame_cropped_max_width'  => FALSE,
 			'photo_frame_cropped_max_height' => FALSE,
 			'photo_frame_cropped_width'      => FALSE,
@@ -412,6 +415,7 @@ class Photo_frame_ft extends EE_Fieldtype {
 		$this->EE->theme_loader->css('photo_frame');
 		$this->EE->theme_loader->css('smoothness/jquery-ui-1.10.3.custom.css');
 		$this->EE->theme_loader->css('jquery.jcrop');
+		$this->EE->theme_loader->javascript('json2');
 		$this->EE->theme_loader->javascript('base');
 		$this->EE->theme_loader->javascript('localStorageDB');
 		$this->EE->theme_loader->javascript('spectrum');
@@ -424,7 +428,6 @@ class Photo_frame_ft extends EE_Fieldtype {
 		$this->EE->theme_loader->javascript('jquery.load-image');
 		$this->EE->theme_loader->javascript('jquery.jcrop');
 		$this->EE->theme_loader->javascript('jquery.color');
-		$this->EE->theme_loader->javascript('json2');
 		
 		if($settings['photo_frame_show_editor_cp'] == 'true' && !$this->safecracker ||
 		   $settings['photo_frame_show_editor_sc'] == 'true' && $this->safecracker ||
@@ -811,8 +814,8 @@ class Photo_frame_ft extends EE_Fieldtype {
 						    	}
 						    	else {
 					    			t.showProgress(0, function() {
-							    		var count = 1;
-							    		
+							    		var count = 1;					    		
+						    	
 								    	$.each(files, function(i, file) {
 									    	t._fileBrowserResponseHandler(file.url, file.id, function(response) {
 									    		var progress = parseInt(count / files.length * 100);
@@ -829,7 +832,7 @@ class Photo_frame_ft extends EE_Fieldtype {
 						if(!t.safecracker) {
 							$.ee_filebrowser.add_trigger(t.ui.browse, t.directory.id, {
 								content_type: \'images\',
-								directory:    t.directory.id,
+								directory:    t.directory.id
 							}, function(file, field){
 								t.showProgress(0, function() {
 						    		t._fileBrowserResponseHandler(file.rel_path, function(response) {
@@ -1098,7 +1101,7 @@ class Photo_frame_ft extends EE_Fieldtype {
 			{
 				$photos[$photo->entry_id][$photo->field_id][] = (array) $photo;
 			}
-			
+
 			$this->data = $photos;
 		}
 		else
@@ -1126,7 +1129,6 @@ class Photo_frame_ft extends EE_Fieldtype {
 		{
 			return $this->data;
 		}
-
 
 		if(isset($this->row['entry_id']) && (!isset($this->col_id) || empty($this->col_id)))
 		{
@@ -1209,7 +1211,7 @@ class Photo_frame_ft extends EE_Fieldtype {
 		$default = array(
 			'file'   	  => FALSE,
 			'width'		  => FALSE,
-			'pre_loop'	  => TRUE,
+			'pre_loop'	  => FALSE,
 			'height'      => '14px',
 			'limit'       => FALSE,
 			'offset'      => 0,
@@ -1280,7 +1282,7 @@ class Photo_frame_ft extends EE_Fieldtype {
 			'file'   	  => FALSE,
 			'width'		  => FALSE,
 			'height'      => '14px',
-			'pre_loop'    => TRUE,
+			'pre_loop'    => FALSE,
 			'limit'       => FALSE,
 			'type'        => 'rgb',
 			'offset'      => 0,
@@ -1465,14 +1467,20 @@ class Photo_frame_ft extends EE_Fieldtype {
 		$total_photos = 0;
 		$photo_index  = 0;
 
+		if(!count($photos))
+		{
+			return FALSE;
+		}
+
 		foreach($photos as $index => $row)
 		{
 			$index = count($return);
 
 			if($params['offset'] <= $photo_index && (!$params['limit'] || $total_photos < $params['limit']))
 			{	
-				$row['thumb'] = $this->EE->photo_frame_model->parse($this->EE->photo_frame_lib->swap_filename($row['original_file_name'], $row['original_file'], '_thumbs/'), 'url');
-								
+				//$row['thumb'] = $this->EE->photo_frame_model->parse($this->EE->photo_frame_lib->swap_filename($row['original_file_name'], $row['original_file'], '_thumbs/'), 'url');
+				$row['thumb'] = $this->EE->photo_frame_model->parse(rtrim(str_replace($row['original_file_name'], '', $row['original_file']), '/') . '/_thumbs/' . $row['original_file_name']);
+
 				$row = $this->EE->photo_frame_lib->parse_vars($row, $this->upload_prefs, $params['directory']);
 				
 				if($this->is_draft)
@@ -1511,10 +1519,20 @@ class Photo_frame_ft extends EE_Fieldtype {
 				}
 				else
 				{		
+
+					$src  = $this->EE->photo_frame_model->parse((isset($params['directory']) && $params['directory'] ? $row[$params['directory']] : $row['url']), 'url');
+					
+					if(isset($params['directory']) && $params['directory'] == '_thumbs')
+					{
+						$src = $row['thumb'];
+					}		
+
+					$src .= ($this->is_draft ? '?__='.time() : '');
+
 					$img = array(
-						'src="'.$this->EE->photo_frame_model->parse((isset($params['directory']) && $params['directory'] ? $row[$params['directory']] : $row['url']), 'url').($this->is_draft ? '?__='.time() : '').'"'
+						'src="'.$src.'"'
 					);
-							
+
 					if(empty($params['alt']))
 					{
 						$params['alt'] = !empty($row['title']) ? $row['title'] : (isset($this->row['title']) ? $this->row['title'] : NULL);
@@ -1816,6 +1834,11 @@ class Photo_frame_ft extends EE_Fieldtype {
 		}
 		else
 		{
+			if(!isset($this->settings['field_settings']))
+			{
+				return;
+			}
+			
 			$settings = unserialize(base64_decode($this->settings['field_settings']));
 		}
 		
@@ -1832,6 +1855,11 @@ class Photo_frame_ft extends EE_Fieldtype {
 			$post = $data;
 		}
 		
+		if(empty($this->field_id) && isset($this->settings['field_id']))
+		{
+			$this->field_id = $this->settings['field_id'];
+		}
+
 		$buttons = $this->EE->photo_frame_lib->get_buttons();
 		
 		if(is_array($post))
@@ -1841,7 +1869,7 @@ class Photo_frame_ft extends EE_Fieldtype {
     		    if(isset($photo['new']))
     		    {
         		    $photo = (array) json_decode($photo['new']);
-        		  
+
         		   	$path  = $this->EE->photo_frame_model->parse($photo['file'], 'server_path');
         		   	
         		   	if(isset($photo['cachePath']))
@@ -2023,7 +2051,7 @@ class Photo_frame_ft extends EE_Fieldtype {
 			$col_id = $this->settings['col_id'];
 
 			$this->EE->photo_frame_model->update_cell($this->settings['row_id'], array(
-				'col_id_'.$col_id => $this->settings['row_id']
+				'col_id_'.$col_id => (count($new_photos) > 0 || count($edit_photos) > 0) ? $this->settings['row_id'] : ''
 			));			
 		}
 		else
@@ -2036,20 +2064,20 @@ class Photo_frame_ft extends EE_Fieldtype {
 						$this->settings['grid_field_id'], 
 						$this->settings['grid_row_id'], 
 						array(
-							'col_id_'.$this->settings['col_id'] => $this->settings['grid_row_id']
+							'col_id_'.$this->settings['col_id'] => (count($new_photos) > 0 || count($edit_photos) > 0) ? $this->settings['grid_row_id'] : ''
 						)
 					);
 				}
 				else
 				{
 					$this->EE->photo_frame_model->update_entry($this->settings['entry_id'], array(
-						'field_id_'.$this->field_id => $this->settings['entry_id']
+						'field_id_'.$this->field_id => (count($new_photos) > 0 || count($edit_photos) > 0) ? $this->settings['entry_id'] : ''
 					));
 				}	
 								
 				if($this->is_draft)
 				{
-					$this->EE->photo_frame_model->update_draft_data($this->settings['entry_id'], $this->field_id);
+					$this->EE->photo_frame_model->update_draft_data($this->settings['entry_id'], (count($new_photos) > 0 || count($edit_photos) > 0) ? $this->field_id : '');
 				}
 				
 				$var_id = NULL;			
@@ -2313,7 +2341,7 @@ class Photo_frame_ft extends EE_Fieldtype {
 	
 	public function accepts_content_type($name)
 	{
-	    return ($name == 'channel' || $name == 'grid');
+		return TRUE;
 	}
 
 	public function grid_display_settings($data)
@@ -2332,7 +2360,41 @@ class Photo_frame_ft extends EE_Fieldtype {
 	
 	public function grid_settings_modify_column($data)
 	{
-		return $data;
+		return $this->_get_column_settings('text', $data['col_id'], TRUE);
+	}
+
+	private function _get_column_settings($data_type, $field_id, $grid = FALSE)
+	{
+		$field_name = ($grid) ? 'col_id_'.$field_id : 'field_id_'.$field_id;
+
+		switch($data_type)
+		{
+			case 'numeric':
+				$fields[$field_name] = array(
+					'type'		=> 'FLOAT',
+					'default'	=> 0
+				);
+				break;
+			case 'integer':
+				$fields[$field_name] = array(
+					'type'		=> 'INT',
+					'default'	=> 0
+				);
+				break;
+			case 'decimal':
+				$fields[$field_name] = array(
+					'type'		=> 'DECIMAL(10,4)',
+					'default'	=> 0
+				);
+				break;
+			default:
+				$fields[$field_name] = array(
+					'type'		=> 'text',
+					'null'		=> TRUE
+				);
+		}
+
+		return $fields;
 	}
 
 	public function display_settings($data)
@@ -2407,6 +2469,16 @@ class Photo_frame_ft extends EE_Fieldtype {
 			'photo_frame_jpeg_compression' => array(
 				'label'       => 'Image Compression (JPEG Only)',
 				'description' => 'Enter an integer 1-100 with 100 being the best quality.',
+				'type'        => 'input'
+			),
+			'photo_frame_resize_fixed_width' => array(
+				'label'       => 'Resize Uploaded Photo (Fixed Width)',
+				'description' => 'Resize the photo to a fixed width <i>before</i> it is uploaded.',
+				'type'        => 'input'
+			),
+			'photo_frame_resize_fixed_height' => array(
+				'label'       => 'Resize Uploaded Photo (Fixed Height)',
+				'description' => 'Resize the photo to a fixed height <i>before</i> it is uploaded.',
 				'type'        => 'input'
 			),
 			'photo_frame_resize_max_width' => array(
@@ -2811,6 +2883,10 @@ class Photo_frame_ft extends EE_Fieldtype {
 		return $data;
 	}
 	
+	function grid_save_settings($data)
+	{
+		return $data;
+	}
 	
 	private function bool_param($param)
 	{

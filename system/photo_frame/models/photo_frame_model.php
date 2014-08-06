@@ -78,7 +78,8 @@ class Photo_frame_model extends CI_Model {
 			)
 		));
 		
-		$base_url = config_item('site_url');
+		$base_url = config_item('photo_frame_base_url');
+		$base_url = $base_url ? $base_url : config_item('site_url') . config_item('site_index');
 		$base_url = $base_url && !empty($base_url) ? $base_url : base_url();
 		$base_url = !empty($base_url) ? $base_url : base_page();
 		$base_url = preg_replace('/^http(s|)\:\/\//', '', $base_url);
@@ -174,7 +175,7 @@ class Photo_frame_model extends CI_Model {
 			$string = $this->photo_frame_lib->replace_asset_subdir($asset_id, $string);
 		}
 		
-		return str_replace($tag, $file_uploads[$id][$type], $string);		
+		return reduce_double_slashes(str_replace($tag, $file_uploads[$id][$type], $string));		
 	}
 
 	public function get_grid_photos($col_id, $row_id)
@@ -719,9 +720,9 @@ class Photo_frame_model extends CI_Model {
 				'site_id'  => $photo['site_id'],
 				'field_id' => $photo['field_id'],
 				'entry_id' => $photo['entry_id'],
-				'row_id'   => isset($photo['row_id']) ? $photo['row_id'] : 0,
-				'col_id'   => isset($photo['col_id']) ? $photo['col_id'] : 0,
-				'var_id'   => isset($photo['var_id']) ? $photo['var_id'] : 0,
+				'row_id'   => isset($photo['row_id']) && !empty($photo['row_id']) ? $photo['row_id'] : 0,
+				'col_id'   => isset($photo['col_id']) && !empty($photo['col_id']) ? $photo['col_id'] : 0,
+				'var_id'   => isset($photo['var_id']) && !empty($photo['var_id']) ? $photo['var_id'] : 0,
 				'date'     => $photo['date'],
 				'depth'    => $color_index,
 				'r'		   => $color->r,

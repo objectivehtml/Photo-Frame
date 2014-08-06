@@ -31,19 +31,52 @@ class Photo_frame_ext {
 
         $this->settings = array();
     }
+
+
+    public function assets_rename_file($file, $new_file_name)
+    {
+    	$this->EE->load->library('photo_frame_lib');
+    	
+	 	$subfolder  = $file->subfolder();
+	 	$old_path   = '{filedir_'.$file->filedir_id().'}'.(!empty($subfolder) ? $subfolder . '/' : '').$file->filename();
+	 	$new_path   = '{filedir_'.$file->filedir_id().'}'.(!empty($subfolder) ? $subfolder . '/' : '').$new_file_name;
+
+    	$photos = $this->EE->photo_frame_model->get_photos(array(
+ 			'where' => array(
+ 				'site_id' 		=> config_item('site_id'),
+ 				'original_file' 	 => $old_path
+ 			)
+ 		));
+
+ 		foreach($photos->result() as $photo)
+ 		{
+	 		$this->EE->photo_frame_model->update_photo($photo->id, array(
+	 			'original_file' 	 => $new_path,
+ 				'original_file_name' => $new_file_name
+	 		));
+ 		}
+    }
     
-    public function assets_move_file($file, $folder_row, $file_name)
+    public function assets_move_file($file, $folder_row, $new_file_name)
     {
     	$this->EE->load->library('photo_frame_lib');
     	
 	 	$asset_id   = $file->file_id();
 	 	$asset_path = $file->path();    
-	 	$new_path   = '{filedir_'.$folder_row->filedir_id.'}'.str_replace($file_name, '', $file->subpath()) . $file_name;
+	 	
+	 	$subfolder  = $file->subfolder();
+	 	$old_path   = '{filedir_'.$file->filedir_id().'}'.(!empty($subfolder) ? $subfolder . '/' : '').$file->filename();
+	 	$new_path   = '{filedir_'.$folder_row->filedir_id.'}'.str_replace($new_file_name, '', $folder_row->full_path) . $new_file_name;
 	 	
 	 	if($folder_row->source_type == 'ee')
 	 	{
-	 		$photos = $this->EE->photo_frame_model->get_photos_by_asset_id($asset_id);
-	 		
+	 		$photos = $this->EE->photo_frame_model->get_photos(array(
+	 			'where' => array(
+	 				'site_id' 		=> config_item('site_id'),
+	 				'original_file' => $old_path
+	 			)
+	 		));
+
 	 		foreach($photos->result() as $photo)
 	 		{
 		 		$this->EE->photo_frame_model->update_photo($photo->id, array(
