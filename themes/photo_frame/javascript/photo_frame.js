@@ -33,13 +33,13 @@ var PhotoFrame = {};
 		 * Build Date
 		 */
 		 
-		buildDate: '2013-09-30',
+		buildDate: '2014-08-07',
 		
 		/**
 		 * Version
 		 */
 		 
-		version: '1.2.2',
+		version: '1.2.6',
 		
 		/**
 		 * Sets the default options
@@ -3374,7 +3374,7 @@ var PhotoFrame = {};
 				return false;
 			}
 
-			return typeof cropSize == "undefined" || (this.jcrop.ui.selection.css('display') != 'none' && (cropSize.x || cropSize.y || cropSize.x2 || cropSize.y2)) ? true : false;	
+			return typeof cropSize == "undefined" || (this.jcrop && this.jcrop.ui.selection.css('display') != 'none' && (cropSize.x || cropSize.y || cropSize.x2 || cropSize.y2)) ? true : false;	
 		},
 		
 		reduce: function(numerator, denominator) {
