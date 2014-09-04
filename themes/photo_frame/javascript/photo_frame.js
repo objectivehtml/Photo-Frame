@@ -580,7 +580,8 @@ var PhotoFrame = {};
 			t.ui.metaDescription = t.ui.meta.find('#description');
 			t.ui.metaKeywords    = t.ui.meta.find('#keywords');
 			t.ui.dropZone        = t.$wrapper.find('.'+t.classes.dropZone);
-					
+
+
 			t.buttonBar = new PhotoFrame.ButtonBar(t, t.buttons, {
 				title: PhotoFrame.Lang.tools
 			});
@@ -1388,7 +1389,9 @@ var PhotoFrame = {};
 			for(var x in buttons) {
 				var button = buttons[x];
 				
-				this.addButton(button, options);
+				if(typeof button === "string") {
+					this.addButton(button, options);
+				}
 			}
 		},
 		
@@ -1404,7 +1407,7 @@ var PhotoFrame = {};
 			if(typeof options != "object") {
 				options = {};
 			}
-			
+
 			if(PhotoFrame.Buttons[type.ucfirst()]) {
 				var button = new PhotoFrame.Buttons[type.ucfirst()](this, $.extend(true, {}, {
 					name: type
