@@ -1297,6 +1297,14 @@ class Photo_frame_lib {
 	
 	public function json($data, $ie = FALSE)
 	{
+		if(isset($data['exif_data']['MakerNote']))
+		{
+			if(!json_encode($data['exif_data']['MakerNote']))
+			{
+				$data['exif_data']['MakerNote'] = NULL;
+			}
+		}
+
 		if(!$ie)
 		{
 			header('Content-type: application/json');

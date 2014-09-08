@@ -633,6 +633,8 @@ var PhotoFrame = {};
 					dropZone: t.ui.dropZone,
 					url: t.getUploadUrl(),
 					add: function (e, data) {
+						console.log(t.getTotalPhotos());
+
 						if(t.maxPhotos > 0 && (t.maxPhotos <= t.getTotalPhotos())) {
 							t.showErrors([PhotoFrame.Lang.max_photos_error], {
 								max_photos: t.maxPhotos,
@@ -706,6 +708,7 @@ var PhotoFrame = {};
 		    		id: photo.id,
 		    		manipulations: photo.manipulations,
 		    		index: x,
+		    		isSaved: true,
 		    		cropSettings: $.extend({}, options.cropSettings, {
 			    		setSelect: [photo.x, photo.y, photo.x2, photo.y2]	
 		    		}),
@@ -2399,6 +2402,12 @@ var PhotoFrame = {};
 		 */	
 		 
 		id: false,
+
+		/**
+		 * Has the photo been saved?
+		 */	
+		 
+		isSaved: false,
 			
 		/**
 		 * jCrop object
@@ -3161,6 +3170,10 @@ var PhotoFrame = {};
 						$(this).remove();
 					});
 				}
+
+				if(!t.isSaved) {
+					t.factory.photos.splice(t.index, 1);
+				}
 				
 				t.factory.trigger('cancel', t);
 												
@@ -3198,6 +3211,7 @@ var PhotoFrame = {};
 					t.ui.saving.remove();
 				}
 				
+				t.isSaved = true;
 				t.hideProgress();
 				t.hideDimmer();
 				
