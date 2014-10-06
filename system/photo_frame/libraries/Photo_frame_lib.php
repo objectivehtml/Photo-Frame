@@ -429,7 +429,7 @@ class Photo_frame_lib {
 				'errors'             => $errors
 			);
 		}
-		
+
 		return $this->json($return, $ie);
 	}
 	
@@ -1297,11 +1297,32 @@ class Photo_frame_lib {
 	
 	public function json($data, $ie = FALSE)
 	{
-		if(isset($data['exif_data']['MakerNote']))
+		if(isset($data['exif_data']) && is_array($data['exif_data']))
 		{
-			if(!json_encode($data['exif_data']['MakerNote']))
+			foreach($data['exif_data'] as $prop => $value)
 			{
-				$data['exif_data']['MakerNote'] = NULL;
+				if(!json_encode($data['exif_data'][$prop]))
+				{
+					$data['exif_data'][$prop] = NULL;
+				}
+			}
+		}
+		else if(isset($data[0]))
+		{
+			foreach($data as $index => $row)
+			{
+				if(isset($row['exif_data']) && is_array($row['exif_data']))
+				{
+					foreach($row['exif_data'] as $prop => $value)
+					{
+						if(!json_encode($row['exif_data'][$prop]))
+						{
+							$row['exif_data'][$prop] = NULL;
+						}
+					}
+				}
+
+				$data[$index] = $row;
 			}
 		}
 
