@@ -515,7 +515,7 @@ class Photo_frame_ft extends EE_Fieldtype {
 		{
 			$data = 0;
 		}
-		
+
 		$where = array(
 			'field_id' => $this->field_id, 
 			'entry_id' => $data
@@ -1617,8 +1617,6 @@ class Photo_frame_ft extends EE_Fieldtype {
 	{
 		$this->grid = TRUE;
 
-		exit('asd');
-
 		$this->save($data);
 		
 		return $this->grid_id;
@@ -1721,7 +1719,7 @@ class Photo_frame_ft extends EE_Fieldtype {
 		
 		$orig_data   = $data;		
 		$invalid_ids = array();
-				
+
 		foreach($post as $index => $photo)
 		{	
 			if(isset($photo['edit']))
@@ -1820,6 +1818,11 @@ class Photo_frame_ft extends EE_Fieldtype {
 	{	
 		$this->EE->load->library('photo_frame_lib');
 		
+		if(isset(ee()->channel_form_lib))
+		{
+			$this->_delete_photos();
+		}
+
 		if($this->matrix || $this->low_variables)
 		{
 			$settings = $this->settings;
@@ -2296,15 +2299,15 @@ class Photo_frame_ft extends EE_Fieldtype {
 		}
 
 		if(!$this->EE->input->post('epBwfDraft_create_draft') && !$this->EE->input->post('epBwfDraft_update_draft') || $force_delete)
-		{		
+		{	
 			if(isset($post_photos[$id]))
-			{
+			{	
 				$delete_photos = $post_photos[$id];
-					
+
 				unset($post_photos[$id]);
 							
 				// $total_photos  = $total_photos - count($delete_photos);
-				
+
 				$this->EE->photo_frame_model->delete($delete_photos, $this->settings, $this->is_draft);
 				
 				$_POST['photo_frame_delete_photos'] = $post_photos;
@@ -3009,5 +3012,5 @@ class Photo_frame_ft extends EE_Fieldtype {
 
 // END CLASS
 
-/* End of file ft.keywords.php */
-/* Location: ./system/expressionengine/third_party/google_maps/ft.keywords.php */
+/* End of file ft.photo_frame.php */
+/* Location: ./system/expressionengine/third_party/photo_frame/ft.photo_frame.php */

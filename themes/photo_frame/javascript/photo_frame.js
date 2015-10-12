@@ -33,13 +33,13 @@ var PhotoFrame = {};
 		 * Build Date
 		 */
 		 
-		buildDate: '2013-09-30',
+		buildDate: '2014-08-07',
 		
 		/**
 		 * Version
 		 */
 		 
-		version: '1.2.2',
+		version: '1.2.6',
 		
 		/**
 		 * Sets the default options
@@ -580,7 +580,8 @@ var PhotoFrame = {};
 			t.ui.metaDescription = t.ui.meta.find('#description');
 			t.ui.metaKeywords    = t.ui.meta.find('#keywords');
 			t.ui.dropZone        = t.$wrapper.find('.'+t.classes.dropZone);
-					
+
+
 			t.buttonBar = new PhotoFrame.ButtonBar(t, t.buttons, {
 				title: PhotoFrame.Lang.tools
 			});
@@ -632,6 +633,8 @@ var PhotoFrame = {};
 					dropZone: t.ui.dropZone,
 					url: t.getUploadUrl(),
 					add: function (e, data) {
+						console.log(t.getTotalPhotos());
+
 						if(t.maxPhotos > 0 && (t.maxPhotos <= t.getTotalPhotos())) {
 							t.showErrors([PhotoFrame.Lang.max_photos_error], {
 								max_photos: t.maxPhotos,
@@ -705,6 +708,7 @@ var PhotoFrame = {};
 		    		id: photo.id,
 		    		manipulations: photo.manipulations,
 		    		index: x,
+		    		isSaved: true,
 		    		cropSettings: $.extend({}, options.cropSettings, {
 			    		setSelect: [photo.x, photo.y, photo.x2, photo.y2]	
 		    		}),
@@ -1388,7 +1392,9 @@ var PhotoFrame = {};
 			for(var x in buttons) {
 				var button = buttons[x];
 				
-				this.addButton(button, options);
+				if(typeof button === "string") {
+					this.addButton(button, options);
+				}
 			}
 		},
 		
@@ -1404,7 +1410,7 @@ var PhotoFrame = {};
 			if(typeof options != "object") {
 				options = {};
 			}
-			
+
 			if(PhotoFrame.Buttons[type.ucfirst()]) {
 				var button = new PhotoFrame.Buttons[type.ucfirst()](this, $.extend(true, {}, {
 					name: type
@@ -2396,6 +2402,12 @@ var PhotoFrame = {};
 		 */	
 		 
 		id: false,
+
+		/**
+		 * Has the photo been saved?
+		 */	
+		 
+		isSaved: false,
 			
 		/**
 		 * jCrop object
@@ -3158,6 +3170,10 @@ var PhotoFrame = {};
 						$(this).remove();
 					});
 				}
+
+				if(!t.isSaved) {
+					t.factory.photos.splice(t.index, 1);
+				}
 				
 				t.factory.trigger('cancel', t);
 												
@@ -3195,6 +3211,7 @@ var PhotoFrame = {};
 					t.ui.saving.remove();
 				}
 				
+				t.isSaved = true;
 				t.hideProgress();
 				t.hideDimmer();
 				
@@ -3374,7 +3391,7 @@ var PhotoFrame = {};
 				return false;
 			}
 
-			return typeof cropSize == "undefined" || (this.jcrop.ui.selection.css('display') != 'none' && (cropSize.x || cropSize.y || cropSize.x2 || cropSize.y2)) ? true : false;	
+			return typeof cropSize == "undefined" || (this.jcrop && this.jcrop.ui.selection.css('display') != 'none' && (cropSize.x || cropSize.y || cropSize.x2 || cropSize.y2)) ? true : false;	
 		},
 		
 		reduce: function(numerator, denominator) {

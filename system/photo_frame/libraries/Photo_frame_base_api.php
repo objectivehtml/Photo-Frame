@@ -58,8 +58,42 @@ class Photo_frame_base_api {
 			require_once PATH_THIRD . 'photo_frame/libraries/'.$this->class_name.'.php';
 		}
 			
-		foreach(directory_map(PATH_THIRD) as $addon_name => $addon)
+		foreach(directory_map(PATH_THIRD, 1) as $addon_name)
 		{
+			if(is_dir(PATH_THIRD . $addon_name))
+			{
+
+				$path = PATH_THIRD . $addon_name . '/' . $this->dir_name . '/';
+				$dir_name = $this->dir_name;
+
+				if($addon_name != 'photo_frame')
+				{
+					$dir_name = 'photo_frame/' . $dir_name;
+
+					$path = PATH_THIRD . $addon_name . '/photo_frame/' . $this->dir_name . '/';
+				}
+
+				if(is_dir($path))
+				{
+					foreach(directory_map($path, 1) as $file)
+					{
+						if(is_dir($path . '/' . $file))
+						{
+							foreach(directory_map($path . '/' . $file, 1) as $name => $value)
+							{
+								$return[str_replace('.php', '', $value)] = $this->_load($dir_name . '/' . $file . '/', $addon_name, $value, $params);
+							}
+						}
+						else
+						{
+							$return[str_replace('.php', '', $file)] = $this->_load($dir_name, $addon_name, $file, $params);
+						}
+					}
+				}
+			}
+
+
+			/*
 			if(isset($addon['photo_frame'][$this->dir_name]) && is_array($addon['photo_frame']))
 			{
 				foreach($addon['photo_frame'][$this->dir_name] as $file)
@@ -85,8 +119,9 @@ class Photo_frame_base_api {
 					}
 				}
 			}
+			*/
 		}
-		
+
 		return $this->_reorder($return);
 	}
 	
